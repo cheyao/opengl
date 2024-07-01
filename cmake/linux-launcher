@@ -1,0 +1,7 @@
+#!/bin/bash
+MACHINE_TYPE=`uname -m`
+if [ ${MACHINE_TYPE} == 'x86_64' ]; then
+  ./PROJECT_NAME64
+else
+  ./PROJECT_NAME32
+fi

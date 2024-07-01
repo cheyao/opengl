@@ -1,0 +1,6 @@
+Checks: '-*,readability-identifier-naming,misc-assert-side-effect,readability-container-size-empty,cppcoreguidelines,bugprone,clang-analyzer,modernize,misc'
+CheckOptions:
+  - key: misc-assert-side-effect.CheckFunctionCalls
+    value: 1
+  - key: misc-assert-side-effect.AssertMacros
+    value: 'assert'
