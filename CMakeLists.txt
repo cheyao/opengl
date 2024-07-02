@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
-project(Golf CXX)
+project(OpenGL C CXX)
 #CXX standards
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -25,6 +25,12 @@ if(CHECKS STREQUAL ON)
 	set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+set(GLAD
+src/glad.c 
+include/glad/glad.h 
+include/KHR/khrplatform.h 
+)
+
 set(SRC
 #Sources
 src/main.cpp
@@ -32,6 +38,7 @@ src/game.cpp
 #Headers
 include/game.hpp
 include/common.hpp
+${GLAD}
 )
 
 set(IMGUI_SRC
@@ -42,12 +49,11 @@ external/imgui/imgui_draw.cpp
 external/imgui/imgui_tables.cpp
 external/imgui/imgui_widgets.cpp
 external/imgui/backends/imgui_impl_sdl3.cpp
-external/imgui/backends/imgui_impl_sdlrenderer3.cpp
+external/imgui/backends/imgui_impl_opengl3.cpp
 )
 
 set(ASSETS_EMBED_WEB
---embed-file=assets/Ball.png@/assets/Ball.png
---embed-file=assets/Hole.png@/assets/Hole.png
+	# --embed-file=assets/Ball.png@/assets/Ball.png
 )
 
 #Check debug
@@ -90,17 +96,17 @@ include_directories(include)
 if(NOT ANDROID)
 	if(WEB)
     		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-static)
-		find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL3_image-static)
+		# find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL3_image-static)
 
 		set(CMAKE_EXECUTABLE_SUFFIX .js)
 		
 		configure_file(cmake/index.html.in ${CMAKE_BINARY_DIR}/index.html)
 	elseif(VENDOR)
     		add_subdirectory(external/SDL3 EXCLUDE_FROM_ALL)
-		add_subdirectory(external/SDL3_image EXCLUDE_FROM_ALL)
+		# add_subdirectory(external/SDL3_image EXCLUDE_FROM_ALL)
 	else()
     		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
-		find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL3_image-shared)
+		# find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL3_image-shared)
 
 		if(MACOSX AND NOT DEBUG)
 			message("Building for MacOS, did you use -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64?")
@@ -115,7 +121,7 @@ if (ANDROID)
 
 	add_library(${BUILD_NAME} SHARED ${SRC})
 
-	target_link_libraries(${BUILD_NAME} PUBLIC SDL3::SDL3 SDL3_image::SDL3_image)
+	target_link_libraries(${BUILD_NAME} PUBLIC SDL3::SDL3) # SDL3_image::SDL3_image)
 elseif(MACOSX)
 	message("Building for MacOS")
 
@@ -141,18 +147,18 @@ elseif(MACOSX)
 		file(COPY cmake/mac-patch-dylib.sh DESTINATION ${CMAKE_BINARY_DIR}) # Helper script
 	endif()
 
-	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3 SDL3_image::SDL3_image)
+	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
 elseif(WINDOWS)
 	message("Building for windows")
 
 	add_executable(${BUILD_NAME} WIN32 ${SRC})
-	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3 SDL3_image::SDL3_image)
+	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
 else()
 	message("Building for linux")
 
 	add_executable(${BUILD_NAME} ${SRC})
 
-	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3 SDL3_image::SDL3_image)
+	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
 endif()
 
 # Strip debug symbols
@@ -205,30 +211,10 @@ if(IMGUI STREQUAL ON AND CHECKS STREQUAL OFF)
 	endif()
 endif()
 
-if(TRACY STREQUAL ON)
-	message("Enabling tracy")
-
-	if(EXISTS external/tracy/public)
-		message(FATAL_ERROR "Please run git submodule update --remote --init external/trancy")
-	endif()
-
-	# target_link_libraries(${BUILD_NAME} PRIVATE external/tracy/public/TracyClient.cpp)
-	target_link_libraries(${BUILD_NAME} PRIVATE -ltracy)
-	include_directories(external/tracy/public/tracy)
-
-	if(MSVC)
-		target_compile_definitions(${BUILD_NAME} PRIVATE /DTRACY)
-	else()
-		target_compile_definitions(${BUILD_NAME} PRIVATE -DTRACY)
-	endif()
-else()
-	include_directories(external/tr)
-endif()
-
 if(WEB)
-	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_SDL_IMAGE=3)
+	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3) # -sUSE_SDL_IMAGE=3)
 	target_compile_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
-	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_SDL_IMAGE=3)
+	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3) # -sUSE_SDL_IMAGE=3)
 	target_link_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
 endif()
 

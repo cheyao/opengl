@@ -4,6 +4,8 @@
 
 #include <cmath>
 
+#define ERROR_BOX(msg) SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERROR", msg, nullptr)
+
 // Warper functins just incase we change platforms
 namespace maths {
 
@@ -37,10 +39,10 @@ inline bool nearZero(float number, float epsilon = 0.001f) {
 	}
 }
 
-}  // namespace maths
+} // namespace maths
 
 class Vector2 {
-       public:
+  public:
 	float x;
 	float y;
 
@@ -56,46 +58,46 @@ class Vector2 {
 		return point;
 	}
 
-	friend Vector2 operator+(const Vector2& a, const Vector2& b) {
+	friend Vector2 operator+(const Vector2 &a, const Vector2 &b) {
 		return Vector2(b.x + a.x, b.y + a.y);
 	}
-	Vector2& operator+=(const Vector2& right) {
+	Vector2 &operator+=(const Vector2 &right) {
 		x += right.x;
 		y += right.y;
 		return *this;
 	}
 
-	friend Vector2 operator-(const Vector2& a, const Vector2& b) {
+	friend Vector2 operator-(const Vector2 &a, const Vector2 &b) {
 		return Vector2(b.x - a.x, b.y - a.y);
 	}
-	Vector2& operator-=(const Vector2& right) {
+	Vector2 &operator-=(const Vector2 &right) {
 		x -= right.x;
 		y -= right.y;
 		return *this;
 	}
-	Vector2& operator-() {
+	Vector2 &operator-() {
 		x = -x;
 		y = -y;
 		return *this;
 	}
 
-	friend Vector2 operator*(const Vector2& a, const Vector2& b) {
+	friend Vector2 operator*(const Vector2 &a, const Vector2 &b) {
 		return Vector2(a.x * b.x, a.y * b.y);
 	}
-	Vector2& operator*=(const Vector2& right) {
+	Vector2 &operator*=(const Vector2 &right) {
 		x *= right.x;
 		y *= right.y;
 		return *this;
 	}
 
 	// Scalar
-	friend Vector2 operator*(const Vector2& a, const float scalar) {
+	friend Vector2 operator*(const Vector2 &a, const float scalar) {
 		return Vector2(a.x * scalar, a.y * scalar);
 	}
-	friend Vector2 operator*(const float scalar, const Vector2& a) {
+	friend Vector2 operator*(const float scalar, const Vector2 &a) {
 		return Vector2(a.x * scalar, a.y * scalar);
 	}
-	Vector2& operator*=(const float scalar) {
+	Vector2 &operator*=(const float scalar) {
 		x *= scalar;
 		y *= scalar;
 		return *this;
@@ -118,15 +120,13 @@ class Vector2 {
 		y /= vectorLength;
 	}
 
-	static Vector2 normalize(const Vector2& vec) {
+	static Vector2 normalize(const Vector2 &vec) {
 		Vector2 temp = vec;
 		temp.normalize();
 		return temp;
 	}
 
-	static float dot(const Vector2& a, const Vector2& b) {
-		return (a.x * b.x + a.y * b.y);
-	}
+	static float dot(const Vector2 &a, const Vector2 &b) { return (a.x * b.x + a.y * b.y); }
 };
 
 typedef struct Mouse {
@@ -139,6 +139,5 @@ typedef struct Mouse {
 		BUTTON_STATE_X2
 	} type;
 	class Vector2 position;
-	bool captured;	// Reserved by program, remember to free!
+	bool captured; // Reserved by program, remember to free!
 } TouchEvent;
-
