@@ -44,8 +44,9 @@ int Game::init() {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-#ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#ifdef __APPLE_
+	// Put this and pray
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 #endif
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -120,6 +121,7 @@ int Game::setup() {
 	mShader = new Shader(fullPath("shaders/basic.vert"), fullPath("shaders/basic.frag"));
 
 	SDL_Log("Successfully initialized OpenGL and game\n");
+
 	return 0;
 }
 

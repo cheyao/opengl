@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "You need to have patchelf installed"
 
-OUTPUT_NAME=Golf
+OUTPUT_NAME=OpenGL
 
 mkdir output
 
