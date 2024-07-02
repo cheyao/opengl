@@ -1,21 +1,26 @@
 #pragma once
 
+#include "shader.hpp"
+#include "vertexArray.hpp"
+
 #include <SDL3/SDL.h>
 
 #include <string>
 
+#define fullPath(path) (mBasePath + "/assets/" + path)
+
 class Game {
   public:
 	Game();
+	Game(Game&&) = delete;
+	Game(const Game&) = delete;
+	Game& operator=(Game&&) = delete;
+	Game& operator=(const Game&) = delete;
 	~Game();
 
 	int init();
 	int iterate();
-	int event(const SDL_Event &event);
-
-	// No copy
-	Game(const Game &) = delete;
-	Game &operator=(const Game &x) = delete;
+	int event(const SDL_Event& event);
 
   private:
 	void input();
@@ -24,14 +29,13 @@ class Game {
 	void draw();
 	int setup();
 
-	SDL_Window *mWindow;
+	SDL_Window* mWindow;
 	SDL_GLContext mContext;
+
+	Shader* mShader;
+	VertexArray* mVertex;
 
 	Uint64 mTicks;
 
 	std::string mBasePath;
-
-	unsigned int mVAO;
-	unsigned int mShaderProgram;
-	unsigned int VBO, EBO;
 };

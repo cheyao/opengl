@@ -13,8 +13,7 @@
 
 #include <string>
 
-Game::Game()
-	: mWindow(nullptr), mContext(nullptr), mTicks(0), mBasePath(""), mVAO(0), mShaderProgram(0){};
+Game::Game() : mWindow(nullptr), mContext(nullptr), mTicks(0), mBasePath(){};
 
 int Game::init() {
 	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
@@ -83,7 +82,7 @@ int Game::init() {
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO &io = ImGui::GetIO();
+	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 #ifdef __EMSCRIPTEN__
@@ -100,103 +99,25 @@ int Game::init() {
 
 	mTicks = SDL_GetTicks();
 
-	char *basepath = SDL_GetBasePath();
+	char* basepath = SDL_GetBasePath();
 	if (basepath != nullptr) {
-		mBasePath += basepath;
+		mBasePath = std::string(basepath);
 		SDL_free(basepath); // We gotta free da pointer UwU
 	}
 
 	return setup();
 }
 
-const char *vertexShaderSource =
-#include "shaders/basic.vert"
-	;
-
-const char *fragmentShaderSource =
-#include "shaders/basic.frag"
-	;
+// TODO: Shader & ~Shader
 
 int Game::setup() {
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-
-	// Error checking
-	int success;
-	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to compile vertex shader: %s\n", infoLog);
-		ERROR_BOX("Failed to compile vertex shader");
-		return 1;
-	}
-
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-	// Error checking #2
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to compile fragment shader: %s\n", infoLog);
-		ERROR_BOX("Failed to compile fragment shader");
-		return 1;
-	}
-
-	mShaderProgram = glCreateProgram();
-	glAttachShader(mShaderProgram, vertexShader);
-	glAttachShader(mShaderProgram, fragmentShader);
-	glLinkProgram(mShaderProgram);
-
-	glGetShaderiv(mShaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(mShaderProgram, 512, NULL, infoLog);
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to compile link shader: %s\n", infoLog);
-		ERROR_BOX("Failed to link shader");
-		return 1;
-	}
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
 	float vertices[] = {
-		/*
-		0.5f,  0.5f,  // top right
-		0.5f,  -0.5f, // bottom right
-		-0.5f, -0.5f, // bottom left
-		-0.5f, 0.5f	  // top left
-		*/
-		 0.00f, -0.5f,
-		-0.75f, -0.5f,
-		-0.375f,  0.5f,
-		0.75f, -0.5f,
-		0.375f,  0.5f,
+		0.00f, -0.5f, -0.75f, -0.5f, -0.375f, 0.5f, 0.75f, -0.5f, 0.375f, 0.5f,
 	};
-	unsigned int indices[] = {
-		// note that we start from 0!
-		0, 1, 2,
-		0, 3, 4
-	};
+	unsigned int indices[] = {0, 1, 2, 0, 3, 4};
 
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	// Save the conf to VAO
-	glGenVertexArrays(1, &mVAO);
-	glBindVertexArray(mVAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), static_cast<GLvoid *>(0));
-	glEnableVertexAttribArray(0);
-
-	glBindVertexArray(0);
+	mVertex = new VertexArray(vertices, sizeof(vertices) / sizeof(vertices[0]), indices, sizeof(indices) / sizeof(indices[0]));
+	mShader = new Shader(fullPath("shaders/basic.vert"), fullPath("shaders/basic.frag"));
 
 	SDL_Log("Successfully initialized OpenGL and game\n");
 	return 0;
@@ -214,7 +135,7 @@ int Game::iterate() {
 
 void Game::input() {
 	// TODO:
-	const Uint8 *keys = SDL_GetKeyboardState(nullptr);
+	const Uint8* keys = SDL_GetKeyboardState(nullptr);
 
 	(void)keys;
 }
@@ -244,7 +165,7 @@ void Game::gui() {
 	/* Main menu */ {
 		ImGui::Begin("Main menu");
 
-		ImGuiIO &io = ImGui::GetIO();
+		ImGuiIO& io = ImGui::GetIO();
 		ImGui::Text("Average %.3f ms/frame (%.1f FPS)", (1000.f / io.Framerate), io.Framerate);
 		ImGui::Text("%d vertices, %d indices (%d triangles)", io.MetricsRenderVertices,
 					io.MetricsRenderIndices, io.MetricsRenderIndices / 3);
@@ -278,10 +199,9 @@ void Game::draw() {
 
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	glUseProgram(mShaderProgram);
-	glBindVertexArray(mVAO);
+	mShader->activate();
+	mVertex->activate();
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
 
 #ifdef IMGUI
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -290,7 +210,7 @@ void Game::draw() {
 	SDL_GL_SwapWindow(mWindow);
 }
 
-int Game::event(const SDL_Event &event) {
+int Game::event(const SDL_Event& event) {
 #ifdef IMGUI
 	ImGui_ImplSDL3_ProcessEvent(&event);
 #endif
@@ -342,10 +262,8 @@ Game::~Game() {
 	ImGui::DestroyContext();
 #endif
 
-	glDeleteVertexArrays(1, &mVAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
-	glDeleteProgram(mShaderProgram);
+	delete mShader;
+	delete mVertex;
 
 	SDL_GL_DeleteContext(mContext);
 	SDL_DestroyWindow(mWindow);

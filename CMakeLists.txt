@@ -35,12 +35,13 @@ set(SRC
 #Sources
 src/main.cpp
 src/game.cpp
+src/shader.cpp
+src/vertexArray.cpp
 #Headers
 include/game.hpp
 include/common.hpp
-#Shaders
-include/shaders/basic.vert
-include/shaders/basic.frag
+include/shader.hpp
+include/vertexArray.hpp
 #External
 ${GLAD}
 )
