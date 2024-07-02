@@ -43,19 +43,17 @@ int Game::init() {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-
-#ifdef __APPLE_
-	// Put this and pray
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-#endif
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
+#ifndef __APPLE__
 	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init glad!\n");
 		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
 	}
+#endif
 
 	SDL_Log("Vendor   : %s", glGetString(GL_VENDOR));
 	SDL_Log("Renderer : %s", glGetString(GL_RENDERER));

@@ -129,6 +129,7 @@ if (ANDROID)
 	target_link_libraries(${BUILD_NAME} PUBLIC SDL3::SDL3) # SDL3_image::SDL3_image)
 elseif(MACOSX)
 	message("Building for MacOS")
+	find_package(OpenGL REQUIRED)
 
 	if(DEBUG)
 		add_executable(${BUILD_NAME} ${SRC})
@@ -148,12 +149,14 @@ elseif(MACOSX)
 		file(COPY assets DESTINATION ${CMAKE_BINARY_DIR}/${BUILD_NAME}.app/Contents/Resources)
 
 		target_link_options(${BUILD_NAME} PRIVATE -headerpad_max_install_names)
-		target_link_libraries(${PROJECT_NAME} LINK_PUBLIC "-framework OpenGL")
 
 		file(COPY cmake/mac-patch-dylib.sh DESTINATION ${CMAKE_BINARY_DIR}) # Helper script
 	endif()
 
+	target_include_directories(${BUILD_NAME} PRIVATE ${OPENGL_INCLUDE_DIR})
+
 	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
+	target_link_libraries(${BUILD_NAME} PRIVATE ${OPENGL_LIBRARIES})
 elseif(WINDOWS)
 	message("Building for windows")
 
