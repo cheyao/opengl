@@ -22,6 +22,7 @@ class Game {
 	void update();
 	void gui();
 	void draw();
+	int setup();
 
 	SDL_Window *mWindow;
 	SDL_GLContext mContext;
@@ -32,4 +33,5 @@ class Game {
 
 	unsigned int mVAO;
 	unsigned int mShaderProgram;
+	unsigned int VBO, EBO;
 };

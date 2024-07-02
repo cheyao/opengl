@@ -6,9 +6,9 @@
 #include <SDL3/SDL.h>
 
 #ifdef IMGUI
-#include <imgui.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_sdl3.h>
+#include <imgui.h>
 #endif
 
 #include <string>
@@ -45,10 +45,9 @@ int Game::init() {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -107,25 +106,18 @@ int Game::init() {
 		SDL_free(basepath); // We gotta free da pointer UwU
 	}
 
-	glGenVertexArrays(1, &mVAO);
-
-	// Init OpenGL part 2
-	float triangle[] = {-0.5f, -0.5f, 0.5f, -0.5f, 0.0f, 0.5f};
-
-	unsigned int VBO;
-	glGenBuffers(1, &VBO);
-
-	const char *vertexShaderSource =
-		R""(
-#version 400 core
-layout (location = 0) in vec2 aPos;
-
-void main() {
-    gl_Position = vec4(aPos.x, aPos.y, 0.0, 1.0);
+	return setup();
 }
 
-)"";
+const char *vertexShaderSource =
+#include "shaders/basic.vert"
+	;
 
+const char *fragmentShaderSource =
+#include "shaders/basic.frag"
+	;
+
+int Game::setup() {
 	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
 	glCompileShader(vertexShader);
@@ -141,15 +133,6 @@ void main() {
 		return 1;
 	}
 
-	const char *fragmentShaderSource =
-		R""(
-#version 400 core
-out vec4 FragColor;
-
-void main() {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-} 
-)"";
 	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
 	glCompileShader(fragmentShader);
@@ -168,22 +151,47 @@ void main() {
 	glAttachShader(mShaderProgram, fragmentShader);
 	glLinkProgram(mShaderProgram);
 
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+	glGetShaderiv(mShaderProgram, GL_LINK_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(mShaderProgram, 512, NULL, infoLog);
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to compile link shader: %s\n", infoLog);
 		ERROR_BOX("Failed to link shader");
 		return 1;
 	}
-
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
+	float vertices[] = {
+		/*
+		0.5f,  0.5f,  // top right
+		0.5f,  -0.5f, // bottom right
+		-0.5f, -0.5f, // bottom left
+		-0.5f, 0.5f	  // top left
+		*/
+		 0.00f, -0.5f,
+		-0.75f, -0.5f,
+		-0.375f,  0.5f,
+		0.75f, -0.5f,
+		0.375f,  0.5f,
+	};
+	unsigned int indices[] = {
+		// note that we start from 0!
+		0, 1, 2,
+		0, 3, 4
+	};
+
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+
 	// Save the conf to VAO
+	glGenVertexArrays(1, &mVAO);
 	glBindVertexArray(mVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), static_cast<GLvoid *>(0));
 	glEnableVertexAttribArray(0);
@@ -222,7 +230,8 @@ void Game::update() {
 
 #ifdef IMGUI
 bool demoMenu = false;
-bool statisticsMenu = false;
+bool vsync = true;
+bool wireframe = false;
 #endif
 
 void Game::gui() {
@@ -235,9 +244,15 @@ void Game::gui() {
 	/* Main menu */ {
 		ImGui::Begin("Main menu");
 
-		ImGui::Checkbox("Statistics", &statisticsMenu);
+		ImGuiIO &io = ImGui::GetIO();
+		ImGui::Text("Average %.3f ms/frame (%.1f FPS)", (1000.f / io.Framerate), io.Framerate);
+		ImGui::Text("%d vertices, %d indices (%d triangles)", io.MetricsRenderVertices,
+					io.MetricsRenderIndices, io.MetricsRenderIndices / 3);
+
 		// ImGui::Checkbox("Debug", &debugMenu);
 		ImGui::Checkbox("Demo", &demoMenu);
+		ImGui::Checkbox("VSync", &vsync);
+		ImGui::Checkbox("Wireframe", &wireframe);
 
 		ImGui::End();
 	}
@@ -246,15 +261,13 @@ void Game::gui() {
 		ImGui::ShowDemoWindow(&demoMenu);
 	}
 
-	if (statisticsMenu) {
-		ImGui::Begin("Statistics", &statisticsMenu);
-
-		ImGuiIO &io = ImGui::GetIO();
-		ImGui::Text("Average %.3f ms/frame (%.1f FPS)", (1000.f / io.Framerate), io.Framerate);
-		ImGui::Text("%d vertices, %d indices (%d triangles)", io.MetricsRenderVertices, io.MetricsRenderIndices, io.MetricsRenderIndices / 3);
-
-		ImGui::End();
+	if (wireframe) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	} else {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
+
+	SDL_GL_SetSwapInterval(vsync);
 #endif
 }
 
@@ -267,7 +280,7 @@ void Game::draw() {
 
 	glUseProgram(mShaderProgram);
 	glBindVertexArray(mVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 
 #ifdef IMGUI
@@ -328,6 +341,11 @@ Game::~Game() {
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
 #endif
+
+	glDeleteVertexArrays(1, &mVAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glDeleteProgram(mShaderProgram);
 
 	SDL_GL_DeleteContext(mContext);
 	SDL_DestroyWindow(mWindow);

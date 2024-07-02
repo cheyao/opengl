@@ -38,6 +38,10 @@ src/game.cpp
 #Headers
 include/game.hpp
 include/common.hpp
+#Shaders
+include/shaders/basic.vert
+include/shaders/basic.frag
+#External
 ${GLAD}
 )
 
