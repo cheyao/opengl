@@ -1,6 +1,7 @@
 #include "game.hpp"
 #include "common.hpp"
 
+#include <SDL3/SDL_video.h>
 #include <glad/glad.h>
 
 #include <SDL3/SDL.h>
@@ -14,6 +15,27 @@
 #include <string>
 
 Game::Game() : mWindow(nullptr), mContext(nullptr), mTicks(0), mBasePath(){};
+
+void printGLInfo() {
+	SDL_Log("Vendor   : %s\n", glGetString(GL_VENDOR));
+	SDL_Log("Renderer : %s\n", glGetString(GL_RENDERER));
+	SDL_Log("Version  : %s\n", glGetString(GL_VERSION));
+	SDL_Log("GLSL     : %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+	int maj;
+	int min;
+	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &maj);
+	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &min);
+	SDL_Log("Context  : %d.%d\n", maj, min);
+
+	glGetIntegerv(GL_MAJOR_VERSION, &maj);
+	glGetIntegerv(GL_MINOR_VERSION, &min);
+	SDL_Log("Context  : %d.%d\n", maj, min);
+
+	int nrAttributes;
+	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
+	SDL_Log("Maximum number of vertex attributes supported: %d\n", nrAttributes);
+}
 
 int Game::init() {
 	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
@@ -55,23 +77,10 @@ int Game::init() {
 	}
 #endif
 
-	SDL_Log("Vendor   : %s", glGetString(GL_VENDOR));
-	SDL_Log("Renderer : %s", glGetString(GL_RENDERER));
-	SDL_Log("Version  : %s", glGetString(GL_VERSION));
-	SDL_Log("GLSL     : %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
-
-	int maj;
-	int min;
-	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &maj);
-	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &min);
-	SDL_Log("Context  : %d.%d", maj, min);
-
-	glGetIntegerv(GL_MAJOR_VERSION, &maj);
-	glGetIntegerv(GL_MINOR_VERSION, &min);
-	SDL_Log("Context  : %d.%d", maj, min);
-
 	// Set VSync
 	SDL_GL_SetSwapInterval(1);
+
+	printGLInfo();
 
 	glViewport(0, 0, 1024, 768);
 
@@ -96,13 +105,13 @@ int Game::init() {
 	SDL_Log("Finished Initializing ImGUI");
 #endif
 
-	mTicks = SDL_GetTicks();
-
 	char* basepath = SDL_GetBasePath();
 	if (basepath != nullptr) {
 		mBasePath = std::string(basepath);
 		SDL_free(basepath); // We gotta free da pointer UwU
 	}
+
+	mTicks = SDL_GetTicks();
 
 	return setup();
 }
@@ -110,10 +119,14 @@ int Game::init() {
 // TODO: Shader & ~Shader
 
 int Game::setup() {
+	// Try to compress:
+	// 76, 54 - pos |210 - color|
 	float vertices[] = {
-		0.00f, -0.5f, -0.75f, -0.5f, -0.375f, 0.5f, 0.75f, -0.5f, 0.375f, 0.5f,
+		+0.5f, +0.5f, 1.0f, 0.0f, 0.0f,
+		-0.5f, +0.5f, 0.0f, 1.0f, 0.0f,
+		+0.0f, -0.5f, 0.0f, 0.0f, 1.0f,
 	};
-	unsigned int indices[] = {0, 1, 2, 0, 3, 4};
+	unsigned int indices[] = {0, 1, 2};
 
 	mVertex = new VertexArray(vertices, sizeof(vertices) / sizeof(vertices[0]), indices, sizeof(indices) / sizeof(indices[0]));
 	mShader = new Shader(fullPath("shaders/basic.vert"), fullPath("shaders/basic.frag"));

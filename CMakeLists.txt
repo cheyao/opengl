@@ -36,11 +36,13 @@ set(SRC
 src/main.cpp
 src/game.cpp
 src/shader.cpp
+src/texture.cpp
 src/vertexArray.cpp
 #Headers
 include/game.hpp
 include/common.hpp
 include/shader.hpp
+include/texture.hpp
 include/vertexArray.hpp
 #External
 ${GLAD}
@@ -268,5 +270,9 @@ else()
 	message(STATUS "IPO / LTO not supported: <${error}>")
 endif()
 
-file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
+if(DEBUG)
+	ADD_CUSTOM_TARGET(link_target ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../assets ${CMAKE_BINARY_DIR}/assets)
+else()
+	file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
+endif()
 

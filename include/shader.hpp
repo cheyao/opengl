@@ -15,8 +15,16 @@ class Shader {
 
 	void activate();
 
+	// set uniform
+	void set(const std::string& name, bool val);
+	void set(const std::string& name, int val);
+	void set(const std::string& name, float val);
+	void set(const std::string& name, float val, float val2);
+
   private:
-	void compile(const std::string& fileName, GLenum type, unsigned int& out);
+	void compile(const std::string& fileName, const GLenum& type, unsigned int& out);
+
+	int getUniform(const std::string& name);
 
 	unsigned int mVertexShader;
 	unsigned int mFragmentShader;
