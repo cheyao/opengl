@@ -1,2 +1,7 @@
 unusedFunction
 missingIncludeSystem
+*:include/glad/*
+*:include/KHR/*
+*:include/stb_image.h
+*:src/glad.c
+*:src/stb_image.c

@@ -1,7 +1,10 @@
 #include "game.hpp"
-#include "common.hpp"
 
-#include <SDL3/SDL_video.h>
+#include "common.hpp"
+#include "shader.hpp"
+#include "texture.hpp"
+#include "vertexArray.hpp"
+
 #include <glad/glad.h>
 
 #include <SDL3/SDL.h>
@@ -14,7 +17,8 @@
 
 #include <string>
 
-Game::Game() : mWindow(nullptr), mContext(nullptr), mTicks(0), mBasePath(){};
+Game::Game() : mWindow(nullptr), mContext(nullptr), mShader(nullptr), mVertex(nullptr), mTicks(0), mBasePath(), mBox(nullptr), mFace(nullptr), mixer(0.2) {};
+// TODO: RAII
 
 void printGLInfo() {
 	SDL_Log("Vendor   : %s\n", glGetString(GL_VENDOR));
@@ -35,6 +39,8 @@ void printGLInfo() {
 	int nrAttributes;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	SDL_Log("Maximum number of vertex attributes supported: %d\n", nrAttributes);
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &nrAttributes);
+	SDL_Log("Maximum number of texture units supported: %d\n", nrAttributes);
 }
 
 int Game::init() {
@@ -116,20 +122,25 @@ int Game::init() {
 	return setup();
 }
 
-// TODO: Shader & ~Shader
-
 int Game::setup() {
-	// Try to compress:
-	// 76, 54 - pos |210 - color|
 	float vertices[] = {
-		+0.5f, +0.5f, 1.0f, 0.0f, 0.0f,
-		-0.5f, +0.5f, 0.0f, 1.0f, 0.0f,
-		+0.0f, -0.5f, 0.0f, 0.0f, 1.0f,
+		// positions  // colors   // texture coords
+		0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+		0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+		-0.5f, 0.5f,  1.0f, 1.0f, 0.0f, 0.0f, 1.0f	// top left
 	};
-	unsigned int indices[] = {0, 1, 2};
+	unsigned int indices[] = {0, 1, 3, 1, 2, 3};
 
-	mVertex = new VertexArray(vertices, sizeof(vertices) / sizeof(vertices[0]), indices, sizeof(indices) / sizeof(indices[0]));
+	mVertex = new VertexArray(vertices, sizeof(vertices) / sizeof(vertices[0]), indices,
+							  sizeof(indices) / sizeof(indices[0]));
 	mShader = new Shader(fullPath("shaders/basic.vert"), fullPath("shaders/basic.frag"));
+	mShader->activate();
+	mShader->set("box", 0);
+	mShader->set("face", 1);
+
+	mBox = new Texture(fullPath("container.png"));
+	mFace = new Texture(fullPath("face.png"), true);
 
 	SDL_Log("Successfully initialized OpenGL and game\n");
 
@@ -147,10 +158,13 @@ int Game::iterate() {
 }
 
 void Game::input() {
-	// TODO:
 	const Uint8* keys = SDL_GetKeyboardState(nullptr);
 
-	(void)keys;
+	if (keys[SDL_SCANCODE_UP]) {
+		mixer += 0.1;
+	} else if (keys[SDL_SCANCODE_DOWN]) {
+		mixer -= 0.1;
+	}
 }
 
 void Game::update() {
@@ -214,6 +228,13 @@ void Game::draw() {
 
 	mShader->activate();
 	mVertex->activate();
+
+	mBox->activate(0);
+	mFace->activate(1);
+
+	mShader->set("mixer", mixer);
+
+	// FIXME: Hardcoded triangle count
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 #ifdef IMGUI
@@ -277,6 +298,8 @@ Game::~Game() {
 
 	delete mShader;
 	delete mVertex;
+	delete mBox;
+	delete mFace;
 
 	SDL_GL_DeleteContext(mContext);
 	SDL_DestroyWindow(mWindow);

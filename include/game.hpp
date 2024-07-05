@@ -1,8 +1,5 @@
 #pragma once
 
-#include "shader.hpp"
-#include "vertexArray.hpp"
-
 #include <SDL3/SDL.h>
 
 #include <string>
@@ -32,10 +29,19 @@ class Game {
 	SDL_Window* mWindow;
 	SDL_GLContext mContext;
 
-	Shader* mShader;
-	VertexArray* mVertex;
+	class Shader* mShader;
+	class VertexArray* mVertex;
 
 	Uint64 mTicks;
 
 	std::string mBasePath;
+
+	class Texture* mBox;
+	class Texture* mFace;
+
+	float mixer;
+
+	// TODO: Seperate InputHandler class
+	// TODO: Seperate draw class
+	// TODO: Seperate Texture manager class
 };

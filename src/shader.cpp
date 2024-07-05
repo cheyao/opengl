@@ -1,7 +1,9 @@
 #include "shader.hpp"
 
+#include <glad/glad.h>
+
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_log.h>
+
 #include <cassert>
 
 #include "common.hpp"
@@ -23,7 +25,7 @@ Shader::Shader(const std::string& vertName, const std::string& fragName) {
 		std::string log;
 		log.resize(len);
 
-		glGetProgramInfoLog(mShaderProgram, 512, NULL, &log[0]);
+		glGetProgramInfoLog(mShaderProgram, 512, nullptr, &log[0]);
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to link shader: %s\n", log.c_str());
 		ERROR_BOX("Failed to link shader");
 
@@ -39,10 +41,6 @@ Shader::~Shader() {
 
 void Shader::activate() {
 	glUseProgram(mShaderProgram);
-
-	/*
-	glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
-	*/
 }
 
 int Shader::getUniform(const std::string& name) {
@@ -80,7 +78,7 @@ void Shader::compile(const std::string& fileName, const GLenum& type, unsigned i
 	// SDL_Log("Source: %s\n", shaderSource);
 
 	out = glCreateShader(type);
-	glShaderSource(out, 1, &shaderSource, NULL);
+	glShaderSource(out, 1, &shaderSource, nullptr);
 	glCompileShader(out);
 	SDL_free(shaderSource);
 
@@ -93,7 +91,7 @@ void Shader::compile(const std::string& fileName, const GLenum& type, unsigned i
 		std::string log;
 		log.resize(len);
 
-		glGetShaderInfoLog(out, len, NULL, &log[0]);
+		glGetShaderInfoLog(out, len, nullptr, &log[0]);
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to compile shader %s: %s\n",
 						fileName.c_str(), log.c_str());
 		ERROR_BOX("Failed to compile vertex shader");

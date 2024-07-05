@@ -45,6 +45,9 @@ include/shader.hpp
 include/texture.hpp
 include/vertexArray.hpp
 #External
+src/stb_image.c
+include/stb_image.h
+
 ${GLAD}
 )
 
