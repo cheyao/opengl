@@ -4,3 +4,6 @@
 [submodule "external/imgui"]
 	path = external/imgui
 	url = https://github.com/ocornut/imgui
+[submodule "android"]
+	path = android
+	url = https://github.com/cheyao/android.git

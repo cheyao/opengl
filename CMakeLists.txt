@@ -15,6 +15,7 @@ option(CPPCHECK 	"Run cppcheck" OFF)
 option(IMGUI 		"Include GUI" OFF)
 option(TRACY 		"Include Tracy" OFF)
 option(SANITIZE 	"Use address sanitizer" OFF)
+option(ANDROID		"Build for android" OFF)
 #CMAKE_BUILD_TYPE Release Debug
 
 if(CHECKS STREQUAL ON)
@@ -65,6 +66,15 @@ external/imgui/backends/imgui_impl_opengl3.cpp
 set(ASSETS_EMBED_WEB
 	# --embed-file=assets/Ball.png@/assets/Ball.png
 )
+
+if(ANDROID STREQUAL ON) 
+	set(NAMESPACE com.cyao.opengl)
+	set(BUILD_NAME OpenGL)
+
+	add_subdirectory(android)
+
+	return()
+endif()
 
 #Check debug
 if(NOT CMAKE_BUILD_TYPE)
