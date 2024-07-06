@@ -17,14 +17,19 @@
 
 #include <string>
 
-Game::Game() : mWindow(nullptr), mContext(nullptr), mShader(nullptr), mVertex(nullptr), mTicks(0), mBasePath(), mBox(nullptr), mFace(nullptr), mixer(0.2) {};
+// TODO: debug & info log
+
+Game::Game()
+	: mWindow(nullptr), mContext(nullptr), mShader(nullptr), mVertex(nullptr), mTicks(0),
+	  mBasePath(), mBox(nullptr), mFace(nullptr), mixer(0.2){};
 // TODO: RAII
 
 void printGLInfo() {
-	SDL_Log("Vendor   : %s\n", glGetString(GL_VENDOR));
-	SDL_Log("Renderer : %s\n", glGetString(GL_RENDERER));
-	SDL_Log("Version  : %s\n", glGetString(GL_VERSION));
-	SDL_Log("GLSL     : %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	SDL_Log("Vendor     : %s\n", glGetString(GL_VENDOR));
+	SDL_Log("Renderer   : %s\n", glGetString(GL_RENDERER));
+	SDL_Log("Version    : %s\n", glGetString(GL_VERSION));
+	SDL_Log("GLSL       : %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	// SDL_Log("Extensions : %s\n", glGetString(GL_EXTENSIONS));
 
 	int maj;
 	int min;
@@ -52,6 +57,7 @@ int Game::init() {
 
 		return 1;
 	}
+	SDL_SetWindowMinimumSize(mWindow, 480, 320);
 
 	mContext = SDL_GL_CreateContext(mWindow);
 	if (mWindow == nullptr) {
@@ -67,14 +73,24 @@ int Game::init() {
 	SDL_SetWindowIcon(mWindow, icon);
 	SDL_DestroySurface(icon);
 	*/
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
+#ifdef __ANDROID__
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+
+	if (!gladLoadGLES2Loader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init glad!\n");
+		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
+	}
+#else
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
 #ifndef __APPLE__
 	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
@@ -82,13 +98,18 @@ int Game::init() {
 		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
 	}
 #endif
+#endif
 
 	// Set VSync
 	SDL_GL_SetSwapInterval(1);
 
 	printGLInfo();
 
-	glViewport(0, 0, 1024, 768);
+	// Set size (For android)
+	int w, h;
+	SDL_GetWindowSize(mWindow, &w, &h);
+	glViewport(0, 0, w, h);
+	SDL_GL_MakeCurrent(mWindow, mContext);
 
 #ifdef IMGUI
 	// Init ImGUI
@@ -271,15 +292,9 @@ int Game::event(const SDL_Event& event) {
 		}
 
 		case SDL_EVENT_WINDOW_RESIZED: {
-			if (event.window.data1 < 720 || event.window.data2 < 480) {
-				SDL_SetWindowSize(mWindow, event.window.data1 < 720 ? 720 : event.window.data1,
-								  event.window.data2 < 480 ? 480 : event.window.data2);
-				glViewport(0, 0, event.window.data1 < 720 ? 720 : event.window.data1,
-						   event.window.data2 < 480 ? 480 : event.window.data2);
-			} else {
-				glViewport(0, 0, event.window.data1, event.window.data2);
-			}
-
+			// int w, h;
+			// SDL_GetWindowSize(mWindow, &w, &h);
+			glViewport(0, 0, event.window.data1, event.window.data2);
 			break;
 		}
 	}

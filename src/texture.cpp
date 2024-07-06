@@ -4,6 +4,7 @@
 
 #include <SDL3/SDL.h>
 
+#include <SDL3/SDL_stdinc.h>
 #include <stb_image.h>
 
 #include <glad/glad.h>
@@ -12,9 +13,19 @@ Texture::Texture(const std::string& path, const bool& flip) {
 	stbi_set_flip_vertically_on_load(flip);
 
 	int width, height, channels;
-	unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+	size_t size;
+	unsigned char* source = static_cast<unsigned char*>(SDL_LoadFile(path.c_str(), &size));
+	[[unlikely]] if (source == nullptr) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to read shader shource: %s\n",
+						path.c_str());
+		ERROR_BOX("Failed to read assets");
 
-	if (data == nullptr) {
+		throw 1;
+	}
+
+	unsigned char* data = stbi_load_from_memory(source, size, &width, &height, &channels, 0);
+
+	[[unlikely]] if (data == nullptr) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load texture!\n");
 		ERROR_BOX("Failed to load textures, the assets is probably corrupted or you don't have "
 				  "enough memory");
@@ -52,6 +63,7 @@ Texture::Texture(const std::string& path, const bool& flip) {
 	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
+	SDL_free(source);
 	stbi_image_free(data);
 }
 

@@ -4,7 +4,7 @@
 
 #include <string>
 
-#define fullPath(path) (mBasePath + "/assets/" + path)
+#define fullPath(path) (mBasePath + "assets/" + path)
 
 class Game {
   public:
