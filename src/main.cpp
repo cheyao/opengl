@@ -1,12 +1,15 @@
-#include "common.hpp"
-
 #include <SDL3/SDL.h>
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include <cstdlib>
 #include <ctime>
 
+#include "common.hpp"
 #include "game.hpp"
 
 int SDL_AppInit(void** appstate, int argc, char** argv) {
@@ -40,12 +43,9 @@ int SDL_AppInit(void** appstate, int argc, char** argv) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 #endif
 
-	Game* game = new Game();
-
+	Game* game;
 	try {
-		if (game->init() != 0) {
-			return 1;
-		}
+		game = new Game();
 	} catch (int error) {
 		return error;
 	}

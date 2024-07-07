@@ -64,7 +64,7 @@ external/imgui/backends/imgui_impl_opengl3.cpp
 )
 
 set(ASSETS_EMBED_WEB
-	# --embed-file=assets/Ball.png@/assets/Ball.png
+	--preload-file=assets@assets
 )
 
 if(ANDROID STREQUAL ON) 
@@ -115,7 +115,7 @@ include_directories(include)
 
 if(NOT ANDROID)
 	if(WEB)
-    		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-static)
+		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-static)
 		# find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL3_image-static)
 
 		set(CMAKE_EXECUTABLE_SUFFIX .js)
@@ -236,10 +236,16 @@ if(IMGUI STREQUAL ON AND CHECKS STREQUAL OFF)
 endif()
 
 if(WEB)
-	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3) # -sUSE_SDL_IMAGE=3)
+	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -D__ANDROID__) # -sUSE_SDL_IMAGE=3)
 	target_compile_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
-	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3) # -sUSE_SDL_IMAGE=3)
+	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3) # -sUSE_SDL_IMAGE=3)
 	target_link_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
+	if(DEBUG)
+		target_compile_options(${BUILD_NAME} PRIVATE -gsource-map)
+		target_link_options(${BUILD_NAME} PRIVATE -gsource-map)
+		ADD_CUSTOM_TARGET(link_target1 ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../src ${CMAKE_BINARY_DIR}/src)
+		ADD_CUSTOM_TARGET(link_target2 ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../include ${CMAKE_BINARY_DIR}/include)
+	endif()
 endif()
 
 # IWYU

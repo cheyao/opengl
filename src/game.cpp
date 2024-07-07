@@ -15,15 +15,16 @@
 #include <imgui.h>
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/html5.h>
+
+EM_JS(int, browserHeight, (), { return window.innerHeight; });
+EM_JS(int, browserWidth, (), { return window.innerWidth; });
+#endif
+
 #include <string>
 
 // TODO: debug & info log
-
-Game::Game()
-	: mWindow(nullptr), mContext(nullptr), mShader(nullptr), mVertex(nullptr), mTicks(0),
-	  mBasePath(), mBox(nullptr), mFace(nullptr), mixer(0.2){};
-// TODO: RAII
-
 void printGLInfo() {
 	SDL_Log("Vendor     : %s\n", glGetString(GL_VENDOR));
 	SDL_Log("Renderer   : %s\n", glGetString(GL_RENDERER));
@@ -48,14 +49,16 @@ void printGLInfo() {
 	SDL_Log("Maximum number of texture units supported: %d\n", nrAttributes);
 }
 
-int Game::init() {
+Game::Game()
+	: mWindow(nullptr), mContext(nullptr), mShader(nullptr), mVertex(nullptr), mTicks(0),
+	  mBasePath(), mBox(nullptr), mFace(nullptr), mixer(0.2) {
 	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to make SDL window, there is something wrong with "
 				  "your SDL installation");
 
-		return 1;
+		throw 1;
 	}
 	SDL_SetWindowMinimumSize(mWindow, 480, 320);
 
@@ -64,7 +67,7 @@ int Game::init() {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to initialize OpenGL Context, there is something "
 				  "wrong with your OpenGL");
-		return 1;
+		throw 1;
 	}
 
 	// TODO: Get a icon
@@ -81,10 +84,14 @@ int Game::init() {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
 
+#ifndef __EMSCRIPTEN__
 	if (!gladLoadGLES2Loader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init glad!\n");
 		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
+
+		throw 1;
 	}
+#endif
 #else
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
@@ -96,6 +103,8 @@ int Game::init() {
 	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init glad!\n");
 		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
+
+		throw 1;
 	}
 #endif
 #endif
@@ -108,6 +117,10 @@ int Game::init() {
 	// Set size (For android)
 	int w, h;
 	SDL_GetWindowSize(mWindow, &w, &h);
+#ifdef __EMSCRIPTEN__
+	h = browserHeight();
+	w = browserWidth();
+#endif
 	glViewport(0, 0, w, h);
 	SDL_GL_MakeCurrent(mWindow, mContext);
 
@@ -140,10 +153,11 @@ int Game::init() {
 
 	mTicks = SDL_GetTicks();
 
-	return setup();
+	setup();
 }
 
-int Game::setup() {
+void Game::setup() {
+	SDL_Log("Setting up game");
 	float vertices[] = {
 		// positions  // colors   // texture coords
 		0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
@@ -164,8 +178,6 @@ int Game::setup() {
 	mFace = new Texture(fullPath("face.png"), true);
 
 	SDL_Log("Successfully initialized OpenGL and game\n");
-
-	return 0;
 }
 
 int Game::iterate() {
@@ -294,6 +306,12 @@ int Game::event(const SDL_Event& event) {
 		case SDL_EVENT_WINDOW_RESIZED: {
 			// int w, h;
 			// SDL_GetWindowSize(mWindow, &w, &h);
+			/*
+#ifdef __EMSCRIPTEN__
+	h = browserHeight();
+	w = browserWidth();
+#endif
+*/
 			glViewport(0, 0, event.window.data1, event.window.data2);
 			break;
 		}

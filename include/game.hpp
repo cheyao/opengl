@@ -15,7 +15,6 @@ class Game {
 	Game& operator=(const Game&) = delete;
 	~Game();
 
-	int init();
 	int iterate();
 	int event(const SDL_Event& event);
 
@@ -24,7 +23,7 @@ class Game {
 	void update();
 	void gui();
 	void draw();
-	int setup();
+	void setup();
 
 	SDL_Window* mWindow;
 	SDL_GLContext mContext;

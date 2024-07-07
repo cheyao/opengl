@@ -71,7 +71,6 @@ void Shader::compile(const std::string& fileName, const GLenum& type, unsigned i
 	// #version 400 core 
 	// to
 	// #version 300 es
-	// TODO: Get this to look better
 	shaderSource[9] = '3';
 	shaderSource[13] = 'e';
 	shaderSource[14] = 's';
