@@ -1,3 +1,6 @@
+#include "utils.hpp"
+#include "game.hpp"
+
 #include <SDL3/SDL.h>
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
@@ -8,9 +11,6 @@
 
 #include <cstdlib>
 #include <ctime>
-
-#include "common.hpp"
-#include "game.hpp"
 
 int SDL_AppInit(void** appstate, int argc, char** argv) {
 	(void)argc;

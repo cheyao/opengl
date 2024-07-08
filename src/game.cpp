@@ -1,13 +1,17 @@
 #include "game.hpp"
 
-#include "common.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
+#include "utils.hpp"
 #include "vertexArray.hpp"
+
+#include <Eigen/Dense>
 
 #include <glad/glad.h>
 
 #include <SDL3/SDL.h>
+
+#include <cmath>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -20,6 +24,10 @@
 
 EM_JS(int, browserHeight, (), { return window.innerHeight; });
 EM_JS(int, browserWidth, (), { return window.innerWidth; });
+EM_JS(int, canvasResize, (), {
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+});
 #endif
 
 #include <string>
@@ -120,6 +128,8 @@ Game::Game()
 #ifdef __EMSCRIPTEN__
 	h = browserHeight();
 	w = browserWidth();
+	canvasResize();
+	SDL_SetWindowSize(mWindow, w, h);
 #endif
 	glViewport(0, 0, w, h);
 	SDL_GL_MakeCurrent(mWindow, mContext);
@@ -159,11 +169,11 @@ Game::Game()
 void Game::setup() {
 	SDL_Log("Setting up game");
 	float vertices[] = {
-		// positions  // colors   // texture coords
-		0.5f,  0.5f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-		0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-		-0.5f, 0.5f,  1.0f, 1.0f, 0.0f, 0.0f, 1.0f	// top left
+		// positions  // texture coords
+		0.5f,  0.5f,  1.0f, 1.0f, // top right
+		0.5f,  -0.5f, 1.0f, 0.0f, // bottom right
+		-0.5f, -0.5f, 0.0f, 0.0f, // bottom left
+		-0.5f, 0.5f,  0.0f, 1.0f  // top left
 	};
 	unsigned int indices[] = {0, 1, 3, 1, 2, 3};
 
@@ -181,6 +191,11 @@ void Game::setup() {
 }
 
 int Game::iterate() {
+#ifdef __EMSCRIPTEN__
+	// Web hack
+	SDL_SetWindowSize(mWindow, browserWidth(), browserHeight());
+#endif
+
 	// Loop
 	input();
 	update();
@@ -267,7 +282,19 @@ void Game::draw() {
 
 	mShader->set("mixer", mixer);
 
+	Eigen::Affine3f trans = Eigen::Affine3f::Identity();
+	trans.translate(Eigen::Vector3f(0.5f, -0.5f, 0.0f));
+	trans.rotate(
+		Eigen::AngleAxisf(static_cast<double>(SDL_GetTicks()) / 800, Eigen::Vector3f(0, 0, 1)));
+	mShader->set("trans", trans);
+
 	// FIXME: Hardcoded triangle count
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	trans.setIdentity();
+	trans.translate(Eigen::Vector3f(-0.5f, 0.5f, 0.0f));
+	trans.scale(Eigen::Vector3f(sin(SDL_GetTicks() / 800), sin(SDL_GetTicks() / 800), sin(SDL_GetTicks() / 800)));
+	mShader->set("trans", trans);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 #ifdef IMGUI
@@ -295,23 +322,7 @@ int Game::event(const SDL_Event& event) {
 			break;
 		}
 
-		case SDL_EVENT_KEY_DOWN: {
-			if (event.key.key == SDLK_ESCAPE) {
-				return 1;
-			}
-
-			break;
-		}
-
 		case SDL_EVENT_WINDOW_RESIZED: {
-			// int w, h;
-			// SDL_GetWindowSize(mWindow, &w, &h);
-			/*
-#ifdef __EMSCRIPTEN__
-	h = browserHeight();
-	w = browserWidth();
-#endif
-*/
 			glViewport(0, 0, event.window.data1, event.window.data2);
 			break;
 		}

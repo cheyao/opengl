@@ -1,12 +1,14 @@
 #include "shader.hpp"
 
+#include "utils.hpp"
+
+#include <Eigen/Dense>
+
 #include <glad/glad.h>
 
 #include <SDL3/SDL.h>
 
 #include <cassert>
-
-#include "common.hpp"
 
 Shader::Shader(const std::string& vertName, const std::string& fragName) {
 	compile(vertName, GL_VERTEX_SHADER, mVertexShader);
@@ -39,9 +41,9 @@ Shader::~Shader() {
 	glDeleteProgram(mShaderProgram);
 }
 
-void Shader::activate() { glUseProgram(mShaderProgram); }
+void Shader::activate() const { glUseProgram(mShaderProgram); }
 
-int Shader::getUniform(const std::string& name) {
+int Shader::getUniform(const std::string& name) const {
 	int location = glGetUniformLocation(mShaderProgram, name.c_str());
 
 	[[unlikely]] if (location == -1) {
@@ -53,22 +55,26 @@ int Shader::getUniform(const std::string& name) {
 	return location;
 }
 
-void Shader::set(const std::string& name, bool val) {
+void Shader::set(const std::string& name, bool val) const {
 	glUniform1i(getUniform(name), static_cast<int>(val));
 }
 
-void Shader::set(const std::string& name, int val) { glUniform1i(getUniform(name), val); }
+void Shader::set(const std::string& name, int val) const { glUniform1i(getUniform(name), val); }
 
-void Shader::set(const std::string& name, float val) { glUniform1f(getUniform(name), val); }
+void Shader::set(const std::string& name, float val) const { glUniform1f(getUniform(name), val); }
 
-void Shader::set(const std::string& name, float val, float val2) {
+void Shader::set(const std::string& name, float val, float val2) const {
 	glUniform2f(getUniform(name), val, val2);
+}
+
+void Shader::set(const std::string& name, Eigen::Affine3f mat, GLboolean transpose) const {
+	glUniformMatrix4fv(getUniform(name), 1, transpose, mat.data());
 }
 
 void Shader::compile(const std::string& fileName, const GLenum& type, unsigned int& out) {
 	char* shaderSource = static_cast<char*>(SDL_LoadFile(fileName.c_str(), nullptr));
 #ifdef __ANDROID__
-	// #version 400 core 
+	// #version 400 core
 	// to
 	// #version 300 es
 	shaderSource[9] = '3';

@@ -41,7 +41,7 @@ src/texture.cpp
 src/vertexArray.cpp
 #Headers
 include/game.hpp
-include/common.hpp
+include/utils.hpp
 include/shader.hpp
 include/texture.hpp
 include/vertexArray.hpp
@@ -112,6 +112,7 @@ include(CheckIPOSupported)
 check_ipo_supported(RESULT LTOSupported OUTPUT error)
 
 include_directories(include)
+include_directories(external/Eigen)
 
 if(NOT ANDROID)
 	if(WEB)

@@ -1,7 +1,6 @@
 #version 400 core
 precision mediump float;
 
-in vec3 dstColor;
 in vec2 texPos;
 
 uniform sampler2D box;
