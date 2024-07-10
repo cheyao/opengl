@@ -1,17 +1,17 @@
 #include "game.hpp"
 
-#include "shader.hpp"
-#include "texture.hpp"
+#include "opengl/camera.hpp"
+#include "opengl/glmanager.hpp"
+#include "opengl/shader.hpp"
+#include "opengl/texture.hpp"
+#include "opengl/vertexArray.hpp"
 #include "utils.hpp"
-#include "vertexArray.hpp"
 
-#include <Eigen/Dense>
-
-#include <glad/glad.h>
+#include <third_party/Eigen/Dense>
+#include <third_party/glad/glad.h>
 
 #include <SDL3/SDL.h>
-
-#include <cmath>
+#include <string>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -30,36 +30,10 @@ EM_JS(int, canvasResize, (), {
 });
 #endif
 
-#include <string>
-
-// TODO: debug & info log
-void printGLInfo() {
-	SDL_Log("Vendor     : %s\n", glGetString(GL_VENDOR));
-	SDL_Log("Renderer   : %s\n", glGetString(GL_RENDERER));
-	SDL_Log("Version    : %s\n", glGetString(GL_VERSION));
-	SDL_Log("GLSL       : %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-	// SDL_Log("Extensions : %s\n", glGetString(GL_EXTENSIONS));
-
-	int maj;
-	int min;
-	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &maj);
-	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &min);
-	SDL_Log("Context  : %d.%d\n", maj, min);
-
-	glGetIntegerv(GL_MAJOR_VERSION, &maj);
-	glGetIntegerv(GL_MINOR_VERSION, &min);
-	SDL_Log("Context  : %d.%d\n", maj, min);
-
-	int nrAttributes;
-	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-	SDL_Log("Maximum number of vertex attributes supported: %d\n", nrAttributes);
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &nrAttributes);
-	SDL_Log("Maximum number of texture units supported: %d\n", nrAttributes);
-}
-
 Game::Game()
-	: mWindow(nullptr), mContext(nullptr), mShader(nullptr), mVertex(nullptr), mTicks(0),
-	  mBasePath(), mBox(nullptr), mFace(nullptr), mixer(0.2) {
+	: mWindow(nullptr), mGL(nullptr), mShader(nullptr), mVertex(nullptr), mTicks(0),
+	  mBasePath(), mBox(nullptr), mFace(nullptr), mCamera(nullptr), mWidth(0),
+	  mHeight(0) {
 	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
@@ -70,69 +44,21 @@ Game::Game()
 	}
 	SDL_SetWindowMinimumSize(mWindow, 480, 320);
 
-	mContext = SDL_GL_CreateContext(mWindow);
-	if (mWindow == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
-		ERROR_BOX("Failed to initialize OpenGL Context, there is something "
-				  "wrong with your OpenGL");
-		throw 1;
-	}
+	mGL = new GLManager(mWindow);
 
-	// TODO: Get a icon
-	/*
-	SDL_Surface *icon = IMG_Load("assets/icon.png");
-	SDL_SetWindowIcon(mWindow, icon);
-	SDL_DestroySurface(icon);
-	*/
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-
-#ifdef __ANDROID__
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-
-#ifndef __EMSCRIPTEN__
-	if (!gladLoadGLES2Loader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init glad!\n");
-		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
-
-		throw 1;
-	}
-#endif
-#else
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
-#ifndef __APPLE__
-	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init glad!\n");
-		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
-
-		throw 1;
-	}
-#endif
-#endif
-
-	// Set VSync
-	SDL_GL_SetSwapInterval(1);
-
-	printGLInfo();
+	mGL->printInfo();
 
 	// Set size (For android)
-	int w, h;
-	SDL_GetWindowSize(mWindow, &w, &h);
 #ifdef __EMSCRIPTEN__
-	h = browserHeight();
-	w = browserWidth();
+	mHeight = browserHeight();
+	mWidth = browserWidth();
 	canvasResize();
-	SDL_SetWindowSize(mWindow, w, h);
+	SDL_SetWindowSize(mWindow, mWidth, mHeight);
+#else
+	SDL_GetWindowSize(mWindow, &mWidth, &mHeight);
 #endif
-	glViewport(0, 0, w, h);
-	SDL_GL_MakeCurrent(mWindow, mContext);
+
+	glViewport(0, 0, mWidth, mHeight);
 
 #ifdef IMGUI
 	// Init ImGUI
@@ -149,7 +75,7 @@ Game::Game()
 
 	ImGui::StyleColorsDark();
 
-	ImGui_ImplSDL3_InitForOpenGL(mWindow, mContext);
+	ImGui_ImplSDL3_InitForOpenGL(mWindow, mGL->getContext());
 	ImGui_ImplOpenGL3_Init("#version 400");
 
 	SDL_Log("Finished Initializing ImGUI");
@@ -161,6 +87,13 @@ Game::Game()
 		SDL_free(basepath); // We gotta free da pointer UwU
 	}
 
+	// TODO: Get a icon
+	/*
+	SDL_Surface *icon = IMG_Load("assets/icon.png");
+	SDL_SetWindowIcon(mWindow, icon);
+	SDL_DestroySurface(icon);
+	*/
+
 	mTicks = SDL_GetTicks();
 
 	setup();
@@ -168,14 +101,53 @@ Game::Game()
 
 void Game::setup() {
 	SDL_Log("Setting up game");
+
+	glEnable(GL_DEPTH_TEST);
+
 	float vertices[] = {
-		// positions  // texture coords
-		0.5f,  0.5f,  1.0f, 1.0f, // top right
-		0.5f,  -0.5f, 1.0f, 0.0f, // bottom right
-		-0.5f, -0.5f, 0.0f, 0.0f, // bottom left
-		-0.5f, 0.5f,  0.0f, 1.0f  // top left
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};
-	unsigned int indices[] = {0, 1, 3, 1, 2, 3};
+	unsigned int indices[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, };
 
 	mVertex = new VertexArray(vertices, sizeof(vertices) / sizeof(vertices[0]), indices,
 							  sizeof(indices) / sizeof(indices[0]));
@@ -187,6 +159,11 @@ void Game::setup() {
 	mBox = new Texture(fullPath("container.png"));
 	mFace = new Texture(fullPath("face.png"), true);
 
+	mCamera = new Camera();
+	mCamera->project(toRadians(45.0f), mWidth, mHeight, 0.1f, 100.0f);
+	mCamera->view(Eigen::Vector3f(0.0f, 0.0f, 3.0f), Eigen::Vector3f(0.0f, 0.0f, 0.0f),
+				  Eigen::Vector3f(0.0f, 1.0f, 0.0f));
+
 	SDL_Log("Successfully initialized OpenGL and game\n");
 }
 
@@ -196,7 +173,6 @@ int Game::iterate() {
 	SDL_SetWindowSize(mWindow, browserWidth(), browserHeight());
 #endif
 
-	// Loop
 	input();
 	update();
 	gui();
@@ -208,11 +184,7 @@ int Game::iterate() {
 void Game::input() {
 	const Uint8* keys = SDL_GetKeyboardState(nullptr);
 
-	if (keys[SDL_SCANCODE_UP]) {
-		mixer += 0.1;
-	} else if (keys[SDL_SCANCODE_DOWN]) {
-		mixer -= 0.1;
-	}
+	(void) keys;
 }
 
 void Game::update() {
@@ -228,10 +200,7 @@ void Game::update() {
 bool demoMenu = false;
 bool vsync = true;
 bool wireframe = false;
-#endif
-
 void Game::gui() {
-#ifdef IMGUI
 	// Update ImGui Frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
@@ -264,15 +233,36 @@ void Game::gui() {
 	}
 
 	SDL_GL_SetSwapInterval(vsync);
-#endif
 }
+#else
+void Game::gui() {}
+#endif
 
 void Game::draw() {
 #ifdef IMGUI
 	ImGui::Render();
 #endif
+	const float radius = 10.0f;
+	float x = sin(static_cast<float>(SDL_GetTicks()) / 1000) * radius;
+	float z = cos(static_cast<float>(SDL_GetTicks()) / 1000) * radius;
+	mCamera->view(Eigen::Vector3f(x, 0.0f, z), 
+			      Eigen::Vector3f(0.0f, 0.0f, 0.0f),
+				  Eigen::Vector3f(0.0f, 1.0f, 0.0f));
 
-	glClear(GL_COLOR_BUFFER_BIT);
+	Eigen::Vector3f cubePositions[] = {
+		Eigen::Vector3f( 0.0f,  0.0f,  0.0f), 
+		Eigen::Vector3f( 2.0f,  5.0f, -15.0f), 
+		Eigen::Vector3f(-1.5f, -2.2f, -2.5f),  
+		Eigen::Vector3f(-3.8f, -2.0f, -12.3f),  
+		Eigen::Vector3f( 2.4f, -0.4f, -3.5f),  
+		Eigen::Vector3f(-1.7f,  3.0f, -7.5f),  
+		Eigen::Vector3f( 1.3f, -2.0f, -2.5f),  
+		Eigen::Vector3f( 1.5f,  2.0f, -2.5f), 
+		Eigen::Vector3f( 1.5f,  0.2f, -1.5f), 
+		Eigen::Vector3f(-1.3f,  1.0f, -1.5f)  
+	};
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	mShader->activate();
 	mVertex->activate();
@@ -280,22 +270,18 @@ void Game::draw() {
 	mBox->activate(0);
 	mFace->activate(1);
 
-	mShader->set("mixer", mixer);
+	mShader->set("view", mCamera->mViewMatrix);
+	mShader->set("proj", mCamera->mProjectionMatrix);
 
-	Eigen::Affine3f trans = Eigen::Affine3f::Identity();
-	trans.translate(Eigen::Vector3f(0.5f, -0.5f, 0.0f));
-	trans.rotate(
-		Eigen::AngleAxisf(static_cast<double>(SDL_GetTicks()) / 800, Eigen::Vector3f(0, 0, 1)));
-	mShader->set("trans", trans);
-
-	// FIXME: Hardcoded triangle count
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-	trans.setIdentity();
-	trans.translate(Eigen::Vector3f(-0.5f, 0.5f, 0.0f));
-	trans.scale(Eigen::Vector3f(sin(SDL_GetTicks() / 800), sin(SDL_GetTicks() / 800), sin(SDL_GetTicks() / 800)));
-	mShader->set("trans", trans);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	for (auto i = 0; i < 10; ++i) {
+		Eigen::Affine3f modelMat = Eigen::Affine3f::Identity();
+		modelMat.translate(cubePositions[i]);
+		if (i % 3 == 0) {
+			modelMat.rotate(Eigen::AngleAxisf(static_cast<float>(SDL_GetTicks()) / 1000, Eigen::Vector3f(0.5f, 1.0f, 0.0f).normalized()));
+		}
+		mShader->set("model", modelMat);
+		glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
+	}
 
 #ifdef IMGUI
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -323,7 +309,10 @@ int Game::event(const SDL_Event& event) {
 		}
 
 		case SDL_EVENT_WINDOW_RESIZED: {
+			mWidth = event.window.data1;
+			mHeight = event.window.data2;
 			glViewport(0, 0, event.window.data1, event.window.data2);
+			mCamera->project(toRadians(45.0f), mWidth, mHeight, 0.1f, 100.0f);
 			break;
 		}
 	}
@@ -344,7 +333,7 @@ Game::~Game() {
 	delete mVertex;
 	delete mBox;
 	delete mFace;
+	delete mGL;
 
-	SDL_GL_DeleteContext(mContext);
 	SDL_DestroyWindow(mWindow);
 }

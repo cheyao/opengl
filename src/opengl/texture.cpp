@@ -1,13 +1,12 @@
-#include "texture.hpp"
+#include "opengl/texture.hpp"
 
 #include "utils.hpp"
 
+#include <third_party/stb_image.h>
+#include <third_party/glad/glad.h>
+
+#include <stddef.h>
 #include <SDL3/SDL.h>
-
-#include <SDL3/SDL_stdinc.h>
-#include <stb_image.h>
-
-#include <glad/glad.h>
 
 Texture::Texture(const std::string& path, const bool& flip) {
 	stbi_set_flip_vertically_on_load(flip);
@@ -69,7 +68,7 @@ Texture::Texture(const std::string& path, const bool& flip) {
 
 Texture::~Texture() { glDeleteTextures(1, &mID); }
 
-void Texture::activate(const unsigned int& num) {
+void Texture::activate(const unsigned int& num) const {
 	glActiveTexture(GL_TEXTURE0 + num);
 	glBindTexture(GL_TEXTURE_2D, mID);
 }

@@ -11,7 +11,7 @@ class Texture {
 	Texture& operator=(const Texture&) = delete;
 	~Texture();
 
-	void activate(const unsigned int& num = 0);
+	void activate(const unsigned int& num = 0) const;
 
   private:
 	unsigned int mID;

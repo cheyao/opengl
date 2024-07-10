@@ -10,7 +10,7 @@ class VertexArray {
 	VertexArray& operator=(const VertexArray&) = delete;
 	~VertexArray();
 
-	void activate();
+	void activate() const;
 
 	unsigned int indices() const { return mIndices; }
 	unsigned int vertices() const { return mVertices; }

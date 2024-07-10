@@ -1,6 +1,6 @@
-#include "vertexArray.hpp"
+#include "opengl/vertexArray.hpp"
 
-#include <glad/glad.h>
+#include <third_party/glad/glad.h>
 
 VertexArray::VertexArray(const float* vertices, unsigned int numVertices,
 						 const unsigned int* indices, unsigned int numIndices)
@@ -18,9 +18,9 @@ VertexArray::VertexArray(const float* vertices, unsigned int numVertices,
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(indices[0]), indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(vertices[0]), static_cast<GLvoid*>(0));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(vertices[0]), static_cast<GLvoid*>(0));
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(vertices[0]), reinterpret_cast<GLvoid*>(2 * sizeof(vertices[0])));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(vertices[0]), reinterpret_cast<GLvoid*>(3 * sizeof(vertices[0])));
 	glEnableVertexAttribArray(1);
 
 	glBindVertexArray(0);
@@ -32,4 +32,4 @@ VertexArray::~VertexArray() {
 	glDeleteBuffers(1, &mEBO);
 }
 
-void VertexArray::activate() { glBindVertexArray(mVAO); }
+void VertexArray::activate() const { glBindVertexArray(mVAO); }

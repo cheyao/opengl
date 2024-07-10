@@ -1,13 +1,10 @@
-#include "shader.hpp"
-
+#include "opengl/shader.hpp"
 #include "utils.hpp"
 
-#include <Eigen/Dense>
-
-#include <glad/glad.h>
+#include <third_party/Eigen/Dense>
+#include <third_party/glad/glad.h>
 
 #include <SDL3/SDL.h>
-
 #include <cassert>
 
 Shader::Shader(const std::string& vertName, const std::string& fragName) {
@@ -55,19 +52,24 @@ int Shader::getUniform(const std::string& name) const {
 	return location;
 }
 
-void Shader::set(const std::string& name, bool val) const {
+void Shader::set(const std::string& name, const bool& val) const {
 	glUniform1i(getUniform(name), static_cast<int>(val));
 }
 
-void Shader::set(const std::string& name, int val) const { glUniform1i(getUniform(name), val); }
+void Shader::set(const std::string& name, const int& val) const {
+	glUniform1i(getUniform(name), val);
+}
 
-void Shader::set(const std::string& name, float val) const { glUniform1f(getUniform(name), val); }
+void Shader::set(const std::string& name, const float& val) const {
+	glUniform1f(getUniform(name), val);
+}
 
-void Shader::set(const std::string& name, float val, float val2) const {
+void Shader::set(const std::string& name, const float& val, const float& val2) const {
 	glUniform2f(getUniform(name), val, val2);
 }
 
-void Shader::set(const std::string& name, Eigen::Affine3f mat, GLboolean transpose) const {
+void Shader::set(const std::string& name, const Eigen::Affine3f& mat,
+				 const GLboolean& transpose) const {
 	glUniformMatrix4fv(getUniform(name), 1, transpose, mat.data());
 }
 

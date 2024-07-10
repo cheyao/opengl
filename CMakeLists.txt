@@ -27,27 +27,41 @@ if(CHECKS STREQUAL ON)
 endif()
 
 set(GLAD
-src/glad.c 
-include/glad/glad.h 
-include/KHR/khrplatform.h 
+src/third_party/glad.c 
+include/third_party/glad/glad.h 
+include/third_party/KHR/khrplatform.h 
 )
 
 set(SRC
 #Sources
 src/main.cpp
 src/game.cpp
-src/shader.cpp
-src/texture.cpp
-src/vertexArray.cpp
+
+src/opengl/camera.cpp
+src/opengl/glmanager.cpp
+src/opengl/shader.cpp
+src/opengl/texture.cpp
+src/opengl/vertexArray.cpp
+
+src/actors/actor.cpp
+src/actors/player.cpp
+
 #Headers
 include/game.hpp
 include/utils.hpp
-include/shader.hpp
-include/texture.hpp
-include/vertexArray.hpp
+
+include/opengl/camera.hpp
+include/opengl/glmanager.hpp
+include/opengl/shader.hpp
+include/opengl/texture.hpp
+include/opengl/vertexArray.hpp
+
+include/actors/actor.hpp
+include/actors/player.hpp
+
 #External
-src/stb_image.c
-include/stb_image.h
+src/third_party/stb_image.c
+include/third_party/stb_image.h
 
 ${GLAD}
 )
@@ -112,7 +126,6 @@ include(CheckIPOSupported)
 check_ipo_supported(RESULT LTOSupported OUTPUT error)
 
 include_directories(include)
-include_directories(external/Eigen)
 
 if(NOT ANDROID)
 	if(WEB)
@@ -184,6 +197,10 @@ else()
 	add_executable(${BUILD_NAME} ${SRC})
 
 	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
+endif()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -stdlib=libc++)
 endif()
 
 # Strip debug symbols
@@ -291,7 +308,7 @@ else()
 endif()
 
 if(DEBUG)
-	ADD_CUSTOM_TARGET(link_target ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../assets ${CMAKE_BINARY_DIR}/assets)
+	execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../assets ${CMAKE_BINARY_DIR}/assets)
 else()
 	file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 endif()

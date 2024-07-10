@@ -1,5 +1,9 @@
 #pragma once
 
+#include <third_party/glad/glad.h>
+
+#include <SDL3/SDL.h>
+
 #define ERROR_BOX(msg) SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERROR", msg, nullptr)
 
 const float PI = 3.14159265358979323846;

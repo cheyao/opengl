@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-
 #include <string>
 
 #define fullPath(path) (mBasePath + "assets/" + path)
@@ -26,8 +25,8 @@ class Game {
 	void setup();
 
 	SDL_Window* mWindow;
-	SDL_GLContext mContext;
 
+	class GLManager* mGL;
 	class Shader* mShader;
 	class VertexArray* mVertex;
 
@@ -37,8 +36,9 @@ class Game {
 
 	class Texture* mBox;
 	class Texture* mFace;
+	class Camera* mCamera;
 
-	float mixer;
+	int mWidth, mHeight;
 
 	// TODO: Seperate InputHandler class
 	// TODO: Seperate draw class
