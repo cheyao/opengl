@@ -1,6 +1,7 @@
 #pragma once
 
-#include "third_party/Eigen/Dense"
+#include "third_party/Eigen/Geometry"
+#include "third_party/Eigen/src/Core/Matrix.h"
 
 #include <vector>
 
@@ -24,7 +25,6 @@ class Actor {
 
 	class Game* getGame() { return mGame; }
 
-
 	State getState() const { return mState; }
 	void setState(const State& state) { mState = state; }
 
@@ -36,6 +36,13 @@ class Actor {
 
 	const Eigen::Quaternionf& getRotation() const { return mRotation; }
 	void setRotation(const Eigen::Quaternionf& rotation) { mRotation = rotation; }
+
+	Eigen::Vector3f getForward() const {
+		return mRotation.toRotationMatrix() * Eigen::Vector3f::UnitX();
+	}
+	Eigen::Vector3f getRight() const {
+		return mRotation.toRotationMatrix() * Eigen::Vector3f::UnitY();
+	}
 
 
 	void addComponent(class Component* component);

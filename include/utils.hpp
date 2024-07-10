@@ -1,6 +1,6 @@
 #pragma once
 
-#include <third_party/glad/glad.h>
+#include <cmath>
 
 #include <SDL3/SDL.h>
 
@@ -11,4 +11,12 @@ const float PI = 3.14159265358979323846;
 inline float toRadians(float degrees) { return degrees * (PI / 180.f); }
 
 inline float toDegrees(float radians) { return radians * (180.f / PI); }
+
+inline bool nearZero(float number, float epsilon = 0.001f) {
+	if (fabs(number) <= epsilon) {
+		return true;
+	} else {
+		return false;
+	}
+}
 

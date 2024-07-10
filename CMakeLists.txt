@@ -39,6 +39,7 @@ src/game.cpp
 
 src/components/cameraComponent.cpp
 src/components/component.cpp
+src/components/movementComponent.cpp
 
 src/opengl/shader.cpp
 src/opengl/texture.cpp
@@ -56,6 +57,7 @@ include/utils.hpp
 
 include/components/cameraComponent.hpp
 include/components/component.hpp
+include/components/movementComponent.hpp
 
 include/opengl/shader.hpp
 include/opengl/texture.hpp

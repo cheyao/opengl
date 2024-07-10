@@ -11,7 +11,9 @@ public:
 	Player &operator=(const Player &) = delete;
 	/*~Player();*/
 
+	void actorInput(const uint8_t* keystate) override;
+
 private:
-	
+	class MovementComponent* mMoveComp;
 };
 
