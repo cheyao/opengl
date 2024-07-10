@@ -1,4 +1,4 @@
-#include "opengl/glmanager.hpp"
+#include "managers/glmanager.hpp"
 
 #include "third_party/glad/glad.h"
 #include "utils.hpp"

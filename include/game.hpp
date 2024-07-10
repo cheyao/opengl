@@ -1,7 +1,10 @@
 #pragma once
 
-#include <SDL3/SDL.h>
+#include "third_party/Eigen/Geometry"
+
+#include <cstdint>
 #include <string>
+#include <vector>
 
 #define fullPath(path) (mBasePath + "assets/" + path)
 
@@ -15,7 +18,16 @@ class Game {
 	~Game();
 
 	int iterate();
-	int event(const SDL_Event& event);
+	int event(const union SDL_Event& event);
+
+	void addActor(class Actor* actor);
+	void removeActor(class Actor* actor);
+
+	int getWidth() { return mWidth; }
+	int getHeight() { return mHeight; }
+
+	Eigen::Affine3f mView;
+	Eigen::Affine3f mProjection;
 
   private:
 	void input();
@@ -24,23 +36,19 @@ class Game {
 	void draw();
 	void setup();
 
-	SDL_Window* mWindow;
-
+	struct SDL_Window* mWindow;
 	class GLManager* mGL;
+	class TextureManager* mTextures;
+
 	class Shader* mShader;
 	class VertexArray* mVertex;
 
-	Uint64 mTicks;
-
-	std::string mBasePath;
-
-	class Texture* mBox;
-	class Texture* mFace;
-	class Camera* mCamera;
+	std::vector<class Actor*> mActors;
+	std::vector<class Actor*> mPendingActors;
+	bool mUpdatingActors;
 
 	int mWidth, mHeight;
-
-	// TODO: Seperate InputHandler class
+	uint64_t mTicks;
+	std::string mBasePath;
 	// TODO: Seperate draw class
-	// TODO: Seperate Texture manager class
 };

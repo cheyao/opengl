@@ -37,11 +37,15 @@ set(SRC
 src/main.cpp
 src/game.cpp
 
-src/opengl/camera.cpp
-src/opengl/glmanager.cpp
+src/components/cameraComponent.cpp
+src/components/component.cpp
+
 src/opengl/shader.cpp
 src/opengl/texture.cpp
 src/opengl/vertexArray.cpp
+
+src/managers/glmanager.cpp
+src/managers/textureManager.cpp
 
 src/actors/actor.cpp
 src/actors/player.cpp
@@ -50,11 +54,15 @@ src/actors/player.cpp
 include/game.hpp
 include/utils.hpp
 
-include/opengl/camera.hpp
-include/opengl/glmanager.hpp
+include/components/cameraComponent.hpp
+include/components/component.hpp
+
 include/opengl/shader.hpp
 include/opengl/texture.hpp
 include/opengl/vertexArray.hpp
+
+include/managers/glmanager.hpp
+include/managers/textureManager.hpp
 
 include/actors/actor.hpp
 include/actors/player.hpp

@@ -1,12 +1,15 @@
 #include "game.hpp"
 
-#include "opengl/camera.hpp"
-#include "opengl/glmanager.hpp"
+#include "actors/actor.hpp"
+#include "actors/player.hpp"
+#include "managers/glmanager.hpp"
+#include "managers/textureManager.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
 #include "opengl/vertexArray.hpp"
 #include "utils.hpp"
 
+#include <cstdint>
 #include <third_party/Eigen/Dense>
 #include <third_party/glad/glad.h>
 
@@ -31,9 +34,8 @@ EM_JS(int, canvasResize, (), {
 #endif
 
 Game::Game()
-	: mWindow(nullptr), mGL(nullptr), mShader(nullptr), mVertex(nullptr), mTicks(0),
-	  mBasePath(), mBox(nullptr), mFace(nullptr), mCamera(nullptr), mWidth(0),
-	  mHeight(0) {
+	: mWindow(nullptr), mGL(nullptr), mShader(nullptr), mVertex(nullptr), mWidth(0), mHeight(0),
+	  mTicks(0), mBasePath() {
 	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
@@ -45,10 +47,8 @@ Game::Game()
 	SDL_SetWindowMinimumSize(mWindow, 480, 320);
 
 	mGL = new GLManager(mWindow);
-
 	mGL->printInfo();
 
-	// Set size (For android)
 #ifdef __EMSCRIPTEN__
 	mHeight = browserHeight();
 	mWidth = browserWidth();
@@ -61,7 +61,6 @@ Game::Game()
 	glViewport(0, 0, mWidth, mHeight);
 
 #ifdef IMGUI
-	// Init ImGUI
 	SDL_Log("Initializing ImGUI");
 
 	IMGUI_CHECKVERSION();
@@ -87,6 +86,8 @@ Game::Game()
 		SDL_free(basepath); // We gotta free da pointer UwU
 	}
 
+	mTextures = new TextureManager(mBasePath);
+
 	// TODO: Get a icon
 	/*
 	SDL_Surface *icon = IMG_Load("assets/icon.png");
@@ -104,50 +105,33 @@ void Game::setup() {
 
 	glEnable(GL_DEPTH_TEST);
 
-	float vertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+	float vertices[] = {-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,	-0.5f, -0.5f, 1.0f, 0.0f,
+						0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,	0.5f,  -0.5f, 1.0f, 1.0f,
+						-0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
 
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+						-0.5f, -0.5f, 0.5f,	 0.0f, 0.0f, 0.5f,	-0.5f, 0.5f,  1.0f, 0.0f,
+						0.5f,  0.5f,  0.5f,	 1.0f, 1.0f, 0.5f,	0.5f,  0.5f,  1.0f, 1.0f,
+						-0.5f, 0.5f,  0.5f,	 0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
 
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+						-0.5f, 0.5f,  0.5f,	 1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f,
+						-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+						-0.5f, -0.5f, 0.5f,	 0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
 
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+						0.5f,  0.5f,  0.5f,	 1.0f, 0.0f, 0.5f,	0.5f,  -0.5f, 1.0f, 1.0f,
+						0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,	-0.5f, -0.5f, 0.0f, 1.0f,
+						0.5f,  -0.5f, 0.5f,	 0.0f, 0.0f, 0.5f,	0.5f,  0.5f,  1.0f, 0.0f,
 
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+						-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,	-0.5f, -0.5f, 1.0f, 1.0f,
+						0.5f,  -0.5f, 0.5f,	 1.0f, 0.0f, 0.5f,	-0.5f, 0.5f,  1.0f, 0.0f,
+						-0.5f, -0.5f, 0.5f,	 0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
 
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+						-0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,	0.5f,  -0.5f, 1.0f, 1.0f,
+						0.5f,  0.5f,  0.5f,	 1.0f, 0.0f, 0.5f,	0.5f,  0.5f,  1.0f, 0.0f,
+						-0.5f, 0.5f,  0.5f,	 0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
+	unsigned int indices[] = {
+		0,	1,	2,	3,	4,	5,	6,	7,	8,	9,	10, 11, 12, 13, 14, 15, 16, 17,
+		18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
 	};
-	unsigned int indices[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, };
 
 	mVertex = new VertexArray(vertices, sizeof(vertices) / sizeof(vertices[0]), indices,
 							  sizeof(indices) / sizeof(indices[0]));
@@ -156,13 +140,7 @@ void Game::setup() {
 	mShader->set("box", 0);
 	mShader->set("face", 1);
 
-	mBox = new Texture(fullPath("container.png"));
-	mFace = new Texture(fullPath("face.png"), true);
-
-	mCamera = new Camera();
-	mCamera->project(toRadians(45.0f), mWidth, mHeight, 0.1f, 100.0f);
-	mCamera->view(Eigen::Vector3f(0.0f, 0.0f, 3.0f), Eigen::Vector3f(0.0f, 0.0f, 0.0f),
-				  Eigen::Vector3f(0.0f, 1.0f, 0.0f));
+	new Player(this);
 
 	SDL_Log("Successfully initialized OpenGL and game\n");
 }
@@ -182,9 +160,13 @@ int Game::iterate() {
 }
 
 void Game::input() {
-	const Uint8* keys = SDL_GetKeyboardState(nullptr);
+	const uint8_t* keys = SDL_GetKeyboardState(nullptr);
 
-	(void) keys;
+	mUpdatingActors = true;
+	for (auto& actor : mActors) {
+		actor->input(keys);
+	}
+	mUpdatingActors = false;
 }
 
 void Game::update() {
@@ -194,13 +176,35 @@ void Game::update() {
 		delta = 0.05;
 	}
 	mTicks = SDL_GetTicks();
+
+	// Update the Actors
+	mUpdatingActors = true;
+	for (auto& actor : mActors) {
+		actor->update(delta);
+	}
+	mUpdatingActors = false;
+
+	// Append the pending actors
+	std::copy(mPendingActors.begin(), mPendingActors.end(), std::back_inserter(mActors));
+	mPendingActors.clear();
+
+	// Remove the dead Actors
+	std::vector<Actor*> deadActors;
+	std::copy_if(mActors.begin(), mActors.end(), std::back_inserter(deadActors),
+				 [](const Actor* actor) { return (actor->getState() == Actor::DEAD); });
+
+	// Delete all the dead actors
+	for (const auto& actor : deadActors) {
+		delete actor;
+	}
 }
 
 #ifdef IMGUI
-bool demoMenu = false;
-bool vsync = true;
-bool wireframe = false;
 void Game::gui() {
+	static bool demoMenu = false;
+	static bool vsync = true;
+	static bool wireframe = false;
+
 	// Update ImGui Frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
@@ -242,42 +246,37 @@ void Game::draw() {
 #ifdef IMGUI
 	ImGui::Render();
 #endif
-	const float radius = 10.0f;
-	float x = sin(static_cast<float>(SDL_GetTicks()) / 1000) * radius;
-	float z = cos(static_cast<float>(SDL_GetTicks()) / 1000) * radius;
-	mCamera->view(Eigen::Vector3f(x, 0.0f, z), 
-			      Eigen::Vector3f(0.0f, 0.0f, 0.0f),
-				  Eigen::Vector3f(0.0f, 1.0f, 0.0f));
+
+	/*const float radius = 10.0f;*/
+	/*float x = sin(static_cast<float>(SDL_GetTicks()) / 1000) * radius;*/
+	/*float z = cos(static_cast<float>(SDL_GetTicks()) / 1000) * radius;*/
+	/*mCamera->view(Eigen::Vector3f(x, 0.0f, z), Eigen::Vector3f(0.0f, 0.0f, 0.0f),*/
+	/*			  Eigen::Vector3f(0.0f, 1.0f, 0.0f));*/
 
 	Eigen::Vector3f cubePositions[] = {
-		Eigen::Vector3f( 0.0f,  0.0f,  0.0f), 
-		Eigen::Vector3f( 2.0f,  5.0f, -15.0f), 
-		Eigen::Vector3f(-1.5f, -2.2f, -2.5f),  
-		Eigen::Vector3f(-3.8f, -2.0f, -12.3f),  
-		Eigen::Vector3f( 2.4f, -0.4f, -3.5f),  
-		Eigen::Vector3f(-1.7f,  3.0f, -7.5f),  
-		Eigen::Vector3f( 1.3f, -2.0f, -2.5f),  
-		Eigen::Vector3f( 1.5f,  2.0f, -2.5f), 
-		Eigen::Vector3f( 1.5f,  0.2f, -1.5f), 
-		Eigen::Vector3f(-1.3f,  1.0f, -1.5f)  
-	};
+		Eigen::Vector3f(0.0f, 0.0f, 0.0f),	  Eigen::Vector3f(2.0f, 5.0f, -15.0f),
+		Eigen::Vector3f(-1.5f, -2.2f, -2.5f), Eigen::Vector3f(-3.8f, -2.0f, -12.3f),
+		Eigen::Vector3f(2.4f, -0.4f, -3.5f),  Eigen::Vector3f(-1.7f, 3.0f, -7.5f),
+		Eigen::Vector3f(1.3f, -2.0f, -2.5f),  Eigen::Vector3f(1.5f, 2.0f, -2.5f),
+		Eigen::Vector3f(1.5f, 0.2f, -1.5f),	  Eigen::Vector3f(-1.3f, 1.0f, -1.5f)};
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	mShader->activate();
 	mVertex->activate();
 
-	mBox->activate(0);
-	mFace->activate(1);
+	mTextures->get("container.png")->activate(0);
+	mTextures->get("face.png")->activate(1);
 
-	mShader->set("view", mCamera->mViewMatrix);
-	mShader->set("proj", mCamera->mProjectionMatrix);
+	mShader->set("view", mView);
+	mShader->set("proj", mProjection);
 
 	for (auto i = 0; i < 10; ++i) {
 		Eigen::Affine3f modelMat = Eigen::Affine3f::Identity();
 		modelMat.translate(cubePositions[i]);
 		if (i % 3 == 0) {
-			modelMat.rotate(Eigen::AngleAxisf(static_cast<float>(SDL_GetTicks()) / 1000, Eigen::Vector3f(0.5f, 1.0f, 0.0f).normalized()));
+			modelMat.rotate(Eigen::AngleAxisf(static_cast<float>(SDL_GetTicks()) / 1000,
+											  Eigen::Vector3f(0.5f, 1.0f, 0.0f).normalized()));
 		}
 		mShader->set("model", modelMat);
 		glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
@@ -312,12 +311,36 @@ int Game::event(const SDL_Event& event) {
 			mWidth = event.window.data1;
 			mHeight = event.window.data2;
 			glViewport(0, 0, event.window.data1, event.window.data2);
-			mCamera->project(toRadians(45.0f), mWidth, mHeight, 0.1f, 100.0f);
+
+			/*mCamera->project(toRadians(45.0f), mWidth, mHeight, 0.1f, 100.0f);*/
+
 			break;
 		}
 	}
 
 	return 0;
+}
+
+void Game::addActor(Actor* actor) {
+	if (!mUpdatingActors) {
+		mActors.emplace_back(actor);
+	} else {
+		mPendingActors.emplace_back(actor);
+	}
+}
+
+void Game::removeActor(Actor* actor) {
+	auto iter = std::find(mPendingActors.begin(), mPendingActors.end(), actor);
+	if (iter != mPendingActors.end()) {
+		std::iter_swap(iter, mPendingActors.end() - 1);
+		mPendingActors.pop_back();
+	}
+
+	iter = std::find(mActors.begin(), mActors.end(), actor);
+	if (iter != mActors.end()) {
+		std::iter_swap(iter, mActors.end() - 1);
+		mActors.pop_back();
+	}
 }
 
 Game::~Game() {
@@ -329,10 +352,16 @@ Game::~Game() {
 	ImGui::DestroyContext();
 #endif
 
+	while (!mActors.empty()) {
+		delete mActors.back();
+	}
+	while (!mPendingActors.empty()) {
+		delete mPendingActors.back();
+	}
+
 	delete mShader;
 	delete mVertex;
-	delete mBox;
-	delete mFace;
+	delete mTextures;
 	delete mGL;
 
 	SDL_DestroyWindow(mWindow);

@@ -15,4 +15,5 @@ class Texture {
 
   private:
 	unsigned int mID;
+	std::string name;
 };
