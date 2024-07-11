@@ -14,10 +14,19 @@ Player::Player(class Game* owner) : Actor(owner) {
 }
 
 void Player::actorInput(const uint8_t* keystate) {
+	/*
 	if (keystate[SDL_SCANCODE_LEFT]) {
-		mMoveComp->setForwardSpeed(1.0);
+		mMoveComp->setAngularSpeed(2);
 	} else if (keystate[SDL_SCANCODE_RIGHT]) {
-		mMoveComp->setForwardSpeed(-1.0);
+		mMoveComp->setAngularSpeed(-2);
+	} else {
+		mMoveComp->setAngularSpeed(0.0);
+	}
+	*/
+	if (keystate[SDL_SCANCODE_UP]) {
+		mMoveComp->setForwardSpeed(5.0);
+	} else if (keystate[SDL_SCANCODE_DOWN]) {
+		mMoveComp->setForwardSpeed(-5.0);
 	} else {
 		mMoveComp->setForwardSpeed(0.0);
 	}

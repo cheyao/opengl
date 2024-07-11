@@ -18,7 +18,7 @@ class CameraComponent : public Component {
 	void setFOV(float fov) { mFOV = fov; }
 
 	void project();
-	void view(const Eigen::Vector3f& target, const Eigen::Vector3f& up);
+	void view();
 
 	Eigen::Affine3f mViewMatrix;
 	Eigen::Affine3f mProjectionMatrix;

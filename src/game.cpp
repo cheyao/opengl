@@ -9,6 +9,7 @@
 #include "opengl/vertexArray.hpp"
 #include "utils.hpp"
 
+#include <SDL3/SDL_mouse.h>
 #include <cstdint>
 #include <third_party/Eigen/Dense>
 #include <third_party/glad/glad.h>
@@ -96,6 +97,9 @@ Game::Game()
 	*/
 
 	mTicks = SDL_GetTicks();
+
+	SDL_SetRelativeMouseMode(true);
+	SDL_SetWindowMouseGrab(mWindow, true);
 
 	setup();
 }
@@ -217,6 +221,8 @@ void Game::gui() {
 		ImGui::Text("Average %.3f ms/frame (%.1f FPS)", (1000.f / io.Framerate), io.Framerate);
 		ImGui::Text("%d vertices, %d indices (%d triangles)", io.MetricsRenderVertices,
 					io.MetricsRenderIndices, io.MetricsRenderIndices / 3);
+		auto pos = mActors[0]->getPosition();
+		ImGui::Text("%dx%dx%d",(int) pos.x(), (int)pos.y(), (int)pos.z());
 
 		// ImGui::Checkbox("Debug", &debugMenu);
 		ImGui::Checkbox("Demo", &demoMenu);

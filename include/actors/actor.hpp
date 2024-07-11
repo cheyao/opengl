@@ -1,7 +1,6 @@
 #pragma once
 
 #include "third_party/Eigen/Geometry"
-#include "third_party/Eigen/src/Core/Matrix.h"
 
 #include <vector>
 
