@@ -2,7 +2,7 @@
 
 #include "actors/actor.hpp"
 #include "components/component.hpp"
-#include "third_party/Eigen/Dense"
+#include "third_party/Eigen/Geometry"
 
 class CameraComponent : public Component {
   public:

@@ -35,8 +35,8 @@ EM_JS(int, canvasResize, (), {
 #endif
 
 Game::Game()
-	: mWindow(nullptr), mGL(nullptr), mShader(nullptr), mVertex(nullptr), mWidth(0), mHeight(0),
-	  mTicks(0), mBasePath() {
+	: mWindow(nullptr), mGL(nullptr), mShader(nullptr), mVertex(nullptr), mUpdatingActors(false),
+	  mWidth(0), mHeight(0), mTicks(0), mBasePath() {
 	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
@@ -222,7 +222,7 @@ void Game::gui() {
 		ImGui::Text("%d vertices, %d indices (%d triangles)", io.MetricsRenderVertices,
 					io.MetricsRenderIndices, io.MetricsRenderIndices / 3);
 		auto pos = mActors[0]->getPosition();
-		ImGui::Text("%dx%dx%d",(int) pos.x(), (int)pos.y(), (int)pos.z());
+		ImGui::Text("%dx%dx%d", (int)pos.x(), (int)pos.y(), (int)pos.z());
 
 		// ImGui::Checkbox("Debug", &debugMenu);
 		ImGui::Checkbox("Demo", &demoMenu);

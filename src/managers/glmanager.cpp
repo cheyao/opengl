@@ -6,10 +6,7 @@
 #include <SDL3/SDL.h>
 
 GLManager::GLManager(SDL_Window* window) {
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-
-#ifdef __ANDROID__
+#ifdef GLES
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
@@ -17,7 +14,10 @@ GLManager::GLManager(SDL_Window* window) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 #endif
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -32,27 +32,16 @@ GLManager::GLManager(SDL_Window* window) {
 		throw 1;
 	}
 
-#ifdef __ANDROID__
-#ifndef __EMSCRIPTEN__
+#ifdef GLES
 	if (!gladLoadGLES2Loader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init glad!\n");
-		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
-
-		throw 1;
-	}
-#endif
 #else
-#ifndef __APPLE__
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-
 	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
+#endif
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init glad!\n");
 		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
 
 		throw 1;
 	}
-#endif
-#endif
 
 	// Set VSync
 	SDL_GL_SetSwapInterval(1);
@@ -73,11 +62,11 @@ void GLManager::printInfo() const {
 	int min;
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &maj);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &min);
-	SDL_Log("Context  : %d.%d\n", maj, min);
+	SDL_Log("Context    : %d.%d\n", maj, min);
 
 	glGetIntegerv(GL_MAJOR_VERSION, &maj);
 	glGetIntegerv(GL_MINOR_VERSION, &min);
-	SDL_Log("Context  : %d.%d\n", maj, min);
+	SDL_Log("Context    : %d.%d\n", maj, min);
 
 	int nrAttributes;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);

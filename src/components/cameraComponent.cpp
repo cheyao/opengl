@@ -28,6 +28,9 @@ void CameraComponent::update(float delta) {
 	Eigen::Quaternionf dir = mOwner->getRotation();
 	Eigen::AngleAxisf rot(-(x / 50) * delta, Eigen::Vector3f::UnitY());
 	Eigen::AngleAxisf yaw(-(y / 50) * delta, Eigen::Vector3f::UnitZ());
+	// Eigen::Quaternionf newDir = dir * rot * yaw;
+	// dir.w() += cos(toRadians(x) / 2);
+	// dir.y() += sin(toRadians(x) / 2);
 	mOwner->setRotation(dir * rot * yaw);
 
 	project();

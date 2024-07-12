@@ -16,6 +16,7 @@ option(IMGUI 		"Include GUI" OFF)
 option(TRACY 		"Include Tracy" OFF)
 option(SANITIZE 	"Use address sanitizer" OFF)
 option(ANDROID		"Build for android" OFF)
+option(OPTIMIZE		"Optimize a lot" OFF)
 #CMAKE_BUILD_TYPE Release Debug
 
 if(CHECKS STREQUAL ON)
@@ -165,7 +166,9 @@ if (ANDROID)
 
 	add_library(${BUILD_NAME} SHARED ${SRC})
 
-	target_link_libraries(${BUILD_NAME} PUBLIC SDL3::SDL3) # SDL3_image::SDL3_image)
+	target_compile_options(${BUILD_NAME} PRIVATE -DGLES)
+
+	target_link_libraries(${BUILD_NAME} PUBLIC SDL3::SDL3)
 elseif(MACOSX)
 	message("Building for MacOS")
 	find_package(OpenGL REQUIRED)
@@ -214,7 +217,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID)
 endif()
 
 # Strip debug symbols
-if(NOT DEBUG AND NOT ANDROID AND NOT EMSCRIPTEN)
+if(NOT DEBUG AND NOT ANDROID AND NOT WEB)
 	if (WINDOWS)
 		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
 			COMMAND ${CMAKE_STRIP} ${BUILD_NAME}.exe)
@@ -234,15 +237,19 @@ if(MSVC)
 		target_compile_definitions(${BUILD_NAME} PRIVATE /D_DEBUG /DWIN32 /D_WINDOWS /D_DEBUG)
 	else()
 		target_compile_options(${BUILD_NAME} PRIVATE /MD /O2 /Ob2)
-		target_compile_definitions(${BUILD_NAME} PRIVATE /D_WINDOWS /DWIND32 /DNDEBUG)
+		target_compile_definitions(${BUILD_NAME} PRIVATE /D_WINDOWS /DWIND32 /DNDEBUG /DEIGEN_NO_DEBUG)
 	endif()
 else()
 	if(DEBUG)
-		target_compile_options(${BUILD_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror -g -Og)
+		target_compile_options(${BUILD_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror -g -Og -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wpointer-arith -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Waggregate-return)
 		target_compile_definitions(${BUILD_NAME} PRIVATE -D_DEBUG)
 	else()
-		target_compile_options(${BUILD_NAME} PRIVATE -O3 -ffast-math)
-		target_compile_definitions(${BUILD_NAME} PRIVATE -DNDEBUG)
+		target_compile_options(${BUILD_NAME} PRIVATE -O3)
+		target_compile_definitions(${BUILD_NAME} PRIVATE -DNDEBUG -DEIGEN_NO_DEBUG)
+	endif()
+
+	if (OPTIMIZE STREQUAL ON)
+		target_compile_options(${BUILD_NAME} PRIVATE -march=native -ffast-math -fopenmp -fno-math-errno)
 	endif()
 endif()
 
@@ -264,7 +271,7 @@ if(IMGUI STREQUAL ON AND CHECKS STREQUAL OFF)
 endif()
 
 if(WEB)
-	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -D__ANDROID__) # -sUSE_SDL_IMAGE=3)
+	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -DGLES) # -sUSE_SDL_IMAGE=3)
 	target_compile_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
 	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3) # -sUSE_SDL_IMAGE=3)
 	target_link_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
@@ -302,9 +309,9 @@ endif()
 
 #Sanitize
 if(SANITIZE STREQUAL ON)
-	message("Sanitizer emabled")
-	target_compile_options(${BUILD_NAME} PRIVATE -fsanitize=address -g -fno-omit-frame-pointer -O0)
-	target_link_options(${BUILD_NAME} PRIVATE -fsanitize=address -g -O0)
+	message("Sanitizer enabled")
+	target_compile_options(${BUILD_NAME} PRIVATE -fsanitize=address -fsanitize=leak -fsanitize=undefined --coverage -g -fno-omit-frame-pointer -O0 -fno-optimize-sibling-calls)
+	target_link_options(${BUILD_NAME} PRIVATE -fsanitize=address -fsanitize=leak -fsanitize=undefined --coverage -g -O0)
 endif()
 
 #do LTO

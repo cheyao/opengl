@@ -75,7 +75,7 @@ void Shader::set(const std::string& name, const Eigen::Affine3f& mat,
 
 void Shader::compile(const std::string& fileName, const GLenum& type, unsigned int& out) {
 	char* shaderSource = static_cast<char*>(SDL_LoadFile(fileName.c_str(), nullptr));
-#ifdef __ANDROID__
+#ifdef GLES
 	// #version 400 core
 	// to
 	// #version 300 es
