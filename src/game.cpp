@@ -101,7 +101,6 @@ Game::Game()
 	mTicks = SDL_GetTicks();
 
 	SDL_SetRelativeMouseMode(true);
-	SDL_SetWindowMouseGrab(mWindow, true);
 
 	setup();
 }
@@ -275,11 +274,19 @@ void Game::draw() {
 	Eigen::Affine3f modelMat = Eigen::Affine3f::Identity();
 	mShader->set("model", modelMat);
 
-	Eigen::Vector3f lightOrigin(cos(time) * 1.5, 1.2f, sin(time) * 1.5);
-	
-	mShader->set("objectColor", 1.0f, 0.5f, 0.31f);
-	mShader->set("lightColor", 1.0f, 1.0f, 1.0f);
+	const Eigen::Vector3f lightOrigin(cos(time) * 1.5, 1.2f, sin(time) * 1.5);
+
 	mShader->set("aLightPos", lightOrigin);
+
+	Eigen::Vector3f lightColor(2.0f, 0.7f, 1.3f);
+	mShader->set("light.ambient", lightColor * 0.1f);
+	mShader->set("light.diffuse", lightColor * 0.5f);
+	mShader->set("light.specular", 1.0f, 1.0f, 1.0f);
+
+	mShader->set("material.ambient", 1.0f, 0.5f, 0.31f);
+	mShader->set("material.diffuse", 1.0f, 0.5f, 0.31f);
+	mShader->set("material.specular", 0.5f, 0.5f, 0.5f);
+	mShader->set("material.shininess", 32.0f);
 
 	glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
 
@@ -292,6 +299,7 @@ void Game::draw() {
 	mSourceShader->set("view", mView);
 	mSourceShader->set("proj", mProjection);
 	mSourceShader->set("model", modelMat);
+	mSourceShader->set("aColor", lightColor);
 
 	glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
 
