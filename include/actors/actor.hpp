@@ -40,7 +40,7 @@ class Actor {
 		return mRotation.toRotationMatrix() * Eigen::Vector3f::UnitX();
 	}
 	Eigen::Vector3f getRight() const {
-		return mRotation.toRotationMatrix() * Eigen::Vector3f::UnitY();
+		return mRotation.toRotationMatrix() * Eigen::Vector3f::UnitZ();
 	}
 
 
@@ -52,6 +52,7 @@ class Actor {
 
 	Eigen::Vector3f mPosition;
 	Eigen::Quaternionf mRotation;
+	// TODO: Roll pitch yaw
 	float mScale;
 
 	class Game* mGame;

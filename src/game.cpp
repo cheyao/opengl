@@ -5,10 +5,12 @@
 #include "managers/glmanager.hpp"
 #include "managers/textureManager.hpp"
 #include "opengl/shader.hpp"
-#include "opengl/texture.hpp"
 #include "opengl/vertexArray.hpp"
+#include "third_party/Eigen/src/Core/Matrix.h"
 #include "utils.hpp"
 
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_mouse.h>
 #include <cstdint>
 #include <third_party/Eigen/Dense>
@@ -109,29 +111,31 @@ void Game::setup() {
 
 	glEnable(GL_DEPTH_TEST);
 
-	float vertices[] = {-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,	-0.5f, -0.5f, 1.0f, 0.0f,
-						0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,	0.5f,  -0.5f, 1.0f, 1.0f,
-						-0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+	float vertices[] = {
+		-0.5f, -0.5f, -0.5f, 0.0f,	0.0f,  -1.0f, 0.5f,	 -0.5f, -0.5f, 0.0f,  0.0f,	 -1.0f,
+		0.5f,  0.5f,  -0.5f, 0.0f,	0.0f,  -1.0f, 0.5f,	 0.5f,	-0.5f, 0.0f,  0.0f,	 -1.0f,
+		-0.5f, 0.5f,  -0.5f, 0.0f,	0.0f,  -1.0f, -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,	 -1.0f,
 
-						-0.5f, -0.5f, 0.5f,	 0.0f, 0.0f, 0.5f,	-0.5f, 0.5f,  1.0f, 0.0f,
-						0.5f,  0.5f,  0.5f,	 1.0f, 1.0f, 0.5f,	0.5f,  0.5f,  1.0f, 1.0f,
-						-0.5f, 0.5f,  0.5f,	 0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, 0.5f,	 0.0f,	0.0f,  1.0f,  0.5f,	 -0.5f, 0.5f,  0.0f,  0.0f,	 1.0f,
+		0.5f,  0.5f,  0.5f,	 0.0f,	0.0f,  1.0f,  0.5f,	 0.5f,	0.5f,  0.0f,  0.0f,	 1.0f,
+		-0.5f, 0.5f,  0.5f,	 0.0f,	0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,	 1.0f,
 
-						-0.5f, 0.5f,  0.5f,	 1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f,
-						-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-						-0.5f, -0.5f, 0.5f,	 0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, 0.5f,  0.5f,	 -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,	-0.5f, -1.0f, 0.0f,	 0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,	 0.0f,
+		-0.5f, -0.5f, 0.5f,	 -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,	0.5f,  -1.0f, 0.0f,	 0.0f,
 
-						0.5f,  0.5f,  0.5f,	 1.0f, 0.0f, 0.5f,	0.5f,  -0.5f, 1.0f, 1.0f,
-						0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,	-0.5f, -0.5f, 0.0f, 1.0f,
-						0.5f,  -0.5f, 0.5f,	 0.0f, 0.0f, 0.5f,	0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,	 1.0f,	0.0f,  0.0f,  0.5f,	 0.5f,	-0.5f, 1.0f,  0.0f,	 0.0f,
+		0.5f,  -0.5f, -0.5f, 1.0f,	0.0f,  0.0f,  0.5f,	 -0.5f, -0.5f, 1.0f,  0.0f,	 0.0f,
+		0.5f,  -0.5f, 0.5f,	 1.0f,	0.0f,  0.0f,  0.5f,	 0.5f,	0.5f,  1.0f,  0.0f,	 0.0f,
 
-						-0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,	-0.5f, -0.5f, 1.0f, 1.0f,
-						0.5f,  -0.5f, 0.5f,	 1.0f, 0.0f, 0.5f,	-0.5f, 0.5f,  1.0f, 0.0f,
-						-0.5f, -0.5f, 0.5f,	 0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f,	-1.0f, 0.0f,  0.5f,	 -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
+		0.5f,  -0.5f, 0.5f,	 0.0f,	-1.0f, 0.0f,  0.5f,	 -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,
+		-0.5f, -0.5f, 0.5f,	 0.0f,	-1.0f, 0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
 
-						-0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,	0.5f,  -0.5f, 1.0f, 1.0f,
-						0.5f,  0.5f,  0.5f,	 1.0f, 0.0f, 0.5f,	0.5f,  0.5f,  1.0f, 0.0f,
-						-0.5f, 0.5f,  0.5f,	 0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
+		-0.5f, 0.5f,  -0.5f, 0.0f,	1.0f,  0.0f,  0.5f,	 0.5f,	-0.5f, 0.0f,  1.0f,	 0.0f,
+		0.5f,  0.5f,  0.5f,	 0.0f,	1.0f,  0.0f,  0.5f,	 0.5f,	0.5f,  0.0f,  1.0f,	 0.0f,
+		-0.5f, 0.5f,  0.5f,	 0.0f,	1.0f,  0.0f,  -0.5f, 0.5f,	-0.5f, 0.0f,  1.0f,	 0.0f};
+
 	unsigned int indices[] = {
 		0,	1,	2,	3,	4,	5,	6,	7,	8,	9,	10, 11, 12, 13, 14, 15, 16, 17,
 		18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
@@ -140,9 +144,8 @@ void Game::setup() {
 	mVertex = new VertexArray(vertices, sizeof(vertices) / sizeof(vertices[0]), indices,
 							  sizeof(indices) / sizeof(indices[0]));
 	mShader = new Shader(fullPath("shaders/basic.vert"), fullPath("shaders/basic.frag"));
+	mSourceShader = new Shader(fullPath("shaders/basic.vert"), fullPath("shaders/light.frag"));
 	mShader->activate();
-	mShader->set("box", 0);
-	mShader->set("face", 1);
 
 	new Player(this);
 
@@ -259,34 +262,38 @@ void Game::draw() {
 	/*mCamera->view(Eigen::Vector3f(x, 0.0f, z), Eigen::Vector3f(0.0f, 0.0f, 0.0f),*/
 	/*			  Eigen::Vector3f(0.0f, 1.0f, 0.0f));*/
 
-	Eigen::Vector3f cubePositions[] = {
-		Eigen::Vector3f(0.0f, 0.0f, 0.0f),	  Eigen::Vector3f(2.0f, 5.0f, -15.0f),
-		Eigen::Vector3f(-1.5f, -2.2f, -2.5f), Eigen::Vector3f(-3.8f, -2.0f, -12.3f),
-		Eigen::Vector3f(2.4f, -0.4f, -3.5f),  Eigen::Vector3f(-1.7f, 3.0f, -7.5f),
-		Eigen::Vector3f(1.3f, -2.0f, -2.5f),  Eigen::Vector3f(1.5f, 2.0f, -2.5f),
-		Eigen::Vector3f(1.5f, 0.2f, -1.5f),	  Eigen::Vector3f(-1.3f, 1.0f, -1.5f)};
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	float time = static_cast<float>(SDL_GetTicks()) / 1000;
 
 	mShader->activate();
 	mVertex->activate();
 
-	mTextures->get("container.png")->activate(0);
-	mTextures->get("face.png")->activate(1);
-
 	mShader->set("view", mView);
 	mShader->set("proj", mProjection);
 
-	for (auto i = 0; i < 10; ++i) {
-		Eigen::Affine3f modelMat = Eigen::Affine3f::Identity();
-		modelMat.translate(cubePositions[i]);
-		if (i % 3 == 0) {
-			modelMat.rotate(Eigen::AngleAxisf(static_cast<float>(SDL_GetTicks()) / 1000,
-											  Eigen::Vector3f(0.5f, 1.0f, 0.0f).normalized()));
-		}
-		mShader->set("model", modelMat);
-		glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
-	}
+	Eigen::Affine3f modelMat = Eigen::Affine3f::Identity();
+	mShader->set("model", modelMat);
+
+	Eigen::Vector3f lightOrigin(cos(time) * 1.5, 1.2f, sin(time) * 1.5);
+	
+	mShader->set("objectColor", 1.0f, 0.5f, 0.31f);
+	mShader->set("lightColor", 1.0f, 1.0f, 1.0f);
+	mShader->set("aLightPos", lightOrigin);
+
+	glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
+
+	mSourceShader->activate();
+
+	modelMat.setIdentity();
+	modelMat.translate(lightOrigin);
+	modelMat.scale(0.2f);
+
+	mSourceShader->set("view", mView);
+	mSourceShader->set("proj", mProjection);
+	mSourceShader->set("model", modelMat);
+
+	glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
 
 #ifdef IMGUI
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -307,6 +314,14 @@ int Game::event(const SDL_Event& event) {
 
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED: {
 			if (event.window.windowID == SDL_GetWindowID(mWindow)) {
+				return 1;
+			}
+
+			break;
+		}
+
+		case SDL_EVENT_KEY_DOWN: {
+			if (event.key.key == SDLK_ESCAPE) {
 				return 1;
 			}
 
@@ -366,6 +381,7 @@ Game::~Game() {
 	}
 
 	delete mShader;
+	delete mSourceShader;
 	delete mVertex;
 	delete mTextures;
 	delete mGL;

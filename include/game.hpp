@@ -41,6 +41,7 @@ class Game {
 	class TextureManager* mTextures;
 
 	class Shader* mShader;
+	class Shader* mSourceShader;
 	class VertexArray* mVertex;
 
 	std::vector<class Actor*> mActors;

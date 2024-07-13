@@ -68,6 +68,15 @@ void Shader::set(const std::string& name, const float& val, const float& val2) c
 	glUniform2f(getUniform(name), val, val2);
 }
 
+void Shader::set(const std::string& name, const float& val, const float& val2,
+				 const float& val3) const {
+	glUniform3f(getUniform(name), val, val2, val3);
+}
+
+void Shader::set(const std::string& name, const Eigen::Vector3f& val) const {
+	glUniform3f(getUniform(name), val.x(), val.y(), val.z());
+}
+
 void Shader::set(const std::string& name, const Eigen::Affine3f& mat,
 				 const GLboolean& transpose) const {
 	glUniformMatrix4fv(getUniform(name), 1, transpose, mat.data());

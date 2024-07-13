@@ -12,8 +12,11 @@ public:
 	/*~Player();*/
 
 	void actorInput(const uint8_t* keystate) override;
+	void updateActor(float delta) override;
 
 private:
 	class MovementComponent* mMoveComp;
+
+	int move;
 };
 

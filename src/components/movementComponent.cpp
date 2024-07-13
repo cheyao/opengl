@@ -4,7 +4,6 @@
 #include "components/component.hpp"
 #include "third_party/Eigen/src/Geometry/Quaternion.h"
 #include "utils.hpp"
-#include <iostream>
 
 MovementComponent::MovementComponent(class Actor* owner, int updateOrder)
 	: Component(owner, updateOrder), mAngularSpeed(0.0f), mForwardSpeed(0.0f) {}
@@ -18,10 +17,10 @@ void MovementComponent::update(float delta) {
 		mOwner->setRotation(out.normalized());
 	}
 
-	if (!nearZero(mForwardSpeed) /* || !nearZero(mStrafeSpeed) */) {
+	if (!nearZero(mForwardSpeed)  || !nearZero(mStrafeSpeed) ) {
 		Eigen::Vector3f pos = mOwner->getPosition();
 		pos += mOwner->getForward() * mForwardSpeed * delta;
-		// pos += mOwner->getRight() * mStrafeSpeed * delta;
+		pos += mOwner->getRight() * mStrafeSpeed * delta;
 		mOwner->setPosition(pos);
 	}
 }

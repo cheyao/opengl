@@ -12,14 +12,18 @@ class MovementComponent : public Component {
 
 	void update(float delta) override;
 	
-	float GetAngularSpeed() const { return mAngularSpeed; }
-	void setAngularSpeed(float speed) { mAngularSpeed = speed; }
+	float getAngularSpeed() const { return mAngularSpeed; }
+	void setAngularSpeed(const float speed) { mAngularSpeed = speed; }
 
-	float GetForwardSpeed() const { return mForwardSpeed; }
-	void setForwardSpeed(float speed) { mForwardSpeed = speed; }
+	float getForwardSpeed() const { return mForwardSpeed; }
+	void setForwardSpeed(const float speed) { mForwardSpeed = speed; }
+
+	float getStrafeSpeed() const { return mStrafeSpeed; }
+	void setStrafeSpeed(const float speed) { mStrafeSpeed = speed; }
 
   private:
 	float mAngularSpeed;
 	float mForwardSpeed;
+	float mStrafeSpeed;
 };
 

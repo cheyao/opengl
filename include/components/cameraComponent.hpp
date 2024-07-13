@@ -23,5 +23,6 @@ class CameraComponent : public Component {
 	Eigen::Affine3f mViewMatrix;
 	Eigen::Affine3f mProjectionMatrix;
 
+  private:
 	float mFOV;
 };
