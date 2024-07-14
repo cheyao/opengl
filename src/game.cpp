@@ -5,6 +5,7 @@
 #include "managers/glmanager.hpp"
 #include "managers/textureManager.hpp"
 #include "opengl/shader.hpp"
+#include "opengl/texture.hpp"
 #include "opengl/vertexArray.hpp"
 #include "third_party/Eigen/src/Core/Matrix.h"
 #include "utils.hpp"
@@ -111,29 +112,36 @@ void Game::setup() {
 	glEnable(GL_DEPTH_TEST);
 
 	float vertices[] = {
-		-0.5f, -0.5f, -0.5f, 0.0f,	0.0f,  -1.0f, 0.5f,	 -0.5f, -0.5f, 0.0f,  0.0f,	 -1.0f,
-		0.5f,  0.5f,  -0.5f, 0.0f,	0.0f,  -1.0f, 0.5f,	 0.5f,	-0.5f, 0.0f,  0.0f,	 -1.0f,
-		-0.5f, 0.5f,  -0.5f, 0.0f,	0.0f,  -1.0f, -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,	 -1.0f,
+		// positions          // normals           // texture coords
+		-0.5f, -0.5f, -0.5f, 0.0f,	0.0f,  -1.0f, 0.0f,	 0.0f,	0.5f,  -0.5f, -0.5f, 0.0f,
+		0.0f,  -1.0f, 1.0f,	 0.0f,	0.5f,  0.5f,  -0.5f, 0.0f,	0.0f,  -1.0f, 1.0f,	 1.0f,
+		0.5f,  0.5f,  -0.5f, 0.0f,	0.0f,  -1.0f, 1.0f,	 1.0f,	-0.5f, 0.5f,  -0.5f, 0.0f,
+		0.0f,  -1.0f, 0.0f,	 1.0f,	-0.5f, -0.5f, -0.5f, 0.0f,	0.0f,  -1.0f, 0.0f,	 0.0f,
 
-		-0.5f, -0.5f, 0.5f,	 0.0f,	0.0f,  1.0f,  0.5f,	 -0.5f, 0.5f,  0.0f,  0.0f,	 1.0f,
-		0.5f,  0.5f,  0.5f,	 0.0f,	0.0f,  1.0f,  0.5f,	 0.5f,	0.5f,  0.0f,  0.0f,	 1.0f,
-		-0.5f, 0.5f,  0.5f,	 0.0f,	0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,	 1.0f,
+		-0.5f, -0.5f, 0.5f,	 0.0f,	0.0f,  1.0f,  0.0f,	 0.0f,	0.5f,  -0.5f, 0.5f,	 0.0f,
+		0.0f,  1.0f,  1.0f,	 0.0f,	0.5f,  0.5f,  0.5f,	 0.0f,	0.0f,  1.0f,  1.0f,	 1.0f,
+		0.5f,  0.5f,  0.5f,	 0.0f,	0.0f,  1.0f,  1.0f,	 1.0f,	-0.5f, 0.5f,  0.5f,	 0.0f,
+		0.0f,  1.0f,  0.0f,	 1.0f,	-0.5f, -0.5f, 0.5f,	 0.0f,	0.0f,  1.0f,  0.0f,	 0.0f,
 
-		-0.5f, 0.5f,  0.5f,	 -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,	-0.5f, -1.0f, 0.0f,	 0.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,	 0.0f,
-		-0.5f, -0.5f, 0.5f,	 -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,	0.5f,  -1.0f, 0.0f,	 0.0f,
+		-0.5f, 0.5f,  0.5f,	 -1.0f, 0.0f,  0.0f,  1.0f,	 0.0f,	-0.5f, 0.5f,  -0.5f, -1.0f,
+		0.0f,  0.0f,  1.0f,	 1.0f,	-0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f,	 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f,	 1.0f,	-0.5f, -0.5f, 0.5f,	 -1.0f,
+		0.0f,  0.0f,  0.0f,	 0.0f,	-0.5f, 0.5f,  0.5f,	 -1.0f, 0.0f,  0.0f,  1.0f,	 0.0f,
 
-		0.5f,  0.5f,  0.5f,	 1.0f,	0.0f,  0.0f,  0.5f,	 0.5f,	-0.5f, 1.0f,  0.0f,	 0.0f,
-		0.5f,  -0.5f, -0.5f, 1.0f,	0.0f,  0.0f,  0.5f,	 -0.5f, -0.5f, 1.0f,  0.0f,	 0.0f,
-		0.5f,  -0.5f, 0.5f,	 1.0f,	0.0f,  0.0f,  0.5f,	 0.5f,	0.5f,  1.0f,  0.0f,	 0.0f,
+		0.5f,  0.5f,  0.5f,	 1.0f,	0.0f,  0.0f,  1.0f,	 0.0f,	0.5f,  0.5f,  -0.5f, 1.0f,
+		0.0f,  0.0f,  1.0f,	 1.0f,	0.5f,  -0.5f, -0.5f, 1.0f,	0.0f,  0.0f,  0.0f,	 1.0f,
+		0.5f,  -0.5f, -0.5f, 1.0f,	0.0f,  0.0f,  0.0f,	 1.0f,	0.5f,  -0.5f, 0.5f,	 1.0f,
+		0.0f,  0.0f,  0.0f,	 0.0f,	0.5f,  0.5f,  0.5f,	 1.0f,	0.0f,  0.0f,  1.0f,	 0.0f,
 
-		-0.5f, -0.5f, -0.5f, 0.0f,	-1.0f, 0.0f,  0.5f,	 -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
-		0.5f,  -0.5f, 0.5f,	 0.0f,	-1.0f, 0.0f,  0.5f,	 -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,
-		-0.5f, -0.5f, 0.5f,	 0.0f,	-1.0f, 0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f,	-1.0f, 0.0f,  0.0f,	 1.0f,	0.5f,  -0.5f, -0.5f, 0.0f,
+		-1.0f, 0.0f,  1.0f,	 1.0f,	0.5f,  -0.5f, 0.5f,	 0.0f,	-1.0f, 0.0f,  1.0f,	 0.0f,
+		0.5f,  -0.5f, 0.5f,	 0.0f,	-1.0f, 0.0f,  1.0f,	 0.0f,	-0.5f, -0.5f, 0.5f,	 0.0f,
+		-1.0f, 0.0f,  0.0f,	 0.0f,	-0.5f, -0.5f, -0.5f, 0.0f,	-1.0f, 0.0f,  0.0f,	 1.0f,
 
-		-0.5f, 0.5f,  -0.5f, 0.0f,	1.0f,  0.0f,  0.5f,	 0.5f,	-0.5f, 0.0f,  1.0f,	 0.0f,
-		0.5f,  0.5f,  0.5f,	 0.0f,	1.0f,  0.0f,  0.5f,	 0.5f,	0.5f,  0.0f,  1.0f,	 0.0f,
-		-0.5f, 0.5f,  0.5f,	 0.0f,	1.0f,  0.0f,  -0.5f, 0.5f,	-0.5f, 0.0f,  1.0f,	 0.0f};
+		-0.5f, 0.5f,  -0.5f, 0.0f,	1.0f,  0.0f,  0.0f,	 1.0f,	0.5f,  0.5f,  -0.5f, 0.0f,
+		1.0f,  0.0f,  1.0f,	 1.0f,	0.5f,  0.5f,  0.5f,	 0.0f,	1.0f,  0.0f,  1.0f,	 0.0f,
+		0.5f,  0.5f,  0.5f,	 0.0f,	1.0f,  0.0f,  1.0f,	 0.0f,	-0.5f, 0.5f,  0.5f,	 0.0f,
+		1.0f,  0.0f,  0.0f,	 0.0f,	-0.5f, 0.5f,  -0.5f, 0.0f,	1.0f,  0.0f,  0.0f,	 1.0f};
 
 	unsigned int indices[] = {
 		0,	1,	2,	3,	4,	5,	6,	7,	8,	9,	10, 11, 12, 13, 14, 15, 16, 17,
@@ -255,15 +263,10 @@ void Game::draw() {
 	ImGui::Render();
 #endif
 
-	/*const float radius = 10.0f;*/
-	/*float x = sin(static_cast<float>(SDL_GetTicks()) / 1000) * radius;*/
-	/*float z = cos(static_cast<float>(SDL_GetTicks()) / 1000) * radius;*/
-	/*mCamera->view(Eigen::Vector3f(x, 0.0f, z), Eigen::Vector3f(0.0f, 0.0f, 0.0f),*/
-	/*			  Eigen::Vector3f(0.0f, 1.0f, 0.0f));*/
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	float time = static_cast<float>(SDL_GetTicks()) / 1000;
+	time = 0;
 
 	mShader->activate();
 	mVertex->activate();
@@ -278,15 +281,17 @@ void Game::draw() {
 
 	mShader->set("aLightPos", lightOrigin);
 
-	Eigen::Vector3f lightColor(2.0f, 0.7f, 1.3f);
-	mShader->set("light.ambient", lightColor * 0.1f);
-	mShader->set("light.diffuse", lightColor * 0.5f);
+	mShader->set("light.ambient", 0.2f, 0.2f, 0.2f);
+	mShader->set("light.diffuse", 0.5f, 0.5f, 0.5f);
 	mShader->set("light.specular", 1.0f, 1.0f, 1.0f);
 
-	mShader->set("material.ambient", 1.0f, 0.5f, 0.31f);
-	mShader->set("material.diffuse", 1.0f, 0.5f, 0.31f);
-	mShader->set("material.specular", 0.5f, 0.5f, 0.5f);
-	mShader->set("material.shininess", 32.0f);
+	mShader->set("material.diffuse", 0);
+	mTextures->get("container2.png")->activate(0);
+	mShader->set("material.specular", 1);
+	mTextures->get("container2_specular.png")->activate(1);
+	mShader->set("material.emission", 2);
+	mTextures->get("matrix.jpg")->activate(2);
+	mShader->set("material.shininess", 64.0f);
 
 	glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
 
@@ -299,7 +304,7 @@ void Game::draw() {
 	mSourceShader->set("view", mView);
 	mSourceShader->set("proj", mProjection);
 	mSourceShader->set("model", modelMat);
-	mSourceShader->set("aColor", lightColor);
+	mSourceShader->set("aColor", 1.0f, 1.0f, 1.0f);
 
 	glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
 
