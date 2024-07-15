@@ -17,7 +17,7 @@ Texture::Texture(const std::string& path, const bool& flip) : name(path) {
 	[[unlikely]] if (source == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to read shader shource: %s\n",
 						path.c_str());
-		ERROR_BOX("Failed to read assets");
+		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have enough memory");
 
 		throw 1;
 	}
@@ -33,14 +33,6 @@ Texture::Texture(const std::string& path, const bool& flip) : name(path) {
 	}
 
 	SDL_Log("Loaded texture %s: %d channels %dx%d", path.c_str(), channels, width, height);
-
-	glGenTextures(1, &mID);
-	glBindTexture(GL_TEXTURE_2D, mID);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	GLenum format;
 	switch (channels) {
@@ -59,8 +51,16 @@ Texture::Texture(const std::string& path, const bool& flip) : name(path) {
 			throw 1;
 	}
 
+	glGenTextures(1, &mID);
+	glBindTexture(GL_TEXTURE_2D, mID);
+
 	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	SDL_free(source);
 	stbi_image_free(data);

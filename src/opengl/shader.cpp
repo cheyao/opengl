@@ -77,6 +77,14 @@ void Shader::set(const std::string& name, const Eigen::Vector3f& val) const {
 	glUniform3f(getUniform(name), val.x(), val.y(), val.z());
 }
 
+void Shader::set(const std::string& name, const Eigen::Vector3f& val, const float& val2) const {
+	glUniform4f(getUniform(name), val.x(), val.y(), val.z(), val2);
+}
+
+void Shader::set(const std::string& name, const Eigen::Vector4f& val) const {
+	glUniform4f(getUniform(name), val.x(), val.y(), val.z(), val.w());
+}
+
 void Shader::set(const std::string& name, const Eigen::Affine3f& mat,
 				 const GLboolean& transpose) const {
 	glUniformMatrix4fv(getUniform(name), 1, transpose, mat.data());
@@ -115,13 +123,14 @@ void Shader::compile(const std::string& fileName, const GLenum& type, unsigned i
 	[[unlikely]] if (!success) {
 		int len = 0;
 		glGetShaderiv(out, GL_INFO_LOG_LENGTH, &len);
-		std::string log;
-		log.resize(len);
+		GLchar* log = new GLchar[len + 1];
 
-		glGetShaderInfoLog(out, len, nullptr, &log[0]);
+		glGetShaderInfoLog(out, len * sizeof(GLchar), nullptr, &log[0]);
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to compile shader %s: %s\n",
-						fileName.c_str(), log.c_str());
+						fileName.c_str(), log);
 		ERROR_BOX("Failed to compile vertex shader");
+
+		delete[] log;
 
 		throw 1;
 	}

@@ -17,6 +17,7 @@ CameraComponent::CameraComponent(Actor* owner, int priority)
 	Eigen::Quaternionf dir = mOwner->getRotation();
 	Eigen::AngleAxisf rot(toRadians(90), Eigen::Vector3f::UnitY());
 	mOwner->setRotation(dir * rot);
+	mOwner->getGame()->setCamera(this);
 };
 
 CameraComponent::~CameraComponent() {}
@@ -28,16 +29,10 @@ void CameraComponent::update(float delta) {
 	Eigen::Quaternionf dir = mOwner->getRotation();
 	Eigen::AngleAxisf rot(-(x / 50) * delta, Eigen::Vector3f::UnitY());
 	Eigen::AngleAxisf yaw(-(y / 50) * delta, Eigen::Vector3f::UnitZ());
-	// Eigen::Quaternionf newDir = dir * rot * yaw;
-	// dir.w() += cos(toRadians(x) / 2);
-	// dir.y() += sin(toRadians(x) / 2);
 	mOwner->setRotation(dir * rot * yaw);
 
 	project();
 	view();
-
-	mOwner->getGame()->mView = mViewMatrix;
-	mOwner->getGame()->mProjection = mProjectionMatrix;
 
 	(void)delta;
 }

@@ -26,8 +26,7 @@ class Game {
 	int getWidth() { return mWidth; }
 	int getHeight() { return mHeight; }
 
-	Eigen::Affine3f mView;
-	Eigen::Affine3f mProjection;
+	void setCamera(class CameraComponent* camera) { mCamera = camera; }
 
   private:
 	void input();
@@ -39,10 +38,11 @@ class Game {
 	struct SDL_Window* mWindow;
 	class GLManager* mGL;
 	class TextureManager* mTextures;
+	class ShaderManager* mShaders;
 
-	class Shader* mShader;
-	class Shader* mSourceShader;
 	class VertexArray* mVertex;
+
+	class CameraComponent* mCamera;
 
 	std::vector<class Actor*> mActors;
 	std::vector<class Actor*> mPendingActors;

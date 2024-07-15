@@ -17,6 +17,7 @@ option(TRACY 		"Include Tracy" OFF)
 option(SANITIZE 	"Use address sanitizer" OFF)
 option(ANDROID		"Build for android" OFF)
 option(OPTIMIZE		"Optimize a lot" OFF)
+option(MOLD			"Use mold" OFF)
 #CMAKE_BUILD_TYPE Release Debug
 
 if(CHECKS STREQUAL ON)
@@ -46,7 +47,8 @@ src/opengl/shader.cpp
 src/opengl/texture.cpp
 src/opengl/vertexArray.cpp
 
-src/managers/glmanager.cpp
+src/managers/glManager.cpp
+src/managers/shaderManager.cpp
 src/managers/textureManager.cpp
 
 src/actors/actor.cpp
@@ -64,7 +66,8 @@ include/opengl/shader.hpp
 include/opengl/texture.hpp
 include/opengl/vertexArray.hpp
 
-include/managers/glmanager.hpp
+include/managers/glManager.hpp
+include/managers/shaderManager.hpp
 include/managers/textureManager.hpp
 
 include/actors/actor.hpp
@@ -131,10 +134,6 @@ elseif(EMSCRIPTEN)
 else()
 	set(BUILD_NAME ${PROJECT_NAME})
 endif()
-
-#Check LTO
-include(CheckIPOSupported)
-check_ipo_supported(RESULT LTOSupported OUTPUT error)
 
 include_directories(include)
 
@@ -213,7 +212,7 @@ else()
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID)
-	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -stdlib=libc++)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif()
 
 # Strip debug symbols
@@ -234,23 +233,27 @@ endif()
 if(MSVC)
 	if(DEBUG)
 		target_compile_options(${BUILD_NAME} PRIVATE /W4 /WX /MDd /Zi /Ob0 /Od /RTC1 /W3 /GR /EHsc)
-		target_compile_definitions(${BUILD_NAME} PRIVATE /D_DEBUG /DWIN32 /D_WINDOWS /D_DEBUG)
+		target_compile_definitions(${BUILD_NAME} PRIVATE /DWIN32 /D_WINDOWS /DDEBUG /D_DEBUG)
 	else()
 		target_compile_options(${BUILD_NAME} PRIVATE /MD /O2 /Ob2)
-		target_compile_definitions(${BUILD_NAME} PRIVATE /D_WINDOWS /DWIND32 /DNDEBUG /DEIGEN_NO_DEBUG)
+		target_compile_definitions(${BUILD_NAME} PRIVATE /D_WINDOWS /DWIND32 /DEIGEN_NO_DEBUG)
 	endif()
 else()
 	if(DEBUG)
 		target_compile_options(${BUILD_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror -g -Og -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wpointer-arith -Wstrict-prototypes -Wstrict-overflow=5 -Wwrite-strings -Waggregate-return)
-		target_compile_definitions(${BUILD_NAME} PRIVATE -D_DEBUG)
+		target_compile_definitions(${BUILD_NAME} PRIVATE -DDEBUG -D_DEBUG)
 	else()
 		target_compile_options(${BUILD_NAME} PRIVATE -O3)
-		target_compile_definitions(${BUILD_NAME} PRIVATE -DNDEBUG -DEIGEN_NO_DEBUG)
+		target_compile_definitions(${BUILD_NAME} PRIVATE -DEIGEN_NO_DEBUG)
 	endif()
 
 	if (OPTIMIZE STREQUAL ON)
 		target_compile_options(${BUILD_NAME} PRIVATE -march=native -ffast-math -fopenmp -fno-math-errno)
 	endif()
+endif()
+
+if(MOLD STREQUAL ON) 
+	target_link_options(${BUILD_NAME} PRIVATE -fuse-ld=mold)
 endif()
 
 if(IMGUI STREQUAL ON AND CHECKS STREQUAL OFF)
@@ -315,9 +318,14 @@ if(SANITIZE STREQUAL ON)
 endif()
 
 #do LTO
+#Check LTO
+include(CheckIPOSupported)
+check_ipo_supported(RESULT LTOSupported OUTPUT error)
+
 if(LTOSupported AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Android")
 	if(NOT DEBUG)
 		message(STATUS "IPO / LTO enabled")
+		set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 		set_property(TARGET ${BUILD_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 	endif()
 else()

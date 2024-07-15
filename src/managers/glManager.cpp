@@ -1,9 +1,19 @@
-#include "managers/glmanager.hpp"
+#include "managers/glManager.hpp"
 
 #include "third_party/glad/glad.h"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_video.h>
+
+void checkGLError(const char* stmt, const char* fname, int line) {
+	GLenum err = glGetError();
+	while (err != GL_NO_ERROR) {
+		SDL_Log("OpenGL error %d at %s:%d - for %s\n", err, fname, line, stmt);
+		err = glGetError(); // To catch multiple errors
+	}
+}
+
 
 GLManager::GLManager(SDL_Window* window) {
 #ifdef GLES
@@ -14,7 +24,11 @@ GLManager::GLManager(SDL_Window* window) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG
+#ifdef DEBUG
+												  | SDL_GL_CONTEXT_DEBUG_FLAG
+#endif
+	);
 #endif
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -46,17 +60,26 @@ GLManager::GLManager(SDL_Window* window) {
 	// Set VSync
 	SDL_GL_SetSwapInterval(1);
 
+#ifdef DEBUG
+	/*
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	*/
+#endif
+
 	SDL_GL_MakeCurrent(window, mContext);
 }
 
-GLManager::~GLManager() { SDL_GL_DeleteContext(mContext); }
+GLManager::~GLManager() { SDL_GL_DestroyContext(mContext); }
 
 void GLManager::printInfo() const {
 	SDL_Log("Vendor     : %s\n", glGetString(GL_VENDOR));
 	SDL_Log("Renderer   : %s\n", glGetString(GL_RENDERER));
 	SDL_Log("Version    : %s\n", glGetString(GL_VERSION));
 	SDL_Log("GLSL       : %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-	// SDL_Log("Extensions : %s\n", glGetString(GL_EXTENSIONS));
+#ifdef DEBUG
+	SDL_Log("Extensions : %s\n", glGetString(GL_EXTENSIONS));
+#endif
 
 	int maj;
 	int min;
@@ -74,4 +97,3 @@ void GLManager::printInfo() const {
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &nrAttributes);
 	SDL_Log("Maximum number of texture units supported: %d\n", nrAttributes);
 }
-

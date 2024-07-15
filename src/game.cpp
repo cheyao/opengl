@@ -2,7 +2,9 @@
 
 #include "actors/actor.hpp"
 #include "actors/player.hpp"
-#include "managers/glmanager.hpp"
+#include "components/cameraComponent.hpp"
+#include "managers/glManager.hpp"
+#include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
@@ -38,8 +40,8 @@ EM_JS(int, canvasResize, (), {
 #endif
 
 Game::Game()
-	: mWindow(nullptr), mGL(nullptr), mShader(nullptr), mVertex(nullptr), mUpdatingActors(false),
-	  mWidth(0), mHeight(0), mTicks(0), mBasePath() {
+	: mWindow(nullptr), mGL(nullptr), mTextures(nullptr), mShaders(nullptr), mVertex(nullptr),
+	  mUpdatingActors(false), mWidth(0), mHeight(0), mTicks(0), mBasePath() {
 	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
@@ -91,6 +93,7 @@ Game::Game()
 	}
 
 	mTextures = new TextureManager(mBasePath);
+	mShaders = new ShaderManager(mBasePath);
 
 	// TODO: Get a icon
 	/*
@@ -150,9 +153,6 @@ void Game::setup() {
 
 	mVertex = new VertexArray(vertices, sizeof(vertices) / sizeof(vertices[0]), indices,
 							  sizeof(indices) / sizeof(indices[0]));
-	mShader = new Shader(fullPath("shaders/basic.vert"), fullPath("shaders/basic.frag"));
-	mSourceShader = new Shader(fullPath("shaders/basic.vert"), fullPath("shaders/light.frag"));
-	mShader->activate();
 
 	new Player(this);
 
@@ -263,48 +263,73 @@ void Game::draw() {
 	ImGui::Render();
 #endif
 
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	float time = static_cast<float>(SDL_GetTicks()) / 1000;
-	time = 0;
+	/*float time = static_cast<float>(SDL_GetTicks()) / 1000;*/
 
-	mShader->activate();
+	Eigen::Vector4f lightPos(1.2f, 1.0f, 2.0f, 1.0f);
+
+	Shader* source = mShaders->get("basic.vert", "light.frag");
+	Shader* dest = mShaders->get("basic.vert", "basic.frag");
+
+	dest->activate();
 	mVertex->activate();
 
-	mShader->set("view", mView);
-	mShader->set("proj", mProjection);
+	dest->set("view", mCamera->mViewMatrix);
+	dest->set("proj", mCamera->mProjectionMatrix);
 
-	Eigen::Affine3f modelMat = Eigen::Affine3f::Identity();
-	mShader->set("model", modelMat);
+	// source->set("light.position", mView * lightPos); // -0.2f, -1.0f, -0.3f);
+	dest->set("viewPos", mActors[0]->getPosition());
+	dest->set("light.position", mActors[0]->getPosition());
+	dest->set("light.direction", mActors[0]->getForward());
+	dest->set("light.cutOff", cos(toRadians(12.5f)));
+	dest->set("light.outerCutOff", cos(toRadians(17.5f)));
 
-	const Eigen::Vector3f lightOrigin(cos(time) * 1.5, 1.2f, sin(time) * 1.5);
+	dest->set("light.ambient", 0.2f, 0.2f, 0.2f);
+	dest->set("light.diffuse", 0.7f, 0.7f, 0.7f);
+	dest->set("light.specular", 1.0f, 1.0f, 1.0f);
 
-	mShader->set("aLightPos", lightOrigin);
+	dest->set("light.constant", 1.0f);
+	dest->set("light.linear", 0.09f);
+	dest->set("light.quadratic", 0.032f);
 
-	mShader->set("light.ambient", 0.2f, 0.2f, 0.2f);
-	mShader->set("light.diffuse", 0.5f, 0.5f, 0.5f);
-	mShader->set("light.specular", 1.0f, 1.0f, 1.0f);
+	dest->set("material.shininess", 64.0f);
 
-	mShader->set("material.diffuse", 0);
+	dest->set("material.diffuse", 0);
 	mTextures->get("container2.png")->activate(0);
-	mShader->set("material.specular", 1);
+	dest->set("material.specular", 1);
 	mTextures->get("container2_specular.png")->activate(1);
-	mShader->set("material.emission", 2);
-	mTextures->get("matrix.jpg")->activate(2);
-	mShader->set("material.shininess", 64.0f);
 
-	glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
+	const Eigen::Vector3f cubePositions[] = {
+		Eigen::Vector3f(0.0f, 0.0f, 0.0f),	  Eigen::Vector3f(2.0f, 5.0f, -15.0f),
+		Eigen::Vector3f(-1.5f, -2.2f, -2.5f), Eigen::Vector3f(-3.8f, -2.0f, -12.3f),
+		Eigen::Vector3f(2.4f, -0.4f, -3.5f),  Eigen::Vector3f(-1.7f, 3.0f, -7.5f),
+		Eigen::Vector3f(1.3f, -2.0f, -2.5f),  Eigen::Vector3f(1.5f, 2.0f, -2.5f),
+		Eigen::Vector3f(1.5f, 0.2f, -1.5f),	  Eigen::Vector3f(-1.3f, 1.0f, -1.5f)};
 
-	mSourceShader->activate();
+	Eigen::Affine3f modelMat;
+	for (int i = 0; i < 10; ++i) {
+		modelMat.setIdentity();
+		modelMat.translate(cubePositions[i]);
+		modelMat.rotate(Eigen::AngleAxisf(toRadians(20.0f * i),
+										  Eigen::Vector3f(1.0f, 0.3f, 0.5f).normalized()));
+		source->set("model", modelMat);
+
+		glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
+	}
+
+	source->activate();
 
 	modelMat.setIdentity();
-	modelMat.translate(lightOrigin);
+	modelMat.translate(lightPos.head<3>());
 	modelMat.scale(0.2f);
 
-	mSourceShader->set("view", mView);
-	mSourceShader->set("proj", mProjection);
-	mSourceShader->set("model", modelMat);
-	mSourceShader->set("aColor", 1.0f, 1.0f, 1.0f);
+	source->set("view", mCamera->mViewMatrix);
+	source->set("proj", mCamera->mProjectionMatrix);
+
+	source->set("model", modelMat);
+	source->set("aColor", 1.0f, 1.0f, 1.0f);
 
 	glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
 
@@ -314,6 +339,8 @@ void Game::draw() {
 
 	SDL_GL_SwapWindow(mWindow);
 }
+
+bool rel = true;
 
 int Game::event(const SDL_Event& event) {
 #ifdef IMGUI
@@ -337,6 +364,14 @@ int Game::event(const SDL_Event& event) {
 			if (event.key.key == SDLK_ESCAPE) {
 				return 1;
 			}
+			if (event.key.key == SDLK_F1) {
+				rel = !rel;
+				SDL_SetRelativeMouseMode(rel);
+			}
+			if (event.key.key == SDLK_F2) {
+				mTextures->reload();
+				mShaders->reload();
+			}
 
 			break;
 		}
@@ -345,8 +380,6 @@ int Game::event(const SDL_Event& event) {
 			mWidth = event.window.data1;
 			mHeight = event.window.data2;
 			glViewport(0, 0, event.window.data1, event.window.data2);
-
-			/*mCamera->project(toRadians(45.0f), mWidth, mHeight, 0.1f, 100.0f);*/
 
 			break;
 		}
@@ -393,10 +426,9 @@ Game::~Game() {
 		delete mPendingActors.back();
 	}
 
-	delete mShader;
-	delete mSourceShader;
 	delete mVertex;
 	delete mTextures;
+	delete mShaders;
 	delete mGL;
 
 	SDL_DestroyWindow(mWindow);

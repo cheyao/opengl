@@ -9,7 +9,6 @@ public:
 	Player(const Player &) = delete;
 	Player &operator=(Player &&) = delete;
 	Player &operator=(const Player &) = delete;
-	/*~Player();*/
 
 	void actorInput(const uint8_t* keystate) override;
 	void updateActor(float delta) override;
@@ -17,6 +16,6 @@ public:
 private:
 	class MovementComponent* mMoveComp;
 
-	int move;
+	int up;
 };
 

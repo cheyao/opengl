@@ -22,7 +22,7 @@ class Actor {
 	void input(const uint8_t* keystate);
 	virtual void actorInput(const uint8_t* keystate);
 
-	class Game* getGame() { return mGame; }
+	class Game* getGame() const { return mGame; }
 
 	State getState() const { return mState; }
 	void setState(const State& state) { mState = state; }

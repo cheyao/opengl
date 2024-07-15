@@ -6,7 +6,7 @@
 
 #include <SDL3/SDL.h>
 
-Player::Player(class Game* owner) : Actor(owner), move(0) {
+Player::Player(class Game* owner) : Actor(owner), up(0) {
 	new CameraComponent(this);
 	mMoveComp = new MovementComponent(this);
 
@@ -32,16 +32,16 @@ void Player::actorInput(const uint8_t* keystate) {
 
 	SDL_Keymod mod = SDL_GetModState();
 	if (mod & SDL_KMOD_SHIFT) {
-		move = -5;
+		up = -5;
 	} else if (keystate[SDL_SCANCODE_SPACE]) {
-		move = 5;
+		up = 5;
 	} else {
-		move = 0;
+		up = 0;
 	}
 }
 
 void Player::updateActor(float delta) {
 	Eigen::Vector3f pos = getPosition();
-	pos.y() += move * delta;
+	pos.y() += up * delta;
 	setPosition(pos);
 }
