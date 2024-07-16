@@ -1,13 +1,14 @@
 #include "opengl/shader.hpp"
 #include "utils.hpp"
 
-#include <third_party/Eigen/Dense>
-#include <third_party/glad/glad.h>
+#include "third_party/Eigen/Dense"
+#include "third_party/glad/glad.h"
 
 #include <SDL3/SDL.h>
 #include <cassert>
+#include <string_view>
 
-Shader::Shader(const std::string& vertName, const std::string& fragName) {
+Shader::Shader(const std::string_view& vertName, const std::string_view& fragName) {
 	compile(vertName, GL_VERTEX_SHADER, mVertexShader);
 	compile(fragName, GL_FRAGMENT_SHADER, mFragmentShader);
 
@@ -21,12 +22,13 @@ Shader::Shader(const std::string& vertName, const std::string& fragName) {
 	[[unlikely]] if (!success) {
 		int len = 0;
 		glGetProgramiv(mShaderProgram, GL_INFO_LOG_LENGTH, &len);
-		std::string log;
-		log.resize(len);
+		GLchar* log = new GLchar[len + 1];
 
 		glGetProgramInfoLog(mShaderProgram, 512, nullptr, &log[0]);
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to link shader: %s\n", log.c_str());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to link shader: \n%s\n", log);
 		ERROR_BOX("Failed to link shader");
+
+		delete[] log;
 
 		throw 1;
 	}
@@ -40,11 +42,11 @@ Shader::~Shader() {
 
 void Shader::activate() const { glUseProgram(mShaderProgram); }
 
-int Shader::getUniform(const std::string& name) const {
-	int location = glGetUniformLocation(mShaderProgram, name.c_str());
+int Shader::getUniform(const std::string_view& name) const {
+	int location = glGetUniformLocation(mShaderProgram, name.data());
 
 	[[unlikely]] if (location == -1) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed find uniform location: %s\n", name.c_str());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed find uniform location: %s\n", name.data());
 		ERROR_BOX("Failed to find uniform location");
 		throw 1;
 	}
@@ -52,46 +54,51 @@ int Shader::getUniform(const std::string& name) const {
 	return location;
 }
 
-void Shader::set(const std::string& name, const bool& val) const {
+void Shader::set(const std::string_view& name, const bool& val) const {
 	glUniform1i(getUniform(name), static_cast<int>(val));
 }
 
-void Shader::set(const std::string& name, const int& val) const {
+void Shader::set(const std::string_view& name, const int& val) const {
 	glUniform1i(getUniform(name), val);
 }
 
-void Shader::set(const std::string& name, const float& val) const {
+void Shader::set(const std::string_view& name, const float& val) const {
 	glUniform1f(getUniform(name), val);
 }
 
-void Shader::set(const std::string& name, const float& val, const float& val2) const {
+void Shader::set(const std::string_view& name, const double& val) const {
+	glUniform1f(getUniform(name), val);
+}
+
+void Shader::set(const std::string_view& name, const float& val, const float& val2) const {
 	glUniform2f(getUniform(name), val, val2);
 }
 
-void Shader::set(const std::string& name, const float& val, const float& val2,
+void Shader::set(const std::string_view& name, const float& val, const float& val2,
 				 const float& val3) const {
 	glUniform3f(getUniform(name), val, val2, val3);
 }
 
-void Shader::set(const std::string& name, const Eigen::Vector3f& val) const {
+void Shader::set(const std::string_view& name, const Eigen::Vector3f& val) const {
 	glUniform3f(getUniform(name), val.x(), val.y(), val.z());
 }
 
-void Shader::set(const std::string& name, const Eigen::Vector3f& val, const float& val2) const {
+void Shader::set(const std::string_view& name, const Eigen::Vector3f& val,
+				 const float& val2) const {
 	glUniform4f(getUniform(name), val.x(), val.y(), val.z(), val2);
 }
 
-void Shader::set(const std::string& name, const Eigen::Vector4f& val) const {
+void Shader::set(const std::string_view& name, const Eigen::Vector4f& val) const {
 	glUniform4f(getUniform(name), val.x(), val.y(), val.z(), val.w());
 }
 
-void Shader::set(const std::string& name, const Eigen::Affine3f& mat,
+void Shader::set(const std::string_view& name, const Eigen::Affine3f& mat,
 				 const GLboolean& transpose) const {
 	glUniformMatrix4fv(getUniform(name), 1, transpose, mat.data());
 }
 
-void Shader::compile(const std::string& fileName, const GLenum& type, unsigned int& out) {
-	char* shaderSource = static_cast<char*>(SDL_LoadFile(fileName.c_str(), nullptr));
+void Shader::compile(const std::string_view& fileName, const GLenum& type, unsigned int& out) {
+	char* shaderSource = static_cast<char*>(SDL_LoadFile(fileName.data(), nullptr));
 #ifdef GLES
 	// #version 400 core
 	// to
@@ -105,12 +112,12 @@ void Shader::compile(const std::string& fileName, const GLenum& type, unsigned i
 
 	[[unlikely]] if (shaderSource == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to read shader shource: %s\n",
-						fileName.c_str());
+						fileName.data());
 		ERROR_BOX("Failed to read assets");
 
 		throw 1;
 	}
-	SDL_Log("Loading %s", fileName.c_str());
+	SDL_Log("Loading %s", fileName.data());
 
 	out = glCreateShader(type);
 	glShaderSource(out, 1, &shaderSource, nullptr);
@@ -126,8 +133,8 @@ void Shader::compile(const std::string& fileName, const GLenum& type, unsigned i
 		GLchar* log = new GLchar[len + 1];
 
 		glGetShaderInfoLog(out, len * sizeof(GLchar), nullptr, &log[0]);
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to compile shader %s: %s\n",
-						fileName.c_str(), log);
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to compile shader %s: \n%s\n",
+						fileName.data(), log);
 		ERROR_BOX("Failed to compile vertex shader");
 
 		delete[] log;

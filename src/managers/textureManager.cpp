@@ -37,8 +37,7 @@ TextureManager::~TextureManager() {
 void TextureManager::reload() {
 	for (auto& [name, texture] : mTextures) {
 #ifdef DEBUG
-		if (std::filesystem::last_write_time(mPath + name) ==
-			mLastEdit[texture]) {
+		if (std::filesystem::last_write_time(mPath + name) == mLastEdit[texture]) {
 			continue;
 		}
 #endif

@@ -17,7 +17,7 @@ void MovementComponent::update(float delta) {
 		mOwner->setRotation(out.normalized());
 	}
 
-	if (!nearZero(mForwardSpeed)  || !nearZero(mStrafeSpeed) ) {
+	if (!nearZero(mForwardSpeed) || !nearZero(mStrafeSpeed)) {
 		Eigen::Vector3f pos = mOwner->getPosition();
 		pos += mOwner->getForward() * mForwardSpeed * delta;
 		pos += mOwner->getRight() * mStrafeSpeed * delta;

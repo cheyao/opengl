@@ -28,6 +28,8 @@ class Game {
 
 	void setCamera(class CameraComponent* camera) { mCamera = camera; }
 
+	void pause() { mPaused = true; }
+
   private:
 	void input();
 	void update();
@@ -51,5 +53,7 @@ class Game {
 	int mWidth, mHeight;
 	uint64_t mTicks;
 	std::string mBasePath;
+
+	bool mPaused;
 	// TODO: Seperate draw class
 };

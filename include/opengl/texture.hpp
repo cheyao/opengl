@@ -1,10 +1,11 @@
 #pragma once
 
+#include <string_view>
 #include <string>
 
 class Texture {
   public:
-	explicit Texture(const std::string& path, const bool& flip = false);
+	explicit Texture(const std::string_view& path, const bool& flip = false);
 	Texture(Texture&&) = delete;
 	Texture(const Texture&) = delete;
 	Texture& operator=(Texture&&) = delete;

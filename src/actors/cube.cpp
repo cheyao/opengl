@@ -35,6 +35,4 @@ Cube::Cube(Game* game) : Actor(game) {
 							  sizeof(indices) / sizeof(indices[0]));
 }
 
-Cube::~Cube() {
-	delete mVertex;
-}
+Cube::~Cube() { delete mVertex; }

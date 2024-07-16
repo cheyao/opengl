@@ -41,7 +41,7 @@ EM_JS(int, canvasResize, (), {
 
 Game::Game()
 	: mWindow(nullptr), mGL(nullptr), mTextures(nullptr), mShaders(nullptr), mVertex(nullptr),
-	  mUpdatingActors(false), mWidth(0), mHeight(0), mTicks(0), mBasePath() {
+	  mUpdatingActors(false), mWidth(0), mHeight(0), mTicks(0), mBasePath(), mPaused(false) {
 	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
@@ -160,14 +160,26 @@ void Game::setup() {
 }
 
 int Game::iterate() {
+	if (mPaused) {
+		mTicks = SDL_GetTicks();
+
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		SDL_SetRelativeMouseMode(false);
+		SDL_GL_SwapWindow(mWindow);
+
+		return 0;
+	}
+
 #ifdef __EMSCRIPTEN__
 	// Web hack
 	SDL_SetWindowSize(mWindow, browserWidth(), browserHeight());
 #endif
 
+	gui();
 	input();
 	update();
-	gui();
 	draw();
 
 	return 0;
@@ -259,6 +271,16 @@ void Game::gui() {}
 #endif
 
 void Game::draw() {
+	static float shininess = 32.0f;
+
+#ifdef IMGUI
+	ImGui::Begin("Main menu");
+
+	ImGui::SliderFloat("Shininess", &shininess, -16.0f, 128.0f);
+
+	ImGui::End();
+#endif
+
 #ifdef IMGUI
 	ImGui::Render();
 #endif
@@ -279,27 +301,44 @@ void Game::draw() {
 	dest->set("view", mCamera->mViewMatrix);
 	dest->set("proj", mCamera->mProjectionMatrix);
 
-	// source->set("light.position", mView * lightPos); // -0.2f, -1.0f, -0.3f);
-	dest->set("viewPos", mActors[0]->getPosition());
-	dest->set("light.position", mActors[0]->getPosition());
-	dest->set("light.direction", mActors[0]->getForward());
-	dest->set("light.cutOff", cos(toRadians(12.5f)));
-	dest->set("light.outerCutOff", cos(toRadians(17.5f)));
+	dest->set("dirLight.direction", -0.2f, -1.0f, -0.3f);
+	dest->set("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+	dest->set("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+	dest->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
-	dest->set("light.ambient", 0.2f, 0.2f, 0.2f);
-	dest->set("light.diffuse", 0.7f, 0.7f, 0.7f);
-	dest->set("light.specular", 1.0f, 1.0f, 1.0f);
+	const Eigen::Vector3f pointLightPositions[] = {
+		Eigen::Vector3f(0.7f, 0.2f, 2.0f), Eigen::Vector3f(2.3f, -3.3f, -4.0f),
+		Eigen::Vector3f(-4.0f, 2.0f, -12.0f), Eigen::Vector3f(0.0f, 0.0f, -3.0f)};
 
-	dest->set("light.constant", 1.0f);
-	dest->set("light.linear", 0.09f);
-	dest->set("light.quadratic", 0.032f);
+	for (size_t i = 0; i < sizeof(pointLightPositions) / sizeof(pointLightPositions[0]); i++) {
+		std::string light = "pointLights[0].";
+		light[12] += i;
 
-	dest->set("material.shininess", 64.0f);
+		dest->set(light + "position", pointLightPositions[i]);
+		dest->set(light + "ambient", 0.05f, 0.05f, 0.05f);
+		dest->set(light + "diffuse", 0.8f, 0.8f, 0.8f);
+		dest->set(light + "specular", 1.0f, 1.0f, 1.0f);
+		dest->set(light + "constant", 1.0f);
+		dest->set(light + "linear", 0.09f);
+		dest->set(light + "quadratic", 0.032f);
+	}
+
+	dest->set("spotLight.position", mCamera->getOwner()->getPosition());
+	dest->set("spotLight.direction", mCamera->getOwner()->getForward());
+	dest->set("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+	dest->set("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+	dest->set("spotLight.specular", 1.0f, 1.0f, 1.0f);
+	dest->set("spotLight.constant", 1.0f);
+	dest->set("spotLight.linear", 0.09f);
+	dest->set("spotLight.quadratic", 0.032f);
+	dest->set("spotLight.cutOff", cos(toRadians(12.5f)));
+	dest->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
 
 	dest->set("material.diffuse", 0);
 	mTextures->get("container2.png")->activate(0);
 	dest->set("material.specular", 1);
 	mTextures->get("container2_specular.png")->activate(1);
+	dest->set("material.shininess", shininess);
 
 	const Eigen::Vector3f cubePositions[] = {
 		Eigen::Vector3f(0.0f, 0.0f, 0.0f),	  Eigen::Vector3f(2.0f, 5.0f, -15.0f),
@@ -321,17 +360,20 @@ void Game::draw() {
 
 	source->activate();
 
-	modelMat.setIdentity();
-	modelMat.translate(lightPos.head<3>());
-	modelMat.scale(0.2f);
-
 	source->set("view", mCamera->mViewMatrix);
 	source->set("proj", mCamera->mProjectionMatrix);
 
-	source->set("model", modelMat);
 	source->set("aColor", 1.0f, 1.0f, 1.0f);
 
-	glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
+	for (const auto& pos : pointLightPositions) {
+		modelMat.setIdentity();
+		modelMat.translate(pos);
+		modelMat.scale(0.2f);
+
+		source->set("model", modelMat);
+
+		glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
+	}
 
 #ifdef IMGUI
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -369,8 +411,17 @@ int Game::event(const SDL_Event& event) {
 				SDL_SetRelativeMouseMode(rel);
 			}
 			if (event.key.key == SDLK_F2) {
+#ifdef DEBUG
+				if (mPaused) {
+					mPaused = false;
+				}
+#endif
+
 				mTextures->reload();
 				mShaders->reload();
+			}
+			if (event.key.key == SDLK_F3) {
+				mPaused = !mPaused;
 			}
 
 			break;

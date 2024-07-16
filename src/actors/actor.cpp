@@ -6,8 +6,8 @@
 #include <cstdint>
 
 Actor::Actor(Game* owner)
-	: mState(ALIVE), mPosition(Eigen::Vector3f::Zero()), mRotation(Eigen::Quaternionf::Identity()), mScale(1.0f),
-	  mGame(owner) {
+	: mState(ALIVE), mPosition(Eigen::Vector3f::Zero()), mRotation(Eigen::Quaternionf::Identity()),
+	  mScale(1.0f), mGame(owner) {
 	mGame->addActor(this);
 }
 

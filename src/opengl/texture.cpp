@@ -7,17 +7,19 @@
 
 #include <SDL3/SDL.h>
 #include <stddef.h>
+#include <string_view>
 
-Texture::Texture(const std::string& path, const bool& flip) : name(path) {
+Texture::Texture(const std::string_view& path, const bool& flip) : name(path) {
 	stbi_set_flip_vertically_on_load(flip);
 
 	int width, height, channels;
 	size_t size;
-	unsigned char* source = static_cast<unsigned char*>(SDL_LoadFile(path.c_str(), &size));
+	unsigned char* source = static_cast<unsigned char*>(SDL_LoadFile(path.data(), &size));
 	[[unlikely]] if (source == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to read shader shource: %s\n",
-						path.c_str());
-		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have enough memory");
+						path.data());
+		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have "
+				  "enough memory");
 
 		throw 1;
 	}
@@ -26,13 +28,14 @@ Texture::Texture(const std::string& path, const bool& flip) : name(path) {
 
 	[[unlikely]] if (data == nullptr) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load texture!\n");
-		ERROR_BOX("Failed to load textures, the assets is probably corrupted or you don't have "
+		ERROR_BOX("Failed to load textures, the assets is probably corrupted or you don't "
+				  "have "
 				  "enough memory");
 
 		throw 1;
 	}
 
-	SDL_Log("Loaded texture %s: %d channels %dx%d", path.c_str(), channels, width, height);
+	SDL_Log("Loaded texture %s: %d channels %dx%d", path.data(), channels, width, height);
 
 	GLenum format;
 	switch (channels) {
@@ -45,8 +48,9 @@ Texture::Texture(const std::string& path, const bool& flip) : name(path) {
 			break;
 		[[unlikely]] default:
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s:%d Unimplemented image format: %s\n",
-						 __FILE__, __LINE__, path.c_str());
-			ERROR_BOX("Failed to recognise file color format, the assets is probably corrupted");
+						 __FILE__, __LINE__, path.data());
+			ERROR_BOX("Failed to recognise file color format, the assets is probably "
+					  "corrupted");
 
 			throw 1;
 	}

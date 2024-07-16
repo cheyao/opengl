@@ -14,7 +14,6 @@ void checkGLError(const char* stmt, const char* fname, int line) {
 	}
 }
 
-
 GLManager::GLManager(SDL_Window* window) {
 #ifdef GLES
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);

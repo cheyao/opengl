@@ -12,6 +12,8 @@
 #include <cstdlib>
 #include <ctime>
 
+bool halted = false;
+
 int SDL_AppInit(void** appstate, int argc, char** argv) {
 	(void)argc;
 	(void)argv;
@@ -33,6 +35,8 @@ int SDL_AppInit(void** appstate, int argc, char** argv) {
 		game = new Game();
 	} catch (int error) {
 		return error;
+	} catch (...) {
+		return 1;
 	}
 
 	*appstate = game;
@@ -44,7 +48,19 @@ int SDL_AppEvent(void* appstate, const SDL_Event* event) {
 	return static_cast<Game*>(appstate)->event(*event);
 }
 
-int SDL_AppIterate(void* appstate) { return static_cast<Game*>(appstate)->iterate(); }
+int SDL_AppIterate(void* appstate) {
+	try {
+		return static_cast<Game*>(appstate)->iterate();
+	} catch (...) {
+#ifdef DEBUG
+		static_cast<Game*>(appstate)->pause();
+
+		return 0;
+#else
+		return 1;
+#endif
+	}
+}
 
 void SDL_AppQuit(void* appstate) {
 	delete static_cast<Game*>(appstate);

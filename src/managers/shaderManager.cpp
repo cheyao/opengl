@@ -43,8 +43,7 @@ void ShaderManager::reload() {
 
 #ifdef DEBUG
 		if (std::max(std::filesystem::last_write_time(mPath + vert),
-					 std::filesystem::last_write_time(mPath + frag)) ==
-			mLastEdit[shader]) {
+					 std::filesystem::last_write_time(mPath + frag)) == mLastEdit[shader]) {
 			continue;
 		}
 #endif
@@ -55,7 +54,7 @@ void ShaderManager::reload() {
 
 #ifdef DEBUG
 		mLastEdit[shader] = std::max(std::filesystem::last_write_time(mPath + vert),
-									  std::filesystem::last_write_time(mPath + frag));
+									 std::filesystem::last_write_time(mPath + frag));
 #endif
 	}
 }

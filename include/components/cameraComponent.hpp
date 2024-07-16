@@ -20,6 +20,8 @@ class CameraComponent : public Component {
 	void project();
 	void view();
 
+	class Actor* getOwner() { return mOwner; }
+
 	Eigen::Affine3f mViewMatrix;
 	Eigen::Affine3f mProjectionMatrix;
 
