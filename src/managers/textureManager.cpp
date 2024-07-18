@@ -1,15 +1,16 @@
 #include "managers/textureManager.hpp"
 
 #include "opengl/texture.hpp"
+#include "utils.hpp"
 
-#include <algorithm>
 #include <unordered_map>
 
 #ifdef DEBUG
 #include <filesystem>
 #endif
 
-TextureManager::TextureManager(const std::string& path) : mPath(path + "assets/graphics/") {}
+TextureManager::TextureManager(const std::string& path)
+	: mPath(path + "assets" + SEPARATOR + "textures" + SEPARATOR) {}
 
 Texture* TextureManager::get(const std::string& name) {
 	if (mTextures.contains(name)) {

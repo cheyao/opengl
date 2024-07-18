@@ -1,12 +1,10 @@
 #pragma once
 
-#include "third_party/Eigen/Geometry"
-
 #include <cstdint>
 #include <string>
 #include <vector>
 
-#define fullPath(path) (mBasePath + "assets/" + path)
+#define fullPath(path) (mBasePath + "assets" + SEPARATOR + path)
 
 class Game {
   public:
@@ -30,6 +28,8 @@ class Game {
 
 	void pause() { mPaused = true; }
 
+	class TextureManager* getTextureManager() { return mTextures; }
+
   private:
 	void input();
 	void update();
@@ -42,9 +42,9 @@ class Game {
 	class TextureManager* mTextures;
 	class ShaderManager* mShaders;
 
-	class VertexArray* mVertex;
-
 	class CameraComponent* mCamera;
+
+	class Model* mModel;
 
 	std::vector<class Actor*> mActors;
 	std::vector<class Actor*> mPendingActors;

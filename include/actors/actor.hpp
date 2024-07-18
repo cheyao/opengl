@@ -52,7 +52,7 @@ class Actor {
 
 	Eigen::Vector3f mPosition;
 	Eigen::Quaternionf mRotation;
-	// TODO: Roll pitch yaw
+	// TODO: Fix rotation
 	float mScale;
 
 	class Game* mGame;

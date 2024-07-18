@@ -1,11 +1,13 @@
 #include "managers/shaderManager.hpp"
 
 #include "opengl/shader.hpp"
+#include "utils.hpp"
 
 #include <string>
 #include <unordered_map>
 
-ShaderManager::ShaderManager(const std::string& path) : mPath(path + "assets/shaders/") {}
+ShaderManager::ShaderManager(const std::string& path)
+	: mPath(path + "assets" + SEPARATOR + "shaders" + SEPARATOR) {}
 
 Shader* ShaderManager::get(const std::string& vert, const std::string& frag) {
 	assert(vert.find(':') == std::string::npos && frag.find(':') == std::string::npos);
@@ -46,15 +48,19 @@ void ShaderManager::reload() {
 					 std::filesystem::last_write_time(mPath + frag)) == mLastEdit[shader]) {
 			continue;
 		}
-#endif
+		try {
+			Shader* newTexture = new Shader(mPath + vert, mPath + frag);
+			delete shader;
+			shader = newTexture;
+		} catch (...) {
+		}
 
+		mLastEdit[shader] = std::max(std::filesystem::last_write_time(mPath + vert),
+									 std::filesystem::last_write_time(mPath + frag));
+#else
 		delete shader;
 		Shader* newTexture = new Shader(mPath + vert, mPath + frag);
 		shader = newTexture;
-
-#ifdef DEBUG
-		mLastEdit[shader] = std::max(std::filesystem::last_write_time(mPath + vert),
-									 std::filesystem::last_write_time(mPath + frag));
 #endif
 	}
 }

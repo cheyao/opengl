@@ -43,9 +43,10 @@ src/components/cameraComponent.cpp
 src/components/component.cpp
 src/components/movementComponent.cpp
 
+src/opengl/mesh.cpp
+src/opengl/model.cpp
 src/opengl/shader.cpp
 src/opengl/texture.cpp
-src/opengl/vertexArray.cpp
 
 src/managers/glManager.cpp
 src/managers/shaderManager.cpp
@@ -62,9 +63,11 @@ include/components/cameraComponent.hpp
 include/components/component.hpp
 include/components/movementComponent.hpp
 
+include/opengl/mesh.hpp
+include/opengl/model.hpp
 include/opengl/shader.hpp
 include/opengl/texture.hpp
-include/opengl/vertexArray.hpp
+include/opengl/types.hpp
 
 include/managers/glManager.hpp
 include/managers/shaderManager.hpp
@@ -146,10 +149,11 @@ if(NOT ANDROID)
 		
 		configure_file(cmake/index.html.in ${CMAKE_BINARY_DIR}/index.html)
 	elseif(VENDOR)
-    		add_subdirectory(external/SDL3 EXCLUDE_FROM_ALL)
+		add_subdirectory(external/SDL3 EXCLUDE_FROM_ALL)
 		# add_subdirectory(external/SDL3_image EXCLUDE_FROM_ALL)
 	else()
-    		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
+		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
+		find_package(SDL3 REQUIRED CONFIG REQUIRED)
 		# find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL3_image-shared)
 
 		if(MACOSX AND NOT DEBUG)
@@ -168,6 +172,7 @@ if (ANDROID)
 	target_compile_options(${BUILD_NAME} PRIVATE -DGLES)
 
 	target_link_libraries(${BUILD_NAME} PUBLIC SDL3::SDL3)
+	target_link_libraries(${BUILD_NAME} PUBLIC assimp::assimp)
 elseif(MACOSX)
 	message("Building for MacOS")
 	find_package(OpenGL REQUIRED)
@@ -201,6 +206,10 @@ elseif(MACOSX)
 elseif(WINDOWS)
 	message("Building for windows")
 
+	if(NOT MSVC)
+		target_compile_options(${BUILD_NAME} PRIVATE -D__WINDOWS__)
+	endif()
+
 	add_executable(${BUILD_NAME} WIN32 ${SRC})
 	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
 else()
@@ -209,6 +218,22 @@ else()
 	add_executable(${BUILD_NAME} ${SRC})
 
 	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
+endif()
+
+if (NOT ANDROID)
+	find_package(assimp REQUIRED)
+
+	if (assimp_FOUND)
+		link_directories(${ASSIMP_LIBRARY_DIR})
+		include_directories(${ASSIMP_INCLUDE_DIRS})
+		target_link_libraries (${BUILD_NAME} PRIVATE ${ASSIMP_LIBRARIES})
+		message("Found assimp: ${ASSIMP_LIBRARIES}")
+		# set(ASSIMP_LIBRARY "assimp")
+		# add_library(${ASSIMP_LIBRARY} SHARED IMPORTED)
+		# set_target_properties(${ASSIMP_LIBRARY} PROPERTIES IMPORTED_LOCATION "${ASSIMP_LIBRARY_DIRS}/libassimp.so")
+	else()
+		message(FATAL_ERROR "Assimp not found")
+	endif()
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID)
@@ -233,10 +258,10 @@ endif()
 if(MSVC)
 	if(DEBUG)
 		target_compile_options(${BUILD_NAME} PRIVATE /W4 /WX /MDd /Zi /Ob0 /Od /RTC1 /W3 /GR /EHsc)
-		target_compile_definitions(${BUILD_NAME} PRIVATE /DWIN32 /D_WINDOWS /DDEBUG /D_DEBUG)
+		target_compile_definitions(${BUILD_NAME} PRIVATE /DWIN32 /D__WINDOWS__ /DDEBUG /D_DEBUG)
 	else()
 		target_compile_options(${BUILD_NAME} PRIVATE /MD /O2 /Ob2)
-		target_compile_definitions(${BUILD_NAME} PRIVATE /D_WINDOWS /DWIND32 /DEIGEN_NO_DEBUG)
+		target_compile_definitions(${BUILD_NAME} PRIVATE /D__WINDOWS__ /DWIND32 /DEIGEN_NO_DEBUG)
 	endif()
 else()
 	if(DEBUG)
@@ -248,7 +273,7 @@ else()
 	endif()
 
 	if (OPTIMIZE STREQUAL ON)
-		target_compile_options(${BUILD_NAME} PRIVATE -march=native -ffast-math -fopenmp -fno-math-errno)
+		target_compile_options(${BUILD_NAME} PRIVATE -march=native -Ofast -fopenmp -fno-math-errno)
 	endif()
 endif()
 

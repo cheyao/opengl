@@ -6,9 +6,8 @@
 #include "managers/glManager.hpp"
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
+#include "opengl/model.hpp"
 #include "opengl/shader.hpp"
-#include "opengl/texture.hpp"
-#include "opengl/vertexArray.hpp"
 #include "third_party/Eigen/src/Core/Matrix.h"
 #include "utils.hpp"
 
@@ -40,8 +39,8 @@ EM_JS(int, canvasResize, (), {
 #endif
 
 Game::Game()
-	: mWindow(nullptr), mGL(nullptr), mTextures(nullptr), mShaders(nullptr), mVertex(nullptr),
-	  mUpdatingActors(false), mWidth(0), mHeight(0), mTicks(0), mBasePath(), mPaused(false) {
+	: mWindow(nullptr), mGL(nullptr), mTextures(nullptr), mShaders(nullptr), mUpdatingActors(false),
+	  mWidth(0), mHeight(0), mTicks(0), mBasePath(), mPaused(false) {
 	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
@@ -114,50 +113,15 @@ void Game::setup() {
 
 	glEnable(GL_DEPTH_TEST);
 
-	float vertices[] = {
-		// positions          // normals           // texture coords
-		-0.5f, -0.5f, -0.5f, 0.0f,	0.0f,  -1.0f, 0.0f,	 0.0f,	0.5f,  -0.5f, -0.5f, 0.0f,
-		0.0f,  -1.0f, 1.0f,	 0.0f,	0.5f,  0.5f,  -0.5f, 0.0f,	0.0f,  -1.0f, 1.0f,	 1.0f,
-		0.5f,  0.5f,  -0.5f, 0.0f,	0.0f,  -1.0f, 1.0f,	 1.0f,	-0.5f, 0.5f,  -0.5f, 0.0f,
-		0.0f,  -1.0f, 0.0f,	 1.0f,	-0.5f, -0.5f, -0.5f, 0.0f,	0.0f,  -1.0f, 0.0f,	 0.0f,
-
-		-0.5f, -0.5f, 0.5f,	 0.0f,	0.0f,  1.0f,  0.0f,	 0.0f,	0.5f,  -0.5f, 0.5f,	 0.0f,
-		0.0f,  1.0f,  1.0f,	 0.0f,	0.5f,  0.5f,  0.5f,	 0.0f,	0.0f,  1.0f,  1.0f,	 1.0f,
-		0.5f,  0.5f,  0.5f,	 0.0f,	0.0f,  1.0f,  1.0f,	 1.0f,	-0.5f, 0.5f,  0.5f,	 0.0f,
-		0.0f,  1.0f,  0.0f,	 1.0f,	-0.5f, -0.5f, 0.5f,	 0.0f,	0.0f,  1.0f,  0.0f,	 0.0f,
-
-		-0.5f, 0.5f,  0.5f,	 -1.0f, 0.0f,  0.0f,  1.0f,	 0.0f,	-0.5f, 0.5f,  -0.5f, -1.0f,
-		0.0f,  0.0f,  1.0f,	 1.0f,	-0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f,	 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f,	 1.0f,	-0.5f, -0.5f, 0.5f,	 -1.0f,
-		0.0f,  0.0f,  0.0f,	 0.0f,	-0.5f, 0.5f,  0.5f,	 -1.0f, 0.0f,  0.0f,  1.0f,	 0.0f,
-
-		0.5f,  0.5f,  0.5f,	 1.0f,	0.0f,  0.0f,  1.0f,	 0.0f,	0.5f,  0.5f,  -0.5f, 1.0f,
-		0.0f,  0.0f,  1.0f,	 1.0f,	0.5f,  -0.5f, -0.5f, 1.0f,	0.0f,  0.0f,  0.0f,	 1.0f,
-		0.5f,  -0.5f, -0.5f, 1.0f,	0.0f,  0.0f,  0.0f,	 1.0f,	0.5f,  -0.5f, 0.5f,	 1.0f,
-		0.0f,  0.0f,  0.0f,	 0.0f,	0.5f,  0.5f,  0.5f,	 1.0f,	0.0f,  0.0f,  1.0f,	 0.0f,
-
-		-0.5f, -0.5f, -0.5f, 0.0f,	-1.0f, 0.0f,  0.0f,	 1.0f,	0.5f,  -0.5f, -0.5f, 0.0f,
-		-1.0f, 0.0f,  1.0f,	 1.0f,	0.5f,  -0.5f, 0.5f,	 0.0f,	-1.0f, 0.0f,  1.0f,	 0.0f,
-		0.5f,  -0.5f, 0.5f,	 0.0f,	-1.0f, 0.0f,  1.0f,	 0.0f,	-0.5f, -0.5f, 0.5f,	 0.0f,
-		-1.0f, 0.0f,  0.0f,	 0.0f,	-0.5f, -0.5f, -0.5f, 0.0f,	-1.0f, 0.0f,  0.0f,	 1.0f,
-
-		-0.5f, 0.5f,  -0.5f, 0.0f,	1.0f,  0.0f,  0.0f,	 1.0f,	0.5f,  0.5f,  -0.5f, 0.0f,
-		1.0f,  0.0f,  1.0f,	 1.0f,	0.5f,  0.5f,  0.5f,	 0.0f,	1.0f,  0.0f,  1.0f,	 0.0f,
-		0.5f,  0.5f,  0.5f,	 0.0f,	1.0f,  0.0f,  1.0f,	 0.0f,	-0.5f, 0.5f,  0.5f,	 0.0f,
-		1.0f,  0.0f,  0.0f,	 0.0f,	-0.5f, 0.5f,  -0.5f, 0.0f,	1.0f,  0.0f,  0.0f,	 1.0f};
-
-	unsigned int indices[] = {
-		0,	1,	2,	3,	4,	5,	6,	7,	8,	9,	10, 11, 12, 13, 14, 15, 16, 17,
-		18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-	};
-
-	mVertex = new VertexArray(vertices, sizeof(vertices) / sizeof(vertices[0]), indices,
-							  sizeof(indices) / sizeof(indices[0]));
-
 	new Player(this);
+	mModel = new Model(fullPath("models" + SEPARATOR + "backpack.obj"), this);
 
 	SDL_Log("Successfully initialized OpenGL and game\n");
 }
+
+#ifdef DEBUG
+#include <filesystem>
+#endif
 
 int Game::iterate() {
 	if (mPaused) {
@@ -171,10 +135,19 @@ int Game::iterate() {
 
 		return 0;
 	}
-
 #ifdef __EMSCRIPTEN__
 	// Web hack
 	SDL_SetWindowSize(mWindow, browserWidth(), browserHeight());
+#endif
+
+#ifdef DEBUG
+	static std::filesystem::file_time_type last_time;
+
+	if (std::filesystem::last_write_time(fullPath("shaders")) != last_time) {
+		last_time = std::filesystem::last_write_time(fullPath("shaders"));
+
+		mShaders->reload();
+	}
 #endif
 
 	gui();
@@ -271,16 +244,6 @@ void Game::gui() {}
 #endif
 
 void Game::draw() {
-	static float shininess = 32.0f;
-
-#ifdef IMGUI
-	ImGui::Begin("Main menu");
-
-	ImGui::SliderFloat("Shininess", &shininess, -16.0f, 128.0f);
-
-	ImGui::End();
-#endif
-
 #ifdef IMGUI
 	ImGui::Render();
 #endif
@@ -288,31 +251,36 @@ void Game::draw() {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/*float time = static_cast<float>(SDL_GetTicks()) / 1000;*/
-
-	Eigen::Vector4f lightPos(1.2f, 1.0f, 2.0f, 1.0f);
-
-	Shader* source = mShaders->get("basic.vert", "light.frag");
 	Shader* dest = mShaders->get("basic.vert", "basic.frag");
-
 	dest->activate();
-	mVertex->activate();
 
 	dest->set("view", mCamera->mViewMatrix);
 	dest->set("proj", mCamera->mProjectionMatrix);
+	Eigen::Affine3f modelMat = Eigen::Affine3f::Identity();
+	dest->set("model", modelMat);
+
+	// Eigen::Vector3f(1.0f, 0.3f, 0.5f).normalized();
+
+	/*float time = static_cast<float>(SDL_GetTicks()) /
+	 * 1000;*/
+
+	Eigen::Vector4f lightPos(1.2f, 1.0f, 2.0f, 1.0f);
 
 	dest->set("dirLight.direction", -0.2f, -1.0f, -0.3f);
 	dest->set("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-	dest->set("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+	dest->set("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
 	dest->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
+	/*
 	const Eigen::Vector3f pointLightPositions[] = {
-		Eigen::Vector3f(0.7f, 0.2f, 2.0f), Eigen::Vector3f(2.3f, -3.3f, -4.0f),
-		Eigen::Vector3f(-4.0f, 2.0f, -12.0f), Eigen::Vector3f(0.0f, 0.0f, -3.0f)};
+		Eigen::Vector3f(0.7f, 0.2f, 2.0f),
+	Eigen::Vector3f(2.3f, -3.3f, -4.0f),
+		Eigen::Vector3f(-4.0f, 2.0f, -12.0f),
+	Eigen::Vector3f(0.0f, 0.0f, -3.0f)};
 
-	for (size_t i = 0; i < sizeof(pointLightPositions) / sizeof(pointLightPositions[0]); i++) {
-		std::string light = "pointLights[0].";
-		light[12] += i;
+	for (size_t i = 0; i < sizeof(pointLightPositions) /
+	sizeof(pointLightPositions[0]); i++) { std::string light =
+	"pointLights[0]."; light[12] += i;
 
 		dest->set(light + "position", pointLightPositions[i]);
 		dest->set(light + "ambient", 0.05f, 0.05f, 0.05f);
@@ -322,6 +290,7 @@ void Game::draw() {
 		dest->set(light + "linear", 0.09f);
 		dest->set(light + "quadratic", 0.032f);
 	}
+	*/
 
 	dest->set("spotLight.position", mCamera->getOwner()->getPosition());
 	dest->set("spotLight.direction", mCamera->getOwner()->getForward());
@@ -334,30 +303,9 @@ void Game::draw() {
 	dest->set("spotLight.cutOff", cos(toRadians(12.5f)));
 	dest->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
 
-	dest->set("material.diffuse", 0);
-	mTextures->get("container2.png")->activate(0);
-	dest->set("material.specular", 1);
-	mTextures->get("container2_specular.png")->activate(1);
-	dest->set("material.shininess", shininess);
+	mModel->draw(dest);
 
-	const Eigen::Vector3f cubePositions[] = {
-		Eigen::Vector3f(0.0f, 0.0f, 0.0f),	  Eigen::Vector3f(2.0f, 5.0f, -15.0f),
-		Eigen::Vector3f(-1.5f, -2.2f, -2.5f), Eigen::Vector3f(-3.8f, -2.0f, -12.3f),
-		Eigen::Vector3f(2.4f, -0.4f, -3.5f),  Eigen::Vector3f(-1.7f, 3.0f, -7.5f),
-		Eigen::Vector3f(1.3f, -2.0f, -2.5f),  Eigen::Vector3f(1.5f, 2.0f, -2.5f),
-		Eigen::Vector3f(1.5f, 0.2f, -1.5f),	  Eigen::Vector3f(-1.3f, 1.0f, -1.5f)};
-
-	Eigen::Affine3f modelMat;
-	for (int i = 0; i < 10; ++i) {
-		modelMat.setIdentity();
-		modelMat.translate(cubePositions[i]);
-		modelMat.rotate(Eigen::AngleAxisf(toRadians(20.0f * i),
-										  Eigen::Vector3f(1.0f, 0.3f, 0.5f).normalized()));
-		source->set("model", modelMat);
-
-		glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
-	}
-
+	/*
 	source->activate();
 
 	source->set("view", mCamera->mViewMatrix);
@@ -372,8 +320,10 @@ void Game::draw() {
 
 		source->set("model", modelMat);
 
-		glDrawElements(GL_TRIANGLES, mVertex->indices(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, mVertex->indices(),
+	GL_UNSIGNED_INT, 0);
 	}
+	*/
 
 #ifdef IMGUI
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -477,8 +427,8 @@ Game::~Game() {
 		delete mPendingActors.back();
 	}
 
-	delete mVertex;
 	delete mTextures;
+	delete mModel;
 	delete mShaders;
 	delete mGL;
 

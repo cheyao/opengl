@@ -9,15 +9,13 @@
 #include <stddef.h>
 #include <string_view>
 
-Texture::Texture(const std::string_view& path, const bool& flip) : name(path) {
-	stbi_set_flip_vertically_on_load(flip);
-
-	int width, height, channels;
+Texture::Texture(const std::string_view& path) : name(path) {
+	/*
 	size_t size;
 	unsigned char* source = static_cast<unsigned char*>(SDL_LoadFile(path.data(), &size));
 	[[unlikely]] if (source == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to read shader shource: %s\n",
-						path.data());
+						name.data());
 		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have "
 				  "enough memory");
 
@@ -25,17 +23,19 @@ Texture::Texture(const std::string_view& path, const bool& flip) : name(path) {
 	}
 
 	unsigned char* data = stbi_load_from_memory(source, size, &width, &height, &channels, 0);
+	*/
+	int width, height, channels;
+	unsigned char* data = stbi_load(path.data(), &width, &height, &channels, 0);
 
 	[[unlikely]] if (data == nullptr) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load texture!\n");
 		ERROR_BOX("Failed to load textures, the assets is probably corrupted or you don't "
-				  "have "
-				  "enough memory");
+				  "have enough memory");
 
 		throw 1;
 	}
 
-	SDL_Log("Loaded texture %s: %d channels %dx%d", path.data(), channels, width, height);
+	SDL_Log("Loaded texture %s: %d channels %dx%d", name.data(), channels, width, height);
 
 	GLenum format;
 	switch (channels) {
@@ -66,13 +66,14 @@ Texture::Texture(const std::string_view& path, const bool& flip) : name(path) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	SDL_free(source);
+	// SDL_free(source);
 	stbi_image_free(data);
 }
 
 Texture::~Texture() {
-	SDL_Log("Unloading texture %s", name.c_str());
 	glDeleteTextures(1, &mID);
+
+	SDL_Log("Unloading texture %s", name.data());
 }
 
 void Texture::activate(const unsigned int& num) const {

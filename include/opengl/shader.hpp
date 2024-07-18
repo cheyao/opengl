@@ -4,6 +4,9 @@
 #include "third_party/glad/glad.h"
 
 #include <string_view>
+#ifdef DEBUG
+#include <vector>
+#endif
 
 class Shader {
   public:
@@ -19,10 +22,12 @@ class Shader {
 	// set uniform
 	void set(const std::string_view& name, const bool& val) const;
 	void set(const std::string_view& name, const int& val) const;
+	void set(const std::string_view& name, const unsigned int& val) const;
 	void set(const std::string_view& name, const float& val) const;
 	void set(const std::string_view& name, const double& val) const;
 	void set(const std::string_view& name, const float& val, const float& val2) const;
-	void set(const std::string_view& name, const float& val, const float& val2, const float& val3) const;
+	void set(const std::string_view& name, const float& val, const float& val2,
+			 const float& val3) const;
 	void set(const std::string_view& name, const Eigen::Vector3f& val) const;
 	void set(const std::string_view& name, const Eigen::Vector3f& val, const float& val2) const;
 	void set(const std::string_view& name, const Eigen::Vector4f& val) const;

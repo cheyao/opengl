@@ -45,11 +45,17 @@ void Shader::activate() const { glUseProgram(mShaderProgram); }
 int Shader::getUniform(const std::string_view& name) const {
 	int location = glGetUniformLocation(mShaderProgram, name.data());
 
-	[[unlikely]] if (location == -1) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed find uniform location: %s\n", name.data());
-		ERROR_BOX("Failed to find uniform location");
-		throw 1;
+#ifdef DEBUG
+	static std::unordered_map<std::string, bool> errored;
+
+	[[unlikely]] if (location == -1 && !errored.contains(std::string(name))) {
+		SDL_Log("Failed find uniform location: %s\n", name.data());
+		errored[std::string(name)] = true;
+
+		// ERROR_BOX("Failed to find uniform location");
+		// throw 1;
 	}
+#endif
 
 	return location;
 }
@@ -60,6 +66,10 @@ void Shader::set(const std::string_view& name, const bool& val) const {
 
 void Shader::set(const std::string_view& name, const int& val) const {
 	glUniform1i(getUniform(name), val);
+}
+
+void Shader::set(const std::string_view& name, const unsigned int& val) const {
+	glUniform1ui(getUniform(name), val);
 }
 
 void Shader::set(const std::string_view& name, const float& val) const {
