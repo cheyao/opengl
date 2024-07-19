@@ -206,11 +206,12 @@ elseif(MACOSX)
 elseif(WINDOWS)
 	message("Building for windows")
 
+	add_executable(${BUILD_NAME} WIN32 ${SRC})
+
 	if(NOT MSVC)
 		target_compile_options(${BUILD_NAME} PRIVATE -D__WINDOWS__)
 	endif()
 
-	add_executable(${BUILD_NAME} WIN32 ${SRC})
 	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
 else()
 	message("Building for linux")

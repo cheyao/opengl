@@ -11,15 +11,12 @@
 #include "third_party/Eigen/src/Core/Matrix.h"
 #include "utils.hpp"
 
-#include <SDL3/SDL_events.h>
-#include <SDL3/SDL_keycode.h>
-#include <SDL3/SDL_mouse.h>
+#include <SDL3/SDL.h>
 #include <cstdint>
+#include <memory>
+#include <string>
 #include <third_party/Eigen/Dense>
 #include <third_party/glad/glad.h>
-
-#include <SDL3/SDL.h>
-#include <string>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -39,9 +36,9 @@ EM_JS(int, canvasResize, (), {
 #endif
 
 Game::Game()
-	: mWindow(nullptr), mGL(nullptr), mTextures(nullptr), mShaders(nullptr), mUpdatingActors(false),
-	  mWidth(0), mHeight(0), mTicks(0), mBasePath(), mPaused(false) {
-	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	: mWindow(SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE)),
+	  mGL(nullptr), mTextures(nullptr), mShaders(nullptr), mCamera(nullptr), mModel(nullptr),
+	  mUpdatingActors(false), mWidth(0), mHeight(0), mTicks(0), mPaused(false) {
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to make SDL window, there is something wrong with "
@@ -51,7 +48,7 @@ Game::Game()
 	}
 	SDL_SetWindowMinimumSize(mWindow, 480, 320);
 
-	mGL = new GLManager(mWindow);
+	mGL = std::make_unique<GLManager>(mWindow);
 	mGL->printInfo();
 
 #ifdef __EMSCRIPTEN__
@@ -85,14 +82,15 @@ Game::Game()
 	SDL_Log("Finished Initializing ImGUI");
 #endif
 
-	char* basepath = SDL_GetBasePath();
+	const char* basepath = SDL_GetBasePath();
 	if (basepath != nullptr) {
 		mBasePath = std::string(basepath);
-		SDL_free(basepath); // We gotta free da pointer UwU
+	} else {
+		mBasePath = std::string(".") + SEPARATOR;
 	}
 
-	mTextures = new TextureManager(mBasePath);
-	mShaders = new ShaderManager(mBasePath);
+	mTextures = std::make_unique<TextureManager>(mBasePath);
+	mShaders = std::make_unique<ShaderManager>(mBasePath);
 
 	// TODO: Get a icon
 	/*
@@ -111,8 +109,6 @@ Game::Game()
 void Game::setup() {
 	SDL_Log("Setting up game");
 
-	glEnable(GL_DEPTH_TEST);
-
 	new Player(this);
 	mModel = new Model(fullPath("models" + SEPARATOR + "backpack.obj"), this);
 
@@ -130,7 +126,7 @@ int Game::iterate() {
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		SDL_SetRelativeMouseMode(false);
+		SDL_SetRelativeMouseMode(0);
 		SDL_GL_SwapWindow(mWindow);
 
 		return 0;
@@ -170,7 +166,7 @@ void Game::input() {
 
 void Game::update() {
 	// Update the game
-	float delta = (SDL_GetTicks() - mTicks) / 1000.0f;
+	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
 	if (delta > 0.05) {
 		delta = 0.05;
 	}
@@ -217,7 +213,8 @@ void Game::gui() {
 		ImGui::Text("%d vertices, %d indices (%d triangles)", io.MetricsRenderVertices,
 					io.MetricsRenderIndices, io.MetricsRenderIndices / 3);
 		auto pos = mActors[0]->getPosition();
-		ImGui::Text("%dx%dx%d", (int)pos.x(), (int)pos.y(), (int)pos.z());
+		ImGui::Text("%dx%dx%d", static_cast<int>(pos.x()), static_cast<int>(pos.y()),
+					static_cast<int>(pos.z()));
 
 		// ImGui::Checkbox("Debug", &debugMenu);
 		ImGui::Checkbox("Demo", &demoMenu);
@@ -237,7 +234,7 @@ void Game::gui() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
-	SDL_GL_SetSwapInterval(vsync);
+	SDL_GL_SetSwapInterval(static_cast<int>(vsync));
 }
 #else
 void Game::gui() {}
@@ -254,8 +251,8 @@ void Game::draw() {
 	Shader* dest = mShaders->get("basic.vert", "basic.frag");
 	dest->activate();
 
-	dest->set("view", mCamera->mViewMatrix);
-	dest->set("proj", mCamera->mProjectionMatrix);
+	dest->set("view", mCamera->getViewMatrix());
+	dest->set("proj", mCamera->getProjectionMatrix());
 	Eigen::Affine3f modelMat = Eigen::Affine3f::Identity();
 	dest->set("model", modelMat);
 
@@ -332,12 +329,12 @@ void Game::draw() {
 	SDL_GL_SwapWindow(mWindow);
 }
 
-bool rel = true;
-
 int Game::event(const SDL_Event& event) {
 #ifdef IMGUI
 	ImGui_ImplSDL3_ProcessEvent(&event);
 #endif
+
+	static bool rel = true;
 
 	switch (event.type) {
 		case SDL_EVENT_QUIT: {
@@ -358,7 +355,7 @@ int Game::event(const SDL_Event& event) {
 			}
 			if (event.key.key == SDLK_F1) {
 				rel = !rel;
-				SDL_SetRelativeMouseMode(rel);
+				SDL_SetRelativeMouseMode(static_cast<int>(rel));
 			}
 			if (event.key.key == SDLK_F2) {
 #ifdef DEBUG
@@ -411,6 +408,8 @@ void Game::removeActor(Actor* actor) {
 	}
 }
 
+Texture* Game::getTexture(const std::string& name) { return mTextures->get(name); }
+
 Game::~Game() {
 	SDL_Log("Quitting game\n");
 
@@ -427,10 +426,7 @@ Game::~Game() {
 		delete mPendingActors.back();
 	}
 
-	delete mTextures;
 	delete mModel;
-	delete mShaders;
-	delete mGL;
 
 	SDL_DestroyWindow(mWindow);
 }

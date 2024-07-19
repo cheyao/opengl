@@ -81,27 +81,27 @@ void Model::loadMesh(aiMesh* mesh, const aiScene* scene) {
 		}
 	}
 
-	if (mesh->mMaterialIndex >= 0) {
-		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		const std::vector<Texture*> diffuseMaps = loadTextures(material, aiTextureType_DIFFUSE);
-		for (const auto& texture : diffuseMaps) {
-			textures.emplace_back(texture, DIFFUSE);
-		}
+	// TODO: better
+	const std::vector<Texture*> diffuseMaps = loadTextures(material, aiTextureType_DIFFUSE);
+	const std::vector<Texture*> specularMaps = loadTextures(material, aiTextureType_SPECULAR);
+	const std::vector<Texture*> heightMaps = loadTextures(material, aiTextureType_HEIGHT);
+	const std::vector<Texture*> ambientMaps = loadTextures(material, aiTextureType_AMBIENT);
 
-		const std::vector<Texture*> specularMaps = loadTextures(material, aiTextureType_SPECULAR);
-		for (const auto& texture : specularMaps) {
-			textures.emplace_back(texture, SPECULAR);
-		}
+	textures.reserve(diffuseMaps.size() + specularMaps.size() + heightMaps.size() + ambientMaps.size());
 
-		const std::vector<Texture*> heightMaps = loadTextures(material, aiTextureType_HEIGHT);
-		for (const auto texture : heightMaps) {
-			textures.emplace_back(texture, HEIGHT);
-		}
-		const std::vector<Texture*> ambientMaps = loadTextures(material, aiTextureType_AMBIENT);
-		for (const auto texture : ambientMaps) {
-			textures.emplace_back(texture, AMBIENT);
-		}
+	for (const auto& texture : diffuseMaps) {
+		textures.emplace_back(texture, DIFFUSE);
+	}
+	for (const auto& texture : specularMaps) {
+		textures.emplace_back(texture, SPECULAR);
+	}
+	for (const auto& texture : heightMaps) {
+		textures.emplace_back(texture, HEIGHT);
+	}
+	for (const auto& texture : ambientMaps) {
+		textures.emplace_back(texture, AMBIENT);
 	}
 
 	mMeshes.emplace_back(new Mesh(vertices, indices, textures));
@@ -115,7 +115,7 @@ std::vector<Texture*> Model::loadTextures(aiMaterial* mat, const aiTextureType t
 
 		mat->GetTexture(type, i, &str);
 
-		textures.emplace_back(mOwner->getTextureManager()->get(str.C_Str()));
+		textures.emplace_back(mOwner->getTexture(str.C_Str()));
 	}
 
 	return textures;

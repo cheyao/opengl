@@ -11,7 +11,7 @@ class CameraComponent : public Component {
 	CameraComponent(const CameraComponent&) = delete;
 	CameraComponent& operator=(CameraComponent&&) = delete;
 	CameraComponent& operator=(const CameraComponent&) = delete;
-	~CameraComponent();
+	~CameraComponent() override = default;
 
 	void update(float delta) override;
 
@@ -22,9 +22,12 @@ class CameraComponent : public Component {
 
 	class Actor* getOwner() { return mOwner; }
 
-	Eigen::Affine3f mViewMatrix;
-	Eigen::Affine3f mProjectionMatrix;
+	Eigen::Affine3f getViewMatrix() { return mViewMatrix; };
+	Eigen::Affine3f getProjectionMatrix() { return mProjectionMatrix; };
 
   private:
 	float mFOV;
+
+	Eigen::Affine3f mViewMatrix;
+	Eigen::Affine3f mProjectionMatrix;
 };

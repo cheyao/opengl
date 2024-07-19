@@ -16,7 +16,7 @@ public:
 	TextureManager &operator=(const TextureManager &) = delete;
 	~TextureManager();
 
-	class Texture* get(const std::string& texture);
+	class Texture* get(const std::string& name);
 
 	void reload();
 

@@ -2,18 +2,18 @@
 
 #include "actors/actor.hpp"
 #include "components/component.hpp"
-#include "third_party/Eigen/src/Geometry/Quaternion.h"
+#include "third_party/Eigen/Geometry"
 #include "utils.hpp"
 
 MovementComponent::MovementComponent(class Actor* owner, int updateOrder)
-	: Component(owner, updateOrder), mAngularSpeed(0.0f), mForwardSpeed(0.0f) {}
+	: Component(owner, updateOrder), mAngularSpeed(0.0f), mForwardSpeed(0.0f), mStrafeSpeed(0.0f) {}
 
 void MovementComponent::update(float delta) {
 	if (!nearZero(mAngularSpeed)) {
-		Eigen::Quaternionf rot = mOwner->getRotation();
-		float angle = mAngularSpeed * delta;
-		Eigen::Quaternionf inc(Eigen::AngleAxisf(angle, Eigen::Vector3f::UnitY()));
-		Eigen::Quaternionf out = rot * inc;
+		const Eigen::Quaternionf rot = mOwner->getRotation();
+		const float angle = mAngularSpeed * delta;
+		const Eigen::Quaternionf inc(Eigen::AngleAxisf(angle, Eigen::Vector3f::UnitY()));
+		const Eigen::Quaternionf out = rot * inc;
 		mOwner->setRotation(out.normalized());
 	}
 

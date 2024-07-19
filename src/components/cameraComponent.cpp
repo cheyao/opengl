@@ -1,5 +1,6 @@
 #include "components/cameraComponent.hpp"
 
+#include "actors/actor.hpp"
 #include "components/component.hpp"
 #include "game.hpp"
 #include "third_party/Eigen/src/Core/Matrix.h"
@@ -20,15 +21,14 @@ CameraComponent::CameraComponent(Actor* owner, int priority)
 	mOwner->getGame()->setCamera(this);
 };
 
-CameraComponent::~CameraComponent() {}
-
 void CameraComponent::update(float delta) {
-	float x, y;
+	float x = 0;
+	float y = 0;
 	SDL_GetRelativeMouseState(&x, &y);
 
-	Eigen::Quaternionf dir = mOwner->getRotation();
-	Eigen::AngleAxisf rot(-(x / 50) * delta, Eigen::Vector3f::UnitY());
-	Eigen::AngleAxisf yaw(-(y / 50) * delta, Eigen::Vector3f::UnitZ());
+	const Eigen::Quaternionf dir = mOwner->getRotation();
+	const Eigen::AngleAxisf rot(-(x / 50) * delta, Eigen::Vector3f::UnitY());
+	const Eigen::AngleAxisf yaw(-(y / 50) * delta, Eigen::Vector3f::UnitZ());
 	mOwner->setRotation(dir * rot * yaw);
 
 	project();
@@ -55,7 +55,7 @@ void CameraComponent::project() {
 		static_cast<float>(mOwner->getGame()->getWidth()) / mOwner->getGame()->getHeight();
 	float theta = mFOV * 0.5;
 	float range = far - near;
-	float invtan = 1. / tan(theta);
+	float invtan = 1.0f / tan(theta);
 
 	// https://www.songho.ca/opengl/gl_projectionmatrix.html
 	mProjectionMatrix(0, 0) = invtan / aspect;

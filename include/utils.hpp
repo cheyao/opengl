@@ -20,7 +20,7 @@ inline bool nearZero(float number, float epsilon = 0.001f) {
 }
 
 #if defined(__MINGW32__) || defined(__WIN32__) || defined(__CYGWIN32__) || defined(__WINDOWS__)
-#define SEPARATOR "\"
+#define SEPARATOR "\\"
 #else
 #define SEPARATOR "/"
 #endif

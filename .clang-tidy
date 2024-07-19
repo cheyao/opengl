@@ -1,6 +1,2 @@
-Checks: '-*,readability-identifier-naming,misc-assert-side-effect,readability-container-size-empty,cppcoreguidelines,bugprone,clang-analyzer,modernize,misc'
-CheckOptions:
-  - key: misc-assert-side-effect.CheckFunctionCalls
-    value: 1
-  - key: misc-assert-side-effect.AssertMacros
-    value: 'assert'
+Checks: '*,-llvmlibc-*,-modernize-use-trailing-return-type,-cert-msc32-c,-cert-msc51-cpp,-cppcoreguidelines-pro-type-vararg,-hicpp-vararg,-misc-include-cleaner,-cppcoreguidelines-pro-type-reinterpret-cast,-altera-*,-hicpp-uppercase-literal-suffix,-readability-uppercase-literal-suffix,-fuchsia-default-arguments-calls,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers'
+# '-*,readability-identifier-naming,misc-assert-side-effect,readability-container-size-empty,cppcoreguidelines,bugprone,clang-analyzer,modernize,misc'

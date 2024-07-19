@@ -1,15 +1,17 @@
 #include "opengl/mesh.hpp"
 
+#include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
 #include "opengl/types.hpp"
-#include "opengl/shader.hpp"
 #include "third_party/glad/glad.h"
 
 #include <string>
+#include <vector>
+#include <utility>
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
 		   const std::vector<std::pair<Texture*, TextureType>>& textures)
-	: mVertices(vertices), mIndices(indices), mTextures(textures) {
+	: mVBO(0), mEBO(0), mVAO(0), mVertices(vertices), mIndices(indices), mTextures(textures) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
 
@@ -74,12 +76,12 @@ void Mesh::draw(const Shader* shader) const {
 				break;
 		}
 
-		shader->set((/*"material." +*/ name + number).c_str(), i);
+		shader->set(name + number, i);
 
 		mTextures[i].first->activate(i);
 	}
 
 	glBindVertexArray(mVAO);
-	glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
 }

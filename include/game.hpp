@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -21,14 +22,14 @@ class Game {
 	void addActor(class Actor* actor);
 	void removeActor(class Actor* actor);
 
-	int getWidth() { return mWidth; }
-	int getHeight() { return mHeight; }
+	[[nodiscard]] int getWidth() const { return mWidth; }
+	[[nodiscard]] int getHeight() const { return mHeight; }
 
 	void setCamera(class CameraComponent* camera) { mCamera = camera; }
 
 	void pause() { mPaused = true; }
 
-	class TextureManager* getTextureManager() { return mTextures; }
+	class Texture* getTexture(const std::string& name);
 
   private:
 	void input();
@@ -38,9 +39,9 @@ class Game {
 	void setup();
 
 	struct SDL_Window* mWindow;
-	class GLManager* mGL;
-	class TextureManager* mTextures;
-	class ShaderManager* mShaders;
+	std::unique_ptr<class GLManager> mGL;
+	std::unique_ptr<class TextureManager> mTextures;
+	std::unique_ptr<class ShaderManager> mShaders;
 
 	class CameraComponent* mCamera;
 

@@ -17,7 +17,7 @@ Texture* TextureManager::get(const std::string& name) {
 		return mTextures.at(name);
 	}
 
-	Texture* texture = new Texture(mPath + name);
+	auto* texture = new Texture(mPath + name);
 	mTextures[name] = texture;
 
 #ifdef DEBUG
@@ -44,7 +44,7 @@ void TextureManager::reload() {
 #endif
 
 		delete texture;
-		Texture* newTexture = new Texture(mPath + name);
+		auto* newTexture = new Texture(mPath + name);
 		texture = newTexture;
 
 #ifdef DEBUG

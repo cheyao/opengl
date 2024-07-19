@@ -12,8 +12,6 @@
 #include <cstdlib>
 #include <ctime>
 
-bool halted = false;
-
 int SDL_AppInit(void** appstate, int argc, char** argv) {
 	(void)argc;
 	(void)argv;
@@ -24,13 +22,13 @@ int SDL_AppInit(void** appstate, int argc, char** argv) {
 
 	SDL_Log("Initializing game\n");
 
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD)) {
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD) != 0) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to init SDL: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to initialize SDL, there is something wrong with your system");
 		return 1;
 	}
 
-	Game* game;
+	Game* game = nullptr;
 	try {
 		game = new Game();
 	} catch (int error) {

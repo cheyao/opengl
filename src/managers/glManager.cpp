@@ -46,9 +46,9 @@ GLManager::GLManager(SDL_Window* window) {
 	}
 
 #ifdef GLES
-	if (!gladLoadGLES2Loader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
+	if (gladLoadGLES2Loader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress)) == 0) {
 #else
-	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress))) {
+	if (gladLoadGLLoader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress)) == 0) {
 #endif
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init glad!\n");
 		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
@@ -67,11 +67,14 @@ GLManager::GLManager(SDL_Window* window) {
 #endif
 
 	SDL_GL_MakeCurrent(window, mContext);
+
+	glEnable(GL_DEPTH_TEST);
+	// glDepthMask(GL_FALSE);
 }
 
 GLManager::~GLManager() { SDL_GL_DestroyContext(mContext); }
 
-void GLManager::printInfo() const {
+void GLManager::printInfo() {
 	SDL_Log("Vendor     : %s\n", glGetString(GL_VENDOR));
 	SDL_Log("Renderer   : %s\n", glGetString(GL_RENDERER));
 	SDL_Log("Version    : %s\n", glGetString(GL_VERSION));
@@ -80,8 +83,8 @@ void GLManager::printInfo() const {
 	SDL_Log("Extensions : %s\n", glGetString(GL_EXTENSIONS));
 #endif
 
-	int maj;
-	int min;
+	int maj = 0;
+	int min = 0;
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &maj);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &min);
 	SDL_Log("Context    : %d.%d\n", maj, min);
@@ -90,7 +93,7 @@ void GLManager::printInfo() const {
 	glGetIntegerv(GL_MINOR_VERSION, &min);
 	SDL_Log("Context    : %d.%d\n", maj, min);
 
-	int nrAttributes;
+	int nrAttributes = 0;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	SDL_Log("Maximum number of vertex attributes supported: %d\n", nrAttributes);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &nrAttributes);

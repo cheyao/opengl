@@ -23,7 +23,7 @@ public:
 	GLManager &operator=(const GLManager &) = delete;
 	~GLManager();
 
-	void printInfo() const;
+	static void printInfo();
 
 	SDL_GLContext getContext() { return mContext; }
 
