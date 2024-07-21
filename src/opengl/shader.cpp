@@ -8,18 +8,24 @@
 #include <cassert>
 #include <string_view>
 
-Shader::Shader(const std::string_view& vertName, const std::string_view& fragName) {
+Shader::Shader(const std::string_view& vertName, const std::string_view& fragName)
+	: mShaderProgram(glCreateProgram()) {
+	unsigned int mVertexShader = 0;
+	unsigned int mFragmentShader = 0;
+
 	compile(vertName, GL_VERTEX_SHADER, mVertexShader);
 	compile(fragName, GL_FRAGMENT_SHADER, mFragmentShader);
 
-	mShaderProgram = glCreateProgram();
 	glAttachShader(mShaderProgram, mVertexShader);
 	glAttachShader(mShaderProgram, mFragmentShader);
 	glLinkProgram(mShaderProgram);
 
-	int success;
+	glDeleteShader(mVertexShader);
+	glDeleteShader(mFragmentShader);
+
+	int success = 0;
 	glGetProgramiv(mShaderProgram, GL_LINK_STATUS, &success);
-	[[unlikely]] if (!success) {
+	[[unlikely]] if (success == 0) {
 		int len = 0;
 		glGetProgramiv(mShaderProgram, GL_INFO_LOG_LENGTH, &len);
 		GLchar* log = new GLchar[len + 1];
@@ -35,9 +41,9 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 }
 
 Shader::~Shader() {
-	glDeleteShader(mVertexShader);
-	glDeleteShader(mFragmentShader);
+#ifndef ADDRESS
 	glDeleteProgram(mShaderProgram);
+#endif
 }
 
 void Shader::activate() const { glUseProgram(mShaderProgram); }
@@ -77,7 +83,7 @@ void Shader::set(const std::string_view& name, const float& val) const {
 }
 
 void Shader::set(const std::string_view& name, const double& val) const {
-	glUniform1f(getUniform(name), val);
+	glUniform1f(getUniform(name), static_cast<float>(val));
 }
 
 void Shader::set(const std::string_view& name, const float& val, const float& val2) const {
@@ -132,12 +138,14 @@ void Shader::compile(const std::string_view& fileName, const GLenum& type, unsig
 	out = glCreateShader(type);
 	glShaderSource(out, 1, &shaderSource, nullptr);
 	glCompileShader(out);
+
 	SDL_free(shaderSource);
 
 	// Error checking
-	int success;
+	// FIXME: Some wierd error handleing
+	int success = 0;
 	glGetShaderiv(out, GL_COMPILE_STATUS, &success);
-	[[unlikely]] if (!success) {
+	[[unlikely]] if (success == 0) {
 		int len = 0;
 		glGetShaderiv(out, GL_INFO_LOG_LENGTH, &len);
 		GLchar* log = new GLchar[len + 1];
@@ -145,7 +153,7 @@ void Shader::compile(const std::string_view& fileName, const GLenum& type, unsig
 		glGetShaderInfoLog(out, len * sizeof(GLchar), nullptr, &log[0]);
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to compile shader %s: \n%s\n",
 						fileName.data(), log);
-		ERROR_BOX("Failed to compile vertex shader");
+		ERROR_BOX("Failed to compile shader");
 
 		delete[] log;
 

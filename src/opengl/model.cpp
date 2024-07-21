@@ -5,6 +5,7 @@
 #include "opengl/mesh.hpp"
 #include "opengl/texture.hpp"
 #include "third_party/Eigen/Core"
+#include "tracy/Tracy.hpp"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
@@ -14,6 +15,9 @@
 #include <string_view>
 
 Model::Model(const std::string_view& path, Game* owner) : mOwner(owner) {
+	ZoneScopedN("Loading model");
+	ZoneName(path.data(), path.size());
+
 	// TODO: SDL Importer
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(
@@ -89,7 +93,8 @@ void Model::loadMesh(aiMesh* mesh, const aiScene* scene) {
 	const std::vector<Texture*> heightMaps = loadTextures(material, aiTextureType_HEIGHT);
 	const std::vector<Texture*> ambientMaps = loadTextures(material, aiTextureType_AMBIENT);
 
-	textures.reserve(diffuseMaps.size() + specularMaps.size() + heightMaps.size() + ambientMaps.size());
+	textures.reserve(diffuseMaps.size() + specularMaps.size() + heightMaps.size() +
+					 ambientMaps.size());
 
 	for (const auto& texture : diffuseMaps) {
 		textures.emplace_back(texture, DIFFUSE);
@@ -122,6 +127,8 @@ std::vector<Texture*> Model::loadTextures(aiMaterial* mat, const aiTextureType t
 }
 
 void Model::draw(const class Shader* shader) const {
+	ZoneScopedN("Draw model");
+
 	for (const auto& mesh : mMeshes) {
 		mesh->draw(shader);
 	}

@@ -7,3 +7,6 @@
 [submodule "android"]
 	path = android
 	url = https://github.com/cheyao/android.git
+[submodule "external/tracy"]
+	path = external/tracy
+	url = https://github.com/wolfpld/tracy

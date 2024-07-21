@@ -5,9 +5,9 @@
 
 #include <cstdint>
 
-Actor::Actor(Game* owner)
+Actor::Actor(Game* game)
 	: mState(ALIVE), mPosition(Eigen::Vector3f::Zero()), mRotation(Eigen::Quaternionf::Identity()),
-	  mScale(1.0f), mGame(owner) {
+	  mScale(1.0f), mGame(game) {
 	mGame->addActor(this);
 }
 
@@ -27,7 +27,7 @@ void Actor::update(float delta) {
 }
 
 void Actor::updateComponents(float delta) {
-	for (auto component : mComponents) {
+	for (const auto& component : mComponents) {
 		component->update(delta);
 	}
 }

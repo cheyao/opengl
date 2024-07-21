@@ -22,24 +22,24 @@ class Actor {
 	void input(const uint8_t* keystate);
 	virtual void actorInput(const uint8_t* keystate);
 
-	class Game* getGame() const { return mGame; }
+	[[nodiscard]] class Game* getGame() const { return mGame; }
 
-	State getState() const { return mState; }
+	[[nodiscard]] State getState() const { return mState; }
 	void setState(const State& state) { mState = state; }
 
-	const Eigen::Vector3f& getPosition() const { return mPosition; }
+	[[nodiscard]] const Eigen::Vector3f& getPosition() const { return mPosition; }
 	void setPosition(const Eigen::Vector3f& pos) { mPosition = pos; }
 
-	float getScale() const { return mScale; }
+	[[nodiscard]] float getScale() const { return mScale; }
 	void setScale(float scale) { mScale = scale; }
 
-	const Eigen::Quaternionf& getRotation() const { return mRotation; }
+	[[nodiscard]] const Eigen::Quaternionf& getRotation() const { return mRotation; }
 	void setRotation(const Eigen::Quaternionf& rotation) { mRotation = rotation; }
 
-	Eigen::Vector3f getForward() const {
+	[[nodiscard]] Eigen::Vector3f getForward() const {
 		return mRotation.toRotationMatrix() * Eigen::Vector3f::UnitX();
 	}
-	Eigen::Vector3f getRight() const {
+	[[nodiscard]] Eigen::Vector3f getRight() const {
 		return mRotation.toRotationMatrix() * Eigen::Vector3f::UnitZ();
 	}
 

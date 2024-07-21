@@ -22,22 +22,29 @@ int SDL_AppInit(void** appstate, int argc, char** argv) {
 
 	SDL_Log("Initializing game\n");
 
+#ifdef X11
+	SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "x11");
+#endif
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft");
+#ifdef GLES
+	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles");
+#else
+	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
+#endif
+
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD) != 0) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to init SDL: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to initialize SDL, there is something wrong with your system");
 		return 1;
 	}
 
-	Game* game = nullptr;
 	try {
-		game = new Game();
-	} catch (int error) {
-		return error;
+		*appstate = new Game();
 	} catch (...) {
 		return 1;
 	}
 
-	*appstate = game;
+	SDL_SetRelativeMouseMode(1);
 
 	return 0;
 }

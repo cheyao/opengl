@@ -3,6 +3,7 @@
 #include "opengl/shader.hpp"
 #include "utils.hpp"
 
+#include <algorithm>
 #include <string>
 #include <unordered_map>
 
@@ -30,7 +31,7 @@ Shader* ShaderManager::get(const std::string& vert, const std::string& frag) {
 // TODO: Unloading when out of memory
 
 ShaderManager::~ShaderManager() {
-	for (auto& [_, shader] : mTextures) {
+	for (const auto& [_, shader] : mTextures) {
 		delete shader;
 	}
 }
@@ -50,16 +51,19 @@ void ShaderManager::reload() {
 		}
 		try {
 			Shader* newTexture = new Shader(mPath + vert, mPath + frag);
+
 			delete shader;
+
 			shader = newTexture;
 		} catch (...) {
+			SDL_Log("Error recompiling shaders");
 		}
 
 		mLastEdit[shader] = std::max(std::filesystem::last_write_time(mPath + vert),
 									 std::filesystem::last_write_time(mPath + frag));
 #else
-		delete shader;
 		Shader* newTexture = new Shader(mPath + vert, mPath + frag);
+		delete shader;
 		shader = newTexture;
 #endif
 	}

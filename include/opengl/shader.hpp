@@ -4,9 +4,6 @@
 #include "third_party/glad/glad.h"
 
 #include <string_view>
-#ifdef DEBUG
-#include <vector>
-#endif
 
 class Shader {
   public:
@@ -38,9 +35,7 @@ class Shader {
   private:
 	static void compile(const std::string_view& fileName, const GLenum& type, unsigned int& out);
 
-	int getUniform(const std::string_view& name) const;
+	[[nodiscard]] int getUniform(const std::string_view& name) const;
 
-	unsigned int mVertexShader;
-	unsigned int mFragmentShader;
 	unsigned int mShaderProgram;
 };

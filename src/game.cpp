@@ -9,6 +9,8 @@
 #include "opengl/model.hpp"
 #include "opengl/shader.hpp"
 #include "third_party/Eigen/src/Core/Matrix.h"
+#include "tracy/Tracy.hpp"
+#include "tracy/TracyOpenGL.hpp"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
@@ -36,20 +38,23 @@ EM_JS(int, canvasResize, (), {
 #endif
 
 Game::Game()
-	: mWindow(SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE)),
-	  mGL(nullptr), mTextures(nullptr), mShaders(nullptr), mCamera(nullptr), mModel(nullptr),
-	  mUpdatingActors(false), mWidth(0), mHeight(0), mTicks(0), mPaused(false) {
+	: mWindow(nullptr), mGL(nullptr), mTextures(nullptr), mShaders(nullptr), mCamera(nullptr),
+	  mModel(nullptr), mUpdatingActors(false), mWidth(0), mHeight(0), mTicks(0), mPaused(false) {
+	ZoneScopedN("Setup context");
+
+	mGL = std::make_unique<GLManager>();
+
+	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to make SDL window, there is something wrong with "
-				  "your SDL installation");
+				  "your system/SDL installation");
 
 		throw 1;
 	}
 	SDL_SetWindowMinimumSize(mWindow, 480, 320);
 
-	mGL = std::make_unique<GLManager>(mWindow);
-	mGL->printInfo();
+	mGL->bindContext(mWindow);
 
 #ifdef __EMSCRIPTEN__
 	mHeight = browserHeight();
@@ -99,14 +104,18 @@ Game::Game()
 	SDL_DestroySurface(icon);
 	*/
 
+	mGL->printInfo();
+
 	mTicks = SDL_GetTicks();
 
-	SDL_SetRelativeMouseMode(true);
+	SDL_SetRelativeMouseMode(1);
 
 	setup();
 }
 
 void Game::setup() {
+	ZoneScopedN("Settup assets");
+
 	SDL_Log("Setting up game");
 
 	new Player(this);
@@ -120,14 +129,16 @@ void Game::setup() {
 #endif
 
 int Game::iterate() {
+	ZoneScopedN("Iteration");
+
 	if (mPaused) {
 		mTicks = SDL_GetTicks();
 
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		SDL_SetRelativeMouseMode(0);
-		SDL_GL_SwapWindow(mWindow);
+		// SDL_GL_SwapWindow(mWindow);
 
 		return 0;
 	}
@@ -155,6 +166,8 @@ int Game::iterate() {
 }
 
 void Game::input() {
+	ZoneScopedN("Input");
+
 	const uint8_t* keys = SDL_GetKeyboardState(nullptr);
 
 	mUpdatingActors = true;
@@ -165,6 +178,7 @@ void Game::input() {
 }
 
 void Game::update() {
+	ZoneScopedN("Update");
 	// Update the game
 	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
 	if (delta > 0.05) {
@@ -196,6 +210,7 @@ void Game::update() {
 
 #ifdef IMGUI
 void Game::gui() {
+	ZoneScopedN("ImGui");
 	static bool demoMenu = false;
 	static bool vsync = true;
 	static bool wireframe = false;
@@ -237,16 +252,20 @@ void Game::gui() {
 	SDL_GL_SetSwapInterval(static_cast<int>(vsync));
 }
 #else
-void Game::gui() {}
+void Game::gui() { ZoneScopedN("ImGui"); }
 #endif
 
 void Game::draw() {
+	ZoneScopedN("Draw");
+	TracyGpuZone("Draw");
 #ifdef IMGUI
 	ImGui::Render();
 #endif
 
+	// float time = static_cast<float>(SDL_GetTicks()) / 10;
+
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	Shader* dest = mShaders->get("basic.vert", "basic.frag");
 	dest->activate();
@@ -254,12 +273,8 @@ void Game::draw() {
 	dest->set("view", mCamera->getViewMatrix());
 	dest->set("proj", mCamera->getProjectionMatrix());
 	Eigen::Affine3f modelMat = Eigen::Affine3f::Identity();
+	// modelMat.rotate(Eigen::AngleAxisf(toRadians(time), Eigen::Vector3f::UnitY()));
 	dest->set("model", modelMat);
-
-	// Eigen::Vector3f(1.0f, 0.3f, 0.5f).normalized();
-
-	/*float time = static_cast<float>(SDL_GetTicks()) /
-	 * 1000;*/
 
 	Eigen::Vector4f lightPos(1.2f, 1.0f, 2.0f, 1.0f);
 
@@ -267,27 +282,6 @@ void Game::draw() {
 	dest->set("dirLight.ambient", 0.05f, 0.05f, 0.05f);
 	dest->set("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
 	dest->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
-
-	/*
-	const Eigen::Vector3f pointLightPositions[] = {
-		Eigen::Vector3f(0.7f, 0.2f, 2.0f),
-	Eigen::Vector3f(2.3f, -3.3f, -4.0f),
-		Eigen::Vector3f(-4.0f, 2.0f, -12.0f),
-	Eigen::Vector3f(0.0f, 0.0f, -3.0f)};
-
-	for (size_t i = 0; i < sizeof(pointLightPositions) /
-	sizeof(pointLightPositions[0]); i++) { std::string light =
-	"pointLights[0]."; light[12] += i;
-
-		dest->set(light + "position", pointLightPositions[i]);
-		dest->set(light + "ambient", 0.05f, 0.05f, 0.05f);
-		dest->set(light + "diffuse", 0.8f, 0.8f, 0.8f);
-		dest->set(light + "specular", 1.0f, 1.0f, 1.0f);
-		dest->set(light + "constant", 1.0f);
-		dest->set(light + "linear", 0.09f);
-		dest->set(light + "quadratic", 0.032f);
-	}
-	*/
 
 	dest->set("spotLight.position", mCamera->getOwner()->getPosition());
 	dest->set("spotLight.direction", mCamera->getOwner()->getForward());
@@ -300,33 +294,34 @@ void Game::draw() {
 	dest->set("spotLight.cutOff", cos(toRadians(12.5f)));
 	dest->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
 
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	glEnable(GL_DEPTH_TEST);
+	glStencilMask(0xFF);
+
 	mModel->draw(dest);
 
-	/*
-	source->activate();
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glDisable(GL_DEPTH_TEST);
+	glStencilMask(0x00);
 
-	source->set("view", mCamera->mViewMatrix);
-	source->set("proj", mCamera->mProjectionMatrix);
+	Shader* single = mShaders->get("basic.vert", "light.frag");
+	modelMat.scale(1.2f);
+	single->activate();
+	single->set("view", mCamera->getViewMatrix());
+	single->set("proj", mCamera->getProjectionMatrix());
+	single->set("model", modelMat);
+	mModel->draw(dest);
 
-	source->set("aColor", 1.0f, 1.0f, 1.0f);
-
-	for (const auto& pos : pointLightPositions) {
-		modelMat.setIdentity();
-		modelMat.translate(pos);
-		modelMat.scale(0.2f);
-
-		source->set("model", modelMat);
-
-		glDrawElements(GL_TRIANGLES, mVertex->indices(),
-	GL_UNSIGNED_INT, 0);
-	}
-	*/
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	glEnable(GL_DEPTH_TEST);
+	glStencilMask(0xFF);
 
 #ifdef IMGUI
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #endif
 
 	SDL_GL_SwapWindow(mWindow);
+	TracyGpuCollect;
 }
 
 int Game::event(const SDL_Event& event) {
@@ -363,14 +358,12 @@ int Game::event(const SDL_Event& event) {
 					mPaused = false;
 				}
 #endif
-
 				mTextures->reload();
 				mShaders->reload();
 			}
 			if (event.key.key == SDLK_F3) {
 				mPaused = !mPaused;
 			}
-
 			break;
 		}
 

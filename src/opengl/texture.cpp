@@ -24,7 +24,9 @@ Texture::Texture(const std::string_view& path) : name(path) {
 
 	unsigned char* data = stbi_load_from_memory(source, size, &width, &height, &channels, 0);
 	*/
-	int width, height, channels;
+	int width = 0;
+	int height = 0;
+	int channels = 0;
 	unsigned char* data = stbi_load(path.data(), &width, &height, &channels, 0);
 
 	[[unlikely]] if (data == nullptr) {
@@ -37,7 +39,7 @@ Texture::Texture(const std::string_view& path) : name(path) {
 
 	SDL_Log("Loaded texture %s: %d channels %dx%d", name.data(), channels, width, height);
 
-	GLenum format;
+	GLenum format = GL_RGB;
 	switch (channels) {
 		// TODO: Gray scale
 		case 3:
@@ -71,7 +73,9 @@ Texture::Texture(const std::string_view& path) : name(path) {
 }
 
 Texture::~Texture() {
+#ifndef ADDRESS
 	glDeleteTextures(1, &mID);
+#endif
 
 	SDL_Log("Unloading texture %s", name.data());
 }

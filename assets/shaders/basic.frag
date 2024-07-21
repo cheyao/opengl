@@ -44,8 +44,8 @@ struct SpotLight {
 };
 
 uniform DirLight dirLight;
-#define POINT_LIGHTS 4  
-uniform PointLight pointLights[POINT_LIGHTS];
+// #define POINT_LIGHTS 0  
+// uniform PointLight pointLights[POINT_LIGHTS];
 uniform SpotLight spotLight;
 
 in vec3 normal;
@@ -72,6 +72,8 @@ void main() {
 
 	color = vec4(outColor, 1.0f);
 }
+
+// TODO: Concat common parts
 
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 	vec3 lightDir = normalize(-light.direction);
@@ -133,9 +135,5 @@ vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 	vec3 diffuse = light.diffuse * diff * texture(texture_diffuse0, texPos).rgb;  
 	vec3 specular = light.specular * spec * texture(texture_specular0, texPos).rgb;  
 
-	ambient  *= attenuation * intensity;
-	diffuse  *= attenuation * intensity;
-	specular *= attenuation * intensity;
-
-	return ambient + diffuse + specular;
+	return (ambient + diffuse + specular) * attenuation * intensity;
 }

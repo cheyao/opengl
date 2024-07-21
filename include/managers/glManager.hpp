@@ -2,21 +2,9 @@
 
 #include <SDL3/SDL.h>
 
-#ifdef DEBUG
-#define GL_CHECK(stmt)                                                                             \
-	do {                                                                                           \
-		stmt;                                                                                      \
-		checkGLError(#stmt, __FILE__, __LINE__);                                                   \
-	} while (0)
-#else
-#define GL_CHECK(stmt)
-#endif
-
-void checkGLError(const char* stmt, const char* fname, int line);
-
 class GLManager {
 public:
-	explicit GLManager(SDL_Window* window);
+	GLManager();
 	GLManager(GLManager &&) = delete;
 	GLManager(const GLManager &) = delete;
 	GLManager &operator=(GLManager &&) = delete;
@@ -24,6 +12,7 @@ public:
 	~GLManager();
 
 	static void printInfo();
+	void bindContext(SDL_Window* window);
 
 	SDL_GLContext getContext() { return mContext; }
 
