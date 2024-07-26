@@ -53,16 +53,41 @@ int SDL_AppEvent(void* appstate, const SDL_Event* event) {
 	return static_cast<Game*>(appstate)->event(*event);
 }
 
+#ifdef DEBUG
+#include <filesystem>
+#endif
+
 int SDL_AppIterate(void* appstate) {
 	try {
 		return static_cast<Game*>(appstate)->iterate();
-	} catch (...) {
+	} 
 #ifdef DEBUG
+	catch (const std::filesystem::filesystem_error& error) {
+
+		SDL_Log("Filesystem Error:");
+		SDL_Log("what():  %s", error.what());
+		SDL_Log("path1(): %s", error.path1().c_str());
+		SDL_Log("path2(): %s", error.path2().c_str());
+		SDL_Log("code().value():    %d", error.code().value());
+		SDL_Log("code().message():  %s", error.code().message().data());
+		SDL_Log("code().category(): %s", error.code().category().name());
+
+		// static_cast<Game*>(appstate)->pause();
+
+		return 0;
+	}
+#endif
+	catch (const std::runtime_error& error) {
+#ifdef DEBUG
+		SDL_Log("Uncaught exception: %s", error.what());
+
 		static_cast<Game*>(appstate)->pause();
 
 		return 0;
 #else
-		return 1;
+		ERROR_BOX("Exception thrown, the game might not function correctly");
+
+		return 0;
 #endif
 	}
 }

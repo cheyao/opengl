@@ -1,7 +1,6 @@
 #include "opengl/model.hpp"
 
 #include "game.hpp"
-#include "managers/textureManager.hpp"
 #include "opengl/mesh.hpp"
 #include "opengl/texture.hpp"
 #include "third_party/Eigen/Core"
@@ -29,7 +28,7 @@ Model::Model(const std::string_view& path, Game* owner) : mOwner(owner) {
 		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have "
 				  "enough memory");
 
-		throw 1;
+		throw std::runtime_error("Model.cpp: Failed to read model");
 	}
 
 	loadNode(scene->mRootNode, scene);

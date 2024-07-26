@@ -7,6 +7,7 @@
 #include <SDL3/SDL.h>
 #include <cassert>
 #include <string_view>
+#include <unordered_map>
 
 Shader::Shader(const std::string_view& vertName, const std::string_view& fragName)
 	: mShaderProgram(glCreateProgram()) {
@@ -36,7 +37,7 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 
 		delete[] log;
 
-		throw 1;
+		throw std::runtime_error("Shader.cpp: Failed to link shader");
 	}
 }
 
@@ -57,9 +58,7 @@ int Shader::getUniform(const std::string_view& name) const {
 	[[unlikely]] if (location == -1 && !errored.contains(std::string(name))) {
 		SDL_Log("Failed find uniform location: %s\n", name.data());
 		errored[std::string(name)] = true;
-
-		// ERROR_BOX("Failed to find uniform location");
-		// throw 1;
+		return -1;
 	}
 #endif
 
@@ -127,11 +126,14 @@ void Shader::compile(const std::string_view& fileName, const GLenum& type, unsig
 #endif
 
 	[[unlikely]] if (shaderSource == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to read shader shource: %s\n",
-						fileName.data());
-		ERROR_BOX("Failed to read assets");
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to read shader shource %s: %s\n",
+						fileName.data(), SDL_GetError());
 
-		throw 1;
+#ifndef DEBUG
+		ERROR_BOX("Failed to read assets");
+#endif
+
+		throw std::runtime_error("shader.cpp: Failed to read shader source");
 	}
 	SDL_Log("Loading %s", fileName.data());
 
@@ -142,7 +144,6 @@ void Shader::compile(const std::string_view& fileName, const GLenum& type, unsig
 	SDL_free(shaderSource);
 
 	// Error checking
-	// FIXME: Some wierd error handleing
 	int success = 0;
 	glGetShaderiv(out, GL_COMPILE_STATUS, &success);
 	[[unlikely]] if (success == 0) {
@@ -153,10 +154,11 @@ void Shader::compile(const std::string_view& fileName, const GLenum& type, unsig
 		glGetShaderInfoLog(out, len * sizeof(GLchar), nullptr, &log[0]);
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to compile shader %s: \n%s\n",
 						fileName.data(), log);
+
 		ERROR_BOX("Failed to compile shader");
 
 		delete[] log;
 
-		throw 1;
+		throw std::runtime_error("shader.cpp: Failed to compile shader");
 	}
 }

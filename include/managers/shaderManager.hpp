@@ -24,8 +24,4 @@ private:
 	std::unordered_map<std::string, class Shader*> mTextures;
 
 	std::string mPath;
-
-#ifdef DEBUG
-	std::unordered_map<class Shader*, std::filesystem::file_time_type> mLastEdit;
-#endif
 };

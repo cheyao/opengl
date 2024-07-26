@@ -56,5 +56,7 @@ class Game {
 	std::string mBasePath;
 
 	bool mPaused;
+	
+	class Mesh* mWindowMesh;
 	// TODO: Seperate draw class
 };

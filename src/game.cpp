@@ -6,8 +6,10 @@
 #include "managers/glManager.hpp"
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
+#include "opengl/mesh.hpp"
 #include "opengl/model.hpp"
 #include "opengl/shader.hpp"
+#include "opengl/texture.hpp"
 #include "third_party/Eigen/src/Core/Matrix.h"
 #include "tracy/Tracy.hpp"
 #include "tracy/TracyOpenGL.hpp"
@@ -50,7 +52,7 @@ Game::Game()
 		ERROR_BOX("Failed to make SDL window, there is something wrong with "
 				  "your system/SDL installation");
 
-		throw 1;
+		throw std::runtime_error("game.cpp: Failed to create SDL window");
 	}
 	SDL_SetWindowMinimumSize(mWindow, 480, 320);
 
@@ -97,11 +99,11 @@ Game::Game()
 	mTextures = std::make_unique<TextureManager>(mBasePath);
 	mShaders = std::make_unique<ShaderManager>(mBasePath);
 
-	// TODO: Get a icon
+	// TODO: Icon
 	/*
 	SDL_Surface *icon = IMG_Load("assets/icon.png");
 	SDL_SetWindowIcon(mWindow, icon);
-	SDL_DestroySurface(icon);
+	SDL_backpackShaderroySurface(icon);
 	*/
 
 	mGL->printInfo();
@@ -120,6 +122,17 @@ void Game::setup() {
 
 	new Player(this);
 	mModel = new Model(fullPath("models" + SEPARATOR + "backpack.obj"), this);
+
+	const std::vector<Vertex> vertices = {
+		{{-0.5f, -0.5f, 0.0f},  {0.0f,  0.0f, 0.0f}, {0.0f, 0.0f}},
+		{{+0.5f, -0.5f, 0.0f},  {0.0f,  0.0f, 0.0f}, {0.0f, 1.0f}},
+		{{-0.5f,  0.5f, 0.0f},  {0.0f,  0.0f, 0.0f}, {1.0f, 0.0f}},
+		{{+0.5f,  0.5f, 0.0f},  {0.0f,  0.0f, 0.0f}, {1.0f, 1.0f}},
+	};
+	const std::vector<unsigned int> indices = {1, 3, 0, 3, 2, 0};
+	const std::vector<std::pair<Texture*, TextureType>> textures = {std::make_pair(mTextures->get("windows.png"), TextureType::DIFFUSE)};
+
+	mWindowMesh = new Mesh(vertices, indices, textures);
 
 	SDL_Log("Successfully initialized OpenGL and game\n");
 }
@@ -211,6 +224,7 @@ void Game::update() {
 #ifdef IMGUI
 void Game::gui() {
 	ZoneScopedN("ImGui");
+
 	static bool demoMenu = false;
 	static bool vsync = true;
 	static bool wireframe = false;
@@ -265,56 +279,48 @@ void Game::draw() {
 	// float time = static_cast<float>(SDL_GetTicks()) / 10;
 
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Shader* dest = mShaders->get("basic.vert", "basic.frag");
-	dest->activate();
+	Shader* backpackShader = mShaders->get("basic.vert", "basic.frag");
+	backpackShader->activate();
 
-	dest->set("view", mCamera->getViewMatrix());
-	dest->set("proj", mCamera->getProjectionMatrix());
+	backpackShader->set("view", mCamera->getViewMatrix());
+	backpackShader->set("proj", mCamera->getProjectionMatrix());
 	Eigen::Affine3f modelMat = Eigen::Affine3f::Identity();
 	// modelMat.rotate(Eigen::AngleAxisf(toRadians(time), Eigen::Vector3f::UnitY()));
-	dest->set("model", modelMat);
+	backpackShader->set("model", modelMat);
 
-	Eigen::Vector4f lightPos(1.2f, 1.0f, 2.0f, 1.0f);
+	const Eigen::Vector4f lightPos(1.2f, 1.0f, 2.0f, 1.0f);
 
-	dest->set("dirLight.direction", -0.2f, -1.0f, -0.3f);
-	dest->set("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-	dest->set("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
-	dest->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
+	backpackShader->set("dirLight.direction", -0.2f, -1.0f, -0.3f);
+	backpackShader->set("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+	backpackShader->set("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
+	backpackShader->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
-	dest->set("spotLight.position", mCamera->getOwner()->getPosition());
-	dest->set("spotLight.direction", mCamera->getOwner()->getForward());
-	dest->set("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-	dest->set("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-	dest->set("spotLight.specular", 1.0f, 1.0f, 1.0f);
-	dest->set("spotLight.constant", 1.0f);
-	dest->set("spotLight.linear", 0.09f);
-	dest->set("spotLight.quadratic", 0.032f);
-	dest->set("spotLight.cutOff", cos(toRadians(12.5f)));
-	dest->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
+	backpackShader->set("spotLight.position", mCamera->getOwner()->getPosition());
+	backpackShader->set("spotLight.direction", mCamera->getOwner()->getForward());
+	backpackShader->set("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+	backpackShader->set("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+	backpackShader->set("spotLight.specular", 1.0f, 1.0f, 1.0f);
+	backpackShader->set("spotLight.constant", 1.0f);
+	backpackShader->set("spotLight.linear", 0.09f);
+	backpackShader->set("spotLight.quadratic", 0.032f);
+	backpackShader->set("spotLight.cutOff", cos(toRadians(12.5f)));
+	backpackShader->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
 
-	glStencilFunc(GL_ALWAYS, 1, 0xFF);
-	glEnable(GL_DEPTH_TEST);
-	glStencilMask(0xFF);
+	mModel->draw(backpackShader);
 
-	mModel->draw(dest);
+	Shader* windowShader = mShaders->get("basic.vert", "window.frag");
+	windowShader->activate();
 
-	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glDisable(GL_DEPTH_TEST);
-	glStencilMask(0x00);
+	windowShader->set("view", mCamera->getViewMatrix());
+	windowShader->set("proj", mCamera->getProjectionMatrix());
+	modelMat.translate(Eigen::Vector3f(0.0f, 1.0f, 0.0f));
+	modelMat.scale(2);
+	// modelMat.rotate(Eigen::AngleAxisf(toRadians(time), Eigen::Vector3f::UnitY()));
+	windowShader->set("model", modelMat);
 
-	Shader* single = mShaders->get("basic.vert", "light.frag");
-	modelMat.scale(1.2f);
-	single->activate();
-	single->set("view", mCamera->getViewMatrix());
-	single->set("proj", mCamera->getProjectionMatrix());
-	single->set("model", modelMat);
-	mModel->draw(dest);
-
-	glStencilFunc(GL_ALWAYS, 1, 0xFF);
-	glEnable(GL_DEPTH_TEST);
-	glStencilMask(0xFF);
+	mWindowMesh->draw(windowShader);
 
 #ifdef IMGUI
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

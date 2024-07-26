@@ -5,6 +5,7 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <stdexcept>
 
 GLManager::GLManager() : mContext(nullptr) {
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -15,6 +16,13 @@ GLManager::GLManager() : mContext(nullptr) {
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+
+#ifdef __APPLE__
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+#endif
 }
 
 void GLManager::bindContext(SDL_Window* window) {
@@ -23,7 +31,8 @@ void GLManager::bindContext(SDL_Window* window) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to initialize OpenGL Context, there is something "
 				  "wrong with your OpenGL");
-		throw 1;
+
+		throw std::runtime_error("glManager.cpp: Failed to get opengl context");
 	}
 
 #ifdef GLES
@@ -34,7 +43,7 @@ void GLManager::bindContext(SDL_Window* window) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init glad!\n");
 		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
 
-		throw 1;
+		throw std::runtime_error("glManager.cpp: Failed to init glad");
 	}
 
 #ifdef GLES
@@ -52,9 +61,15 @@ void GLManager::bindContext(SDL_Window* window) {
 	SDL_GL_MakeCurrent(window, mContext);
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_STENCIL_TEST);
 
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+	glEnable(GL_STENCIL_TEST);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Enable tracy
 	TracyGpuContext;

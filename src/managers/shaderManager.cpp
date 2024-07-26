@@ -3,7 +3,6 @@
 #include "opengl/shader.hpp"
 #include "utils.hpp"
 
-#include <algorithm>
 #include <string>
 #include <unordered_map>
 
@@ -20,11 +19,6 @@ Shader* ShaderManager::get(const std::string& vert, const std::string& frag) {
 	Shader* shader = new Shader(mPath + vert, mPath + frag);
 	mTextures[vert + ':' + frag] = shader;
 
-#ifdef DEBUG
-	mLastEdit[shader] = std::max(std::filesystem::last_write_time(mPath + vert),
-								 std::filesystem::last_write_time(mPath + frag));
-#endif
-
 	return shader;
 }
 
@@ -37,20 +31,19 @@ ShaderManager::~ShaderManager() {
 }
 
 void ShaderManager::reload() {
+	SDL_Log("Reloading shaders");
+
 	for (auto& [names, shader] : mTextures) {
 		std::string frag = names;
 
-		size_t pos = frag.find(':');
-		std::string vert = frag.substr(0, pos);
+		const size_t pos = frag.find(':');
+		std::string vert = mPath + frag.substr(0, pos);
 		frag.erase(0, pos + 1);
+		frag = mPath + frag;
 
 #ifdef DEBUG
-		if (std::max(std::filesystem::last_write_time(mPath + vert),
-					 std::filesystem::last_write_time(mPath + frag)) == mLastEdit[shader]) {
-			continue;
-		}
 		try {
-			Shader* newTexture = new Shader(mPath + vert, mPath + frag);
+			Shader* newTexture = new Shader(vert, frag);
 
 			delete shader;
 
@@ -59,8 +52,6 @@ void ShaderManager::reload() {
 			SDL_Log("Error recompiling shaders");
 		}
 
-		mLastEdit[shader] = std::max(std::filesystem::last_write_time(mPath + vert),
-									 std::filesystem::last_write_time(mPath + frag));
 #else
 		Shader* newTexture = new Shader(mPath + vert, mPath + frag);
 		delete shader;
