@@ -10,12 +10,12 @@
 
 #include <SDL3/SDL.h>
 #include <algorithm>
-#include <chrono>
 #include <cstdint>
 #include <iterator>
 #include <memory>
 #include <string>
 #include <third_party/Eigen/Dense>
+#include <third_party/glad/glad.h>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>

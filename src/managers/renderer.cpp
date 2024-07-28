@@ -1,14 +1,17 @@
 #include "managers/renderer.hpp"
 
+#include "actors/actor.hpp"
 #include "components/cameraComponent.hpp"
 #include "game.hpp"
 #include "managers/glManager.hpp"
+#include "opengl/framebuffer.hpp"
 #include "opengl/mesh.hpp"
 #include "opengl/model.hpp"
 #include "opengl/shader.hpp"
-#include "actors/actor.hpp"
 #include "third_party/glad/glad.h"
 #include "utils.hpp"
+
+#include <memory>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -27,18 +30,12 @@ EM_JS(int, canvasResize, (), {
 });
 #endif
 
-#include <memory>
-
-// TODO: Framebuffer
-
 Renderer::Renderer(Game* game)
-	: mOwner(game), mWindow(nullptr), mGL(nullptr), mWidth(0), mHeight(0), mWindowMesh(nullptr),
-	  mModel(nullptr) {
+	: mOwner(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mWidth(0), mHeight(0),
+	  mWindowMesh(nullptr), mModel(nullptr) {
 	mGL = std::make_unique<GLManager>();
 
-	mWindow = SDL_CreateWindow("Golf", 1024, 768,
-							   SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MOUSE_GRABBED |
-								   SDL_WINDOW_MOUSE_CAPTURE);
+	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to make SDL window, there is something wrong with "
@@ -88,16 +85,18 @@ Renderer::Renderer(Game* game)
 	mModel = std::make_unique<Model>(mOwner->fullPath("models" SEPARATOR "backpack.obj"), mOwner);
 
 	const std::vector<Vertex> vertices = {
-		{{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-		{{+0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
-		{{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-		{{+0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
+		{{-0.5f, +0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Top left
+		{{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bot left
+		{{+0.5f, +0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f}}, // Top right
+		{{+0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // Bot right
 	};
-	const std::vector<unsigned int> indices = {1, 3, 0, 3, 2, 0};
+	const std::vector<unsigned int> indices = {0, 1, 2, 1, 3, 2};
 	const std::vector<std::pair<Texture*, TextureType>> textures = {
 		std::make_pair(mOwner->getTexture("windows.png"), TextureType::DIFFUSE)};
 
 	mWindowMesh = std::make_unique<Mesh>(vertices, indices, textures);
+
+	mFramebuffer = std::make_unique<Framebuffer>(mOwner);
 }
 
 Renderer::~Renderer() { SDL_DestroyWindow(mWindow); }
@@ -107,7 +106,7 @@ void Renderer::setDemensions(int width, int height) {
 	mHeight = height;
 
 	glViewport(0, 0, width, height);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	mFramebuffer->setDemensions(width, height);
 }
 
 void Renderer::draw(CameraComponent* camera) {
@@ -169,9 +168,5 @@ void Renderer::draw(CameraComponent* camera) {
 
 	mWindowMesh->draw(windowShader);
 
-#ifdef IMGUI
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#endif
-
-	SDL_GL_SwapWindow(mWindow);
+	mFramebuffer->swap(mWindow);
 }

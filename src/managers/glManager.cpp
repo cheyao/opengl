@@ -69,15 +69,9 @@ void GLManager::bindContext(SDL_Window* window) {
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glGenRenderbuffers(1, &mRBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, mRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1024, 768);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRBO);
 }
 
 GLManager::~GLManager() { 
-	glDeleteRenderbuffers(1, &mRBO);
 	SDL_GL_DestroyContext(mContext); 
 }
 

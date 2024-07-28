@@ -49,6 +49,7 @@ src/opengl/mesh.cpp
 src/opengl/model.cpp
 src/opengl/shader.cpp
 src/opengl/texture.cpp
+src/opengl/framebuffer.cpp
 
 src/managers/glManager.cpp
 src/managers/shaderManager.cpp
@@ -71,6 +72,7 @@ include/opengl/model.hpp
 include/opengl/shader.hpp
 include/opengl/texture.hpp
 include/opengl/types.hpp
+include/opengl/framebuffer.hpp
 
 include/managers/glManager.hpp
 include/managers/shaderManager.hpp

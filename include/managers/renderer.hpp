@@ -22,6 +22,7 @@ class Renderer {
 
 	struct SDL_Window* mWindow;
 	std::unique_ptr<class GLManager> mGL;
+	std::unique_ptr<class Framebuffer> mFramebuffer;
 
 	int mWidth, mHeight;
 
