@@ -3,10 +3,6 @@
 #include <string>
 #include <unordered_map>
 
-#ifdef DEBUG
-#include <filesystem>
-#endif
-
 class ShaderManager {
 public:
 	explicit ShaderManager(const std::string& path);

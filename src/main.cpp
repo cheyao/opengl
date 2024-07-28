@@ -11,6 +11,9 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <stdexcept>
+#include <string>
+#include <system_error>
 
 int SDL_AppInit(void** appstate, int argc, char** argv) {
 	(void)argc;
@@ -60,7 +63,7 @@ int SDL_AppEvent(void* appstate, const SDL_Event* event) {
 int SDL_AppIterate(void* appstate) {
 	try {
 		return static_cast<Game*>(appstate)->iterate();
-	} 
+	}
 #ifdef DEBUG
 	catch (const std::filesystem::filesystem_error& error) {
 

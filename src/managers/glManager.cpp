@@ -1,7 +1,6 @@
 #include "managers/glManager.hpp"
 
 #include "third_party/glad/glad.h"
-#include "tracy/TracyOpenGL.hpp"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
@@ -71,11 +70,16 @@ void GLManager::bindContext(SDL_Window* window) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// Enable tracy
-	TracyGpuContext;
+	glGenRenderbuffers(1, &mRBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, mRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1024, 768);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRBO);
 }
 
-GLManager::~GLManager() { SDL_GL_DestroyContext(mContext); }
+GLManager::~GLManager() { 
+	glDeleteRenderbuffers(1, &mRBO);
+	SDL_GL_DestroyContext(mContext); 
+}
 
 void GLManager::printInfo() {
 	SDL_Log("Video driver: %s\n", SDL_GetCurrentVideoDriver());

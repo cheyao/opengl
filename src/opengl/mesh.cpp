@@ -4,8 +4,8 @@
 #include "opengl/texture.hpp"
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
-#include "tracy/Tracy.hpp"
 
+#include <stddef.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -48,8 +48,6 @@ Mesh::~Mesh() {
 }
 
 void Mesh::draw(const Shader* shader) const {
-	ZoneScopedN("Draw mesh");
-
 	unsigned int diffuse = 0;
 	unsigned int specular = 0;
 	unsigned int height = 0;

@@ -2,25 +2,20 @@
 
 #include "actors/actor.hpp"
 #include "actors/player.hpp"
-#include "components/cameraComponent.hpp"
-#include "managers/glManager.hpp"
+#include "managers/renderer.hpp"
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
-#include "opengl/mesh.hpp"
-#include "opengl/model.hpp"
-#include "opengl/shader.hpp"
-#include "opengl/texture.hpp"
 #include "third_party/Eigen/src/Core/Matrix.h"
-#include "tracy/Tracy.hpp"
-#include "tracy/TracyOpenGL.hpp"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <algorithm>
+#include <chrono>
 #include <cstdint>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <third_party/Eigen/Dense>
-#include <third_party/glad/glad.h>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -28,67 +23,9 @@
 #include <imgui.h>
 #endif
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten/html5.h>
-
-EM_JS(int, browserHeight, (), { return window.innerHeight; });
-EM_JS(int, browserWidth, (), { return window.innerWidth; });
-EM_JS(int, canvasResize, (), {
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-});
-#endif
-
 Game::Game()
-	: mWindow(nullptr), mGL(nullptr), mTextures(nullptr), mShaders(nullptr), mCamera(nullptr),
-	  mModel(nullptr), mUpdatingActors(false), mWidth(0), mHeight(0), mTicks(0), mPaused(false) {
-	ZoneScopedN("Setup context");
-
-	mGL = std::make_unique<GLManager>();
-
-	mWindow = SDL_CreateWindow("Golf", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-	if (mWindow == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
-		ERROR_BOX("Failed to make SDL window, there is something wrong with "
-				  "your system/SDL installation");
-
-		throw std::runtime_error("game.cpp: Failed to create SDL window");
-	}
-	SDL_SetWindowMinimumSize(mWindow, 480, 320);
-
-	mGL->bindContext(mWindow);
-
-#ifdef __EMSCRIPTEN__
-	mHeight = browserHeight();
-	mWidth = browserWidth();
-	canvasResize();
-	SDL_SetWindowSize(mWindow, mWidth, mHeight);
-#else
-	SDL_GetWindowSize(mWindow, &mWidth, &mHeight);
-#endif
-
-	glViewport(0, 0, mWidth, mHeight);
-
-#ifdef IMGUI
-	SDL_Log("Initializing ImGUI");
-
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-#ifdef __EMSCRIPTEN__
-	io.IniFilename = nullptr;
-#endif
-
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplSDL3_InitForOpenGL(mWindow, mGL->getContext());
-	ImGui_ImplOpenGL3_Init("#version 400");
-
-	SDL_Log("Finished Initializing ImGUI");
-#endif
-
+	: mRenderer(nullptr), mTextures(nullptr), mShaders(nullptr), mCamera(nullptr),
+	  mUpdatingActors(false), mTicks(0), mBasePath(""), mPaused(false) {
 	const char* basepath = SDL_GetBasePath();
 	if (basepath != nullptr) {
 		mBasePath = std::string(basepath);
@@ -99,14 +36,14 @@ Game::Game()
 	mTextures = std::make_unique<TextureManager>(mBasePath);
 	mShaders = std::make_unique<ShaderManager>(mBasePath);
 
+	mRenderer = std::make_unique<Renderer>(this);
+
 	// TODO: Icon
 	/*
 	SDL_Surface *icon = IMG_Load("assets/icon.png");
 	SDL_SetWindowIcon(mWindow, icon);
 	SDL_backpackShaderroySurface(icon);
 	*/
-
-	mGL->printInfo();
 
 	mTicks = SDL_GetTicks();
 
@@ -116,23 +53,9 @@ Game::Game()
 }
 
 void Game::setup() {
-	ZoneScopedN("Settup assets");
-
 	SDL_Log("Setting up game");
 
 	new Player(this);
-	mModel = new Model(fullPath("models" + SEPARATOR + "backpack.obj"), this);
-
-	const std::vector<Vertex> vertices = {
-		{{-0.5f, -0.5f, 0.0f},  {0.0f,  0.0f, 0.0f}, {0.0f, 0.0f}},
-		{{+0.5f, -0.5f, 0.0f},  {0.0f,  0.0f, 0.0f}, {0.0f, 1.0f}},
-		{{-0.5f,  0.5f, 0.0f},  {0.0f,  0.0f, 0.0f}, {1.0f, 0.0f}},
-		{{+0.5f,  0.5f, 0.0f},  {0.0f,  0.0f, 0.0f}, {1.0f, 1.0f}},
-	};
-	const std::vector<unsigned int> indices = {1, 3, 0, 3, 2, 0};
-	const std::vector<std::pair<Texture*, TextureType>> textures = {std::make_pair(mTextures->get("windows.png"), TextureType::DIFFUSE)};
-
-	mWindowMesh = new Mesh(vertices, indices, textures);
 
 	SDL_Log("Successfully initialized OpenGL and game\n");
 }
@@ -142,8 +65,6 @@ void Game::setup() {
 #endif
 
 int Game::iterate() {
-	ZoneScopedN("Iteration");
-
 	if (mPaused) {
 		mTicks = SDL_GetTicks();
 
@@ -179,8 +100,6 @@ int Game::iterate() {
 }
 
 void Game::input() {
-	ZoneScopedN("Input");
-
 	const uint8_t* keys = SDL_GetKeyboardState(nullptr);
 
 	mUpdatingActors = true;
@@ -191,7 +110,6 @@ void Game::input() {
 }
 
 void Game::update() {
-	ZoneScopedN("Update");
 	// Update the game
 	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
 	if (delta > 0.05) {
@@ -221,10 +139,8 @@ void Game::update() {
 	}
 }
 
-#ifdef IMGUI
 void Game::gui() {
-	ZoneScopedN("ImGui");
-
+#ifdef IMGUI
 	static bool demoMenu = false;
 	static bool vsync = true;
 	static bool wireframe = false;
@@ -264,71 +180,10 @@ void Game::gui() {
 	}
 
 	SDL_GL_SetSwapInterval(static_cast<int>(vsync));
+#endif
 }
-#else
-void Game::gui() { ZoneScopedN("ImGui"); }
-#endif
 
-void Game::draw() {
-	ZoneScopedN("Draw");
-	TracyGpuZone("Draw");
-#ifdef IMGUI
-	ImGui::Render();
-#endif
-
-	// float time = static_cast<float>(SDL_GetTicks()) / 10;
-
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	Shader* backpackShader = mShaders->get("basic.vert", "basic.frag");
-	backpackShader->activate();
-
-	backpackShader->set("view", mCamera->getViewMatrix());
-	backpackShader->set("proj", mCamera->getProjectionMatrix());
-	Eigen::Affine3f modelMat = Eigen::Affine3f::Identity();
-	// modelMat.rotate(Eigen::AngleAxisf(toRadians(time), Eigen::Vector3f::UnitY()));
-	backpackShader->set("model", modelMat);
-
-	const Eigen::Vector4f lightPos(1.2f, 1.0f, 2.0f, 1.0f);
-
-	backpackShader->set("dirLight.direction", -0.2f, -1.0f, -0.3f);
-	backpackShader->set("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-	backpackShader->set("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
-	backpackShader->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
-
-	backpackShader->set("spotLight.position", mCamera->getOwner()->getPosition());
-	backpackShader->set("spotLight.direction", mCamera->getOwner()->getForward());
-	backpackShader->set("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-	backpackShader->set("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-	backpackShader->set("spotLight.specular", 1.0f, 1.0f, 1.0f);
-	backpackShader->set("spotLight.constant", 1.0f);
-	backpackShader->set("spotLight.linear", 0.09f);
-	backpackShader->set("spotLight.quadratic", 0.032f);
-	backpackShader->set("spotLight.cutOff", cos(toRadians(12.5f)));
-	backpackShader->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
-
-	mModel->draw(backpackShader);
-
-	Shader* windowShader = mShaders->get("basic.vert", "window.frag");
-	windowShader->activate();
-
-	windowShader->set("view", mCamera->getViewMatrix());
-	windowShader->set("proj", mCamera->getProjectionMatrix());
-	modelMat.translate(Eigen::Vector3f(0.0f, 1.0f, 0.0f));
-	modelMat.scale(2);
-	// modelMat.rotate(Eigen::AngleAxisf(toRadians(time), Eigen::Vector3f::UnitY()));
-	windowShader->set("model", modelMat);
-
-	mWindowMesh->draw(windowShader);
-
-#ifdef IMGUI
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-#endif
-
-	SDL_GL_SwapWindow(mWindow);
-	TracyGpuCollect;
-}
+void Game::draw() { mRenderer->draw(mCamera); }
 
 int Game::event(const SDL_Event& event) {
 #ifdef IMGUI
@@ -343,9 +198,7 @@ int Game::event(const SDL_Event& event) {
 		}
 
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED: {
-			if (event.window.windowID == SDL_GetWindowID(mWindow)) {
-				return 1;
-			}
+			return 1;
 
 			break;
 		}
@@ -374,9 +227,7 @@ int Game::event(const SDL_Event& event) {
 		}
 
 		case SDL_EVENT_WINDOW_RESIZED: {
-			mWidth = event.window.data1;
-			mHeight = event.window.data2;
-			glViewport(0, 0, event.window.data1, event.window.data2);
+			mRenderer->setDemensions(event.window.data1, event.window.data2);
 
 			break;
 		}
@@ -408,6 +259,9 @@ void Game::removeActor(Actor* actor) {
 }
 
 Texture* Game::getTexture(const std::string& name) { return mTextures->get(name); }
+Shader* Game::getShader(const std::string& vert, const std::string& frag) {
+	return mShaders->get(vert, frag);
+}
 
 Game::~Game() {
 	SDL_Log("Quitting game\n");
@@ -424,8 +278,7 @@ Game::~Game() {
 	while (!mPendingActors.empty()) {
 		delete mPendingActors.back();
 	}
-
-	delete mModel;
-
-	SDL_DestroyWindow(mWindow);
 }
+
+[[nodiscard]] int Game::getWidth() const { return mRenderer->getWidth(); }
+[[nodiscard]] int Game::getHeight() const { return mRenderer->getHeight(); }

@@ -3,6 +3,7 @@
 #include "third_party/Eigen/Geometry"
 
 #include <vector>
+#include <stdint.h>
 
 class Actor {
   public:

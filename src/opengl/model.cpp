@@ -2,21 +2,20 @@
 
 #include "game.hpp"
 #include "opengl/mesh.hpp"
-#include "opengl/texture.hpp"
+#include "opengl/types.hpp"
 #include "third_party/Eigen/Core"
-#include "tracy/Tracy.hpp"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <stdexcept>
+#include <string>
 #include <string_view>
+#include <utility>
 
 Model::Model(const std::string_view& path, Game* owner) : mOwner(owner) {
-	ZoneScopedN("Loading model");
-	ZoneName(path.data(), path.size());
-
 	// TODO: SDL Importer
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(
@@ -126,8 +125,6 @@ std::vector<Texture*> Model::loadTextures(aiMaterial* mat, const aiTextureType t
 }
 
 void Model::draw(const class Shader* shader) const {
-	ZoneScopedN("Draw model");
-
 	for (const auto& mesh : mMeshes) {
 		mesh->draw(shader);
 	}

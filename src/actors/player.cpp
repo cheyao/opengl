@@ -5,6 +5,7 @@
 #include "game.hpp"
 
 #include <SDL3/SDL.h>
+#include <stdint.h>
 
 Player::Player(class Game* owner) : Actor(owner), up(0) {
 	new CameraComponent(this);

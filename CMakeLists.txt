@@ -13,7 +13,6 @@ option(IWYU 		"Run include what you use" OFF)
 option(CLANG_TIDY 	"Run clang tidy" OFF)
 option(CPPCHECK 	"Run cppcheck" OFF)
 option(IMGUI 		"Include GUI" OFF)
-option(TRACY 		"Include Tracy" OFF)
 option(ADDRESS	 	"Use address sanitizer" OFF)
 option(LEAK		"Use leak sanitizer" OFF)
 option(UNDEFINED	"Use undefined sanitizer" OFF)
@@ -21,7 +20,6 @@ option(ANDROID		"Build for android" OFF)
 option(OPTIMIZE		"Optimize a lot" OFF)
 option(MOLD		"Use mold" OFF)
 option(X11		"Force x11" OFF)
-option(TRACY_ENABLE 	"Enable Tracy" OFF)
 #CMAKE_BUILD_TYPE Release Debug
 
 if(CHECKS STREQUAL ON)
@@ -55,6 +53,7 @@ src/opengl/texture.cpp
 src/managers/glManager.cpp
 src/managers/shaderManager.cpp
 src/managers/textureManager.cpp
+src/managers/renderer.cpp
 
 src/actors/actor.cpp
 src/actors/player.cpp
@@ -76,6 +75,7 @@ include/opengl/types.hpp
 include/managers/glManager.hpp
 include/managers/shaderManager.hpp
 include/managers/textureManager.hpp
+include/managers/renderer.hpp
 
 include/actors/actor.hpp
 include/actors/player.hpp
@@ -143,9 +143,6 @@ else()
 endif()
 
 include_directories(include)
-include_directories(external/tracy/public)
-
-add_subdirectory(external/tracy)
 
 if(NOT ANDROID)
 	if(WEB)
@@ -227,8 +224,6 @@ else()
 
 	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
 endif()
-
-target_link_libraries(${BUILD_NAME} PUBLIC Tracy::TracyClient)
 
 if (NOT ANDROID)
 	find_package(assimp REQUIRED)

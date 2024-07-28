@@ -6,7 +6,7 @@
 #include <third_party/stb_image.h>
 
 #include <SDL3/SDL.h>
-#include <stddef.h>
+#include <stdexcept>
 #include <string_view>
 
 Texture::Texture(const std::string_view& path) : name(path) {

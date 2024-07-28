@@ -3,6 +3,9 @@
 #include "opengl/shader.hpp"
 #include "utils.hpp"
 
+#include <SDL3/SDL.h>
+#include <assert.h>
+#include <stddef.h>
 #include <string>
 #include <unordered_map>
 

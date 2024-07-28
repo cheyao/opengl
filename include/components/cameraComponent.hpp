@@ -1,6 +1,5 @@
 #pragma once
 
-#include "actors/actor.hpp"
 #include "components/component.hpp"
 #include "third_party/Eigen/Geometry"
 

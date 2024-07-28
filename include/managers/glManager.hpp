@@ -18,5 +18,7 @@ public:
 
 private:
 	SDL_GLContext mContext;
+
+	unsigned int mRBO;
 };
 

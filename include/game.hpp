@@ -1,11 +1,11 @@
 #pragma once
 
+#include "utils.hpp"
+
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
-
-#define fullPath(path) (mBasePath + "assets" + SEPARATOR + path)
 
 class Game {
   public:
@@ -22,14 +22,17 @@ class Game {
 	void addActor(class Actor* actor);
 	void removeActor(class Actor* actor);
 
-	[[nodiscard]] int getWidth() const { return mWidth; }
-	[[nodiscard]] int getHeight() const { return mHeight; }
+	[[nodiscard]] int getWidth() const;
+	[[nodiscard]] int getHeight() const;
 
 	void setCamera(class CameraComponent* camera) { mCamera = camera; }
 
 	void pause() { mPaused = true; }
 
 	class Texture* getTexture(const std::string& name);
+	class Shader* getShader(const std::string& vert, const std::string& frag);
+
+	inline std::string fullPath(const std::string& path) const { return (mBasePath + "assets" + SEPARATOR + path); };
 
   private:
 	void input();
@@ -38,25 +41,19 @@ class Game {
 	void draw();
 	void setup();
 
-	struct SDL_Window* mWindow;
-	std::unique_ptr<class GLManager> mGL;
+	std::unique_ptr<class Renderer> mRenderer;
 	std::unique_ptr<class TextureManager> mTextures;
 	std::unique_ptr<class ShaderManager> mShaders;
 
 	class CameraComponent* mCamera;
 
-	class Model* mModel;
-
 	std::vector<class Actor*> mActors;
 	std::vector<class Actor*> mPendingActors;
 	bool mUpdatingActors;
 
-	int mWidth, mHeight;
 	uint64_t mTicks;
 	std::string mBasePath;
 
 	bool mPaused;
-	
-	class Mesh* mWindowMesh;
 	// TODO: Seperate draw class
 };

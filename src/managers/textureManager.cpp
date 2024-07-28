@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #ifdef DEBUG
+#include <chrono>
 #include <filesystem>
 #endif
 
