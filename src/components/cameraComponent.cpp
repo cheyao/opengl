@@ -3,9 +3,8 @@
 #include "actors/actor.hpp"
 #include "components/component.hpp"
 #include "game.hpp"
-#include "third_party/Eigen/src/Core/Matrix.h"
-#include "third_party/Eigen/src/Geometry/AngleAxis.h"
-#include "third_party/Eigen/src/Geometry/Quaternion.h"
+#include "opengl/renderer.hpp"
+#include "third_party/Eigen/Geometry"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
@@ -18,7 +17,7 @@ CameraComponent::CameraComponent(Actor* owner, int priority)
 	Eigen::Quaternionf dir = mOwner->getRotation();
 	Eigen::AngleAxisf rot(toRadians(90), Eigen::Vector3f::UnitY());
 	mOwner->setRotation(dir * rot);
-	mOwner->getGame()->setCamera(this);
+	mOwner->getGame()->getRenderer()->setCamera(this);
 };
 
 void CameraComponent::update(float delta) {

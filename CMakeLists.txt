@@ -43,10 +43,13 @@ src/game.cpp
 
 src/components/cameraComponent.cpp
 src/components/component.cpp
+src/components/drawComponent.cpp
+src/components/meshComponent.cpp
+src/components/modelComponent.cpp
 src/components/movementComponent.cpp
 
 src/opengl/mesh.cpp
-src/opengl/model.cpp
+src/opengl/renderer.cpp
 src/opengl/shader.cpp
 src/opengl/texture.cpp
 src/opengl/framebuffer.cpp
@@ -54,10 +57,10 @@ src/opengl/framebuffer.cpp
 src/managers/glManager.cpp
 src/managers/shaderManager.cpp
 src/managers/textureManager.cpp
-src/managers/renderer.cpp
 
 src/actors/actor.cpp
 src/actors/player.cpp
+src/actors/world.cpp
 
 #Headers
 include/game.hpp
@@ -65,10 +68,13 @@ include/utils.hpp
 
 include/components/cameraComponent.hpp
 include/components/component.hpp
+include/components/drawComponent.hpp
+include/components/meshComponent.hpp
+include/components/modelComponent.hpp
 include/components/movementComponent.hpp
 
 include/opengl/mesh.hpp
-include/opengl/model.hpp
+include/opengl/renderer.hpp
 include/opengl/shader.hpp
 include/opengl/texture.hpp
 include/opengl/types.hpp
@@ -77,10 +83,10 @@ include/opengl/framebuffer.hpp
 include/managers/glManager.hpp
 include/managers/shaderManager.hpp
 include/managers/textureManager.hpp
-include/managers/renderer.hpp
 
 include/actors/actor.hpp
 include/actors/player.hpp
+include/actors/world.hpp
 
 #External
 src/third_party/stb_image.c

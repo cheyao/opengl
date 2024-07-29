@@ -2,9 +2,10 @@
 
 #include "actors/actor.hpp"
 #include "actors/player.hpp"
-#include "managers/renderer.hpp"
+#include "actors/world.hpp"
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
+#include "opengl/renderer.hpp"
 #include "third_party/Eigen/src/Core/Matrix.h"
 #include "utils.hpp"
 
@@ -24,8 +25,8 @@
 #endif
 
 Game::Game()
-	: mRenderer(nullptr), mTextures(nullptr), mShaders(nullptr), mCamera(nullptr),
-	  mUpdatingActors(false), mTicks(0), mBasePath(""), mPaused(false) {
+	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mUpdatingActors(false), mTicks(0),
+	  mBasePath(""), mPaused(false) {
 	const char* basepath = SDL_GetBasePath();
 	if (basepath != nullptr) {
 		mBasePath = std::string(basepath);
@@ -36,7 +37,7 @@ Game::Game()
 	mTextures = std::make_unique<TextureManager>(mBasePath);
 	mShaders = std::make_unique<ShaderManager>(mBasePath);
 
-	mRenderer = std::make_unique<Renderer>(this);
+	mRenderer = new Renderer(this);
 
 	// TODO: Icon
 	/*
@@ -55,6 +56,7 @@ Game::Game()
 void Game::setup() {
 	SDL_Log("Setting up game");
 
+	new World(this);
 	new Player(this);
 
 	SDL_Log("Successfully initialized OpenGL and game\n");
@@ -157,8 +159,20 @@ void Game::gui() {
 		ImGui::Text("Average %.3f ms/frame (%.1f FPS)", (1000.f / io.Framerate), io.Framerate);
 		ImGui::Text("%d vertices, %d indices (%d triangles)", io.MetricsRenderVertices,
 					io.MetricsRenderIndices, io.MetricsRenderIndices / 3);
-		auto pos = mActors[0]->getPosition();
-		ImGui::Text("%dx%dx%d", static_cast<int>(pos.x()), static_cast<int>(pos.y()),
+
+		Player* p = nullptr;
+		for (const auto& actor : mActors) {
+			if (dynamic_cast<Player*>(actor) != nullptr) {
+				p = dynamic_cast<Player*>(actor);
+				break;
+			}
+		}
+		if (p == nullptr) {
+			return;
+		}
+
+		auto pos = p->getPosition();
+		ImGui::Text("Player position: %dx%dx%d", static_cast<int>(pos.x()), static_cast<int>(pos.y()),
 					static_cast<int>(pos.z()));
 
 		// ImGui::Checkbox("Debug", &debugMenu);
@@ -183,7 +197,7 @@ void Game::gui() {
 #endif
 }
 
-void Game::draw() { mRenderer->draw(mCamera); }
+void Game::draw() { mRenderer->draw(); }
 
 int Game::event(const SDL_Event& event) {
 #ifdef IMGUI
@@ -278,6 +292,8 @@ Game::~Game() {
 	while (!mPendingActors.empty()) {
 		delete mPendingActors.back();
 	}
+
+	delete mRenderer;
 }
 
 [[nodiscard]] int Game::getWidth() const { return mRenderer->getWidth(); }

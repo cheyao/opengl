@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 class Renderer {
   public:
@@ -13,9 +14,15 @@ class Renderer {
 
 	[[nodiscard]] inline int getWidth() const { return mWidth; }
 	[[nodiscard]] inline int getHeight() const { return mHeight; }
-	void setDemensions(int width, int height);
 
-	void draw(class CameraComponent* camera);
+	void setDemensions(int width, int height);
+	void setCamera(class CameraComponent* camera) { mCamera = camera; }
+	void setLights(class Shader* shader) const;
+
+	void addSprite(class DrawComponent* sprite);
+	void removeSprite(class DrawComponent* sprite);
+
+	void draw() const;
 
   private:
 	class Game* mOwner;
@@ -24,8 +31,9 @@ class Renderer {
 	std::unique_ptr<class GLManager> mGL;
 	std::unique_ptr<class Framebuffer> mFramebuffer;
 
+	std::vector<class DrawComponent*> mDrawables;
+
 	int mWidth, mHeight;
 
-	std::unique_ptr<class Mesh> mWindowMesh;
-	std::unique_ptr<class Model> mModel;
+	class CameraComponent* mCamera;
 };

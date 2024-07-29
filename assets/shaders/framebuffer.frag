@@ -16,17 +16,17 @@ void main() {
 	float d = length(fragCoord - center);
 	vec2 uv = texPos;
 	
-	uv = uv * 2.0f - 1.0f; // 4 textures
-	vec2 offset = uv.yx / 5.0f; // offset?
-	uv = uv + uv * offset * offset;
-	uv = uv * 0.5f + 0.5f;
+	// uv = uv * 2.0f - 1.0f; // 4 textures
+	// vec2 offset = uv.yx / 5.0f; // offset?
+	// uv = uv + uv * offset * offset;
+	// uv = uv * 0.5f + 0.5f;
 
-	if (int(gl_FragCoord.x) % 2 == 0) {
+	if (int(gl_FragCoord.x) % 4 == 0) {
 		color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		// return;
 	}
-	if (int(gl_FragCoord.y) % 2 == 0) {
+	if (int(gl_FragCoord.y) % 4 == 0) {
 		color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		// return;

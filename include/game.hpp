@@ -25,12 +25,11 @@ class Game {
 	[[nodiscard]] int getWidth() const;
 	[[nodiscard]] int getHeight() const;
 
-	void setCamera(class CameraComponent* camera) { mCamera = camera; }
-
 	void pause() { mPaused = true; }
 
 	class Texture* getTexture(const std::string& name);
 	class Shader* getShader(const std::string& vert, const std::string& frag);
+	class Renderer* getRenderer() { return mRenderer; }
 
 	inline std::string fullPath(const std::string& path) const { return (mBasePath + "assets" + SEPARATOR + path); };
 
@@ -41,11 +40,10 @@ class Game {
 	void draw();
 	void setup();
 
-	std::unique_ptr<class Renderer> mRenderer;
 	std::unique_ptr<class TextureManager> mTextures;
 	std::unique_ptr<class ShaderManager> mShaders;
 
-	class CameraComponent* mCamera;
+	class Renderer* mRenderer;
 
 	std::vector<class Actor*> mActors;
 	std::vector<class Actor*> mPendingActors;

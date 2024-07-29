@@ -1,7 +1,9 @@
-#include "opengl/model.hpp"
+#include "components/modelComponent.hpp"
 
+#include "actors/actor.hpp"
 #include "game.hpp"
 #include "opengl/mesh.hpp"
+#include "opengl/shader.hpp"
 #include "opengl/types.hpp"
 #include "third_party/Eigen/Core"
 #include "utils.hpp"
@@ -11,11 +13,10 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <stdexcept>
-#include <string>
 #include <string_view>
 #include <utility>
 
-Model::Model(const std::string_view& path, Game* owner) : mOwner(owner) {
+ModelComponent::ModelComponent(Actor* owner, const std::string_view& path) : DrawComponent(owner) {
 	// TODO: SDL Importer
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(
@@ -27,7 +28,7 @@ Model::Model(const std::string_view& path, Game* owner) : mOwner(owner) {
 		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have "
 				  "enough memory");
 
-		throw std::runtime_error("Model.cpp: Failed to read model");
+		throw std::runtime_error("ModelComponent.cpp: Failed to read model");
 	}
 
 	loadNode(scene->mRootNode, scene);
@@ -35,13 +36,13 @@ Model::Model(const std::string_view& path, Game* owner) : mOwner(owner) {
 	SDL_Log("Successfully loaded model: %s", path.data());
 }
 
-Model::~Model() {
+ModelComponent::~ModelComponent() {
 	for (const auto& mesh : mMeshes) {
 		delete mesh;
 	}
 }
 
-void Model::loadNode(aiNode* node, const aiScene* scene) {
+void ModelComponent::loadNode(aiNode* node, const aiScene* scene) {
 	for (unsigned int i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		loadMesh(mesh, scene);
@@ -52,7 +53,7 @@ void Model::loadNode(aiNode* node, const aiScene* scene) {
 	}
 }
 
-void Model::loadMesh(aiMesh* mesh, const aiScene* scene) {
+void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<std::pair<Texture*, TextureType>> textures;
@@ -110,7 +111,7 @@ void Model::loadMesh(aiMesh* mesh, const aiScene* scene) {
 	mMeshes.emplace_back(new Mesh(vertices, indices, textures));
 }
 
-std::vector<Texture*> Model::loadTextures(aiMaterial* mat, const aiTextureType type) {
+std::vector<Texture*> ModelComponent::loadTextures(aiMaterial* mat, const aiTextureType type) {
 	std::vector<Texture*> textures;
 
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
@@ -118,14 +119,24 @@ std::vector<Texture*> Model::loadTextures(aiMaterial* mat, const aiTextureType t
 
 		mat->GetTexture(type, i, &str);
 
-		textures.emplace_back(mOwner->getTexture(str.C_Str()));
+		textures.emplace_back(mOwner->getGame()->getTexture(str.C_Str()));
 	}
 
 	return textures;
 }
 
-void Model::draw(const class Shader* shader) const {
+void ModelComponent::draw() {
+	if (!getVisible()) {
+		return;
+	}
+
+	Eigen::Affine3f matrix = Eigen::Affine3f::Identity();
+	matrix.translate(mOwner->getPosition());
+	matrix.scale(mOwner->getScale());
+	matrix.rotate(mOwner->getRotation());
+	this->getShader()->set("model", matrix);
+
 	for (const auto& mesh : mMeshes) {
-		mesh->draw(shader);
+		mesh->draw(this->getShader());
 	}
 }
