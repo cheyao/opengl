@@ -58,7 +58,7 @@ int Shader::getUniform(const std::string_view& name) const {
 	static std::unordered_map<std::string, bool> errored;
 
 	[[unlikely]] if (location == -1 && !errored.contains(std::string(name))) {
-		SDL_Log("Failed find uniform location: %s\n", name.data());
+		SDL_Log("Failed find uniform location \"%s\"\n", name.data());
 		errored[std::string(name)] = true;
 		return -1;
 	}

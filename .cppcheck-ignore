@@ -1,8 +1,4 @@
 unusedFunction
 missingIncludeSystem
-*:include/glad/glad.h
-*:include/KHR/khrplatform.h
-*:external/*
-*:include/stb_image.h
-*:src/glad.c
-*:src/stb_image.c
+*:include/third_party/*
+*:src/third_party/*

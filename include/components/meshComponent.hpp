@@ -14,7 +14,7 @@ class MeshComponent : public DrawComponent {
 	MeshComponent(const MeshComponent&) = delete;
 	MeshComponent& operator=(MeshComponent&&) = delete;
 	MeshComponent& operator=(const MeshComponent&) = delete;
-	~MeshComponent();
+	~MeshComponent() override = default;
 
 	void draw() override;
 

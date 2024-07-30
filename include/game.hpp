@@ -7,6 +7,10 @@
 #include <string>
 #include <vector>
 
+#ifdef DEBUG
+#include <filesystem>
+#endif
+
 class Game {
   public:
 	Game();
@@ -53,5 +57,8 @@ class Game {
 	std::string mBasePath;
 
 	bool mPaused;
-	// TODO: Seperate draw class
+
+#ifdef DEBUG
+	std::filesystem::file_time_type last_time;
+#endif
 };

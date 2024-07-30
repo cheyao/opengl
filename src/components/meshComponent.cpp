@@ -16,8 +16,6 @@ MeshComponent::MeshComponent(Actor* owner, const std::vector<Vertex>& vertices,
 							 const std::vector<std::pair<Texture*, TextureType>>& textures)
 	: DrawComponent(owner), mMesh(std::make_unique<Mesh>(vertices, indices, textures)) {}
 
-MeshComponent::~MeshComponent() {}
-
 void MeshComponent::draw() {
 	if (!getVisible()) {
 		return;
@@ -27,7 +25,7 @@ void MeshComponent::draw() {
 	matrix.translate(mOwner->getPosition());
 	matrix.scale(mOwner->getScale());
 	matrix.rotate(mOwner->getRotation());
-	this->getShader()->set("ModelComponent", matrix);
+	this->getShader()->set("model", matrix);
 
 	mMesh->draw(this->getShader());
 }

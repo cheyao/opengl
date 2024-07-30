@@ -6,10 +6,10 @@
 
 DrawComponent::DrawComponent(class Actor* owner, int drawOrder)
 	: Component(owner), mDrawOrder(drawOrder), mVisible(true) {
+	SDL_Log("Called");
 	mShader = mOwner->getGame()->getShader("basic.vert", "basic.frag");
+
 	mOwner->getGame()->getRenderer()->addSprite(this);
 }
-
-DrawComponent::~DrawComponent() {}
 
 void DrawComponent::draw() {}

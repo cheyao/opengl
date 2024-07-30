@@ -46,12 +46,14 @@ Game::Game()
 	SDL_backpackShaderroySurface(icon);
 	*/
 
-	mTicks = SDL_GetTicks();
-
 	SDL_SetRelativeMouseMode(1);
 
 	setup();
 }
+
+#ifdef DEBUG
+#include <filesystem>
+#endif
 
 void Game::setup() {
 	SDL_Log("Setting up game");
@@ -59,12 +61,14 @@ void Game::setup() {
 	new World(this);
 	new Player(this);
 
-	SDL_Log("Successfully initialized OpenGL and game\n");
-}
+	mTicks = SDL_GetTicks();
 
 #ifdef DEBUG
-#include <filesystem>
+	last_time = std::filesystem::last_write_time(fullPath("shaders"));
 #endif
+
+	SDL_Log("Successfully initialized OpenGL and game\n");
+}
 
 int Game::iterate() {
 	if (mPaused) {
@@ -84,8 +88,6 @@ int Game::iterate() {
 #endif
 
 #ifdef DEBUG
-	static std::filesystem::file_time_type last_time;
-
 	if (std::filesystem::last_write_time(fullPath("shaders")) != last_time) {
 		last_time = std::filesystem::last_write_time(fullPath("shaders"));
 

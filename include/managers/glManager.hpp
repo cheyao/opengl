@@ -14,7 +14,7 @@ public:
 	static void printInfo();
 	void bindContext(SDL_Window* window);
 
-	SDL_GLContext getContext() { return mContext; }
+	SDL_GLContext getContext() const { return mContext; }
 
 private:
 	SDL_GLContext mContext;

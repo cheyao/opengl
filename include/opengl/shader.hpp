@@ -3,6 +3,7 @@
 #include "third_party/Eigen/Dense"
 #include "third_party/glad/glad.h"
 
+#include <string>
 #include <string_view>
 
 class Shader {

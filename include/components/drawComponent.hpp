@@ -9,7 +9,7 @@ class DrawComponent : public Component {
 	DrawComponent(const DrawComponent&) = delete;
 	DrawComponent& operator=(DrawComponent&&) = delete;
 	DrawComponent& operator=(const DrawComponent&) = delete;
-	~DrawComponent();
+	~DrawComponent() override = default;
 
 	virtual void draw();
 
