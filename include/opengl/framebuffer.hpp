@@ -1,25 +1,27 @@
 #pragma once
 
+#include "third_party/glad/glad.h"
+
 #include <memory>
 
 class Framebuffer {
-public:
+  public:
 	explicit Framebuffer(class Game* owner);
-	Framebuffer(Framebuffer &&) = delete;
-	Framebuffer(const Framebuffer &) = delete;
-	Framebuffer &operator=(Framebuffer &&) = delete;
-	Framebuffer &operator=(const Framebuffer &) = delete;
+	Framebuffer(Framebuffer&&) = delete;
+	Framebuffer(const Framebuffer&) = delete;
+	Framebuffer& operator=(Framebuffer&&) = delete;
+	Framebuffer& operator=(const Framebuffer&) = delete;
 	~Framebuffer();
 
 	void setDemensions(int width, int height);
 	void swap(struct SDL_Window* window);
 
-private:
+  private:
 	class Game* mOwner;
 
-	unsigned int mRBO;
-	unsigned int mScreen;
-	unsigned int mScreenTexture;
+	GLuint mRBO;
+	GLuint mScreen;
+	GLuint mScreenTexture;
 
 	std::unique_ptr<class Mesh> mScreenMesh;
 };

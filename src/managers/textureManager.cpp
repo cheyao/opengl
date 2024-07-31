@@ -36,10 +36,10 @@ TextureManager::~TextureManager() {
 	}
 }
 
-void TextureManager::reload() {
+void TextureManager::reload(bool full) {
 	for (auto& [name, texture] : mTextures) {
 #ifdef DEBUG
-		if (std::filesystem::last_write_time(mPath + name) == mLastEdit[texture]) {
+		if (!full && std::filesystem::last_write_time(mPath + name) == mLastEdit[texture]) {
 			continue;
 		}
 #endif

@@ -3,7 +3,6 @@
 #include "third_party/Eigen/Dense"
 #include "third_party/glad/glad.h"
 
-#include <string>
 #include <string_view>
 
 class Shader {
@@ -18,25 +17,25 @@ class Shader {
 	void activate() const;
 
 	// set uniform
-	void set(const std::string_view& name, const bool& val) const;
-	void set(const std::string_view& name, const int& val) const;
-	void set(const std::string_view& name, const unsigned int& val) const;
-	void set(const std::string_view& name, const float& val) const;
-	void set(const std::string_view& name, const double& val) const;
-	void set(const std::string_view& name, const float& val, const float& val2) const;
-	void set(const std::string_view& name, const float& val, const float& val2,
-			 const float& val3) const;
+	void set(const std::string_view& name, const GLboolean& val) const;
+	void set(const std::string_view& name, const GLint& val) const;
+	void set(const std::string_view& name, const GLuint& val) const;
+	void set(const std::string_view& name, const GLfloat& val) const;
+	void set(const std::string_view& name, const GLdouble& val) const;
+	void set(const std::string_view& name, const GLfloat& val, const GLfloat& val2) const;
+	void set(const std::string_view& name, const GLfloat& val, const GLfloat& val2,
+			 const GLfloat& val3) const;
 	void set(const std::string_view& name, const Eigen::Vector3f& val) const;
-	void set(const std::string_view& name, const Eigen::Vector3f& val, const float& val2) const;
+	void set(const std::string_view& name, const Eigen::Vector3f& val, const GLfloat& val2) const;
 	void set(const std::string_view& name, const Eigen::Vector4f& val) const;
 	// Note: Eigen uses column major storage as default, so no transpose
 	void set(const std::string_view& name, const Eigen::Affine3f& mat,
 			 const GLboolean& transpose = GL_FALSE) const;
 
   private:
-	static void compile(const std::string_view& fileName, const GLenum& type, unsigned int& out);
+	static void compile(const std::string_view& fileName, const GLenum& type, GLuint& out);
 
-	[[nodiscard]] int getUniform(const std::string_view& name) const;
+	void setUniform(const std::string_view& name, std::function<void(GLint)> toCall) const;
 
-	unsigned int mShaderProgram;
+	GLuint mShaderProgram;
 };

@@ -6,7 +6,8 @@
 
 World::World(class Game* owner) : Actor(owner) {
 	ModelComponent* const model = new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "backpack.obj"));
-	model->setShader(this->getGame()->getShader("basic.vert", "basic.frag"));
+	model->setVert("common.vert");
+	model->setFrag("backpack.frag");
 
 	const std::vector<Vertex> vertices = {
 		{{-0.5f, +0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Top left
@@ -19,5 +20,6 @@ World::World(class Game* owner) : Actor(owner) {
 		std::make_pair(this->getGame()->getTexture("windows.png"), TextureType::DIFFUSE)};
 
 	MeshComponent* const window = new MeshComponent(this, vertices, indices, textures);
-	window->setShader(this->getGame()->getShader("basic.vert", "window.frag"));
+	window->setVert("common.vert");
+	window->setFrag("window.frag");
 }

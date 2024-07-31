@@ -103,7 +103,7 @@ void Renderer::draw() const {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (const auto& sprite : mDrawables) {
-		Shader* shader = sprite->getShader();
+		Shader* const shader = sprite->getShader();
 		shader->activate();
 		shader->set("view", mCamera->getViewMatrix());
 		shader->set("proj", mCamera->getProjectionMatrix());
@@ -114,6 +114,12 @@ void Renderer::draw() const {
 	}
 
 	mFramebuffer->swap(mWindow);
+}
+
+void Renderer::reload() const {
+	for (const auto& sprite : mDrawables) {
+		sprite->reload();
+	}
 }
 
 void Renderer::addSprite(DrawComponent* sprite) {

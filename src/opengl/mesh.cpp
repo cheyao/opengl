@@ -5,7 +5,6 @@
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
 
-#include <stddef.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -47,6 +46,8 @@ Mesh::~Mesh() {
 	glDeleteBuffers(1, &mEBO);
 }
 
+#include <SDL3/SDL.h>
+#include <iostream>
 void Mesh::draw(const Shader* shader) const {
 	unsigned int diffuse = 0;
 	unsigned int specular = 0;
@@ -80,6 +81,8 @@ void Mesh::draw(const Shader* shader) const {
 		shader->set(name + number, i);
 
 		mTextures[i].first->activate(i);
+		// TODO: Std function????
+		// https://stackoverflow.com/questions/10022789/stdfunction-with-non-static-member-functions
 	}
 
 	glBindVertexArray(mVAO);

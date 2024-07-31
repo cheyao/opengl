@@ -100,6 +100,32 @@ int Game::iterate() {
 	update();
 	draw();
 
+#ifdef DEBUG
+	// TODO:
+	/*
+	GLenum err;
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		switch (err) {
+			case GL_INVALID_ENUM:
+				SDL_Log("GLError: Invalid enum");
+				break;
+			case GL_INVALID_VALUE:
+				SDL_Log("GLError: Invalid value");
+				break;
+			case GL_INVALID_OPERATION:
+				SDL_Log("GLError: Invalid operation");
+				break;
+			case GL_INVALID_FRAMEBUFFER_OPERATION:
+				SDL_Log("GLError: Invalid framebuffer op");
+				break;
+			case GL_OUT_OF_MEMORY:
+				SDL_Log("GLError: Out of memory");
+				break;
+		}
+	}
+	*/
+#endif
+
 	return 0;
 }
 
@@ -174,8 +200,8 @@ void Game::gui() {
 		}
 
 		auto pos = p->getPosition();
-		ImGui::Text("Player position: %dx%dx%d", static_cast<int>(pos.x()), static_cast<int>(pos.y()),
-					static_cast<int>(pos.z()));
+		ImGui::Text("Player position: %dx%dx%d", static_cast<int>(pos.x()),
+					static_cast<int>(pos.y()), static_cast<int>(pos.z()));
 
 		// ImGui::Checkbox("Debug", &debugMenu);
 		ImGui::Checkbox("Demo", &demoMenu);
@@ -233,8 +259,10 @@ int Game::event(const SDL_Event& event) {
 					mPaused = false;
 				}
 #endif
-				mTextures->reload();
-				mShaders->reload();
+				// mTextures->reload(true);
+				// TODO: Maybe textures
+				mShaders->reload(true);
+				mRenderer->reload();
 			}
 			if (event.key.key == SDLK_F3) {
 				mPaused = !mPaused;

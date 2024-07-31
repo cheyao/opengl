@@ -23,6 +23,7 @@ class Renderer {
 	void removeSprite(class DrawComponent* sprite);
 
 	void draw() const;
+	void reload() const;
 
   private:
 	class Game* mOwner;

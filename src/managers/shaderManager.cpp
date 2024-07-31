@@ -6,6 +6,7 @@
 #include <SDL3/SDL.h>
 #include <assert.h>
 #include <stddef.h>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
@@ -22,6 +23,11 @@ Shader* ShaderManager::get(const std::string& vert, const std::string& frag) {
 	Shader* shader = new Shader(mPath + vert, mPath + frag);
 	mTextures[vert + ':' + frag] = shader;
 
+#ifdef DEBUG
+	mLastEdit[shader] = std::max(std::filesystem::last_write_time(mPath + vert),
+								 std::filesystem::last_write_time(mPath + frag));
+#endif
+
 	return shader;
 }
 
@@ -33,7 +39,7 @@ ShaderManager::~ShaderManager() {
 	}
 }
 
-void ShaderManager::reload() {
+void ShaderManager::reload(bool full) {
 	SDL_Log("Reloading shaders");
 
 	for (auto& [names, shader] : mTextures) {
@@ -45,20 +51,36 @@ void ShaderManager::reload() {
 		frag = mPath + frag;
 
 #ifdef DEBUG
-		try {
-			Shader* newTexture = new Shader(vert, frag);
+		SDL_Log("Reloading %s:%s", vert.data(), frag.data());
 
-			delete shader;
-
-			shader = newTexture;
-		} catch (...) {
-			SDL_Log("Error recompiling shaders");
+		const auto lastEditTime = std::max(std::filesystem::last_write_time(vert),
+										   std::filesystem::last_write_time(frag));
+		if (!full && lastEditTime == mLastEdit[shader]) {
+			continue;
 		}
 
+		try {
+			delete shader;
+
+			Shader* newTexture = new Shader(vert, frag);
+
+			shader = newTexture;
+		} catch (std::runtime_error error) {
+			SDL_Log("Error recompiling shaders: %s", error.what());
+
+			shader = this->get("default.vert", "default.frag");
+		}
+
+		mLastEdit[shader] = lastEditTime;
 #else
-		Shader* newTexture = new Shader(mPath + vert, mPath + frag);
-		delete shader;
-		shader = newTexture;
+		try {
+			delete shader;
+			Shader* newTexture = new Shader(vert, frag);
+			shader = newTexture;
+		} catch (std::runtime_error error) {
+			shader = this->get("default.vert", "default.frag");
+			throw error;
+		}
 #endif
 	}
 }

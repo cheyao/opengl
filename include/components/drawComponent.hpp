@@ -2,6 +2,8 @@
 
 #include "components/component.hpp"
 
+#include <string>
+
 class DrawComponent : public Component {
   public:
 	DrawComponent(class Actor* owner, int drawOrder = 100);
@@ -18,11 +20,18 @@ class DrawComponent : public Component {
 	void setVisible(bool visible) { mVisible = visible; }
 	bool getVisible() const { return mVisible; }
 
-	void setShader(class Shader* shader) { mShader = shader; }
-	class Shader* getShader() const { return mShader; }
+	void setVert(const std::string& vert) { mVert = vert; reload(); }
+	void setFrag(const std::string& frag) { mFrag = frag; reload(); }
+	class Shader* getShader() const { return mShader; };
+
+	void reload();
 
   protected:
 	int mDrawOrder;
 	bool mVisible;
+
+	std::string mVert;
+	std::string mFrag;
+
 	class Shader* mShader;
 };

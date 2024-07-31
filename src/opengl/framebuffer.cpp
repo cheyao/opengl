@@ -44,7 +44,6 @@ Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScr
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	const std::vector<Vertex> vertices = {
 		{{-1.0f, +1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Top left
@@ -67,7 +66,6 @@ void Framebuffer::setDemensions(int width, int height) {
 }
 
 void Framebuffer::swap(SDL_Window* window) {
-	/*
 	int mode;
 	glGetIntegerv(GL_POLYGON_MODE, &mode);
 
@@ -90,7 +88,6 @@ void Framebuffer::swap(SDL_Window* window) {
 	glBindTexture(GL_TEXTURE_2D, mScreenTexture);
 
 	mScreenMesh->draw(mShader);
-	*/
 
 #ifdef IMGUI
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -98,12 +95,10 @@ void Framebuffer::swap(SDL_Window* window) {
 
 	SDL_GL_SwapWindow(window);
 
-	/*
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 	glEnable(GL_DEPTH_TEST);
 
 	glPolygonMode(GL_FRONT_AND_BACK, mode);
-	*/
 }
 
 Framebuffer::~Framebuffer() {
