@@ -11,5 +11,6 @@ uniform mat4 proj;
 void main() {
 	texPos = aPos;
 
-	gl_Position = proj * view */* model**/ vec4(aPos, 1.0f);
+	vec4 pos = proj * mat4(mat3(view)) * vec4(aPos, 1.0f);
+	gl_Position = pos.xyww;
 }

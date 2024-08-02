@@ -78,6 +78,8 @@ int Game::iterate() {
 		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		SDL_SetRelativeMouseMode(0);
+		// Delay some time to not use too much CPU
+		SDL_Delay(64);
 		// SDL_GL_SwapWindow(mWindow);
 
 		return 0;
