@@ -21,6 +21,10 @@ class Mesh {
 	unsigned int indices() const { return mIndices.size(); }
 	unsigned int vertices() const { return mVertices.size(); }
 
+	void addTexture(std::pair<class Texture*, TextureType> texture) {
+		mTextures.emplace_back(texture);
+	}
+
   private:
 	GLuint mVBO;
 	GLuint mEBO;

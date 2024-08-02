@@ -7,6 +7,7 @@ uniform vec3 viewPos;
 
 uniform sampler2D texture_diffuse0;
 uniform sampler2D texture_specular0;
+uniform samplerCube texture_diffuse1;
 
 struct DirLight {
 	vec3 direction;
@@ -57,6 +58,7 @@ out vec4 color;
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+vec3 calcCube(vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void main() {
 	vec3 norm = normalize(normal);
@@ -64,16 +66,25 @@ void main() {
 
 	vec3 outColor = vec3(0);
 
+	/*
 	outColor += calcDirLight(dirLight, norm, viewDir);
 	// for (int i = 0; i < POINT_LIGHTS; i++) {
 	// 	outColor += calcPointLight(pointLights[i], norm, fragPos, viewDir);
 	// }
-	outColor += calcSpotLight(spotLight, norm, fragPos, viewDir);
+	*/
+	// outColor += calcSpotLight(spotLight, norm, fragPos, viewDir);
+	// FIXME: Cannot be added together?
+	outColor += calcCube(norm, fragPos, viewDir);
 
 	color = vec4(outColor, 1.0f);
 }
 
 // TODO: Concat common parts
+
+vec3 calcCube(vec3 normal, vec3 fragPos, vec3 viewDir) {
+	vec3 reflection = reflect(-viewDir, normal);
+	return vec3(texture(texture_diffuse1, reflection));
+}
 
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 	vec3 lightDir = normalize(-light.direction);

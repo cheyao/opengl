@@ -17,15 +17,18 @@ class Renderer {
 
 	void setDemensions(int width, int height);
 	void setCamera(class CameraComponent* camera) { mCamera = camera; }
-	void setLights(class Shader* shader) const;
 
 	void addSprite(class DrawComponent* sprite);
 	void removeSprite(class DrawComponent* sprite);
+	// TODO: Add lights
+	// void addLight(class Actor* source);
 
 	void draw() const;
 	void reload() const;
 
   private:
+	void setLights(class Shader* shader) const;
+
 	class Game* mOwner;
 
 	struct SDL_Window* mWindow;
@@ -33,6 +36,7 @@ class Renderer {
 	std::unique_ptr<class Framebuffer> mFramebuffer;
 
 	std::vector<class DrawComponent*> mDrawables;
+	std::vector<class Cubemap*> mCubemaps;
 
 	int mWidth, mHeight;
 

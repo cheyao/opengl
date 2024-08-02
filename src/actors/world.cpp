@@ -10,6 +10,7 @@ World::World(class Game* owner) : Actor(owner) {
 		new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "backpack.obj"));
 	model->setVert("common.vert");
 	model->setFrag("backpack.frag");
+	model->addTexture(std::make_pair(this->getGame()->getTexture("skybox"), TextureType::DIFFUSE));
 
 	const std::vector<Vertex> vertices = {
 		{{-0.5f, +0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Top left
@@ -21,7 +22,7 @@ World::World(class Game* owner) : Actor(owner) {
 	const std::vector<std::pair<Texture*, TextureType>> textures = {
 		std::make_pair(this->getGame()->getTexture("windows.png"), TextureType::DIFFUSE)};
 
-	MeshComponent* const window = new MeshComponent(this, vertices, indices, textures);
+	MeshComponent* const window = new MeshComponent(this, vertices, indices, textures, 300);
 	window->setVert("common.vert");
 	window->setFrag("window.frag");
 

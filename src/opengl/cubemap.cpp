@@ -47,7 +47,7 @@ void Cubemap::loadface(const std::string& face, const unsigned int& i) {
 		ERROR_BOX("Failed to load textures, the assets is corrupted or you don't "
 				  "have enough memory");
 
-		throw std::runtime_error("texture.cpp: Failed to load texture");
+		throw std::runtime_error("cubemap.cpp: Failed to load texture");
 	}
 
 	GLenum format = GL_RGB;
@@ -65,7 +65,7 @@ void Cubemap::loadface(const std::string& face, const unsigned int& i) {
 			ERROR_BOX("Failed to recognise file color format, the assets is probably "
 					  "corrupted");
 
-			throw std::runtime_error("texture.cpp: Invalid enum");
+			throw std::runtime_error("cubemap.cpp: Invalid enum");
 	}
 
 	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format,

@@ -10,6 +10,10 @@
 #include <string>
 #include <unordered_map>
 
+#ifdef DEBUG
+#include <filesystem>
+#endif
+
 ShaderManager::ShaderManager(const std::string& path)
 	: mPath(path + "assets" + SEPARATOR + "shaders" + SEPARATOR) {}
 
@@ -43,18 +47,23 @@ void ShaderManager::reload(bool full) {
 	SDL_Log("Reloading shaders");
 
 	for (auto& [names, shader] : mTextures) {
-		std::string frag = names;
-
-		const size_t pos = frag.find(':');
-		std::string vert = mPath + frag.substr(0, pos);
-		frag.erase(0, pos + 1);
-		frag = mPath + frag;
+		const size_t pos = names.find(':');
+		std::string vert = mPath + names.substr(0, pos);
+		std::string frag = mPath + names.substr(pos + 1, names.size() - pos);
 
 #ifdef DEBUG
 		SDL_Log("Reloading %s:%s", vert.data(), frag.data());
 
-		const auto lastEditTime = std::max(std::filesystem::last_write_time(vert),
+		// TODO: Some wierd vim write stuff
+		// FIXME: I don't fucking know why this doesn't work
+		std::filesystem::file_time_type lastEditTime;
+		try {
+			lastEditTime = std::max(std::filesystem::last_write_time(vert),
 										   std::filesystem::last_write_time(frag));
+		} catch (std::filesystem::filesystem_error) {
+			continue;
+		}
+
 		if (!full && lastEditTime == mLastEdit[shader]) {
 			continue;
 		}
@@ -71,7 +80,10 @@ void ShaderManager::reload(bool full) {
 			shader = this->get("default.vert", "default.frag");
 		}
 
+		/*
 		mLastEdit[shader] = lastEditTime;
+		*/
+		(void) full;
 #else
 		try {
 			delete shader;

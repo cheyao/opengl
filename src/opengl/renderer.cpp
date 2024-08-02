@@ -105,6 +105,7 @@ void Renderer::draw() const {
 	for (const auto& sprite : mDrawables) {
 		Shader* const shader = sprite->getShader();
 		shader->activate();
+		shader->set("viewPos", mCamera->getOwner()->getPosition()); // Bruh how come I forgot
 		shader->set("view", mCamera->getViewMatrix());
 		shader->set("proj", mCamera->getProjectionMatrix());
 

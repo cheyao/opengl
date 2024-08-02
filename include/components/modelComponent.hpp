@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components/drawComponent.hpp"
+#include "opengl/types.hpp"
 
 #include <vector>
 #include <assimp/material.h>
@@ -15,6 +16,8 @@ class ModelComponent : public DrawComponent {
 	~ModelComponent();
 
 	void draw() override;
+
+	void addTexture(std::pair<class Texture*, TextureType> texture);
 
   private:
 	void loadNode(struct aiNode* node, const struct aiScene* scene);

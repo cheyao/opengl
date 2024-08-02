@@ -140,3 +140,9 @@ void ModelComponent::draw() {
 		mesh->draw(this->getShader());
 	}
 }
+
+void ModelComponent::addTexture(std::pair<class Texture*, TextureType> texture) {
+	for (const auto& mesh : mMeshes) {
+		mesh->addTexture(texture);
+	}
+}
