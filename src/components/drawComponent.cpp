@@ -10,8 +10,6 @@ DrawComponent::DrawComponent(class Actor* owner, int drawOrder)
 	reload();
 }
 
-void DrawComponent::draw() {}
-
 void DrawComponent::reload() {
 	mShader = mOwner->getGame()->getShader(mVert, mFrag);
 }

@@ -1,4 +1,5 @@
 #version 400 core
+precision mediump float;
 
 in vec2 texPos;
 

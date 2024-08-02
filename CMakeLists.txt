@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 project(OpenGL C CXX)
 #CXX standards
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -48,6 +48,7 @@ src/components/meshComponent.cpp
 src/components/modelComponent.cpp
 src/components/movementComponent.cpp
 
+src/opengl/cubemap.cpp
 src/opengl/mesh.cpp
 src/opengl/renderer.cpp
 src/opengl/shader.cpp
@@ -73,6 +74,7 @@ include/components/meshComponent.hpp
 include/components/modelComponent.hpp
 include/components/movementComponent.hpp
 
+include/opengl/cubemap.hpp
 include/opengl/mesh.hpp
 include/opengl/renderer.hpp
 include/opengl/shader.hpp

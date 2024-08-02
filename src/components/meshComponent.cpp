@@ -13,8 +13,9 @@
 
 MeshComponent::MeshComponent(Actor* owner, const std::vector<Vertex>& vertices,
 							 const std::vector<unsigned int>& indices,
-							 const std::vector<std::pair<Texture*, TextureType>>& textures)
-	: DrawComponent(owner), mMesh(std::make_unique<Mesh>(vertices, indices, textures)) {}
+							 const std::vector<std::pair<Texture*, TextureType>>& textures,
+							 int drawOrder)
+	: DrawComponent(owner, drawOrder), mMesh(std::make_unique<Mesh>(vertices, indices, textures)) {}
 
 void MeshComponent::draw() {
 	if (!getVisible()) {

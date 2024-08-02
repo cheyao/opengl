@@ -60,9 +60,9 @@ void ShaderManager::reload(bool full) {
 		}
 
 		try {
-			delete shader;
-
 			Shader* newTexture = new Shader(vert, frag);
+
+			delete shader;
 
 			shader = newTexture;
 		} catch (std::runtime_error error) {

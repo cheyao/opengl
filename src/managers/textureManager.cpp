@@ -1,12 +1,12 @@
 #include "managers/textureManager.hpp"
 
 #include "opengl/texture.hpp"
+#include "opengl/cubemap.hpp"
 #include "utils.hpp"
 
 #include <unordered_map>
 
 #ifdef DEBUG
-#include <chrono>
 #include <filesystem>
 #endif
 
@@ -18,7 +18,14 @@ Texture* TextureManager::get(const std::string& name) {
 		return mTextures.at(name);
 	}
 
-	auto* texture = new Texture(mPath + name);
+	Texture* texture;
+	if (!name.contains('.')) {
+		texture = new Cubemap(mPath + name + SEPARATOR);
+	} else {
+		texture = new Texture(mPath + name);
+	}
+	texture->load();
+
 	mTextures[name] = texture;
 
 #ifdef DEBUG

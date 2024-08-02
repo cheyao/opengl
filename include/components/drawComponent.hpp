@@ -13,7 +13,7 @@ class DrawComponent : public Component {
 	DrawComponent& operator=(const DrawComponent&) = delete;
 	~DrawComponent() override = default;
 
-	virtual void draw();
+	virtual void draw() = 0;
 
 	int getDrawOrder() const { return mDrawOrder; }
 

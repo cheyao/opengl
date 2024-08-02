@@ -5,6 +5,7 @@
 
 #include <SDL3/SDL.h>
 #include <stdexcept>
+#include <string>
 
 GLManager::GLManager() : mContext(nullptr) {
 #ifdef __APPLE__
@@ -45,19 +46,6 @@ void GLManager::bindContext(SDL_Window* window) {
 		throw std::runtime_error("glManager.cpp: Failed to init glad");
 	}
 
-	/*
-#ifdef GLES
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-#else
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-#endif
-	*/
-
 	SDL_GL_MakeCurrent(window, mContext);
 
 	SDL_GL_SetSwapInterval(1);
@@ -74,9 +62,7 @@ void GLManager::bindContext(SDL_Window* window) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-GLManager::~GLManager() { 
-	SDL_GL_DestroyContext(mContext); 
-}
+GLManager::~GLManager() { SDL_GL_DestroyContext(mContext); }
 
 void GLManager::printInfo() {
 	SDL_Log("Video driver: %s\n", SDL_GetCurrentVideoDriver());
@@ -84,12 +70,18 @@ void GLManager::printInfo() {
 	SDL_Log("Renderer    : %s\n", glGetString(GL_RENDERER));
 	SDL_Log("Version     : %s\n", glGetString(GL_VERSION));
 	SDL_Log("GLSL        : %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-#ifdef DEBUG
-	SDL_Log("Extensions  : %s\n", glGetString(GL_EXTENSIONS));
-#endif
+	GLint n = 0;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &n);
 
-	int maj = 0;
-	int min = 0;
+	std::string extensions;
+	for (GLint i = 0; i < n; ++i) {
+		extensions += std::string(reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i)));
+		extensions += ' ';
+	}
+	SDL_Log("Extensions  : %s\n", extensions.data());
+
+	GLint maj = 0;
+	GLint min = 0;
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &maj);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &min);
 	SDL_Log("Context     : %d.%d\n", maj, min);
@@ -100,7 +92,7 @@ void GLManager::printInfo() {
 
 	SDL_Log("\n");
 
-	int value = 0;
+	GLint value = 0;
 
 	SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
 	SDL_Log("SDL_GL_RED_SIZE: requested 8, got %d\n", value);

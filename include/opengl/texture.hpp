@@ -1,5 +1,7 @@
 #pragma once
 
+#include "third_party/glad/glad.h"
+
 #include <string>
 
 class Texture {
@@ -9,11 +11,12 @@ class Texture {
 	Texture(const Texture&) = delete;
 	Texture& operator=(Texture&&) = delete;
 	Texture& operator=(const Texture&) = delete;
-	~Texture();
+	virtual ~Texture();
 
-	void activate(const unsigned int& num) const;
+	virtual void activate(const unsigned int& num) const;
+	virtual void load();
 
-  private:
-	unsigned int mID;
+  protected:
+	GLuint mID;
 	std::string name;
 };
