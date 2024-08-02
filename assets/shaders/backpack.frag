@@ -58,7 +58,8 @@ out vec4 color;
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
-vec3 calcCube(vec3 normal, vec3 fragPos, vec3 viewDir);
+vec3 cubeReflect(vec3 normal, vec3 viewDir);
+vec3 cubeRefract(vec3 normal, vec3 viewDir);
 
 void main() {
 	vec3 norm = normalize(normal);
@@ -74,16 +75,24 @@ void main() {
 	*/
 	// outColor += calcSpotLight(spotLight, norm, fragPos, viewDir);
 	// FIXME: Cannot be added together?
-	outColor += calcCube(norm, fragPos, viewDir);
+
+	// outColor += cubeReflect(norm, viewDir);
+	outColor += cubeRefract(norm, viewDir);
 
 	color = vec4(outColor, 1.0f);
 }
 
 // TODO: Concat common parts
 
-vec3 calcCube(vec3 normal, vec3 fragPos, vec3 viewDir) {
+vec3 cubeReflect(vec3 normal, vec3 viewDir) {
 	vec3 reflection = reflect(-viewDir, normal);
 	return vec3(texture(texture_diffuse1, reflection));
+}
+
+vec3 cubeRefract(vec3 normal, vec3 viewDir) {
+	float ratio = 1.00f / 1.52f;
+	vec3 refration = refract(-viewDir, normal, ratio);
+	return vec3(texture(texture_diffuse1, refration));
 }
 
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
