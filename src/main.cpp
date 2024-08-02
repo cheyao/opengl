@@ -17,7 +17,7 @@
 
 int SDL_AppInit(void** appstate, int argc, char** argv) {
 	if (argc != 2) {
-		SDL_Log("Usage: ./pano [file]");
+		SDL_Log("Usage: ./Panorama [file]");
 		return 1;
 	}
 
