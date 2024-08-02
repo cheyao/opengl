@@ -24,7 +24,7 @@
 #include <imgui.h>
 #endif
 
-Game::Game()
+Game::Game(std::string pano)
 	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mUpdatingActors(false), mTicks(0),
 	  mBasePath(""), mPaused(false) {
 	const char* basepath = SDL_GetBasePath();
@@ -48,6 +48,8 @@ Game::Game()
 
 	SDL_SetRelativeMouseMode(1);
 
+	new World(this, pano);
+
 	setup();
 }
 
@@ -58,7 +60,6 @@ Game::Game()
 void Game::setup() {
 	SDL_Log("Setting up game");
 
-	new World(this);
 	new Player(this);
 
 	mTicks = SDL_GetTicks();
@@ -74,13 +75,8 @@ int Game::iterate() {
 	if (mPaused) {
 		mTicks = SDL_GetTicks();
 
-		// glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		SDL_SetRelativeMouseMode(0);
-		// Delay some time to not use too much CPU
 		SDL_Delay(64);
-		// SDL_GL_SwapWindow(mWindow);
 
 		return 0;
 	}

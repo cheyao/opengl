@@ -49,5 +49,5 @@ void Player::updateActor(float delta) {
 
 	auto rot = getRotation();
 
-	setRotation(rot * Eigen::AngleAxisf(-delta / 1.5, Eigen::Vector3f::UnitY()));
+	setRotation(rot * Eigen::AngleAxisf(-delta / 2, Eigen::Vector3f::UnitY()));
 }
