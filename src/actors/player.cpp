@@ -3,7 +3,6 @@
 #include "components/cameraComponent.hpp"
 #include "components/movementComponent.hpp"
 #include "game.hpp"
-#include "third_party/Eigen/Geometry"
 
 #include <SDL3/SDL.h>
 #include <stdint.h>
@@ -46,8 +45,4 @@ void Player::updateActor(float delta) {
 	Eigen::Vector3f pos = getPosition();
 	pos.y() += up * delta;
 	setPosition(pos);
-
-	auto rot = getRotation();
-
-	setRotation(rot * Eigen::AngleAxisf(-delta / 1.5, Eigen::Vector3f::UnitY()));
 }
