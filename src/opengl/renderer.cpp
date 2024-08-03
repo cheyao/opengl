@@ -103,6 +103,7 @@ void Renderer::draw() const {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (const auto& sprite : mDrawables) {
+		// TODO: Depth?
 		Shader* const shader = sprite->getShader();
 		shader->activate();
 		shader->set("viewPos", mCamera->getOwner()->getPosition()); // Bruh how come I forgot

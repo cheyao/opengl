@@ -37,7 +37,7 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
 }
 
 // PERF: Maybe indices pointer?
-Mesh::Mesh(const float* const positions, const float* const normals, const float* texPos,
+Mesh::Mesh(float* positions, float* normals, float* texPos,
 		   const unsigned int vertCount, const std::vector<unsigned int>& indices,
 		   const std::vector<std::pair<class Texture*, TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndices(indices), mTextures(textures) {
@@ -52,11 +52,12 @@ Mesh::Mesh(const float* const positions, const float* const normals, const float
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(mIndices[0]), indices.data(), GL_STATIC_DRAW);
 
-	// WARNING: The last 3 is not always 3
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(vertCount * 0 * sizeof(float)));
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(vertCount * 3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+	if (normals != nullptr) {
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(vertCount * 3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+	}
 
 	if (texPos != nullptr) {
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<GLvoid*>(vertCount * 6 * sizeof(float)));
@@ -79,6 +80,7 @@ void Mesh::genBuffers() {
 	glGenVertexArrays(1, &mVAO);
 }
 
+#include <iostream>
 void Mesh::draw(const Shader* shader) const {
 	unsigned int diffuse = 0;
 	unsigned int specular = 0;
