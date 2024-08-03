@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <assimp/material.h>
+#include <assimp/Importer.hpp>
 
 class ModelComponent : public DrawComponent {
   public:
@@ -20,9 +21,15 @@ class ModelComponent : public DrawComponent {
 	void addTexture(std::pair<class Texture*, TextureType> texture);
 
   private:
+	Assimp::Importer importer;
+
 	void loadNode(struct aiNode* node, const struct aiScene* scene);
 	void loadMesh(struct aiMesh* mesh, const struct aiScene* scene);
 	std::vector<class Texture*> loadTextures(struct aiMaterial* mat, const aiTextureType type);
 
 	std::vector<class Mesh*> mMeshes;
+
+	std::vector<float> mVertices;
+	std::vector<float> mNormals;
+	std::vector<float> mTexPos;
 };
