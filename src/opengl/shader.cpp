@@ -114,6 +114,16 @@ void Shader::set(const std::string_view& name, const Eigen::Affine3f& mat,
 			   std::bind(glUniformMatrix4fv, std::placeholders::_1, 1, transpose, mat.data()));
 }
 
+void Shader::bind(std::string_view name, GLuint index) {
+	GLuint blockIndex = glGetUniformBlockIndex(mShaderProgram, name.data());
+
+	if (blockIndex == GL_INVALID_INDEX) {
+		return;
+	}
+
+	glUniformBlockBinding(mShaderProgram, blockIndex, index);
+}
+
 void Shader::compile(const std::string_view& fileName, const GLenum& type, GLuint& out) {
 	char* shaderSource = static_cast<char*>(SDL_LoadFile(fileName.data(), nullptr));
 #ifdef GLES

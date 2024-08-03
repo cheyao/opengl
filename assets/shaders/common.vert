@@ -8,9 +8,11 @@ out vec3 normal;
 out vec3 fragPos;
 out vec2 texPos;
 
+layout(std140) uniform Matrices {
+	mat4 proj;
+	mat4 view;
+};
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
 
 void main() {
 	normal = mat3(transpose(inverse(model))) * aNormal;

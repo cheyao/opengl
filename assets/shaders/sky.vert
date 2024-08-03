@@ -4,9 +4,10 @@ layout (location = 0) in vec3 aPos;
 
 out vec3 texPos;
 
-// uniform mat4 model;
-uniform mat4 view;
-uniform mat4 proj;
+layout(std140) uniform Matrices {
+	mat4 proj;
+	mat4 view;
+};
 
 void main() {
 	texPos = aPos;
