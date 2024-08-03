@@ -11,6 +11,7 @@
 #include <string_view>
 #include <unordered_map>
 
+/*
 Shader::Shader(const std::string_view& vertName, const std::string_view& fragName)
 	: mShaderProgram(glCreateProgram()) {
 	GLuint mVertexShader = 0;
@@ -25,6 +26,50 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 
 	glDeleteShader(mVertexShader);
 	glDeleteShader(mFragmentShader);
+
+	GLint success = 0;
+	glGetProgramiv(mShaderProgram, GL_LINK_STATUS, &success);
+	[[unlikely]] if (success == 0 || !glIsProgram(mShaderProgram)) {
+		GLint len = 0;
+		glGetProgramiv(mShaderProgram, GL_INFO_LOG_LENGTH, &len);
+		GLchar* log = new GLchar[len + 1];
+
+		glGetProgramInfoLog(mShaderProgram, 512, nullptr, &log[0]);
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to link shader: \n%s\n", log);
+		ERROR_BOX("Failed to link shader");
+
+		delete[] log;
+
+		throw std::runtime_error("Shader.cpp: Failed to link shader");
+	}
+}
+*/
+
+Shader::Shader(const std::string_view& vertName, const std::string_view& fragName,
+			   const std::string_view geomName)
+	: mShaderProgram(glCreateProgram()) {
+	GLuint mVertexShader = 0;
+	GLuint mFragmentShader = 0;
+	GLuint mGeometryShader = 0;
+
+	compile(vertName, GL_VERTEX_SHADER, mVertexShader);
+	compile(fragName, GL_FRAGMENT_SHADER, mFragmentShader);
+	if (!geomName.empty()) {
+		compile(geomName, GL_GEOMETRY_SHADER, mGeometryShader);
+	}
+
+	glAttachShader(mShaderProgram, mVertexShader);
+	glAttachShader(mShaderProgram, mFragmentShader);
+	if (!geomName.empty()) {
+		glAttachShader(mShaderProgram, mGeometryShader);
+	}
+	glLinkProgram(mShaderProgram);
+
+	glDeleteShader(mVertexShader);
+	glDeleteShader(mFragmentShader);
+	if (!geomName.empty()) {
+		glDeleteShader(mGeometryShader);
+	}
 
 	GLint success = 0;
 	glGetProgramiv(mShaderProgram, GL_LINK_STATUS, &success);
@@ -124,7 +169,7 @@ void Shader::bind(std::string_view name, GLuint index) {
 	if (blockIndex == GL_INVALID_INDEX) {
 		// TODO: Warn once
 		SDL_Log("Invalid block: %s", name.data());
-		
+
 		return;
 	}
 

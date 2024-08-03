@@ -7,7 +7,8 @@
 
 class Shader {
   public:
-	explicit Shader(const std::string_view& vertName, const std::string_view& fragName);
+	// explicit Shader(const std::string_view& vertName, const std::string_view& fragName);
+	explicit Shader(const std::string_view& vertName, const std::string_view& fragName, const std::string_view geomName = "");
 	Shader(Shader&&) = delete;
 	Shader(const Shader&) = delete;
 	Shader& operator=(Shader&&) = delete;

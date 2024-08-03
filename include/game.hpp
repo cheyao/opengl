@@ -32,7 +32,7 @@ class Game {
 	void pause() { mPaused = true; }
 
 	class Texture* getTexture(const std::string& name);
-	class Shader* getShader(const std::string& vert, const std::string& frag);
+	class Shader* getShader(const std::string& vert, const std::string& frag, const std::string& geom = "");
 	class Renderer* getRenderer() { return mRenderer; }
 
 	inline std::string fullPath(const std::string& path) const { return (mBasePath + "assets" + SEPARATOR + path); };

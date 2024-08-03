@@ -16,7 +16,7 @@ class ShaderManager {
 	ShaderManager& operator=(const ShaderManager&) = delete;
 	~ShaderManager();
 
-	class Shader* get(const std::string& vert, const std::string& frag);
+	class Shader* get(const std::string& vert, const std::string& frag, const std::string& geom = "");
 
 	void reload(bool full = false);
 
