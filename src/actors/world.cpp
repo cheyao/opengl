@@ -12,6 +12,7 @@ World::World(class Game* owner) : Actor(owner) {
 	model->setFrag("backpack.frag");
 	model->addTexture(std::make_pair(this->getGame()->getTexture("skybox"), TextureType::DIFFUSE));
 
+	/*
 	const std::vector<Vertex> vertices = {
 		{{-0.5f, +0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Top left
 		{{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bot left
@@ -59,4 +60,5 @@ World::World(class Game* owner) : Actor(owner) {
 	MeshComponent* const box = new MeshComponent(this, verticesBox, indicesBox, texturesBox, 200);
 	box->setVert("sky.vert");
 	box->setFrag("sky.frag");
+	*/
 }

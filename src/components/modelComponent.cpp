@@ -18,7 +18,6 @@
 
 ModelComponent::ModelComponent(Actor* owner, const std::string_view& path) : DrawComponent(owner) {
 	// TODO: SDL Importer
-	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(
 		path.data(), aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_OptimizeMeshes);
 	[[unlikely]] if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
@@ -54,10 +53,13 @@ void ModelComponent::loadNode(aiNode* node, const aiScene* scene) {
 }
 
 void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
-	std::vector<Vertex> vertices;
+	// std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<std::pair<Texture*, TextureType>> textures;
 
+	mVertices.reserve(mesh->mNumVertices * sizeof(float));
+
+	/*
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 		Vertex vertex;
 
@@ -75,6 +77,7 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 
 		vertices.emplace_back(vertex);
 	}
+	*/
 
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 		const aiFace& face = mesh->mFaces[i];
@@ -108,7 +111,8 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 		textures.emplace_back(texture, AMBIENT);
 	}
 
-	mMeshes.emplace_back(new Mesh(vertices, indices, textures));
+	// mMeshes.emplace_back(new Mesh(vertices, indices, textures));
+	// mMeshes.emplace_back(new Mesh(reinterpret_cast<float*>(mesh->mVertices), reinterpret_cast<float*>(mesh->mNormals), reinterpret_cast<float*>(mesh->mTextureCoords[0]), mesh->mNumVertices, indices, textures));
 }
 
 std::vector<Texture*> ModelComponent::loadTextures(aiMaterial* mat, const aiTextureType type) {
