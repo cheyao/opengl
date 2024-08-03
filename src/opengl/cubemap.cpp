@@ -5,7 +5,6 @@
 
 #include <SDL3/SDL.h>
 #include <string_view>
-#include <filesystem>
 #include <vector>
 
 Cubemap::Cubemap(const std::string_view& path) : Texture(path) {}
@@ -21,19 +20,11 @@ void Cubemap::load() {
 	glGenTextures(1, &mID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, mID);
 
-	const std::vector faces = {"right.png",	 "left.png",  "top.png",
-							   "bottom.png", "front.png", "back.png"};
-	const std::vector faces2 = {"panorama_0.png", "panorama_1.png", "panorama_2.png",
-								  "panorama_3.png", "panorama_4.png", "panorama_5.png"};
+	const std::vector faces = {"right.jpg",	 "left.jpg",  "top.jpg",
+							   "bottom.jpg", "front.jpg", "back.jpg"};
 
-	if (std::filesystem::exists(name + "panorama_0")) {
-		for (unsigned int i = 0; i < faces2.size(); i++) {
-			loadface(faces2[i], i);
-		}
-	} else {
-		for (unsigned int i = 0; i < faces.size(); i++) {
-			loadface(faces[i], i);
-		}
+	for (unsigned int i = 0; i < faces.size(); i++) {
+		loadface(faces[i], i);
 	}
 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -52,8 +43,7 @@ void Cubemap::loadface(const std::string& face, const unsigned int& i) {
 	unsigned char* data = stbi_load((name + face).data(), &width, &height, &channels, 0);
 
 	[[unlikely]] if (data == nullptr) {
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load texture: %s\n",
-					 (name + face).data());
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load texture: %s\n", name.data());
 		ERROR_BOX("Failed to load textures, the assets is corrupted or you don't "
 				  "have enough memory");
 
