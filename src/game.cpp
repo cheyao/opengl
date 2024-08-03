@@ -84,10 +84,6 @@ int Game::iterate() {
 
 		return 0;
 	}
-#ifdef __EMSCRIPTEN__
-	// Web hack
-	SDL_SetWindowSize(mWindow, browserWidth(), browserHeight());
-#endif
 
 #ifdef DEBUG
 	if (std::filesystem::last_write_time(fullPath("shaders")) != last_time) {

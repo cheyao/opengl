@@ -86,7 +86,7 @@ Renderer::Renderer(Game* game)
 	mFramebuffer = std::make_unique<Framebuffer>(mOwner);
 
 	// Matrix uniform
-	mMatricesUBO = std::make_unique<UBO>(2 * sizeof(Eigen::Affine3f));
+	// mMatricesUBO = std::make_unique<UBO>(2 * sizeof(Eigen::Affine3f));
 	// mMatricesUBO->bind(0);
 }
 
@@ -105,19 +105,21 @@ void Renderer::draw() const {
 	ImGui::Render();
 #endif
 
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClearColor(0.1f, 0.5f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	mMatricesUBO->bind(0);
-	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
-	mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
+	// mMatricesUBO->bind(0);
+	// mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
+	// mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
 
 	for (const auto& sprite : mDrawables) {
 		// TODO: Depth?
 		Shader* const shader = sprite->getShader();
 		shader->activate();
 		shader->set("viewPos", mCamera->getOwner()->getPosition()); // Bruh how come I forgot
-		shader->bind("Matrices", 0);
+		shader->set("view", mCamera->getViewMatrix());
+		shader->set("proj", mCamera->getProjectionMatrix());
+		// shader->bind("Matrices", 0);
 
 		setLights(shader);
 

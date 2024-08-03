@@ -80,14 +80,13 @@ void Mesh::genBuffers() {
 	glGenVertexArrays(1, &mVAO);
 }
 
-#include <iostream>
 void Mesh::draw(const Shader* shader) const {
 	unsigned int diffuse = 0;
 	unsigned int specular = 0;
 	unsigned int height = 0;
 	unsigned int ambient = 0;
 
-	for (unsigned int i = 0; i < mTextures.size(); i++) {
+	for (GLuint i = 0; i < mTextures.size(); i++) {
 		// retrieve texture number (the N in diffuse_textureN)
 		std::string number;
 		std::string name;
@@ -111,7 +110,7 @@ void Mesh::draw(const Shader* shader) const {
 				break;
 		}
 
-		shader->set(name + number, i);
+		shader->set(name + number, static_cast<GLint>(i));
 
 		mTextures[i].first->activate(i);
 		// TODO: Std function????
