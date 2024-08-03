@@ -65,13 +65,21 @@ Renderer::Renderer(Game* game)
 	mFramebuffer = std::make_unique<Framebuffer>(mOwner);
 
 	// Matrix uniform
-	// mMatricesUBO = std::make_unique<UBO>(2 * sizeof(Eigen::Affine3f));
-	// mMatricesUBO->bind(0);
+	mMatricesUBO = std::make_unique<UBO>(2 * sizeof(Eigen::Affine3f));
+	mMatricesUBO->bind(0); // WARNING: Maybe bind every frame
 
 	// FUCK
 	// Tuns out my tests were all wrong...
+	// NOTE: Uncomment if testing framebuffer module
 	// glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
+/* NOTE:
+ * The uniform matrix object is initialized as following:
+ * The uniform is bind eveytime a drawable is added
+ * The projection matrix is reset everytime the camera is changed and the window is changed
+ * The view matrix is changed once at the start of every frame
+ */
 
 Renderer::~Renderer() { SDL_DestroyWindow(mWindow); /* Other stuff are smart pointers */ }
 
@@ -81,6 +89,9 @@ void Renderer::setDemensions(int width, int height) {
 
 	glViewport(0, 0, width, height);
 	mFramebuffer->setDemensions(width, height);
+
+	mCamera->project();
+	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
 }
 
 void Renderer::draw() const {
@@ -91,19 +102,13 @@ void Renderer::draw() const {
 	glClearColor(0.1f, 0.5f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// mMatricesUBO->bind(0);
-	// mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
-	// mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
+	mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
 
 	for (const auto& sprite : mDrawables) {
-		break;
 		// TODO: Depth?
 		Shader* const shader = sprite->getShader();
 		shader->activate();
 		shader->set("viewPos", mCamera->getOwner()->getPosition()); // Bruh how come I forgot
-		shader->set("view", mCamera->getViewMatrix());
-		shader->set("proj", mCamera->getProjectionMatrix());
-		// shader->bind("Matrices", 0);
 
 		setLights(shader);
 
@@ -122,10 +127,11 @@ void Renderer::reload() const {
 void Renderer::setCamera(class CameraComponent* camera) {
 	mCamera = camera;
 	// mMatricesUBO->set(0, camera->getProjectionMatrix());
+	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
 }
 
 void Renderer::addSprite(DrawComponent* sprite) {
-	// sprite->getShader()->bind("Matrices", 0);
+	sprite->getShader()->bind("Matrices", 0); // WARNING: Maybe rebind
 
 	// Preserve order
 	int order = sprite->getDrawOrder();
@@ -145,6 +151,7 @@ void Renderer::removeSprite(DrawComponent* sprite) {
 }
 
 void Renderer::setLights(Shader* shader) const {
+	// TODO: Concat all these
 	const Eigen::Vector4f lightPos(1.2f, 1.0f, 2.0f, 1.0f);
 
 	shader->set("dirLight.direction", -0.2f, -1.0f, -0.3f);

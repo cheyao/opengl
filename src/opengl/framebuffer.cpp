@@ -66,10 +66,8 @@ void Framebuffer::setDemensions(int width, int height) {
 }
 
 void Framebuffer::swap(SDL_Window* window) {
-	/*
-	GLint mode;
-	glGetIntegerv(GL_POLYGON_MODE, &mode);
-	*/
+	GLint mode[2];
+	glGetIntegerv(GL_POLYGON_MODE, mode);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Enable wireframe mode
 
@@ -78,7 +76,6 @@ void Framebuffer::swap(SDL_Window* window) {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 
-	/*
 	Shader* mShader = mOwner->getShader("framebuffer.vert", "framebuffer.frag");
 	mShader->activate();
 
@@ -91,7 +88,6 @@ void Framebuffer::swap(SDL_Window* window) {
 	glBindTexture(GL_TEXTURE_2D, mScreenTexture);
 
 	mScreenMesh->draw(mShader);
-	*/
 
 #ifdef IMGUI
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -99,12 +95,10 @@ void Framebuffer::swap(SDL_Window* window) {
 
 	SDL_GL_SwapWindow(window);
 
-	/*
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 	glEnable(GL_DEPTH_TEST);
 
-	glPolygonMode(GL_FRONT_AND_BACK, mode);
-	*/
+	glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
 }
 
 Framebuffer::~Framebuffer() {

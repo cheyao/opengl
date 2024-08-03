@@ -35,8 +35,6 @@ void CameraComponent::update(float delta) {
 
 	view();
 
-	project(); // TODO: DELETE
-
 	(void)delta;
 }
 
