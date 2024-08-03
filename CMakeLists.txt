@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
-project(Panorama C CXX)
+project(OpenGL C CXX)
 #CXX standards
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -191,7 +191,27 @@ elseif(MACOSX)
 	message("Building for MacOS")
 	find_package(OpenGL REQUIRED)
 
-	add_executable(${BUILD_NAME} ${SRC})
+	if(DEBUG)
+		add_executable(${BUILD_NAME} ${SRC})
+	else()
+		#Package into a application bundle
+		add_executable(${BUILD_NAME} MACOSX_BUNDLE ${SRC})            
+		set_target_properties(${BUILD_NAME} PROPERTIES
+		    BUNDLE True
+		    MACOSX_BUNDLE_ICON_FILE ${CMAKE_SOURCE_DIR}/cmake/${CMAKE_PROJECT_NAME}.ico
+		    MACOSX_BUNDLE_GUI_IDENTIFIER org.cyao.${BUILD_NAME}
+	   	    MACOSX_BUNDLE_BUNDLE_NAME ${BUILD_NAME}
+		    MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
+		    MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
+		    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/info.plist.in
+		)
+	
+		file(COPY assets DESTINATION ${CMAKE_BINARY_DIR}/${BUILD_NAME}.app/Contents/Resources)
+
+		target_link_options(${BUILD_NAME} PRIVATE -headerpad_max_install_names)
+
+		file(COPY cmake/mac-patch-dylib.sh DESTINATION ${CMAKE_BINARY_DIR}) # Helper script
+	endif()
 
 	target_include_directories(${BUILD_NAME} PRIVATE ${OPENGL_INCLUDE_DIR})
 
@@ -241,6 +261,9 @@ if(NOT DEBUG AND NOT ANDROID AND NOT WEB)
 		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
 			COMMAND ${CMAKE_STRIP} ${BUILD_NAME}.exe)
 	elseif(MACOSX AND NOT DEBUG)
+		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
+			COMMAND ${CMAKE_STRIP} ${BUILD_NAME}.app/Contents/MacOS/${BUILD_NAME})
+	else()
 		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
 			COMMAND ${CMAKE_STRIP} ${BUILD_NAME})
 	endif()

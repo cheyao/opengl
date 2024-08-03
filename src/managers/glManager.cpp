@@ -28,7 +28,7 @@ GLManager::GLManager() : mContext(nullptr) {
 void GLManager::bindContext(SDL_Window* window) {
 	mContext = SDL_GL_CreateContext(window);
 	if (mContext == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create glcontext: %s\n", SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to initialize OpenGL Context, there is something "
 				  "wrong with your OpenGL");
 

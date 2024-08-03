@@ -1,19 +1,17 @@
 #include "actors/world.hpp"
 
 #include "components/meshComponent.hpp"
+#include "components/modelComponent.hpp"
 #include "game.hpp"
 #include "third_party/glad/glad.h"
 
-#include <SDL3/SDL.h>
-
-World::World(class Game* owner, std::string pano) : Actor(owner) {
+World::World(class Game* owner) : Actor(owner) {
 	/*
 	ModelComponent* const model =
 		new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "backpack.obj"));
 	model->setVert("common.vert");
 	model->setFrag("backpack.frag");
-	model->addTexture(std::make_pair(this->getGame()->getTexture("panorama"),
-	TextureType::DIFFUSE));
+	model->addTexture(std::make_pair(this->getGame()->getTexture("panorama"), TextureType::DIFFUSE));
 
 	const std::vector<Vertex> vertices = {
 		{{-0.5f, +0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Top left
@@ -58,10 +56,9 @@ World::World(class Game* owner, std::string pano) : Actor(owner) {
 											// Back
 											4, 7, 6, 4, 5, 7};
 	const std::vector<std::pair<Texture*, TextureType>> texturesBox = {
-		std::make_pair(this->getGame()->getTexture(pano), TextureType::DIFFUSE)};
+		std::make_pair(this->getGame()->getTexture("panorama"), TextureType::DIFFUSE)};
 
 	MeshComponent* const box = new MeshComponent(this, verticesBox, indicesBox, texturesBox, 200);
 	box->setVert("sky.vert");
 	box->setFrag("sky.frag");
 }
-

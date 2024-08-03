@@ -18,15 +18,12 @@ Texture* TextureManager::get(const std::string& name) {
 		return mTextures.at(name);
 	}
 
-	Texture* texture = new Cubemap(name + SEPARATOR);
-	/*
+	Texture* texture;
 	if (!name.contains('.')) {
-		texture = new Cubemap(name + SEPARATOR);
+		texture = new Cubemap(mPath + name + SEPARATOR);
 	} else {
-		// throw std::runtime_error("Invalid texture");
 		texture = new Texture(mPath + name);
 	}
-	*/
 	texture->load();
 
 	mTextures[name] = texture;

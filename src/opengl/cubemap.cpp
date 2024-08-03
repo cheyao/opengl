@@ -4,8 +4,8 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
-#include <filesystem>
 #include <string_view>
+#include <filesystem>
 #include <vector>
 
 Cubemap::Cubemap(const std::string_view& path) : Texture(path) {}
@@ -21,30 +21,18 @@ void Cubemap::load() {
 	glGenTextures(1, &mID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, mID);
 
-	const std::vector faces0 = {"right.png",  "left.png",  "top.png",
-								"bottom.png", "front.png", "back.png"};
-	const std::vector faces1 = {"right.jpg",  "left.jpg",  "top.jpg",
-								"bottom.jpg", "front.jpg", "back.jpg"};
+	const std::vector faces = {"right.png",	 "left.png",  "top.png",
+							   "bottom.png", "front.png", "back.png"};
 	const std::vector faces2 = {"panorama_0.png", "panorama_1.png", "panorama_2.png",
-								"panorama_3.png", "panorama_4.png", "panorama_5.png"};
-	const std::vector faces3 = {"panorama_0.jpg", "panorama_1.jpg", "panorama_2.jpg",
-								"panorama_3.jpg", "panorama_4.jpg", "panorama_5.jpg"};
+								  "panorama_3.png", "panorama_4.png", "panorama_5.png"};
 
-	if (std::filesystem::exists(name + "right.png")) {
-		for (unsigned int i = 0; i < faces0.size(); i++) {
-			loadface(faces0[i], i);
-		}
-	} else if (std::filesystem::exists(name + "right.jpg")) {
-		for (unsigned int i = 0; i < faces1.size(); i++) {
-			loadface(faces1[i], i);
-		}
-	} else if (std::filesystem::exists(name + "panorama_0.png")) {
+	if (std::filesystem::exists(name + "panorama_0")) {
 		for (unsigned int i = 0; i < faces2.size(); i++) {
 			loadface(faces2[i], i);
 		}
-	} else if (std::filesystem::exists(name + "panorama_0.jpg")) {
-		for (unsigned int i = 0; i < faces3.size(); i++) {
-			loadface(faces3[i], i);
+	} else {
+		for (unsigned int i = 0; i < faces.size(); i++) {
+			loadface(faces[i], i);
 		}
 	}
 

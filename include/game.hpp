@@ -13,7 +13,7 @@
 
 class Game {
   public:
-	Game(std::string pano);
+	Game();
 	Game(Game&&) = delete;
 	Game(const Game&) = delete;
 	Game& operator=(Game&&) = delete;
@@ -35,9 +35,7 @@ class Game {
 	class Shader* getShader(const std::string& vert, const std::string& frag);
 	class Renderer* getRenderer() { return mRenderer; }
 
-	inline std::string fullPath(const std::string& path) const {
-		return (mBasePath + "assets" + SEPARATOR + path);
-	};
+	inline std::string fullPath(const std::string& path) const { return (mBasePath + "assets" + SEPARATOR + path); };
 
   private:
 	void input();
