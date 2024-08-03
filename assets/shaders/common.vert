@@ -8,10 +8,14 @@ out vec3 normal;
 out vec3 fragPos;
 out vec2 texPos;
 
+/*
 layout(std140) uniform Matrices {
 	mat4 proj;
 	mat4 view;
 };
+*/
+uniform mat4 proj;
+uniform mat4 view;
 uniform mat4 model;
 
 void main() {

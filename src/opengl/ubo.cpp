@@ -16,6 +16,7 @@ UBO::UBO(GLsizeiptr size) : mSize(size) {
 UBO::~UBO() { glDeleteBuffers(1, &mUBO); }
 
 void UBO::set(GLintptr offset, Eigen::Affine3f matrix) {
+	return;
 	glBindBuffer(GL_UNIFORM_BUFFER, mUBO);
 	glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(matrix), matrix.data());
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);

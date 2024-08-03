@@ -26,7 +26,7 @@ void MeshComponent::draw() {
 	matrix.translate(mOwner->getPosition());
 	matrix.scale(mOwner->getScale());
 	matrix.rotate(mOwner->getRotation());
-	this->getShader()->set("model", matrix);
+	getShader()->set("model", matrix);
 
-	mMesh->draw(this->getShader());
+	mMesh->draw(getShader());
 }

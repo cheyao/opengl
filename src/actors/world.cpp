@@ -6,6 +6,7 @@
 #include "third_party/glad/glad.h"
 
 World::World(class Game* owner) : Actor(owner) {
+	/*
 	const std::vector<Vertex> vertices = {
 		{{-0.5f, +0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Top left
 		{{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bot left
@@ -26,6 +27,7 @@ World::World(class Game* owner) : Actor(owner) {
 	model->setFrag("backpack.frag");
 	model->addTexture(std::make_pair(this->getGame()->getTexture("skybox"), TextureType::DIFFUSE));
 
+	*/
 	const std::vector<Vertex> verticesBox = {
 		{{-1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 0 FLD
 		{{+1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 1 FRD
