@@ -122,6 +122,9 @@ void Shader::bind(std::string_view name, GLuint index) {
 	GLuint blockIndex = glGetUniformBlockIndex(mShaderProgram, name.data());
 
 	if (blockIndex == GL_INVALID_INDEX) {
+		// TODO: Warn once
+		SDL_Log("Invalid block: %s", name.data());
+		
 		return;
 	}
 

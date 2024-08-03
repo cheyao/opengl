@@ -12,7 +12,6 @@
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
 		   const std::vector<std::pair<Texture*, TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mVertices(vertices), mIndices(indices), mTextures(textures) {
-	// TODO: Remove verices?
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
 

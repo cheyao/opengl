@@ -6,7 +6,6 @@
 #include "third_party/glad/glad.h"
 
 World::World(class Game* owner) : Actor(owner) {
-	return;
 	const std::vector<Vertex> vertices = {
 		{{-0.5f, +0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Top left
 		{{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bot left
