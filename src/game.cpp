@@ -298,8 +298,8 @@ void Game::removeActor(Actor* actor) {
 }
 
 Texture* Game::getTexture(const std::string& name) { return mTextures->get(name); }
-Shader* Game::getShader(const std::string& vert, const std::string& frag) {
-	return mShaders->get(vert, frag);
+Shader* Game::getShader(const std::string& vert, const std::string& frag, const std::string& geom) {
+	return mShaders->get(vert, frag, geom);
 }
 
 Game::~Game() {

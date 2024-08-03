@@ -22,6 +22,7 @@ class DrawComponent : public Component {
 
 	void setVert(const std::string& vert) { mVert = vert; reload(); }
 	void setFrag(const std::string& frag) { mFrag = frag; reload(); }
+	void setGeom(const std::string& geom) { mGeom = geom; reload(); }
 	class Shader* getShader() const { return mShader; };
 
 	void reload();
@@ -32,6 +33,7 @@ class DrawComponent : public Component {
 
 	std::string mVert;
 	std::string mFrag;
+	std::string mGeom;
 
 	class Shader* mShader;
 };

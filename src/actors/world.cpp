@@ -24,6 +24,7 @@ World::World(class Game* owner) : Actor(owner) {
 		new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "backpack.obj"));
 	model->setVert("common.vert");
 	model->setFrag("backpack.frag");
+	model->setGeom("backpack.geom");
 	model->addTexture(std::make_pair(this->getGame()->getTexture("skybox"), TextureType::DIFFUSE));
 
 	const std::vector<Vertex> verticesBox = {

@@ -45,6 +45,8 @@ int SDL_AppInit(void** appstate, int argc, char** argv) {
 		*appstate = new Game();
 	} catch (const std::runtime_error& error) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "main.cpp: Critical error: %s\n", error.what());
+
+		return 1;
 	} catch (...) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "main.cpp: Uncaught error\n");
 
