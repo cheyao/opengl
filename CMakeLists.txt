@@ -54,6 +54,7 @@ src/opengl/renderer.cpp
 src/opengl/shader.cpp
 src/opengl/texture.cpp
 src/opengl/framebuffer.cpp
+src/opengl/ubo.cpp
 
 src/managers/glManager.cpp
 src/managers/shaderManager.cpp
@@ -81,6 +82,7 @@ include/opengl/shader.hpp
 include/opengl/texture.hpp
 include/opengl/types.hpp
 include/opengl/framebuffer.hpp
+include/opengl/ubo.hpp
 
 include/managers/glManager.hpp
 include/managers/shaderManager.hpp
@@ -280,7 +282,7 @@ if(MSVC)
 	endif()
 else()
 	if(DEBUG)
-		target_compile_options(${BUILD_NAME} PRIVATE -Wall -Wextra -Werror -g -Og -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wpointer-arith -Wwrite-strings -Wno-unknown-warning-option)
+		target_compile_options(${BUILD_NAME} PRIVATE -Wall -Wextra -Werror -g -O0 -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wpointer-arith -Wwrite-strings -Wno-unknown-warning-option)
 		target_compile_definitions(${BUILD_NAME} PRIVATE -DDEBUG -D_DEBUG)
 	else()
 		target_compile_options(${BUILD_NAME} PRIVATE -O3)

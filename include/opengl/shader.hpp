@@ -32,6 +32,8 @@ class Shader {
 	void set(const std::string_view& name, const Eigen::Affine3f& mat,
 			 const GLboolean& transpose = GL_FALSE) const;
 
+	void bind(std::string_view name, GLuint index);
+
   private:
 	static void compile(const std::string_view& fileName, const GLenum& type, GLuint& out);
 

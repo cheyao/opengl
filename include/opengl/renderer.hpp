@@ -1,5 +1,7 @@
 #pragma once
 
+#include "third_party/glad/glad.h"
+
 #include <memory>
 #include <vector>
 
@@ -16,7 +18,7 @@ class Renderer {
 	[[nodiscard]] inline int getHeight() const { return mHeight; }
 
 	void setDemensions(int width, int height);
-	void setCamera(class CameraComponent* camera) { mCamera = camera; }
+	void setCamera(class CameraComponent* camera);
 
 	void addSprite(class DrawComponent* sprite);
 	void removeSprite(class DrawComponent* sprite);
@@ -34,6 +36,7 @@ class Renderer {
 	struct SDL_Window* mWindow;
 	std::unique_ptr<class GLManager> mGL;
 	std::unique_ptr<class Framebuffer> mFramebuffer;
+	std::unique_ptr<class UBO> mMatricesUBO;
 
 	std::vector<class DrawComponent*> mDrawables;
 	std::vector<class Cubemap*> mCubemaps;

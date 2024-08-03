@@ -7,6 +7,8 @@
 #include "managers/glManager.hpp"
 #include "opengl/framebuffer.hpp"
 #include "opengl/shader.hpp"
+#include "opengl/ubo.hpp"
+#include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
 #include "utils.hpp"
 
@@ -82,9 +84,13 @@ Renderer::Renderer(Game* game)
 	mGL->printInfo();
 
 	mFramebuffer = std::make_unique<Framebuffer>(mOwner);
+
+	// Matrix uniform
+	mMatricesUBO = std::make_unique<UBO>(2 * sizeof(Eigen::Affine3f));
+	// mMatricesUBO->bind(0);
 }
 
-Renderer::~Renderer() { SDL_DestroyWindow(mWindow); }
+Renderer::~Renderer() { SDL_DestroyWindow(mWindow); /* Other stuff are smart pointers */ }
 
 void Renderer::setDemensions(int width, int height) {
 	mWidth = width;
@@ -102,13 +108,16 @@ void Renderer::draw() const {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	mMatricesUBO->bind(0);
+	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
+	mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
+
 	for (const auto& sprite : mDrawables) {
 		// TODO: Depth?
 		Shader* const shader = sprite->getShader();
 		shader->activate();
 		shader->set("viewPos", mCamera->getOwner()->getPosition()); // Bruh how come I forgot
-		shader->set("view", mCamera->getViewMatrix());
-		shader->set("proj", mCamera->getProjectionMatrix());
+		shader->bind("Matrices", 0);
 
 		setLights(shader);
 
@@ -124,7 +133,14 @@ void Renderer::reload() const {
 	}
 }
 
+void Renderer::setCamera(class CameraComponent* camera) {
+	mCamera = camera;
+	// mMatricesUBO->set(0, camera->getProjectionMatrix());
+}
+
 void Renderer::addSprite(DrawComponent* sprite) {
+	// sprite->getShader()->bind("Matrices", 0);
+
 	// Preserve order
 	int order = sprite->getDrawOrder();
 	auto iter = mDrawables.begin();

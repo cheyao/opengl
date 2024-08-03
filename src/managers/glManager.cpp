@@ -112,4 +112,10 @@ void GLManager::printInfo() {
 	SDL_Log("Maximum number of vertex attributes supported: %d\n", value);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &value);
 	SDL_Log("Maximum number of texture units supported: %d\n", value);
+	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &value);
+	SDL_Log("Maximum number of vertex uniform blocks: %d\n", value);
+	glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_BLOCKS, &value);
+	SDL_Log("Maximum number of geometry uniform blocks: %d\n", value);
+	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &value);
+	SDL_Log("Maximum number of fragment uniform blocks: %d\n", value);
 }

@@ -104,7 +104,6 @@ int Game::iterate() {
 
 #ifdef DEBUG
 	// TODO:
-	/*
 	GLenum err;
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		switch (err) {
@@ -125,7 +124,6 @@ int Game::iterate() {
 				break;
 		}
 	}
-	*/
 #endif
 
 	return 0;
