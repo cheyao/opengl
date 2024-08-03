@@ -16,10 +16,10 @@
 #include <system_error>
 
 int SDL_AppInit(void** appstate, int argc, char** argv) {
-	if (argc != 2) {
-		SDL_Log("Usage: ./pano [file]");
-		return 1;
-	}
+	(void)argc;
+	(void)argv;
+
+	// The main class is in charge of sdl
 
 	std::srand(std::time(nullptr));
 
@@ -42,11 +42,8 @@ int SDL_AppInit(void** appstate, int argc, char** argv) {
 	}
 
 	try {
-		*appstate = new Game(argv[1]);
-	} catch (std::runtime_error e) {
-		SDL_Log("Error: %s", e.what());
+		*appstate = new Game();
 	} catch (...) {
-		SDL_Log("Uncaught exception");
 		return 1;
 	}
 

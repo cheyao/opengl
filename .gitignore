@@ -8,7 +8,6 @@
 build/
 .compile_commands
 imgui.ini
-rel/
 
 # Local configuration file (sdk path, etc)
 local.properties

@@ -34,7 +34,7 @@ Renderer::Renderer(Game* game)
 	  mCamera(nullptr) {
 	mGL = std::make_unique<GLManager>();
 
-	mWindow = SDL_CreateWindow("Panorama", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	mWindow = SDL_CreateWindow("OpenGL", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to make SDL window, there is something wrong with "
