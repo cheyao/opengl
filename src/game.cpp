@@ -99,7 +99,6 @@ int Game::iterate() {
 	draw();
 
 #ifdef DEBUG
-	// TODO:
 	GLenum err;
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		switch (err) {

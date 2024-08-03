@@ -57,12 +57,8 @@ void ShaderManager::reload(bool full) {
 		// TODO: Some wierd vim write stuff
 		// FIXME: I don't fucking know why this doesn't work
 		std::filesystem::file_time_type lastEditTime;
-		try {
-			lastEditTime = std::max(std::filesystem::last_write_time(vert),
-										   std::filesystem::last_write_time(frag));
-		} catch (std::filesystem::filesystem_error) {
-			continue;
-		}
+		lastEditTime = std::max(std::filesystem::last_write_time(vert),
+									   std::filesystem::last_write_time(frag));
 
 		if (!full && lastEditTime == mLastEdit[shader]) {
 			continue;

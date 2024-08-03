@@ -20,17 +20,6 @@
 #include <imgui.h>
 #endif
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten/html5.h>
-
-EM_JS(int, browserHeight, (), { return window.innerHeight; });
-EM_JS(int, browserWidth, (), { return window.innerWidth; });
-EM_JS(int, canvasResize, (), {
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-});
-#endif
-
 Renderer::Renderer(Game* game)
 	: mOwner(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mWidth(0), mHeight(0),
 	  mCamera(nullptr) {
@@ -56,29 +45,19 @@ Renderer::Renderer(Game* game)
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-#ifdef __EMSCRIPTEN__
-	io.IniFilename = nullptr;
-#endif
 
 	ImGui::StyleColorsDark();
 
 	SDL_Log("Finished Initializing ImGUI");
 #endif
 
-#ifdef __EMSCRIPTEN__
-	mHeight = browserHeight();
-	mWidth = browserWidth();
-	canvasResize();
-	SDL_SetWindowSize(mWindow, mWidth, mHeight);
-#else
 	SDL_GetWindowSize(mWindow, &mWidth, &mHeight);
-#endif
 
 	glViewport(0, 0, mWidth, mHeight);
 
 #ifdef IMGUI
 	ImGui_ImplSDL3_InitForOpenGL(mWindow, mGL->getContext());
-	ImGui_ImplOpenGL3_Init("#version 400");
+	ImGui_ImplOpenGL3_Init("#version 410");
 #endif
 
 	mGL->printInfo();
@@ -88,6 +67,10 @@ Renderer::Renderer(Game* game)
 	// Matrix uniform
 	// mMatricesUBO = std::make_unique<UBO>(2 * sizeof(Eigen::Affine3f));
 	// mMatricesUBO->bind(0);
+
+	// FUCK
+	// Tuns out my tests were all wrong...
+	// glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 Renderer::~Renderer() { SDL_DestroyWindow(mWindow); /* Other stuff are smart pointers */ }
@@ -113,6 +96,7 @@ void Renderer::draw() const {
 	// mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
 
 	for (const auto& sprite : mDrawables) {
+		break;
 		// TODO: Depth?
 		Shader* const shader = sprite->getShader();
 		shader->activate();
