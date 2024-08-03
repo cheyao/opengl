@@ -36,7 +36,7 @@ class Renderer {
 	struct SDL_Window* mWindow;
 	std::unique_ptr<class GLManager> mGL;
 	std::unique_ptr<class Framebuffer> mFramebuffer;
-	std::unique_ptr<class UBO> mMatricesUBO;
+	// std::unique_ptr<class UBO> mMatricesUBO;
 
 	std::vector<class DrawComponent*> mDrawables;
 	std::vector<class Cubemap*> mCubemaps;

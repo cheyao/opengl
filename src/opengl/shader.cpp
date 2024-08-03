@@ -51,7 +51,6 @@ Shader::~Shader() {
 
 void Shader::activate() const { glUseProgram(mShaderProgram); }
 
-#include <iostream>
 void Shader::setUniform(const std::string_view& name, std::function<void(GLint)> toCall) const {
 	// Safety checks
 	assert(!name.contains(' '));
@@ -77,30 +76,6 @@ void Shader::setUniform(const std::string_view& name, std::function<void(GLint)>
 #endif
 
 	toCall(location);
-
-	GLenum err;
-	while ((err = glGetError()) != GL_NO_ERROR) {
-		switch (err) {
-			case GL_INVALID_ENUM:
-				SDL_Log("GLError: Invalid enum");
-				break;
-			case GL_INVALID_VALUE:
-				SDL_Log("GLError: Invalid value");
-				break;
-			case GL_INVALID_OPERATION:
-				SDL_Log("GLError: Invalid operation");
-				break;
-			case GL_INVALID_FRAMEBUFFER_OPERATION:
-				SDL_Log("GLError: Invalid framebuffer op");
-				break;
-			case GL_OUT_OF_MEMORY:
-				SDL_Log("GLError: Out of memory");
-				break;
-		}
-
-		std::cerr << name;
-	}
-
 }
 
 void Shader::set(const std::string_view& name, const GLboolean& val) const {

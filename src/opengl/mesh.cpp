@@ -11,8 +11,13 @@
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
 		   const std::vector<std::pair<Texture*, TextureType>>& textures)
-	: mVBO(0), mEBO(0), mVAO(0) /*, mVertices(vertices)*/, mIndices(indices), mTextures(textures) {
-	genBuffers();
+	: mVBO(0), mEBO(0), mVAO(0), mVertices(vertices), mIndices(indices), mTextures(textures) {
+	// TODO: Remove verices?
+	glGenBuffers(1, &mVBO);
+	glGenBuffers(1, &mEBO);
+
+	glGenVertexArrays(1, &mVAO);
+
 	glBindVertexArray(mVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
@@ -36,7 +41,9 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
 	glBindVertexArray(0);
 }
 
+/*
 // PERF: Maybe indices pointer?
+//
 Mesh::Mesh(float* positions, float* normals, float* texPos,
 		   const unsigned int vertCount, const std::vector<unsigned int>& indices,
 		   const std::vector<std::pair<class Texture*, TextureType>>& textures)
@@ -66,18 +73,12 @@ Mesh::Mesh(float* positions, float* normals, float* texPos,
 
 	glBindVertexArray(0);
 }
+*/
 
 Mesh::~Mesh() {
 	glDeleteVertexArrays(1, &mVAO);
 	glDeleteBuffers(1, &mVBO);
 	glDeleteBuffers(1, &mEBO);
-}
-
-void Mesh::genBuffers() {
-	glGenBuffers(1, &mVBO);
-	glGenBuffers(1, &mEBO);
-
-	glGenVertexArrays(1, &mVAO);
 }
 
 void Mesh::draw(const Shader* shader) const {
@@ -86,7 +87,7 @@ void Mesh::draw(const Shader* shader) const {
 	unsigned int height = 0;
 	unsigned int ambient = 0;
 
-	for (GLuint i = 0; i < mTextures.size(); i++) {
+	for (unsigned int i = 0; i < mTextures.size(); i++) {
 		// retrieve texture number (the N in diffuse_textureN)
 		std::string number;
 		std::string name;

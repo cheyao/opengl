@@ -43,7 +43,11 @@ int SDL_AppInit(void** appstate, int argc, char** argv) {
 
 	try {
 		*appstate = new Game();
+	} catch (const std::runtime_error& error) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "main.cpp: Critical error: %s\n", error.what());
 	} catch (...) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "main.cpp: Uncaught error\n");
+
 		return 1;
 	}
 
@@ -85,13 +89,11 @@ int SDL_AppIterate(void* appstate) {
 		SDL_Log("Uncaught exception: %s", error.what());
 
 		static_cast<Game*>(appstate)->pause();
-
-		return 0;
 #else
 		ERROR_BOX("Exception thrown, the game might not function correctly");
+#endif
 
 		return 0;
-#endif
 	}
 }
 
