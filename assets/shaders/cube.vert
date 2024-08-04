@@ -15,11 +15,11 @@ layout(std140) uniform Matrices {
 	mat4 view;
 };
 uniform mat4 model;
-uniform vec2 offsets[5];
+uniform vec3 offsets[10];
 
 void main() {
 	vs_out.normal = normalize(mat3(transpose(inverse(model))) * aNormal);
-	vs_out.fragPos = vec3(model * vec4(aPos, 1.0f));
+	vs_out.fragPos = vec3(model * vec4(aPos, 1.0f)) + offsets[gl_InstanceID];
 	vs_out.texPos = aTexPos;
-	gl_Position = proj * view * vec4(vs_out.fragPos, 1.0f) + vec4(offsets[gl_InstanceID], 0.0f, 0.0f);
+	gl_Position = proj * view * vec4(vs_out.fragPos, 1.0f);
 }
