@@ -3,6 +3,7 @@
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
 
+#include <functional>
 #include <utility>
 #include <vector>
 
@@ -11,7 +12,9 @@ class Mesh {
 	explicit Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
 				  const std::vector<std::pair<class Texture*, TextureType>>& textures);
 	// explicit Mesh(const float* const positions, const float* const normals);
-	// [[deprecated("Doesn't work")]] explicit Mesh(float* positions, float* normals, float* texPos, const unsigned int vertCount, const std::vector<unsigned int>& indices, const std::vector<std::pair<class Texture*, TextureType>>& textures);
+	// [[deprecated("Doesn't work")]] explicit Mesh(float* positions, float* normals, float* texPos,
+	// const unsigned int vertCount, const std::vector<unsigned int>& indices, const
+	// std::vector<std::pair<class Texture*, TextureType>>& textures);
 	Mesh(Mesh&&) = delete;
 	Mesh(const Mesh&) = delete;
 	Mesh& operator=(Mesh&&) = delete;
@@ -26,6 +29,7 @@ class Mesh {
 	void addTexture(std::pair<class Texture*, TextureType> texture) {
 		mTextures.emplace_back(texture);
 	}
+	void setDrawFunc(const std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)>& func) { mDrawFunc = func; }
 
   private:
 	GLuint mVBO;
@@ -35,4 +39,6 @@ class Mesh {
 	std::vector<struct Vertex> mVertices;
 	std::vector<unsigned int> mIndices;
 	std::vector<std::pair<class Texture*, TextureType>> mTextures;
+
+	std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)> mDrawFunc;
 };
