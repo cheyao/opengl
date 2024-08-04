@@ -170,8 +170,8 @@ void ModelComponent::addUniform(const std::function<void(const Shader* shader)> 
 }
 
 void ModelComponent::addAttribArray(const GLsizeiptr& size, const GLvoid* data,
-									std::function<void()> bind) {
+									std::function<void()> bind, GLuint VBO) {
 	for (const auto& mesh : mMeshes) {
-		mesh->addAttribArray(size, data, bind);
+		mesh->addAttribArray(size, data, bind, VBO);
 	}
 }

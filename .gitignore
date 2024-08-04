@@ -6,6 +6,7 @@
 .gradle/
 .cache/
 build/
+rel/
 .compile_commands
 imgui.ini
 

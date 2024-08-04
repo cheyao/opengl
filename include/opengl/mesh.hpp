@@ -46,7 +46,7 @@ class Mesh {
 						   const GLsizeiptr& size, const GLvoid* data,
 						   const GLuint& divisor = 0, const GLenum& type = GL_FLOAT);
 	*/
-	void addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind);
+	void addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind, GLuint VBO = -1);
 
   private:
 	GLuint mVBO;

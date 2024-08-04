@@ -1,10 +1,12 @@
 #include "actors/world.hpp"
 
 #include "components/meshComponent.hpp"
+#include "components/modelComponent.hpp"
 #include "game.hpp"
 #include "third_party/glad/glad.h"
 
 World::World(class Game* owner) : Actor(owner) {
+	/*
 	const std::vector<Vertex> vertices = {
 		{{-0.5f, +0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Top left
 		{{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bot left
@@ -18,15 +20,14 @@ World::World(class Game* owner) : Actor(owner) {
 	MeshComponent* const window = new MeshComponent(this, vertices, indices, textures, 300);
 	window->setVert("common.vert");
 	window->setFrag("window.frag");
+	*/
 
-	/*
 	ModelComponent* const model =
-		new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "backpack.obj"));
+		new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "earth.blend"));
 	model->setVert("common.vert");
 	model->setFrag("backpack.frag");
 	model->setGeom("backpack.geom");
-	model->addTexture(std::make_pair(this->getGame()->getTexture("nightsky"), TextureType::DIFFUSE));
-	*/
+	model->addTexture(std::make_pair(this->getGame()->getTexture("land.png"), TextureType::DIFFUSE));
 
 	const std::vector<Vertex> verticesBox = {
 		{{-1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 0 FLD
@@ -51,4 +52,6 @@ World::World(class Game* owner) : Actor(owner) {
 	MeshComponent* const box = new MeshComponent(this, verticesBox, indicesBox, texturesBox, 200);
 	box->setVert("sky.vert");
 	box->setFrag("sky.frag");
+
+	setScale(5.0f);
 }

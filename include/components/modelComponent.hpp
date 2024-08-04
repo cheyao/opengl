@@ -23,7 +23,7 @@ class ModelComponent : public DrawComponent {
 											  const void* indices)>& func);
 	void addTexture(std::pair<class Texture*, TextureType> texture);
 	void addUniform(const std::function<void(const class Shader* shader)> func);
-	void addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind);
+	void addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind, GLuint VBO = -1);
 
   private:
 	void loadNode(struct aiNode* node, const struct aiScene* scene);
