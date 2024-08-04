@@ -31,17 +31,15 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 	cube->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1,
 								std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
 								10));
-	cube->addUniform([](const Shader* shader) {
-		for (int y = 0; y < 10; y++) {
-			Eigen::Vector3f translation;
+	std::vector<Eigen::Vector3f> offsets(10, Eigen::Vector3f::Zero());
 
-			translation.x() = sin(y + static_cast<float>(SDL_GetTicks()) / 1000) * 4;
-			translation.y() = 0;
-			translation.z() = cos(y + static_cast<float>(SDL_GetTicks()) / 1000) * 4;
+	for (int y = 0; y < 10; y++) {
+		offsets[y].x() = sin(y + static_cast<float>(SDL_GetTicks()) / 1000) * 4;
+		offsets[y].y() = 0;
+		offsets[y].z() = cos(y + static_cast<float>(SDL_GetTicks()) / 1000) * 4;
+	}
 
-			shader->set("offsets[" + std::to_string(y) + "]", translation);
-		}
-	});
+	cube->addAttribArray(3, 3, sizeof(Eigen::Vector3f), offsets.size() * sizeof(Eigen::Vector3f), offsets.data(), 1);
 
 	setScale(0.25);
 }
