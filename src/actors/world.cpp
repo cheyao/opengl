@@ -1,7 +1,6 @@
 #include "actors/world.hpp"
 
 #include "components/meshComponent.hpp"
-#include "components/modelComponent.hpp"
 #include "game.hpp"
 #include "third_party/glad/glad.h"
 
