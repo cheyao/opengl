@@ -1,12 +1,3 @@
-# Blender MTL File: 'Rock1.blend'
-# Material Count: 1
-
-newmtl Material
-Ns 13.725490
-Ka 0.000000 0.000000 0.000000
-Kd 0.640000 0.640000 0.640000
-Ks 0.007937 0.007937 0.007937
-Ni 1.000000
-d 1.000000
-illum 2
-map_Bump rock.png
+version https://git-lfs.github.com/spec/v1
+oid sha256:0c25dd00baa4d8c1075a003fccb6ed98e53f91459b908a5ce36b121d41dc1a34
+size 223

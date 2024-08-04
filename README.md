@@ -7,3 +7,5 @@ Im currently following [Learn OpenGL](https://learnopengl.com), but instead of t
 Hope everything works out!
 
 TODO: Improve performance by revamping hot reload
+
+"Planet Earth (Alt-Drag to change Lighting)" (https://skfb.ly/Ft8J) by Thomas Kole is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).

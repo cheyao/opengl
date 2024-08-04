@@ -7,7 +7,6 @@ uniform vec3 viewPos;
 
 uniform sampler2D texture_diffuse0;
 uniform sampler2D texture_specular0;
-uniform samplerCube texture_diffuse1;
 
 struct DirLight {
 	vec3 direction;
@@ -60,8 +59,8 @@ out vec4 color;
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 calcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
-vec3 cubeReflect(vec3 normal, vec3 viewDir);
-vec3 cubeRefract(vec3 normal, vec3 viewDir);
+// vec3 cubeReflect(vec3 normal, vec3 viewDir);
+// vec3 cubeRefract(vec3 normal, vec3 viewDir);
 
 void main() {
 	vec3 viewDir = normalize(viewPos - fs_in.fragPos);
@@ -73,7 +72,6 @@ void main() {
 	// 	outColor += calcPointLight(pointLights[i], norm, fragPos, viewDir);
 	// }
 	outColor += calcSpotLight(spotLight, fs_in.normal, fs_in.fragPos, viewDir);
-	// FIXME: Cannot be added together?
 
 	// outColor += cubeReflect(norm, viewDir);
 	// outColor += cubeRefract(fs_in.normal, viewDir);
@@ -83,6 +81,7 @@ void main() {
 
 // TODO: Concat common parts
 
+/*
 vec3 cubeReflect(vec3 normal, vec3 viewDir) {
 	vec3 reflection = reflect(-viewDir, normal);
 	return vec3(texture(texture_diffuse1, reflection));
@@ -93,6 +92,7 @@ vec3 cubeRefract(vec3 normal, vec3 viewDir) {
 	vec3 refration = refract(-viewDir, normal, ratio);
 	return vec3(texture(texture_diffuse1, refration));
 }
+*/
 
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 	vec3 lightDir = normalize(-light.direction);
