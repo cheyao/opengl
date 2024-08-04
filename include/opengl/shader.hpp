@@ -26,6 +26,7 @@ class Shader {
 	void set(const std::string_view& name, const GLfloat& val, const GLfloat& val2) const;
 	void set(const std::string_view& name, const GLfloat& val, const GLfloat& val2,
 			 const GLfloat& val3) const;
+	void set(const std::string_view& name, const Eigen::Vector2f& val) const;
 	void set(const std::string_view& name, const Eigen::Vector3f& val) const;
 	void set(const std::string_view& name, const Eigen::Vector3f& val, const GLfloat& val2) const;
 	void set(const std::string_view& name, const Eigen::Vector4f& val) const;

@@ -2,6 +2,7 @@
 
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
+#include "opengl/shader.hpp"
 
 #include <functional>
 #include <utility>
@@ -30,6 +31,7 @@ class Mesh {
 		mTextures.emplace_back(texture);
 	}
 	void setDrawFunc(const std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)>& func) { mDrawFunc = func; }
+	void addUniform(const std::function<void(const class Shader* shader)> func) { mUniformFuncs.emplace_back(func); };
 
   private:
 	GLuint mVBO;
@@ -41,4 +43,5 @@ class Mesh {
 	std::vector<std::pair<class Texture*, TextureType>> mTextures;
 
 	std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)> mDrawFunc;
+	std::vector<std::function<void(const Shader* shader)>> mUniformFuncs;
 };

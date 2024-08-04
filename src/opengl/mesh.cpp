@@ -118,6 +118,11 @@ void Mesh::draw(const Shader* shader) const {
 		// https://stackoverflow.com/questions/10022789/stdfunction-with-non-static-member-functions
 	}
 
+	// Fking const missmatch
+	for (const std::function<void(const Shader *)>& func : mUniformFuncs) {
+		func(shader);
+	}
+
 	glBindVertexArray(mVAO);
 	mDrawFunc(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);

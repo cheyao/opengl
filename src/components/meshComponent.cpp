@@ -35,3 +35,5 @@ void MeshComponent::setDrawFunc(
 	const std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)>& func) {
 	mMesh->setDrawFunc(func);
 }
+
+void MeshComponent::addUniform(const std::function<void(const Shader*)> func) { mMesh->addUniform(func); }
