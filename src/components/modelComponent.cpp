@@ -6,6 +6,7 @@
 #include "opengl/shader.hpp"
 #include "opengl/types.hpp"
 #include "third_party/Eigen/Core"
+#include "third_party/glad/glad.h"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
@@ -114,7 +115,9 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 
 	mMeshes.emplace_back(new Mesh(vertices, indices, textures));
 	// FIXME: Fix mesh
-	// mMeshes.emplace_back(new Mesh(reinterpret_cast<float*>(mesh->mVertices), reinterpret_cast<float*>(mesh->mNormals), reinterpret_cast<float*>(mesh->mTextureCoords[0]), mesh->mNumVertices, indices, textures));
+	// mMeshes.emplace_back(new Mesh(reinterpret_cast<float*>(mesh->mVertices),
+	// reinterpret_cast<float*>(mesh->mNormals), reinterpret_cast<float*>(mesh->mTextureCoords[0]),
+	// mesh->mNumVertices, indices, textures));
 }
 
 std::vector<Texture*> ModelComponent::loadTextures(aiMaterial* mat, const aiTextureType type) {
@@ -150,5 +153,18 @@ void ModelComponent::draw() {
 void ModelComponent::addTexture(std::pair<class Texture*, TextureType> texture) {
 	for (const auto& mesh : mMeshes) {
 		mesh->addTexture(texture);
+	}
+}
+
+void ModelComponent::setDrawFunc(
+	const std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)>& func) {
+	for (const auto& mesh : mMeshes) {
+		mesh->setDrawFunc(func);
+	}
+}
+
+void ModelComponent::addUniform(const std::function<void(const Shader* shader)> func) {
+	for (const auto& mesh : mMeshes) {
+		mesh->addUniform(func);
 	}
 }

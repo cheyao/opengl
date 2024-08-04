@@ -2,10 +2,11 @@
 
 #include "components/drawComponent.hpp"
 #include "opengl/types.hpp"
+#include "third_party/glad/glad.h"
 
-#include <vector>
-#include <assimp/material.h>
 #include <assimp/Importer.hpp>
+#include <assimp/material.h>
+#include <vector>
 
 class ModelComponent : public DrawComponent {
   public:
@@ -18,7 +19,10 @@ class ModelComponent : public DrawComponent {
 
 	void draw() override;
 
+	void setDrawFunc(const std::function<void(GLenum mode, GLsizei count, GLenum type,
+											  const void* indices)>& func);
 	void addTexture(std::pair<class Texture*, TextureType> texture);
+	void addUniform(const std::function<void(const class Shader* shader)> func);
 
   private:
 	void loadNode(struct aiNode* node, const struct aiScene* scene);

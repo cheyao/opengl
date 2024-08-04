@@ -2,8 +2,9 @@
 
 #include "components/meshComponent.hpp"
 #include "game.hpp"
+#include "opengl/shader.hpp"
+#include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
-#include <functional>
 
 Cube::Cube(class Game* owner) : Actor(owner) {
 	const std::vector<Vertex> verticesCube = {
@@ -29,6 +30,21 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 	cube->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1,
 								std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
 								5));
+	cube->addUniform([](const Shader* shader) {
+		Eigen::Vector2f offsets[5];
+		int index = 0;
+		float offset = 0.1f;
+		for (int y = 0; y < 5; y++) {
+			Eigen::Vector2f translation;
+			translation.x() = 0;
+			translation.y() = (float)y + offset;
+			offsets[index++] = translation;
+		}
+
+		for (int i = 0; i < 5; i++) {
+			shader->set("offsets[" + std::to_string(i) + "]", offsets[i]);
+		}
+	});
 
 	setScale(0.5);
 }

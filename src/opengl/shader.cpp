@@ -145,6 +145,9 @@ void Shader::set(const std::string_view& name, const GLfloat& val, const GLfloat
 				 const GLfloat& val3) const {
 	setUniform(name, std::bind(glUniform3f, std::placeholders::_1, val, val2, val3));
 }
+void Shader::set(const std::string_view& name, const Eigen::Vector2f& val) const {
+	setUniform(name, std::bind(glUniform2f, std::placeholders::_1, val.x(), val.y()));
+}
 void Shader::set(const std::string_view& name, const Eigen::Vector3f& val) const {
 	setUniform(name, std::bind(glUniform3f, std::placeholders::_1, val.x(), val.y(), val.z()));
 }
