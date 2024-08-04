@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components/drawComponent.hpp"
+#include "third_party/glad/glad.h"
 #include "opengl/types.hpp"
 
 #include <utility>
@@ -15,6 +16,8 @@ class MeshComponent : public DrawComponent {
 	MeshComponent& operator=(MeshComponent&&) = delete;
 	MeshComponent& operator=(const MeshComponent&) = delete;
 	~MeshComponent() override = default;
+
+	void setDrawFunc(const std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)>& func);
 
 	void draw() override;
 

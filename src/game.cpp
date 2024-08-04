@@ -1,6 +1,7 @@
 #include "game.hpp"
 
 #include "actors/actor.hpp"
+#include "actors/cube.hpp"
 #include "actors/player.hpp"
 #include "actors/world.hpp"
 #include "managers/shaderManager.hpp"
@@ -60,6 +61,7 @@ void Game::setup() {
 
 	new World(this);
 	new Player(this);
+	new Cube(this);
 
 	mTicks = SDL_GetTicks();
 

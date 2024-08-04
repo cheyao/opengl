@@ -21,4 +21,5 @@ void main() {
 	vs_out.fragPos = vec3(model * vec4(aPos, 1.0f));
 	vs_out.texPos = aTexPos;
 	gl_Position = proj * view * vec4(vs_out.fragPos, 1.0f);
+	gl_Position.x += gl_InstanceID / 5;
 }

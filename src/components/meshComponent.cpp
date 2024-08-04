@@ -30,3 +30,8 @@ void MeshComponent::draw() {
 
 	mMesh->draw(getShader());
 }
+
+void MeshComponent::setDrawFunc(
+	const std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)>& func) {
+	mMesh->setDrawFunc(func);
+}

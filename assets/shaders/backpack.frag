@@ -68,17 +68,15 @@ void main() {
 
 	vec3 outColor = vec3(0);
 
-	/*
-	outColor += calcDirLight(dirLight, norm, viewDir);
+	outColor += calcDirLight(dirLight, fs_in.normal, viewDir);
 	// for (int i = 0; i < POINT_LIGHTS; i++) {
 	// 	outColor += calcPointLight(pointLights[i], norm, fragPos, viewDir);
 	// }
-	*/
-	// outColor += calcSpotLight(spotLight, norm, fragPos, viewDir);
+	outColor += calcSpotLight(spotLight, fs_in.normal, fs_in.fragPos, viewDir);
 	// FIXME: Cannot be added together?
 
 	// outColor += cubeReflect(norm, viewDir);
-	outColor += cubeRefract(fs_in.normal, viewDir);
+	// outColor += cubeRefract(fs_in.normal, viewDir);
 
 	color = vec4(outColor, 1.0f);
 }

@@ -63,6 +63,7 @@ src/managers/textureManager.cpp
 src/actors/actor.cpp
 src/actors/player.cpp
 src/actors/world.cpp
+src/actors/cube.cpp
 
 #Headers
 include/game.hpp
@@ -91,6 +92,7 @@ include/managers/textureManager.hpp
 include/actors/actor.hpp
 include/actors/player.hpp
 include/actors/world.hpp
+include/actors/cube.hpp
 
 #External
 src/third_party/stb_image.c

@@ -37,23 +37,13 @@ World::World(class Game* owner) : Actor(owner) {
 		{{-1.0f, +1.0f, -1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 6 BLU
 		{{+1.0f, +1.0f, -1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}  // 7 BRU
 	};
-	const std::vector<GLuint> indicesBox = {// Top
-											2, 6, 7, 2, 7, 3,
+	const std::vector<GLuint> indicesBox = {2, 6, 7, 2, 7, 3, // Top
 
-											// Bottom
-											0, 5, 4, 0, 1, 5,
-
-											// Left
-											0, 6, 2, 0, 4, 6,
-
-											// Right
-											1, 3, 7, 1, 7, 5,
-
-											// Front
-											0, 2, 3, 0, 3, 1,
-
-											// Back
-											4, 7, 6, 4, 5, 7};
+											0, 5, 4, 0, 1, 5,  // Bottom
+											0, 6, 2, 0, 4, 6,  // Left
+											1, 3, 7, 1, 7, 5,  // Right
+											0, 2, 3, 0, 3, 1,  // Front
+											4, 7, 6, 4, 5, 7}; // Back
 	const std::vector<std::pair<Texture*, TextureType>> texturesBox = {
 		std::make_pair(this->getGame()->getTexture("skybox"), TextureType::DIFFUSE)};
 

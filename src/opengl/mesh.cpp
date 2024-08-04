@@ -5,13 +5,14 @@
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
 
+#include <functional>
 #include <string>
 #include <utility>
 #include <vector>
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
 		   const std::vector<std::pair<Texture*, TextureType>>& textures)
-	: mVBO(0), mEBO(0), mVAO(0), mVertices(vertices), mIndices(indices), mTextures(textures) {
+	: mVBO(0), mEBO(0), mVAO(0), mVertices(vertices), mIndices(indices), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
 
@@ -118,6 +119,6 @@ void Mesh::draw(const Shader* shader) const {
 	}
 
 	glBindVertexArray(mVAO);
-	glDrawElements(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, nullptr);
+	mDrawFunc(GL_TRIANGLES, mIndices.size(), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
 }
