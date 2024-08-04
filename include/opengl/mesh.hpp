@@ -41,9 +41,12 @@ class Mesh {
 		mUniformFuncs.emplace_back(func);
 	};
 	// TODO: Less args
-	void addAttribArray(const GLuint& index, const GLint& count, const GLsizei& stride,
-						const GLsizeiptr& size, const GLvoid* data,
-						const GLuint& divisor = 0, const GLenum& type = GL_FLOAT);
+	/*
+	   void addAttribArray(const GLuint& index, const GLint& count, const GLsizei& stride,
+						   const GLsizeiptr& size, const GLvoid* data,
+						   const GLuint& divisor = 0, const GLenum& type = GL_FLOAT);
+	*/
+	void addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind);
 
   private:
 	GLuint mVBO;

@@ -36,10 +36,11 @@ void MeshComponent::setDrawFunc(
 	mMesh->setDrawFunc(func);
 }
 
-void MeshComponent::addUniform(const std::function<void(const Shader*)> func) { mMesh->addUniform(func); }
+void MeshComponent::addUniform(const std::function<void(const Shader*)> func) {
+	mMesh->addUniform(func);
+}
 
-void MeshComponent::addAttribArray(const GLuint& index, const GLint& count, const GLsizei& stride,
-						  const GLsizeiptr& size, const GLvoid* data,
-						  const GLuint& divisor, const GLenum& type) {
-	mMesh->addAttribArray(index, count, stride, size, data, divisor, type);
+void MeshComponent::addAttribArray(const GLsizeiptr& size, const GLvoid* data,
+								   std::function<void()> bind) {
+	mMesh->addAttribArray(size, data, bind);
 }

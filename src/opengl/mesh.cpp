@@ -50,12 +50,14 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
 /*
  * NOTE:
  * After calling `glBufferData` the data is already copied and need not to be conserved.
- * Source: https://gamedev.stackexchange.com/questions/187420/opengl-what-to-do-after-running-glbufferdata
+ * Source:
+ * https://gamedev.stackexchange.com/questions/187420/opengl-what-to-do-after-running-glbufferdata
  */
 
+/*
 void Mesh::addAttribArray(const GLuint& index, const GLint& count, const GLsizei& stride,
-						  const GLsizeiptr& size, const GLvoid* data,
-						  const GLuint& divisor, const GLenum& type) {
+						  const GLsizeiptr& size, const GLvoid* data, const GLuint& divisor,
+						  const GLenum& type) {
 	GLuint VBO;
 	glGenBuffers(1, &VBO);
 
@@ -67,6 +69,30 @@ void Mesh::addAttribArray(const GLuint& index, const GLint& count, const GLsizei
 	glEnableVertexAttribArray(index);
 	glVertexAttribPointer(index, count, type, GL_FALSE, stride, reinterpret_cast<GLvoid*>(0));
 	glVertexAttribDivisor(index, divisor);
+
+	glBindVertexArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0); // Maybe before attrib divisor?
+
+	mAttribs.emplace_back(VBO);
+}
+*/
+
+void Mesh::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind) {
+	GLuint VBO;
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(mVAO); // Save it in vertex array
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+
+	/*
+	glEnableVertexAttribArray(index);
+	glVertexAttribPointer(index, count, type, GL_FALSE, stride, reinterpret_cast<GLvoid*>(0));
+	glVertexAttribDivisor(index, divisor);
+	*/
+	bind();
 
 	glBindVertexArray(0);
 

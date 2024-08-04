@@ -1,8 +1,14 @@
 #version 410 core
 precision mediump float;
 
+uniform sampler2D texture_diffuse0;
+
+in VS_OUT {
+	vec2 texPos;
+} fs_in;
+
 out vec4 color;
 
 void main() {
-	color = vec4(0.627450980392f, 0.125490196078f, 0.941176470588f, 1.0f);
-} 
+    color = texture(texture_diffuse0, fs_in.texPos);
+}
