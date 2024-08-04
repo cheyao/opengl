@@ -5,6 +5,7 @@
 #include "opengl/shader.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
+#include <SDL3/SDL_timer.h>
 
 Cube::Cube(class Game* owner) : Actor(owner) {
 	const std::vector<Vertex> verticesCube = {
@@ -29,22 +30,18 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 	cube->setFrag("cube.frag");
 	cube->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1,
 								std::placeholders::_2, std::placeholders::_3, std::placeholders::_4,
-								5));
+								10));
 	cube->addUniform([](const Shader* shader) {
-		Eigen::Vector2f offsets[5];
-		int index = 0;
-		float offset = 0.1f;
-		for (int y = 0; y < 5; y++) {
-			Eigen::Vector2f translation;
-			translation.x() = 0;
-			translation.y() = (float)y + offset;
-			offsets[index++] = translation;
-		}
+		for (int y = 0; y < 10; y++) {
+			Eigen::Vector3f translation;
 
-		for (int i = 0; i < 5; i++) {
-			shader->set("offsets[" + std::to_string(i) + "]", offsets[i]);
+			translation.x() = sin(y + static_cast<float>(SDL_GetTicks()) / 1000) * 4;
+			translation.y() = 0;
+			translation.z() = cos(y + static_cast<float>(SDL_GetTicks()) / 1000) * 4;
+
+			shader->set("offsets[" + std::to_string(y) + "]", translation);
 		}
 	});
 
-	setScale(0.5);
+	setScale(0.25);
 }
