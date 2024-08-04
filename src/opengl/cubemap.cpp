@@ -20,8 +20,8 @@ void Cubemap::load() {
 	glGenTextures(1, &mID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, mID);
 
-	const std::vector faces = {"right.jpg",	 "left.jpg",  "top.jpg",
-							   "bottom.jpg", "front.jpg", "back.jpg"};
+	const std::vector faces = {"right.png",	 "left.png",  "top.png",
+							   "bottom.png", "front.png", "back.png"};
 
 	for (unsigned int i = 0; i < faces.size(); i++) {
 		loadface(faces[i], i);

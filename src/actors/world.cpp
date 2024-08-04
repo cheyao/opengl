@@ -20,12 +20,14 @@ World::World(class Game* owner) : Actor(owner) {
 	window->setVert("common.vert");
 	window->setFrag("window.frag");
 
+	/*
 	ModelComponent* const model =
 		new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "backpack.obj"));
 	model->setVert("common.vert");
 	model->setFrag("backpack.frag");
 	model->setGeom("backpack.geom");
-	model->addTexture(std::make_pair(this->getGame()->getTexture("skybox"), TextureType::DIFFUSE));
+	model->addTexture(std::make_pair(this->getGame()->getTexture("nightsky"), TextureType::DIFFUSE));
+	*/
 
 	const std::vector<Vertex> verticesBox = {
 		{{-1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 0 FLD
@@ -45,7 +47,7 @@ World::World(class Game* owner) : Actor(owner) {
 											0, 2, 3, 0, 3, 1,  // Front
 											4, 7, 6, 4, 5, 7}; // Back
 	const std::vector<std::pair<Texture*, TextureType>> texturesBox = {
-		std::make_pair(this->getGame()->getTexture("skybox"), TextureType::DIFFUSE)};
+		std::make_pair(this->getGame()->getTexture("nightsky"), TextureType::DIFFUSE)};
 
 	MeshComponent* const box = new MeshComponent(this, verticesBox, indicesBox, texturesBox, 200);
 	box->setVert("sky.vert");
