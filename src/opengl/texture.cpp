@@ -44,6 +44,9 @@ void Texture::load() {
 	GLenum format = GL_RGB;
 	switch (channels) {
 		// TODO: Gray scale
+		case 1:
+			format = GL_LUMINANCE;
+			break;
 		case 3:
 			format = GL_RGB;
 			break;
@@ -51,8 +54,8 @@ void Texture::load() {
 			format = GL_RGBA;
 			break;
 		[[unlikely]] default:
-			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s:%d Unimplemented image format: %s\n",
-						 __FILE__, __LINE__, name.data());
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s:%d Unimplemented image format: %s: %d\n",
+						 __FILE__, __LINE__, name.data(), channels);
 			ERROR_BOX("Failed to recognise file color format, the assets is probably "
 					  "corrupted");
 

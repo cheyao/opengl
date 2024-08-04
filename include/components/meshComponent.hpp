@@ -19,7 +19,7 @@ class MeshComponent : public DrawComponent {
 
 	void setDrawFunc(const std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)>& func);
 	void addUniform(const std::function<void(const class Shader*)> func);
-	void addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind);
+	void addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind, GLuint VBO = -1);
 
 	void draw() override;
 

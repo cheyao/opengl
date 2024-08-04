@@ -4,7 +4,9 @@
 #include "game.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
-#include <SDL3/SDL_timer.h>
+
+#include <SDL3/SDL.h>
+#include <cstdlib>
 
 Cube::Cube(class Game* owner) : Actor(owner) {
 	const std::vector<Vertex> verticesCube = {
@@ -28,11 +30,8 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 		this, this->getGame()->fullPath("models" SEPARATOR "rock.obj")); //, verticesCube, indicesCube, {}, 200);
 	meteorites->setVert("cube.vert");
 	meteorites->setFrag("cube.frag");
-	meteorites->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1,
-									  std::placeholders::_2, std::placeholders::_3,
-									  std::placeholders::_4, 10));
 
-	constexpr const unsigned int amount = 1000;
+	constexpr const unsigned int amount = 5000;
 
 	Eigen::Affine3f* modelMatrices = new Eigen::Affine3f[amount];
 
@@ -51,28 +50,29 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 		translation.z() = cos(angle) * radius + displacement;
 		model.translate(translation);
 
-		// 2. scale: scale between 0.05 and 0.25f
 		const float scale = (rand() % 20) / 100.0f + 0.05;
 		model.scale(scale);
 
-		// 3. rotation: add random rotation
 		const float rotAngle = (rand() % 360);
-		model.rotate(Eigen::AngleAxisf(rotAngle, Eigen::Vector3f(0.4f, 0.6f, 0.8f)));
+		model.rotate(Eigen::AngleAxisf(rotAngle, Eigen::Vector3f(0.4f, 0.6f, 0.8f).normalized()));
 
 		modelMatrices[i] = model;
 	}
+
 	meteorites->addAttribArray(amount * sizeof(Eigen::Affine3f), &modelMatrices[0], []() {
-		constexpr size_t vecSize = sizeof(Eigen::Vector3f);
+		constexpr size_t vecSize = sizeof(Eigen::Vector4f);
+
 		glEnableVertexAttribArray(3);
+		glEnableVertexAttribArray(4);
+		glEnableVertexAttribArray(5);
+		glEnableVertexAttribArray(6);
+
 		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vecSize,
 							  reinterpret_cast<GLvoid*>(0 * vecSize));
-		glEnableVertexAttribArray(4);
 		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vecSize,
 							  reinterpret_cast<GLvoid*>(1 * vecSize));
-		glEnableVertexAttribArray(5);
 		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vecSize,
 							  reinterpret_cast<GLvoid*>(2 * vecSize));
-		glEnableVertexAttribArray(6);
 		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vecSize,
 							  reinterpret_cast<GLvoid*>(3 * vecSize));
 
@@ -81,6 +81,10 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 		glVertexAttribDivisor(5, 1);
 		glVertexAttribDivisor(6, 1);
 	});
+
+	meteorites->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1,
+									  std::placeholders::_2, std::placeholders::_3,
+									  std::placeholders::_4, amount));
 
 	/*
 	// draw planet

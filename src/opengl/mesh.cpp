@@ -78,14 +78,18 @@ void Mesh::addAttribArray(const GLuint& index, const GLint& count, const GLsizei
 }
 */
 
-void Mesh::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind) {
-	GLuint VBO;
-	glGenBuffers(1, &VBO);
+void Mesh::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind, GLuint VBO) {
+	if (VBO == static_cast<GLuint>(-1)) {
+		// FIXME: Double free
+		glGenBuffers(1, &VBO);
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+	}
 
 	glBindVertexArray(mVAO); // Save it in vertex array
-
+	
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 
 	/*
 	glEnableVertexAttribArray(index);

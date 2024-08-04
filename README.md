@@ -7,3 +7,5 @@ Im currently following [Learn OpenGL](https://learnopengl.com), but instead of t
 Hope everything works out!
 
 TODO: Improve performance by revamping hot reload
+
+Thanks https://sketchfab.com/SebastianSosnowski for his free planet model :D
