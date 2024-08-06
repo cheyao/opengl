@@ -19,7 +19,7 @@
 
 ModelComponent::ModelComponent(Actor* owner, const std::string_view& path) : DrawComponent(owner) {
 	// NOTE: This importer handles memory
-	// All data is freed after this funciton
+	// All data is freed after the destruction of this object
 	Assimp::Importer importer;
 
 	const aiScene* scene = importer.ReadFile(
@@ -43,8 +43,6 @@ ModelComponent::~ModelComponent() {
 	for (const auto& mesh : mMeshes) {
 		delete mesh;
 	}
-
-	// delete importer;
 }
 
 void ModelComponent::loadNode(aiNode* node, const aiScene* scene) {

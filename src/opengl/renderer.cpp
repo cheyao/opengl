@@ -23,6 +23,14 @@
 #include <imgui.h>
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/html5.h>
+
+// Hacks to get browser width and hight
+EM_JS(int, browserHeight, (), { return window.innerHeight; });
+EM_JS(int, browserWidth, (), { return window.innerWidth; });
+#endif
+
 Renderer::Renderer(Game* game)
 	: mOwner(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mWidth(0), mHeight(0),
 	  mCamera(nullptr) {
@@ -36,7 +44,16 @@ Renderer::Renderer(Game* game)
 
 		throw std::runtime_error("game.cpp: Failed to create SDL window");
 	}
+
+#ifdef __EMSCRIPTEN__
+	// Hacks for EMSCRIPTEN Full screen
+	mWidth = browserWidth();
+	mHeight = browserHeight();
+
+	SDL_SetWindowSize(mWindow, mWidth, mHeight);
+#else
 	SDL_SetWindowMinimumSize(mWindow, 480, 320);
+#endif
 
 	mGL->bindContext(mWindow);
 
@@ -48,6 +65,9 @@ Renderer::Renderer(Game* game)
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+#ifdef __EMSCRIPTEN__
+	io.IniFilename = nullptr;
+#endif
 
 	ImGui::StyleColorsDark();
 
@@ -138,6 +158,17 @@ void Renderer::draw() const {
 #endif
 
 	mFramebuffer->swap(mWindow);
+
+#ifdef __EMSCRIPTEN__
+	// Emscripten, SDL3 doesn't correctly report resize atm
+	if (browserWidth() != mWindowWidth ||
+	    browserHeight() != mWindowHeight) {
+		mWindowWidth = browserWidth();
+		mWindowHeight = browserHeight();
+
+		SDL_SetWindowSize(mWindow, mWindowWidth, mWindowHeight);
+	}
+#endif
 }
 
 void Renderer::reload() const {

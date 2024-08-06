@@ -31,6 +31,7 @@ World::World(class Game* game) : Actor(game) {
 	model->addTexture(
 		std::make_pair(this->getGame()->getTexture("land.png"), TextureType::DIFFUSE));
 
+	// TODO: constexpr? Should be able to do this in c++23 duh
 	const std::vector<Vertex> verticesBox = {
 		{{-1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 0 FLD
 		{{+1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 1 FRD
