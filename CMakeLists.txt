@@ -63,6 +63,7 @@ src/managers/textureManager.cpp
 src/actors/actor.cpp
 src/actors/player.cpp
 src/actors/world.cpp
+src/actors/sun.cpp
 src/actors/cube.cpp
 
 #Headers
@@ -92,6 +93,7 @@ include/managers/textureManager.hpp
 include/actors/actor.hpp
 include/actors/player.hpp
 include/actors/world.hpp
+include/actors/sun.hpp
 include/actors/cube.hpp
 
 #External
@@ -280,7 +282,7 @@ if(MSVC)
 		target_compile_definitions(${BUILD_NAME} PRIVATE /DWIN32 /D__WINDOWS__ /DDEBUG /D_DEBUG)
 	else()
 		target_compile_options(${BUILD_NAME} PRIVATE /MD /O2 /Ob2)
-		target_compile_definitions(${BUILD_NAME} PRIVATE /D__WINDOWS__ /DWIND32 /DEIGEN_NO_DEBUG)
+		target_compile_definitions(${BUILD_NAME} PRIVATE /D__WINDOWS__ /DWIND32 /DEIGEN_NO_DEBUG /DNDEBUG)
 	endif()
 else()
 	if(DEBUG)
@@ -288,7 +290,7 @@ else()
 		target_compile_definitions(${BUILD_NAME} PRIVATE -DDEBUG -D_DEBUG)
 	else()
 		target_compile_options(${BUILD_NAME} PRIVATE -O3)
-		target_compile_definitions(${BUILD_NAME} PRIVATE -DEIGEN_NO_DEBUG)
+		target_compile_definitions(${BUILD_NAME} PRIVATE -DEIGEN_NO_DEBUG -DNDEBUG)
 	endif()
 
 	if (OPTIMIZE STREQUAL ON)

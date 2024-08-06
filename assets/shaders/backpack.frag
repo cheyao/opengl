@@ -44,8 +44,8 @@ struct SpotLight {
 };
 
 uniform DirLight dirLight;
-// #define POINT_LIGHTS 0  
-// uniform PointLight pointLights[POINT_LIGHTS];
+#define POINT_LIGHTS 1 // TODO: Non const
+uniform PointLight pointLights[POINT_LIGHTS];
 uniform SpotLight spotLight;
 
 in VS_OUT {
@@ -68,9 +68,9 @@ void main() {
 	vec3 outColor = vec3(0);
 
 	outColor += calcDirLight(dirLight, fs_in.normal, viewDir);
-	// for (int i = 0; i < POINT_LIGHTS; i++) {
-	// 	outColor += calcPointLight(pointLights[i], norm, fragPos, viewDir);
-	// }
+	for (int i = 0; i < POINT_LIGHTS; i++) {
+		outColor += calcPointLight(pointLights[i], fs_in.normal, fs_in.fragPos, viewDir);
+	}
 	outColor += calcSpotLight(spotLight, fs_in.normal, fs_in.fragPos, viewDir);
 
 	// outColor += cubeReflect(norm, viewDir);

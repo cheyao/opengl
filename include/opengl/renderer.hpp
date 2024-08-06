@@ -22,8 +22,8 @@ class Renderer {
 
 	void addSprite(class DrawComponent* sprite);
 	void removeSprite(class DrawComponent* sprite);
-	// TODO: Add lights
-	// void addLight(class Actor* source);
+	void addPointLight(class Actor* source) { mPointLights.emplace_back(source); };
+	// TODO: Add more lights
 
 	void draw() const;
 	void reload() const;
@@ -33,13 +33,15 @@ class Renderer {
 
 	class Game* mOwner;
 
-	struct SDL_Window* mWindow;
+	// These are pointers managed by renderer
+	struct SDL_Window* mWindow; // RAII?
 	std::unique_ptr<class GLManager> mGL;
 	std::unique_ptr<class Framebuffer> mFramebuffer;
 	std::unique_ptr<class UBO> mMatricesUBO;
 
 	std::vector<class DrawComponent*> mDrawables;
 	std::vector<class Cubemap*> mCubemaps;
+	std::vector<class Actor*> mPointLights;
 
 	int mWidth, mHeight;
 

@@ -4,7 +4,7 @@
 
 class World : public Actor {
   public:
-	explicit World(class Game* owner);
+	explicit World(class Game* game);
 	World(World&&) = delete;
 	World(const World&) = delete;
 	World& operator=(World&&) = delete;
