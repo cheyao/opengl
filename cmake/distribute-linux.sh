@@ -22,8 +22,8 @@ mkdir libs
 patchelf --set-rpath '$ORIGIN/libs' ${OUTPUT_NAME}
 
 cp ${SDL_DIR}/libSDL3.so.0 libs
-cp ${SDL_DIR}/libSDL3_image.so.0 libs
-# cp /usr/local/libassimp.so.5 libs
+# cp ${SDL_DIR}/libSDL3_image.so.0 libs
+cp /usr/local/libassimp.so.5 libs
 
 cd ..
 
