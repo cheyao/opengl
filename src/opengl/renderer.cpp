@@ -97,7 +97,25 @@ void Renderer::setDemensions(int width, int height) {
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
 }
 
+static float constant = 1.0f;
+static float linear = 0.09f;
+static float quadratic = 0.032f;
+
 void Renderer::draw() const {
+#ifdef IMGUI
+	ImGui::Begin("Main Menu");
+	ImGui::SliderFloat("Constant", &constant, -1.0f, 10.0f);
+	ImGui::SliderFloat("Linear", &linear, -1.0f, 10.0f);
+	ImGui::SliderFloat("Quadratic", &quadratic, -1.0f, 10.0f);
+	ImGui::End();
+#endif
+	const auto time = SDL_GetTicks() % 1200;
+	if (time < 600) {
+		linear = -(static_cast<float>(time) / 1000);
+	} else {
+		linear = -0.6f + (static_cast<float>(time - 600) / 1000);
+	}
+
 	glClearColor(0.1f, 0.5f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -162,18 +180,6 @@ void Renderer::setLights(Shader* shader) const {
 	shader->set("dirLight.ambient", 0.05f, 0.05f, 0.05f);
 	shader->set("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
 	shader->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
-
-	static float constant = 1.0f;
-	static float linear = 0.09f;
-	static float quadratic = 0.032f;
-
-#ifdef IMGUI
-	ImGui::Begin("Main Menu");
-	ImGui::SliderFloat("Constant", &constant, -1.0f, 10.0f);
-	ImGui::SliderFloat("Linear", &linear, -1.0f, 10.0f);
-	ImGui::SliderFloat("Quadratic", &quadratic, -1.0f, 10.0f);
-	ImGui::End();
-#endif
 
 	// TODO: Point light
 #ifdef __cpp_lib_ranges_enumerate
