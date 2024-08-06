@@ -5,6 +5,7 @@
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
 
+#include <algorithm>
 #include <functional>
 #include <string>
 #include <utility>
@@ -15,7 +16,7 @@
 // TODO: Accept non-Vertex data
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
 		   const std::vector<std::pair<Texture*, TextureType>>& textures)
-	: mVBO(0), mEBO(0), mVAO(0), mIndicesSize(indices.size()), mTextures(textures),
+	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures),
 	  mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
@@ -29,20 +30,63 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
 	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(),
 				 GL_STATIC_DRAW);
 
+	// Set the attrib pointers
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+						  reinterpret_cast<GLvoid*>(offsetof(Vertex, position)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+						  reinterpret_cast<GLvoid*>(offsetof(Vertex, normal)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+						  reinterpret_cast<GLvoid*>(offsetof(Vertex, texturePos)));
+	
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices.data(),
 				 GL_STATIC_DRAW);
 
-	// Set the attrib pointers
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-						  reinterpret_cast<GLvoid*>(offsetof(Vertex, position)));
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-						  reinterpret_cast<GLvoid*>(offsetof(Vertex, normal)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-						  reinterpret_cast<GLvoid*>(offsetof(Vertex, texturePos)));
-	glEnableVertexAttribArray(2);
+	glBindVertexArray(0);
+}
+
+Mesh::Mesh(const std::span<float>& positions, const std::span<float>& normals,
+		   const std::span<float>& texturePos, const std::vector<unsigned int>& indices,
+		   const std::vector<std::pair<Texture*, TextureType>>& textures)
+	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures),
+	  mDrawFunc(glDrawElements) {
+	glGenBuffers(1, &mVBO);
+	glGenBuffers(1, &mEBO);
+
+	glGenVertexArrays(1, &mVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+	// TODO: Subbuffer
+/*
+glBufferSubData(GL_ARRAY_BUFFER, vertCount * 0 * sizeof(float), vertCount * 3 * sizeof(float), positions); 
+glBufferSubData(GL_ARRAY_BUFFER, vertCount * 3 * sizeof(float), vertCount * 3 * sizeof(float), normals); 
+glBufferSubData(GL_ARRAY_BUFFER, vertCount * 6 * sizeof(float), vertCount * 2 * sizeof(float), texPos);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+reinterpret_cast<GLvoid*>(vertCount * 0 * sizeof(float))); 
+glEnableVertexAttribArray(0); 
+if (normals != nullptr) { 
+glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+reinterpret_cast<GLvoid*>(vertCount * 3 * sizeof(float))); 
+glEnableVertexAttribArray(1);
+	}
+
+	if (texPos != nullptr) {
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float),
+reinterpret_cast<GLvoid*>(vertCount * 6 * sizeof(float))); glEnableVertexAttribArray(2);
+	}
+*/
+
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices.data(),
+				 GL_STATIC_DRAW);
+
+	glBindVertexArray(mVAO);
 
 	glBindVertexArray(0);
 }
@@ -55,47 +99,44 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
  */
 
 /*
-void Mesh::addAttribArray(const GLuint& index, const GLint& count, const GLsizei& stride,
-						  const GLsizeiptr& size, const GLvoid* data, const GLuint& divisor,
-						  const GLenum& type) {
-	GLuint VBO;
-	glGenBuffers(1, &VBO);
+ * FIXME: One VBO can only be safely passed to one mesh
+ * or else if one mesh get destroed, the VBO will be freed
+ * and the other mesh would be accessing an invalid VBO
+ *
+ * Possible fix: Use std::shared_ptr
+ * Cons: This will cause some performance overhead
+ *
+ * Possible fix: Make a renderer manage all VBO, free on end
+ * of application
+ * Cons: Memory overhead
+ *
+ * Possible fix: Make a VBO manager, and count references
+ * Cons: Hard to implement without causing more bugs
+ */
 
-	glBindVertexArray(mVAO); // Save it in vertex array
+/*
+ * bind: function to bind vertexes
+ *
+ * Example:
+ * glEnableVertexAttribArray(index);
+ * glVertexAttribPointer(index, count, type, GL_FALSE, stride, reinterpret_cast<GLvoid*>(0));
+ * glVertexAttribDivisor(index, divisor);
+ */
+void Mesh::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind,
+						  GLuint VBO) {
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(index);
-	glVertexAttribPointer(index, count, type, GL_FALSE, stride, reinterpret_cast<GLvoid*>(0));
-	glVertexAttribDivisor(index, divisor);
-
-	glBindVertexArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0); // Maybe before attrib divisor?
-
-	mAttribs.emplace_back(VBO);
-}
-*/
-
-void Mesh::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind, GLuint VBO) {
 	if (VBO == static_cast<GLuint>(-1)) {
-		// FIXME: Double free
 		glGenBuffers(1, &VBO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		// Ahh want glNamedBufferData from 4.5
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 	}
 
 	glBindVertexArray(mVAO); // Save it in vertex array
-	
+
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	/*
-	glEnableVertexAttribArray(index);
-	glVertexAttribPointer(index, count, type, GL_FALSE, stride, reinterpret_cast<GLvoid*>(0));
-	glVertexAttribDivisor(index, divisor);
-	*/
 	bind();
 
 	glBindVertexArray(0);
@@ -105,49 +146,15 @@ void Mesh::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::funct
 	mAttribs.emplace_back(VBO);
 }
 
-/*
-// PERF: Maybe indices pointer?
-//
-Mesh::Mesh(float* positions, float* normals, float* texPos,
-		   const unsigned int vertCount, const std::vector<unsigned int>& indices,
-		   const std::vector<std::pair<class Texture*, TextureType>>& textures)
-	: mVBO(0), mEBO(0), mVAO(0), mIndices(indices), mTextures(textures) {
-	genBuffers();
-	glBindVertexArray(mVAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferSubData(GL_ARRAY_BUFFER, vertCount * 0 * sizeof(float), vertCount * 3 * sizeof(float),
-positions); glBufferSubData(GL_ARRAY_BUFFER, vertCount * 3 * sizeof(float), vertCount * 3 *
-sizeof(float), normals); glBufferSubData(GL_ARRAY_BUFFER, vertCount * 6 * sizeof(float), vertCount *
-2 * sizeof(float), texPos);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(mIndices[0]), indices.data(),
-GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-reinterpret_cast<GLvoid*>(vertCount * 0 * sizeof(float))); glEnableVertexAttribArray(0); if (normals
-!= nullptr) { glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-reinterpret_cast<GLvoid*>(vertCount * 3 * sizeof(float))); glEnableVertexAttribArray(1);
-	}
-
-	if (texPos != nullptr) {
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float),
-reinterpret_cast<GLvoid*>(vertCount * 6 * sizeof(float))); glEnableVertexAttribArray(2);
-	}
-
-	glBindVertexArray(0);
-}
-*/
-
 Mesh::~Mesh() {
 	glDeleteVertexArrays(1, &mVAO);
 	glDeleteBuffers(1, &mVBO);
 	glDeleteBuffers(1, &mEBO);
 
-	for (const auto& buffer : mAttribs) {
-		// Be a good c++ citizen and free the memory
-		glDeleteBuffers(1, &buffer);
+	// Do not delete double buffers
+	const auto& u = std::ranges::unique(mAttribs);
+	for (auto it = mAttribs.begin(); it != u.begin(); ++it) {
+		glDeleteBuffers(1, &(*it));
 	}
 }
 
@@ -188,12 +195,11 @@ void Mesh::draw(const Shader* shader) const {
 		// https://stackoverflow.com/questions/10022789/stdfunction-with-non-static-member-functions
 	}
 
-	// Fking const missmatch
 	for (const std::function<void(const Shader*)>& func : mUniformFuncs) {
 		func(shader);
 	}
 
 	glBindVertexArray(mVAO);
-	mDrawFunc(GL_TRIANGLES, mIndicesSize, GL_UNSIGNED_INT, nullptr);
+	mDrawFunc(GL_TRIANGLES, mIndicesCount, GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
 }

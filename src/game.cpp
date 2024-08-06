@@ -76,13 +76,10 @@ int Game::iterate() {
 	if (mPaused) {
 		mTicks = SDL_GetTicks();
 
-		// glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		// glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		SDL_SetRelativeMouseMode(0);
-		// Delay some time to not use too much CPU
+
+		// Delay some time to not use too much CPU. Add some more?
 		SDL_Delay(64);
-		// SDL_GL_SwapWindow(mWindow);
 
 		return 0;
 	}
