@@ -35,7 +35,7 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 
 	Eigen::Affine3f* modelMatrices = new Eigen::Affine3f[amount];
 
-	float radius = 50.0f;
+	float radius = 25.0f;
 	float offset = 2.5f;
 	for (unsigned int i = 0; i < amount; i++) {
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();

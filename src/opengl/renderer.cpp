@@ -14,6 +14,8 @@
 
 #include <SDL3/SDL.h>
 #include <memory>
+#include <ranges>
+#include <string>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -96,10 +98,6 @@ void Renderer::setDemensions(int width, int height) {
 }
 
 void Renderer::draw() const {
-#ifdef IMGUI
-	ImGui::Render();
-#endif
-
 	glClearColor(0.1f, 0.5f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -116,6 +114,10 @@ void Renderer::draw() const {
 
 		sprite->draw();
 	}
+
+#ifdef IMGUI
+	ImGui::Render();
+#endif
 
 	mFramebuffer->swap(mWindow);
 }
@@ -161,7 +163,37 @@ void Renderer::setLights(Shader* shader) const {
 	shader->set("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
 	shader->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
+	static float constant = 1.0f;
+	static float linear = 0.09f;
+	static float quadratic = 0.032f;
+
+#ifdef IMGUI
+	ImGui::Begin("Main Menu");
+	ImGui::SliderFloat("Constant", &constant, -1.0f, 10.0f);
+	ImGui::SliderFloat("Linear", &linear, -1.0f, 10.0f);
+	ImGui::SliderFloat("Quadratic", &quadratic, -1.0f, 10.0f);
+	ImGui::End();
+#endif
+
 	// TODO: Point light
+#ifdef __cpp_lib_ranges_enumerate
+	// Duh stdlib doesn't support enumerate
+	for (const auto& [place, value] : std::views::enumerate(mPointLights)) {
+#else
+	for (size_t place = 0; place < mPointLights.size(); ++place) {
+		const auto& value = mPointLights[place];
+#endif
+
+		// TODO: Better
+		std::string num = std::to_string(place);
+		shader->set("pointLights[" + num + "].position", value->getPosition());
+		shader->set("pointLights[" + num + "].ambient", 0.05f, 0.05f, 0.05f);
+		shader->set("pointLights[" + num + "].diffuse", 0.5f, 0.5f, 0.5f);
+		shader->set("pointLights[" + num + "].specular", 0.5f, 0.5f, 0.5f);
+		shader->set("pointLights[" + num + "].constant", constant);
+		shader->set("pointLights[" + num + "].linear", linear);
+		shader->set("pointLights[" + num + "].quadratic", quadratic);
+	}
 
 	shader->set("spotLight.position", mCamera->getOwner()->getPosition());
 	shader->set("spotLight.direction", mCamera->getOwner()->getForward());
