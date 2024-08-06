@@ -67,11 +67,11 @@ void main() {
 
 	vec3 outColor = vec3(0);
 
-	outColor += calcDirLight(dirLight, fs_in.normal, viewDir);
+	// outColor += calcDirLight(dirLight, fs_in.normal, viewDir);
 	for (int i = 0; i < POINT_LIGHTS; i++) {
 		outColor += calcPointLight(pointLights[i], fs_in.normal, fs_in.fragPos, viewDir);
 	}
-	outColor += calcSpotLight(spotLight, fs_in.normal, fs_in.fragPos, viewDir);
+	// outColor += calcSpotLight(spotLight, fs_in.normal, fs_in.fragPos, viewDir);
 
 	// outColor += cubeReflect(norm, viewDir);
 	// outColor += cubeRefract(fs_in.normal, viewDir);

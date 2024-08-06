@@ -86,26 +86,5 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 									  std::placeholders::_2, std::placeholders::_3,
 									  std::placeholders::_4, amount));
 
-	/*
-	// draw planet
-	shader.use();
-	Eigen::Affine3f model = Eigen::Affine3f(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, -3.0f, 0.0f));
-	model = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));
-	shader.setMat4("model", model);
-	planet.Draw(shader);
-	*/
-
-	/*
-	for (int y = 0; y < 10; y++) {
-		offsets[y].x() = sin(y + static_cast<float>(SDL_GetTicks()) / 1000) * 4;
-		offsets[y].y() = 0;
-		offsets[y].z() = cos(y + static_cast<float>(SDL_GetTicks()) / 1000) * 4;
-	}
-
-	cube->addAttribArray(3, 3, sizeof(Eigen::Vector3f), offsets.size() * sizeof(Eigen::Vector3f),
-						 offsets.data(), 1);
-	  */
-
 	setScale(0.25);
 }
