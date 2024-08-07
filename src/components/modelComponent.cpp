@@ -58,6 +58,7 @@ void ModelComponent::loadNode(aiNode* node, const aiScene* scene) {
 void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 	std::vector<unsigned int> indices;
 	std::vector<std::pair<Texture*, const TextureType>> textures;
+	/*
 	std::vector<Vertex> vertices;
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
@@ -74,10 +75,12 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 
 		vertices.emplace_back(vertex);
 	}
+	*/
 
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 		const aiFace& face = mesh->mFaces[i];
 
+		// PERF: Optimize
 		for (unsigned int j = 0; j < face.mNumIndices; j++) {
 			indices.emplace_back(face.mIndices[j]);
 		}
@@ -85,7 +88,7 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-	// TODO: better
+	// PERF: better
 	const std::vector<Texture*> diffuseMaps = loadTextures(material, aiTextureType_DIFFUSE);
 	const std::vector<Texture*> specularMaps = loadTextures(material, aiTextureType_SPECULAR);
 	const std::vector<Texture*> heightMaps = loadTextures(material, aiTextureType_HEIGHT);
@@ -106,13 +109,12 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 		textures.emplace_back(texture, AMBIENT);
 	}
 
-	// TODO:
-	/*
+	assert(mesh->mTextureCoords[0] && "Unimplimented");
+
 	mMeshes.emplace_back(new Mesh({&mesh->mVertices[0].x, mesh->mNumVertices * 3},
-								  {&mesh->mNormals[0].x,
-	mesh->mNumVertices * 3}, texPos, indices, textures));
-	*/
-	mMeshes.emplace_back(new Mesh(vertices, indices, textures));
+				      {&mesh->mNormals[0].x, mesh->mNumVertices * 3},
+				      {&mesh->mTextureCoords[0][0].x, mesh->mNumVertices * 3}, indices, textures));
+	// mMeshes.emplace_back(new Mesh(vertices, indices, textures));
 }
 
 std::vector<Texture*> ModelComponent::loadTextures(const aiMaterial* mat, const aiTextureType type) {

@@ -4,21 +4,22 @@
 #include "opengl/texture.hpp"
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
+#include "utils.hpp"
 
+#include <SDL3/SDL.h>
 #include <algorithm>
 #include <functional>
+#include <iostream>
 #include <string>
 #include <utility>
-#include <SDL3/SDL.h>
 #include <vector>
 
 // FIXME: Use something safer then `reinterpret_cast`
 
 // TODO: Accept non-Vertex data
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
-		   const std::vector<std::pair<Texture*, const TextureType>>& textures)
-	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures),
-	  mDrawFunc(glDrawElements) {
+	   const std::vector<std::pair<Texture*, const TextureType>>& textures)
+	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
 
@@ -28,76 +29,82 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
 
 	// Bind all the vertex data
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(),
-				 GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(), GL_STATIC_DRAW);
 
 	// Set the attrib pointers
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-						  reinterpret_cast<GLvoid*>(offsetof(Vertex, position)));
+			      reinterpret_cast<GLvoid*>(offsetof(Vertex, position)));
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-						  reinterpret_cast<GLvoid*>(offsetof(Vertex, normal)));
+			      reinterpret_cast<GLvoid*>(offsetof(Vertex, normal)));
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-						  reinterpret_cast<GLvoid*>(offsetof(Vertex, texturePos)));
+			      reinterpret_cast<GLvoid*>(offsetof(Vertex, texturePos)));
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices.data(),
-				 GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 }
 
-Mesh::Mesh(const std::span<float> positions, const std::span<float> normals,
-		   const std::span<float> texturePos, const std::vector<unsigned int>& indices,
-		   const std::vector<std::pair<Texture*, const TextureType>>& textures)
-	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures),
-	  mDrawFunc(glDrawElements) {
+Mesh::Mesh(const std::span<float> positions, const std::span<float> normals, const std::span<float> texturePos,
+	   const std::vector<unsigned int>& indices,
+	   const std::vector<std::pair<Texture*, const TextureType>>& textures)
+	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
 
 	glGenVertexArrays(1, &mVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+	glBufferData(GL_ARRAY_BUFFER, positions.size() + normals.size() + texturePos.size(), nullptr, GL_STATIC_DRAW);
 
 	// TODO: Non-hardcoded attrib pointer strides
-
+	// TODO: Prettier
+	glBindVertexArray(mVAO);
 	assert(!positions.empty());
 	{
-		glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size(), positions.data());
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-							  reinterpret_cast<GLvoid*>(0));
+		glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * sizeof(float), positions.data());
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(0));
 		glEnableVertexAttribArray(0);
 	}
 
 	[[unlikely]] if (!normals.empty()) {
-		glBufferSubData(GL_ARRAY_BUFFER, positions.size(), normals.size(), normals.data());
+		glBufferSubData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), normals.size() * sizeof(float),
+				normals.data());
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-							  reinterpret_cast<GLvoid*>(positions.size()));
+				      reinterpret_cast<GLvoid*>(positions.size() * sizeof(float)));
 		glEnableVertexAttribArray(1);
 	} else {
 		SDL_Log("Mesh.cpp: Normals empty, ignored");
 	}
 
 	if (!texturePos.empty()) {
-		glBufferSubData(GL_ARRAY_BUFFER, positions.size() + normals.size(), texturePos.size(),
-						texturePos.data());
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float),
-							  reinterpret_cast<GLvoid*>(positions.size() + normals.size()));
+		glBufferSubData(GL_ARRAY_BUFFER, (positions.size() + normals.size()) * sizeof(float),
+				texturePos.size() * sizeof(float), texturePos.data());
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+				      reinterpret_cast<GLvoid*>((positions.size() + normals.size()) * sizeof(float)));
 		glEnableVertexAttribArray(2);
 	} else {
 		SDL_Log("Mesh.cpp: Texture pos empty, ignored");
 	}
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices.data(),
-				 GL_STATIC_DRAW);
-
-	glBindVertexArray(mVAO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
+}
+
+Mesh::~Mesh() {
+	glDeleteVertexArrays(1, &mVAO);
+	glDeleteBuffers(1, &mVBO);
+	glDeleteBuffers(1, &mEBO);
+
+	// Do not delete double buffers
+	const auto& u = std::ranges::unique(mAttribs);
+	glDeleteBuffers(mAttribs.size() - u.size(), mAttribs.data());
 }
 
 /*
@@ -131,8 +138,7 @@ Mesh::Mesh(const std::span<float> positions, const std::span<float> normals,
  * glVertexAttribPointer(index, count, type, GL_FALSE, stride, reinterpret_cast<GLvoid*>(0));
  * glVertexAttribDivisor(index, divisor);
  */
-void Mesh::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind,
-						  GLuint VBO) {
+void Mesh::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind, GLuint VBO) {
 
 	if (VBO == static_cast<GLuint>(-1)) {
 		glGenBuffers(1, &VBO);
@@ -152,19 +158,6 @@ void Mesh::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::funct
 	glBindBuffer(GL_ARRAY_BUFFER, 0); // Maybe before attrib divisor?
 
 	mAttribs.emplace_back(VBO);
-}
-
-Mesh::~Mesh() {
-	glDeleteVertexArrays(1, &mVAO);
-	glDeleteBuffers(1, &mVBO);
-	glDeleteBuffers(1, &mEBO);
-
-	// Do not delete double buffers
-	// TODO: Better
-	const auto& u = std::ranges::unique(mAttribs);
-	for (auto it = mAttribs.begin(); it != u.begin(); ++it) {
-		glDeleteBuffers(1, &(*it));
-	}
 }
 
 void Mesh::draw(const Shader* shader) const {

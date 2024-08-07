@@ -7,7 +7,7 @@ in VS_OUT {
 	vec2 texPos;
 } fs_in;
 
-out vec4 color;
+layout (location = 0) out vec4 color;
 
 void main() {
     color = texture(texture_diffuse0, fs_in.texPos);
