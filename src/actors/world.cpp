@@ -5,6 +5,7 @@
 #include "components/modelComponent.hpp"
 #include "game.hpp"
 #include "third_party/glad/glad.h"
+#include "utils.hpp"
 
 World::World(class Game* game) : Actor(game) {
 	/*
@@ -25,6 +26,7 @@ World::World(class Game* game) : Actor(game) {
 
 	ModelComponent* const model =
 		new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "earth.blend"));
+	return;
 	model->setVert("common.vert");
 	model->setFrag("backpack.frag");
 	model->setGeom("backpack.geom");

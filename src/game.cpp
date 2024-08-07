@@ -16,7 +16,7 @@
 #include <iterator>
 #include <memory>
 #include <string>
-#include <third_party/Eigen/Dense>
+#include <third_party/Eigen/Core>
 #include <third_party/glad/glad.h>
 
 #ifdef IMGUI
@@ -47,7 +47,7 @@ Game::Game()
 	SDL_backpackShaderroySurface(icon);
 	*/
 
-	SDL_SetRelativeMouseMode(1);
+	mRenderer->setWindowRelativeMouseMode(1);
 
 	setup();
 }
@@ -60,8 +60,8 @@ void Game::setup() {
 	SDL_Log("Setting up game");
 
 	new World(this);
-	new Player(this);
-	new Cube(this);
+	// new Player(this);
+	// new Cube(this);
 
 	mTicks = SDL_GetTicks();
 
@@ -76,7 +76,7 @@ int Game::iterate() {
 	if (mPaused) {
 		mTicks = SDL_GetTicks();
 
-		SDL_SetRelativeMouseMode(0);
+		mRenderer->setWindowRelativeMouseMode(0);
 
 		// Delay some time to not use too much CPU. Add some more?
 		SDL_Delay(64);
@@ -245,7 +245,7 @@ int Game::event(const SDL_Event& event) {
 			}
 			if (event.key.key == SDLK_F1) {
 				rel = !rel;
-				SDL_SetRelativeMouseMode(static_cast<int>(rel));
+				mRenderer->setWindowRelativeMouseMode(static_cast<int>(rel));
 			}
 			if (event.key.key == SDLK_F2) {
 #ifdef DEBUG

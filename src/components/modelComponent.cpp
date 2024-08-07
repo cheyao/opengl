@@ -58,8 +58,6 @@ void ModelComponent::loadNode(aiNode* node, const aiScene* scene) {
 void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 	std::vector<unsigned int> indices;
 	std::vector<std::pair<const Texture*, const TextureType>> textures;
-
-	/*
 	std::vector<Vertex> vertices;
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
@@ -79,7 +77,6 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 
 		vertices.emplace_back(vertex);
 	}
-	*/
 
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 		const aiFace& face = mesh->mFaces[i];
@@ -114,31 +111,11 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 	}
 
 	/*
-		vertex.position =
-			Eigen::Vector3f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-		vertex.normal =
-			Eigen::Vector3f(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-
-		if (mesh->mTextureCoords[0]) {
-			vertex.texturePos =
-				Eigen::Vector2f(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
-		} else {
-			vertex.texturePos = Eigen::Vector2f(0.0f, 0.0f);
-		}
-	std::span<float>& positions, const std::span<float>& normals,
-				  const std::span<float>& texturePos, const std::vector<unsigned int>& indices,
-				  const std::vector<std::pair<Texture*, TextureType>>& textures);
-	*/
-	// https://en.cppreference.com/w/cpp/container/span/span
-	// TF
-	std::span<float> texPos;
-	if (mesh->mTextureCoords[0]) {
-		texPos = {&mesh->mTextureCoords[0][0].x, mesh->mNumVertices * 2};
-	}
-
 	mMeshes.emplace_back(new Mesh({&mesh->mVertices[0].x, mesh->mNumVertices * 3},
 								  {&mesh->mNormals[0].x, mesh->mNumVertices * 3}, texPos, indices,
 								  textures));
+	*/
+	mMeshes.emplace_back(new Mesh(vertices, indices, textures));
 }
 
 std::vector<const Texture*> ModelComponent::loadTextures(const aiMaterial* mat,

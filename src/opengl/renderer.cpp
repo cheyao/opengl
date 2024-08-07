@@ -13,6 +13,8 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_mouse.h>
+#include <SDL3/SDL_stdinc.h>
 #include <memory>
 #include <ranges>
 #include <string>
@@ -161,8 +163,7 @@ void Renderer::draw() const {
 
 #ifdef __EMSCRIPTEN__
 	// Emscripten, SDL3 doesn't correctly report resize atm
-	if (browserWidth() != mWindowWidth ||
-	    browserHeight() != mWindowHeight) {
+	if (browserWidth() != mWindowWidth || browserHeight() != mWindowHeight) {
 		mWindowWidth = browserWidth();
 		mWindowHeight = browserHeight();
 
@@ -242,4 +243,8 @@ void Renderer::setLights(Shader* shader) const {
 	shader->set("spotLight.quadratic", 0.032f);
 	shader->set("spotLight.cutOff", cos(toRadians(12.5f)));
 	shader->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
+}
+
+void Renderer::setWindowRelativeMouseMode(SDL_bool mode) {
+	SDL_SetWindowRelativeMouseMode(mWindow, mode);
 }
