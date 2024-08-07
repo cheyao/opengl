@@ -7,16 +7,6 @@
 #include "third_party/glad/glad.h"
 
 World::World(class Game* game) : Actor(game) {
-	const std::vector<Vertex> vertices = {
-		{{-0.5f, +0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Top left
-		{{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bot left
-		{{+0.5f, +0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f}}, // Top right
-		{{+0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // Bot right
-	};
-	const std::vector<unsigned int> indices = {0, 1, 2, 1, 3, 2};
-	const std::vector<std::pair<Texture*, TextureType>> textures = {
-		std::make_pair(this->getGame()->getTexture("windows.png"), TextureType::DIFFUSE)};
-
 	ModelComponent* const model = new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "earth.blend"));
 	model->setVert("common.vert");
 	model->setFrag("backpack.frag");
@@ -24,7 +14,7 @@ World::World(class Game* game) : Actor(game) {
 	model->addTexture(std::make_pair(this->getGame()->getTexture("land.png"), TextureType::DIFFUSE));
 
 	// TODO: constexpr? Should be able to do this in c++23 duh
-	const std::vector<Vertex> verticesBox = {
+	const std::vector<const Vertex> verticesBox = {
 		{{-1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 0 FLD
 		{{+1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 1 FRD
 		{{-1.0f, +1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 2 FLU
@@ -34,14 +24,13 @@ World::World(class Game* game) : Actor(game) {
 		{{-1.0f, +1.0f, -1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 6 BLU
 		{{+1.0f, +1.0f, -1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}  // 7 BRU
 	};
-	const std::vector<GLuint> indicesBox = {2, 6, 7, 2, 7, 3, // Top
-
-						0, 5, 4, 0, 1, 5,  // Bottom
-						1, 6, 2, 0, 4, 6,  // Left
-						1, 3, 7, 1, 7, 5,  // Right
-						0, 2, 3, 0, 3, 1,  // Front
-						4, 7, 6, 4, 5, 7}; // Back
-	const std::vector<std::pair<Texture*, const TextureType>> texturesBox = {
+	const std::vector<const GLuint> indicesBox = {2, 6, 7, 2, 7, 3,	 // Top
+						      0, 5, 4, 0, 1, 5,	 // Bottom
+						      1, 6, 2, 0, 4, 6,	 // Left
+						      1, 3, 7, 1, 7, 5,	 // Right
+						      0, 2, 3, 0, 3, 1,	 // Front
+						      4, 7, 6, 4, 5, 7}; // Back
+	const std::vector<const std::pair<const Texture* const, const TextureType>> texturesBox = {
 		std::make_pair(this->getGame()->getTexture("nightsky"), TextureType::DIFFUSE)};
 
 	MeshComponent* const box = new MeshComponent(this, verticesBox, indicesBox, texturesBox, 200);
