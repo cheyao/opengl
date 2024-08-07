@@ -17,8 +17,8 @@
 // FIXME: Use something safer then `reinterpret_cast`
 
 // TODO: Accept non-Vertex data
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
-	   const std::vector<std::pair<Texture*, const TextureType>>& textures)
+Mesh::Mesh(const std::span<const Vertex>& vertices, const std::span<const unsigned int>& indices,
+	   const std::vector<const std::pair<const Texture* const, const TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
@@ -49,9 +49,9 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
 	glBindVertexArray(0);
 }
 
-Mesh::Mesh(const std::span<float> positions, const std::span<float> normals, const std::span<float> texturePos,
-	   const std::vector<unsigned int>& indices,
-	   const std::vector<std::pair<Texture*, const TextureType>>& textures)
+Mesh::Mesh(const std::span<const float> positions, const std::span<const float> normals,
+	   const std::span<const float> texturePos, const std::span<const unsigned int>& indices,
+	   const std::vector<const std::pair<const Texture* const, const TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
@@ -59,34 +59,39 @@ Mesh::Mesh(const std::span<float> positions, const std::span<float> normals, con
 	glGenVertexArrays(1, &mVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferData(GL_ARRAY_BUFFER, positions.size() + normals.size() + texturePos.size(), nullptr, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, (positions.size() + normals.size() + texturePos.size()) * sizeof(float), nullptr,
+		     GL_STATIC_DRAW);
+
+	size_t offset = 0;
 
 	// TODO: Non-hardcoded attrib pointer strides
 	// TODO: Prettier
 	glBindVertexArray(mVAO);
 	assert(!positions.empty());
 	{
-		glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size() * sizeof(float), positions.data());
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(0));
+		glBufferSubData(GL_ARRAY_BUFFER, offset, positions.size() * sizeof(float), positions.data());
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
 		glEnableVertexAttribArray(0);
+
+		offset += positions.size() * sizeof(float);
 	}
 
 	[[unlikely]] if (!normals.empty()) {
-		glBufferSubData(GL_ARRAY_BUFFER, positions.size() * sizeof(float), normals.size() * sizeof(float),
-				normals.data());
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-				      reinterpret_cast<GLvoid*>(positions.size() * sizeof(float)));
+		glBufferSubData(GL_ARRAY_BUFFER, offset, normals.size() * sizeof(float), normals.data());
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
 		glEnableVertexAttribArray(1);
+
+		offset += normals.size() * sizeof(float);
 	} else {
 		SDL_Log("Mesh.cpp: Normals empty, ignored");
 	}
 
 	if (!texturePos.empty()) {
-		glBufferSubData(GL_ARRAY_BUFFER, (positions.size() + normals.size()) * sizeof(float),
-				texturePos.size() * sizeof(float), texturePos.data());
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-				      reinterpret_cast<GLvoid*>((positions.size() + normals.size()) * sizeof(float)));
+		glBufferSubData(GL_ARRAY_BUFFER, offset, texturePos.size() * sizeof(float), texturePos.data());
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
 		glEnableVertexAttribArray(2);
+
+		offset += texturePos.size() * sizeof(float);
 	} else {
 		SDL_Log("Mesh.cpp: Texture pos empty, ignored");
 	}
@@ -139,7 +144,6 @@ Mesh::~Mesh() {
  * glVertexAttribDivisor(index, divisor);
  */
 void Mesh::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind, GLuint VBO) {
-
 	if (VBO == static_cast<GLuint>(-1)) {
 		glGenBuffers(1, &VBO);
 

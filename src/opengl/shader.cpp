@@ -147,17 +147,6 @@ void Shader::bind(std::string_view name, GLuint index) {
 
 GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 	char* shaderSource = static_cast<char*>(SDL_LoadFile(fileName.data(), nullptr));
-	assert(shaderSource[0] == '#' && "Checking file version");
-#ifdef GLES
-	// #version 410 core
-	// to
-	// #version 300 es
-	shaderSource[9] = '3';
-	shaderSource[13] = 'e';
-	shaderSource[14] = 's';
-	shaderSource[15] = ' ';
-	shaderSource[16] = ' ';
-#endif
 
 	[[unlikely]] if (shaderSource == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to read shader shource %s: %s\n",
@@ -170,6 +159,19 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 		throw std::runtime_error("shader.cpp: Failed to read shader source");
 	}
 	SDL_Log("Loading %s", fileName.data());
+
+	assert(shaderSource[0] == '#' && "Checking file version");
+
+#ifdef GLES
+	// #version 410 core
+	// to
+	// #version 300 es
+	shaderSource[9] = '3';
+	shaderSource[13] = 'e';
+	shaderSource[14] = 's';
+	shaderSource[15] = ' ';
+	shaderSource[16] = ' ';
+#endif
 
 	GLuint out = glCreateShader(type);
 	glShaderSource(out, 1, &shaderSource, nullptr);
@@ -196,7 +198,7 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 		throw std::runtime_error("shader.cpp: Failed to compile shader");
 	}
 
-	assert(glIsShader(out) && "Error compiling shader, something wrong with code, should have been catched");
+	assert(glIsShader(out) && "Error compiling shader, something wrong with code: should have been catched");
 
 	return out;
 }

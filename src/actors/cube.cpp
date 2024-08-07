@@ -19,15 +19,15 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 		{{-1.0f, +1.0f, -1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 6 BLU
 		{{+1.0f, +1.0f, -1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}  // 7 BRU
 	};
-	const std::vector<GLuint> indicesCube = {2, 7, 6, 2, 3, 7,	// Top
-											 0, 4, 5, 0, 5, 1,	// Bottom
-											 0, 2, 6, 0, 6, 4,	// Left
-											 1, 7, 3, 1, 5, 7,	// Right
-											 0, 3, 2, 0, 1, 3,	// Front
-											 4, 6, 7, 4, 7, 5}; // Back
+	const std::vector<GLuint> indicesCube = {2, 7, 6, 2, 3, 7,  // Top
+						 0, 4, 5, 0, 5, 1,  // Bottom
+						 0, 2, 6, 0, 6, 4,  // Left
+						 1, 7, 3, 1, 5, 7,  // Right
+						 0, 3, 2, 0, 1, 3,  // Front
+						 4, 6, 7, 4, 7, 5}; // Back
 
-	ModelComponent* const meteorites = new ModelComponent(
-		this, this->getGame()->fullPath("models" SEPARATOR "rock.obj")); //, verticesCube, indicesCube, {}, 200);
+	ModelComponent* const meteorites =
+		new ModelComponent(this, this->getGame()->fullPath("models" SEPARATOR "rock.obj"));
 	meteorites->setVert("cube.vert");
 	meteorites->setFrag("cube.frag");
 
@@ -67,14 +67,10 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 		glEnableVertexAttribArray(5);
 		glEnableVertexAttribArray(6);
 
-		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vecSize,
-							  reinterpret_cast<GLvoid*>(0 * vecSize));
-		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vecSize,
-							  reinterpret_cast<GLvoid*>(1 * vecSize));
-		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vecSize,
-							  reinterpret_cast<GLvoid*>(2 * vecSize));
-		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vecSize,
-							  reinterpret_cast<GLvoid*>(3 * vecSize));
+		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vecSize, reinterpret_cast<GLvoid*>(0 * vecSize));
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vecSize, reinterpret_cast<GLvoid*>(1 * vecSize));
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vecSize, reinterpret_cast<GLvoid*>(2 * vecSize));
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vecSize, reinterpret_cast<GLvoid*>(3 * vecSize));
 
 		glVertexAttribDivisor(3, 1);
 		glVertexAttribDivisor(4, 1);
@@ -82,9 +78,8 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 		glVertexAttribDivisor(6, 1);
 	});
 
-	meteorites->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1,
-									  std::placeholders::_2, std::placeholders::_3,
-									  std::placeholders::_4, amount));
+	meteorites->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1, std::placeholders::_2,
+					  std::placeholders::_3, std::placeholders::_4, amount));
 
 	setScale(0.25);
 }

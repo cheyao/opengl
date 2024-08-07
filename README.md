@@ -75,4 +75,6 @@ Ok lets just unconst the stuff
 
 BTW 1 feature in 1 commit
 
+TODO: const game
+
 "Planet Earth (Alt-Drag to change Lighting)" (https://skfb.ly/Ft8J) by Thomas Kole is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).

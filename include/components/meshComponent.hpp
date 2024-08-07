@@ -1,16 +1,19 @@
 #pragma once
 
 #include "components/drawComponent.hpp"
-#include "third_party/glad/glad.h"
 #include "opengl/types.hpp"
+#include "third_party/glad/glad.h"
 
 #include <utility>
 #include <vector>
 
 class MeshComponent : public DrawComponent {
-  public:
-	explicit MeshComponent(class Actor* owner, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
-			const std::vector<std::pair<class Texture*, const TextureType>>& textures, int drawOrder = 100);
+      public:
+	explicit MeshComponent(
+		class Actor* owner, const std::vector<const Vertex>& vertices,
+		const std::vector<const unsigned int>& indices,
+		const std::vector<const std::pair<const class Texture* const, const TextureType>>& textures,
+		int drawOrder = 100);
 	MeshComponent(MeshComponent&&) = delete;
 	MeshComponent(const MeshComponent&) = delete;
 	MeshComponent& operator=(MeshComponent&&) = delete;
@@ -23,6 +26,6 @@ class MeshComponent : public DrawComponent {
 
 	void draw() override;
 
-  private:
+      private:
 	std::unique_ptr<class Mesh> mMesh;
 };

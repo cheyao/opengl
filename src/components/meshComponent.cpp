@@ -11,10 +11,10 @@
 #include <utility>
 #include <vector>
 
-MeshComponent::MeshComponent(Actor* owner, const std::vector<Vertex>& vertices,
-							 const std::vector<unsigned int>& indices,
-							 const std::vector<std::pair<Texture*, const TextureType>>& textures,
-							 int drawOrder)
+MeshComponent::MeshComponent(Actor* owner, const std::vector<const Vertex>& vertices,
+			     const std::vector<const unsigned int>& indices,
+			     const std::vector<const std::pair<const Texture* const, const TextureType>>& textures,
+			     int drawOrder)
 	: DrawComponent(owner, drawOrder), mMesh(std::make_unique<Mesh>(vertices, indices, textures)) {}
 
 void MeshComponent::draw() {
@@ -36,11 +36,8 @@ void MeshComponent::setDrawFunc(
 	mMesh->setDrawFunc(func);
 }
 
-void MeshComponent::addUniform(const std::function<void(const Shader*)> func) {
-	mMesh->addUniform(func);
-}
+void MeshComponent::addUniform(const std::function<void(const Shader*)> func) { mMesh->addUniform(func); }
 
-void MeshComponent::addAttribArray(const GLsizeiptr& size, const GLvoid* data,
-								   std::function<void()> bind, GLuint VBO) {
+void MeshComponent::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind, GLuint VBO) {
 	mMesh->addAttribArray(size, data, bind, VBO);
 }

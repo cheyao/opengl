@@ -9,7 +9,7 @@
 #include <vector>
 
 class ModelComponent : public DrawComponent {
-  public:
+      public:
 	explicit ModelComponent(class Actor* owner, const std::string_view& path);
 	ModelComponent(ModelComponent&&) = delete;
 	ModelComponent(const ModelComponent&) = delete;
@@ -19,16 +19,15 @@ class ModelComponent : public DrawComponent {
 
 	void draw() override;
 
-	void setDrawFunc(const std::function<void(GLenum mode, GLsizei count, GLenum type,
-											  const void* indices)>& func);
+	void setDrawFunc(const std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)>& func);
 	void addTexture(std::pair<class Texture*, TextureType> texture);
 	void addUniform(const std::function<void(const class Shader* shader)> func);
 	void addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind, GLuint VBO = -1);
 
-  private:
+      private:
 	void loadNode(struct aiNode* node, const struct aiScene* scene);
 	void loadMesh(struct aiMesh* mesh, const struct aiScene* scene);
-	std::vector<class Texture*> loadTextures(const struct aiMaterial* mat, const aiTextureType type);
+	std::vector<const class Texture*> loadTextures(const struct aiMaterial* mat, const aiTextureType type);
 
 	std::vector<class Mesh*> mMeshes;
 };
