@@ -5,8 +5,8 @@
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/types.hpp"
-#include "third_party/glad/glad.h"
 #include "third_party/Eigen/Geometry"
+#include "third_party/glad/glad.h"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
@@ -22,14 +22,13 @@ ModelComponent::ModelComponent(Actor* owner, const std::string_view& path) : Dra
 	// All data is freed after the destruction of this object
 	Assimp::Importer importer;
 
-	const aiScene* scene = importer.ReadFile(
-		path.data(), aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_OptimizeMeshes);
-	[[unlikely]] if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
-					 !scene->mRootNode) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to load model with assimp %s: \n%s\n",
-						path.data(), importer.GetErrorString());
+	const aiScene* scene =
+		importer.ReadFile(path.data(), aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_OptimizeMeshes);
+	[[unlikely]] if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to load model with assimp %s: \n%s\n", path.data(),
+				importer.GetErrorString());
 		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have "
-				  "enough memory");
+			  "enough memory");
 
 		throw std::runtime_error("ModelComponent.cpp: Failed to read model");
 	}
@@ -64,14 +63,11 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 		Vertex vertex;
 
-		vertex.position =
-			Eigen::Vector3f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-		vertex.normal =
-			Eigen::Vector3f(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+		vertex.position = Eigen::Vector3f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+		vertex.normal = Eigen::Vector3f(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
 
 		if (mesh->mTextureCoords[0]) {
-			vertex.texturePos =
-				Eigen::Vector2f(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+			vertex.texturePos = Eigen::Vector2f(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
 		} else {
 			vertex.texturePos = Eigen::Vector2f(0.0f, 0.0f);
 		}
@@ -95,8 +91,7 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 	const std::vector<Texture*> heightMaps = loadTextures(material, aiTextureType_HEIGHT);
 	const std::vector<Texture*> ambientMaps = loadTextures(material, aiTextureType_AMBIENT);
 
-	textures.reserve(diffuseMaps.size() + specularMaps.size() + heightMaps.size() +
-					 ambientMaps.size());
+	textures.reserve(diffuseMaps.size() + specularMaps.size() + heightMaps.size() + ambientMaps.size());
 
 	for (const auto& texture : diffuseMaps) {
 		textures.emplace_back(texture, DIFFUSE);
@@ -114,15 +109,14 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 	// TODO:
 	/*
 	mMeshes.emplace_back(new Mesh({&mesh->mVertices[0].x, mesh->mNumVertices * 3},
-								  {&mesh->mNormals[0].x, mesh->mNumVertices * 3}, texPos, indices,
-								  textures));
+								  {&mesh->mNormals[0].x,
+	mesh->mNumVertices * 3}, texPos, indices, textures));
 	*/
 	mMeshes.emplace_back(new Mesh(vertices, indices, textures));
 }
 
-std::vector<const Texture*> ModelComponent::loadTextures(const aiMaterial* mat,
-														 const aiTextureType type) {
-	std::vector<const Texture*> textures;
+std::vector<Texture*> ModelComponent::loadTextures(const aiMaterial* mat, const aiTextureType type) {
+	std::vector<Texture*> textures;
 
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;
@@ -170,8 +164,8 @@ void ModelComponent::addUniform(const std::function<void(const Shader* shader)> 
 	}
 }
 
-void ModelComponent::addAttribArray(const GLsizeiptr& size, const GLvoid* data,
-									std::function<void()> bind, GLuint VBO) {
+void ModelComponent::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind,
+				    GLuint VBO) {
 	for (const auto& mesh : mMeshes) {
 		mesh->addAttribArray(size, data, bind, VBO);
 	}

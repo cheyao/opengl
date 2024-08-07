@@ -11,9 +11,7 @@
 Texture::Texture(const std::string_view& path) : name(path) {}
 
 Texture::~Texture() {
-#ifndef ADDRESS
 	glDeleteTextures(1, &mID);
-#endif
 
 	SDL_Log("Unloading texture %s", name.data());
 }
