@@ -60,8 +60,8 @@ void Game::setup() {
 	SDL_Log("Setting up game");
 
 	new World(this);
-	// new Player(this);
-	// new Cube(this);
+	new Player(this);
+	new Cube(this);
 
 	mTicks = SDL_GetTicks();
 

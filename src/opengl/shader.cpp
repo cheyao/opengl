@@ -11,58 +11,26 @@
 #include <string_view>
 #include <unordered_map>
 
-/*
-Shader::Shader(const std::string_view& vertName, const std::string_view& fragName)
-	: mShaderProgram(glCreateProgram()) {
-	GLuint mVertexShader = 0;
-	GLuint mFragmentShader = 0;
-
-	compile(vertName, GL_VERTEX_SHADER, mVertexShader);
-	compile(fragName, GL_FRAGMENT_SHADER, mFragmentShader);
-
-	glAttachShader(mShaderProgram, mVertexShader);
-	glAttachShader(mShaderProgram, mFragmentShader);
-	glLinkProgram(mShaderProgram);
-
-	glDeleteShader(mVertexShader);
-	glDeleteShader(mFragmentShader);
-
-	GLint success = 0;
-	glGetProgramiv(mShaderProgram, GL_LINK_STATUS, &success);
-	[[unlikely]] if (success == 0 || !glIsProgram(mShaderProgram)) {
-		GLint len = 0;
-		glGetProgramiv(mShaderProgram, GL_INFO_LOG_LENGTH, &len);
-		GLchar* log = new GLchar[len + 1];
-
-		glGetProgramInfoLog(mShaderProgram, 512, nullptr, &log[0]);
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to link shader: \n%s\n", log);
-		ERROR_BOX("Failed to link shader");
-
-		delete[] log;
-
-		throw std::runtime_error("Shader.cpp: Failed to link shader");
-	}
-}
-*/
-
 Shader::Shader(const std::string_view& vertName, const std::string_view& fragName,
 			   const std::string_view& geomName)
 	: mShaderProgram(glCreateProgram()) {
-	assert(glIsProgram(mShaderProgram));
+	assert(glIsProgram(mShaderProgram) && "Shader not correctly created");
 
 	GLuint mVertexShader = compile(vertName, GL_VERTEX_SHADER);
-	assert(glIsShader(mVertexShader));
+	assert(glIsShader(mVertexShader) && "Vert shader not loaded correctly");
+
 	GLuint mFragmentShader = compile(fragName, GL_FRAGMENT_SHADER);
-	assert(glIsShader(mFragmentShader));
+	assert(glIsShader(mFragmentShader) && "Frag shader not loaded correctly");
+
 	GLuint mGeometryShader = 0;
 	if (!geomName.empty()) {
 		mGeometryShader = compile(geomName, GL_GEOMETRY_SHADER);
+		assert(glIsShader(mGeometryShader) && "Geom shader not loaded correctly");
 	}
 
 	glAttachShader(mShaderProgram, mVertexShader);
 	glAttachShader(mShaderProgram, mFragmentShader);
 	if (!geomName.empty()) {
-		assert(glIsShader(mGeometryShader));
 		glAttachShader(mShaderProgram, mGeometryShader);
 	}
 	glLinkProgram(mShaderProgram);
@@ -91,9 +59,7 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 }
 
 Shader::~Shader() {
-#ifndef ADDRESS
 	glDeleteProgram(mShaderProgram);
-#endif
 }
 
 void Shader::activate() const { glUseProgram(mShaderProgram); }
@@ -105,10 +71,10 @@ void Shader::setUniform(const std::string_view& name, std::function<void(GLint)>
 
 	int location = glGetUniformLocation(mShaderProgram, name.data());
 
-#ifdef DEBUG
 	static std::unordered_map<std::string, bool> errored;
 
 	[[unlikely]] if (location == -1) {
+#ifdef DEBUG
 		if (!errored.contains(std::string(name))) {
 			SDL_Log("Failed find uniform location \"%s\"\n", name.data());
 
@@ -116,11 +82,9 @@ void Shader::setUniform(const std::string_view& name, std::function<void(GLint)>
 		}
 		// TODO: Error?
 
+#endif
 		return;
 	}
-#else
-	[[unlikely]] if (location == -1) { return; }
-#endif
 
 	toCall(location);
 }
@@ -183,8 +147,9 @@ void Shader::bind(std::string_view name, GLuint index) {
 
 GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 	char* shaderSource = static_cast<char*>(SDL_LoadFile(fileName.data(), nullptr));
+	assert(shaderSource[0] == '#' && "Checking file version");
 #ifdef GLES
-	// #version 400 core
+	// #version 410 core
 	// to
 	// #version 300 es
 	shaderSource[9] = '3';
@@ -231,7 +196,7 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 		throw std::runtime_error("shader.cpp: Failed to compile shader");
 	}
 
-	assert(glIsShader(out));
+	assert(glIsShader(out) && "Error compiling shader, something wrong with code, should have been catched");
 
 	return out;
 }

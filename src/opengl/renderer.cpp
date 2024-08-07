@@ -15,6 +15,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_mouse.h>
 #include <SDL3/SDL_stdinc.h>
+#include <cassert>
 #include <memory>
 #include <ranges>
 #include <string>
@@ -126,20 +127,18 @@ static float quadratic = 0.032f;
 void Renderer::draw() const {
 #ifdef IMGUI
 	ImGui::Begin("Main Menu");
+
 	ImGui::SliderFloat("Constant", &constant, -1.0f, 10.0f);
 	ImGui::SliderFloat("Linear", &linear, -1.0f, 10.0f);
 	ImGui::SliderFloat("Quadratic", &quadratic, -1.0f, 10.0f);
+
 	ImGui::End();
 #endif
-	const auto time = SDL_GetTicks() % 1200;
-	if (time < 600) {
-		linear = -(static_cast<float>(time) / 1000);
-	} else {
-		linear = -0.6f + (static_cast<float>(time - 600) / 1000);
-	}
 
 	glClearColor(0.1f, 0.5f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	assert(mCamera != nullptr && "Did you forget to uncomment `new Player(this)`?");
 
 	mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
 
@@ -180,12 +179,12 @@ void Renderer::reload() const {
 
 void Renderer::setCamera(class CameraComponent* camera) {
 	mCamera = camera;
-	// mMatricesUBO->set(0, camera->getProjectionMatrix());
+
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
 }
 
 void Renderer::addSprite(DrawComponent* sprite) {
-	sprite->getShader()->bind("Matrices", 0); // WARNING: Maybe rebind
+	sprite->getShader()->bind("Matrices", 0);
 
 	// Preserve order
 	int order = sprite->getDrawOrder();
@@ -213,7 +212,6 @@ void Renderer::setLights(Shader* shader) const {
 	shader->set("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
 	shader->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
-	// TODO: Point light
 #ifdef __cpp_lib_ranges_enumerate
 	// Duh stdlib doesn't support enumerate
 	for (const auto& [place, value] : std::views::enumerate(mPointLights)) {
@@ -223,14 +221,16 @@ void Renderer::setLights(Shader* shader) const {
 #endif
 
 		// TODO: Better
-		std::string num = std::to_string(place);
-		shader->set("pointLights[" + num + "].position", value->getPosition());
-		shader->set("pointLights[" + num + "].ambient", 0.05f, 0.05f, 0.05f);
-		shader->set("pointLights[" + num + "].diffuse", 0.5f, 0.5f, 0.5f);
-		shader->set("pointLights[" + num + "].specular", 0.5f, 0.5f, 0.5f);
-		shader->set("pointLights[" + num + "].constant", constant);
-		shader->set("pointLights[" + num + "].linear", linear);
-		shader->set("pointLights[" + num + "].quadratic", quadratic);
+		std::string num = "pointLights[";
+		num.append(std::to_string(place));
+
+		shader->set(num + "].position", value->getPosition());
+		shader->set(num + "].ambient", 0.05f, 0.05f, 0.05f);
+		shader->set(num + "].diffuse", 0.5f, 0.5f, 0.5f);
+		shader->set(num + "].specular", 0.5f, 0.5f, 0.5f);
+		shader->set(num + "].constant", constant);
+		shader->set(num + "].linear", linear);
+		shader->set(num + "].quadratic", quadratic);
 	}
 
 	shader->set("spotLight.position", mCamera->getOwner()->getPosition());
