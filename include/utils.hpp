@@ -46,6 +46,7 @@ inline bool nearZero(float number, float epsilon = 0.001f) {
 				SDL_Log("GLError: Out of memory"); \
 				break; \
 		} \
+		SDL_Log("Check thrown"); \
 		throw 1; \
 	} \
 	}

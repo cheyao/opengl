@@ -17,7 +17,6 @@
 ShaderManager::ShaderManager(const std::string& path)
 	: mPath(path + "assets" + SEPARATOR + "shaders" + SEPARATOR) {}
 
-#include <iostream>
 Shader* ShaderManager::get(const std::string& vert, const std::string& frag, const std::string& geom) {
 	assert(!vert.contains(':') && !frag.contains(':') && !geom.contains(':'));
 
@@ -29,9 +28,7 @@ Shader* ShaderManager::get(const std::string& vert, const std::string& frag, con
 
 	Shader* shader = new Shader(mPath + vert, mPath + frag, geom.empty() ? geom : mPath + geom);
 
-	std::cerr << "b" << std::endl;
-	CHECKERROR();
-	mTextures[vert + ':' + frag + ':' + geom] = shader;
+	mTextures[concated] = shader;
 
 #ifdef DEBUG
 	// FIXME: This somehow doesn't work (Incompatabilities with SDL?)

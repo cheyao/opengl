@@ -71,5 +71,8 @@ A const pointer should have 2 consts, a const vector pointer 3
 From discord:
 it's 2 * sizeof(_Tp*) bytes; it's generally recommended to const-ref objects of which size extends 2 * sizeof(std::uintmax_t) aka 16 byts
 TODO: Un ref all the ints :skull: Premature optimization is the source of all evil
+Ok lets just unconst the stuff
+
+BTW 1 feature in 1 commit
 
 "Planet Earth (Alt-Drag to change Lighting)" (https://skfb.ly/Ft8J) by Thomas Kole is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
