@@ -15,7 +15,7 @@
 
 // TODO: Accept non-Vertex data
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
-		   const std::vector<std::pair<Texture*, TextureType>>& textures)
+		   const std::vector<std::pair<const Texture*, const TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures),
 	  mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
@@ -37,7 +37,7 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
 						  reinterpret_cast<GLvoid*>(offsetof(Vertex, normal)));
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 						  reinterpret_cast<GLvoid*>(offsetof(Vertex, texturePos)));
-	
+
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
@@ -49,9 +49,9 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
 	glBindVertexArray(0);
 }
 
-Mesh::Mesh(const std::span<float>& positions, const std::span<float>& normals,
-		   const std::span<float>& texturePos, const std::vector<unsigned int>& indices,
-		   const std::vector<std::pair<Texture*, TextureType>>& textures)
+Mesh::Mesh(const std::span<float> positions, const std::span<float> normals,
+		   const std::span<float> texturePos, const std::vector<unsigned int>& indices,
+		   const std::vector<std::pair<const Texture*, const TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures),
 	  mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
@@ -60,27 +60,31 @@ Mesh::Mesh(const std::span<float>& positions, const std::span<float>& normals,
 	glGenVertexArrays(1, &mVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	// TODO: Subbuffer
-/*
-glBufferSubData(GL_ARRAY_BUFFER, vertCount * 0 * sizeof(float), vertCount * 3 * sizeof(float), positions); 
-glBufferSubData(GL_ARRAY_BUFFER, vertCount * 3 * sizeof(float), vertCount * 3 * sizeof(float), normals); 
-glBufferSubData(GL_ARRAY_BUFFER, vertCount * 6 * sizeof(float), vertCount * 2 * sizeof(float), texPos);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-reinterpret_cast<GLvoid*>(vertCount * 0 * sizeof(float))); 
-glEnableVertexAttribArray(0); 
-if (normals != nullptr) { 
-glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-reinterpret_cast<GLvoid*>(vertCount * 3 * sizeof(float))); 
-glEnableVertexAttribArray(1);
+	// TODO: Non-hardcoded attrib pointer strides
+
+	assert(!positions.empty());
+	{
+		glBufferSubData(GL_ARRAY_BUFFER, 0, positions.size(), positions.data());
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+							  reinterpret_cast<GLvoid*>(0));
+		glEnableVertexAttribArray(0);
 	}
 
-	if (texPos != nullptr) {
+	if (!normals.empty()) {
+		glBufferSubData(GL_ARRAY_BUFFER, positions.size(), normals.size(), normals.data());
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+							  reinterpret_cast<GLvoid*>(positions.size()));
+		glEnableVertexAttribArray(1);
+	}
+
+	if (!texturePos.empty()) {
+		glBufferSubData(GL_ARRAY_BUFFER, positions.size() + normals.size(), texturePos.size(),
+						texturePos.data());
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float),
-reinterpret_cast<GLvoid*>(vertCount * 6 * sizeof(float))); glEnableVertexAttribArray(2);
+							  reinterpret_cast<GLvoid*>(positions.size() + normals.size()));
+		glEnableVertexAttribArray(2);
 	}
-*/
-
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices.data(),
@@ -129,13 +133,12 @@ void Mesh::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::funct
 		glGenBuffers(1, &VBO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		// Ahh want glNamedBufferData from 4.5
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 	}
 
 	glBindVertexArray(mVAO); // Save it in vertex array
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO); // Be sure our VAO contains the VBO
 
 	bind();
 
@@ -165,34 +168,32 @@ void Mesh::draw(const Shader* shader) const {
 	unsigned int ambient = 0;
 
 	for (unsigned int i = 0; i < mTextures.size(); i++) {
-		// retrieve texture number (the N in diffuse_textureN)
-		std::string number;
 		std::string name;
+		name.reserve(20);
 
+		// += to avoid extra copy that + returns
 		switch (mTextures[i].second) {
 			case DIFFUSE:
-				number = std::to_string(diffuse++);
 				name = "texture_diffuse";
+				name += std::to_string(diffuse++);
 				break;
 			case SPECULAR:
-				number = std::to_string(specular++);
 				name = "texture_specular";
+				name += std::to_string(specular++);
 				break;
 			case HEIGHT:
-				number = std::to_string(height++);
 				name = "texture_height";
+				name += std::to_string(height++);
 				break;
 			case AMBIENT:
-				number = std::to_string(ambient++);
 				name = "texture_ambient";
+				name += std::to_string(ambient++);
 				break;
 		}
 
-		shader->set(name + number, static_cast<GLint>(i));
+		shader->set(name, static_cast<GLint>(i));
 
 		mTextures[i].first->activate(i);
-		// TODO: Std function????
-		// https://stackoverflow.com/questions/10022789/stdfunction-with-non-static-member-functions
 	}
 
 	for (const std::function<void(const Shader*)>& func : mUniformFuncs) {
