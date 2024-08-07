@@ -23,6 +23,7 @@ class Renderer {
 	void addSprite(class DrawComponent* sprite);
 	void removeSprite(class DrawComponent* sprite);
 	void addPointLight(class Actor* source) { mPointLights.emplace_back(source); };
+	void setWindowRelativeMouseMode(int mode);
 	// TODO: Add more lights
 
 	void draw() const;

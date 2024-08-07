@@ -42,7 +42,6 @@ class Mesh {
 	void addUniform(const std::function<void(const class Shader* shader)> func) {
 		mUniformFuncs.emplace_back(func);
 	};
-	// TODO: Less args
 	void addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind,
 						GLuint VBO = -1);
 

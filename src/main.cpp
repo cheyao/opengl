@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include "opengl/renderer.hpp"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
@@ -53,7 +54,7 @@ int SDL_AppInit(void** appstate, int argc, char** argv) {
 		return 1;
 	}
 
-	SDL_SetRelativeMouseMode(1);
+	static_cast<Game*>(*appstate)->getRenderer()->setWindowRelativeMouseMode(1);
 
 	return 0;
 }

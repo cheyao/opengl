@@ -4,11 +4,13 @@
 #include "opengl/texture.hpp"
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
+#include "utils.hpp"
 
 #include <algorithm>
 #include <functional>
 #include <string>
 #include <utility>
+#include <SDL3/SDL.h>
 #include <vector>
 
 // FIXME: Use something safer then `reinterpret_cast`
@@ -71,11 +73,13 @@ Mesh::Mesh(const std::span<float> positions, const std::span<float> normals,
 		glEnableVertexAttribArray(0);
 	}
 
-	if (!normals.empty()) {
+	[[unlikely]] if (!normals.empty()) {
 		glBufferSubData(GL_ARRAY_BUFFER, positions.size(), normals.size(), normals.data());
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
 							  reinterpret_cast<GLvoid*>(positions.size()));
 		glEnableVertexAttribArray(1);
+	} else {
+		SDL_Log("Mesh.cpp: Normals empty, ignored");
 	}
 
 	if (!texturePos.empty()) {
@@ -84,6 +88,8 @@ Mesh::Mesh(const std::span<float> positions, const std::span<float> normals,
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float),
 							  reinterpret_cast<GLvoid*>(positions.size() + normals.size()));
 		glEnableVertexAttribArray(2);
+	} else {
+		SDL_Log("Mesh.cpp: Texture pos empty, ignored");
 	}
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);

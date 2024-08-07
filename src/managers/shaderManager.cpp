@@ -17,15 +17,20 @@
 ShaderManager::ShaderManager(const std::string& path)
 	: mPath(path + "assets" + SEPARATOR + "shaders" + SEPARATOR) {}
 
+#include <iostream>
 Shader* ShaderManager::get(const std::string& vert, const std::string& frag, const std::string& geom) {
 	assert(!vert.contains(':') && !frag.contains(':') && !geom.contains(':'));
 
+	std::string concated = (vert + ':').append(frag).append(":").append(geom);
 	// Using append avoids copies, this function will be called a couple times per loop
-	if (mTextures.contains((vert + ':').append(frag).append(":").append(geom))) {
-		return mTextures.at(vert + ':' + frag + ':' + geom);
+	if (mTextures.contains(concated)) {
+		return mTextures.at(concated);
 	}
 
 	Shader* shader = new Shader(mPath + vert, mPath + frag, geom.empty() ? geom : mPath + geom);
+
+	std::cerr << "b" << std::endl;
+	CHECKERROR();
 	mTextures[vert + ':' + frag + ':' + geom] = shader;
 
 #ifdef DEBUG

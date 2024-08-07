@@ -20,8 +20,8 @@ class Game {
 	Game& operator=(const Game&) = delete;
 	~Game();
 
-	int iterate();
-	int event(const union SDL_Event& event);
+	[[nodiscard]] int iterate();
+	[[nodiscard]] int event(const union SDL_Event& event);
 
 	void addActor(class Actor* actor);
 	void removeActor(class Actor* actor);
@@ -31,11 +31,11 @@ class Game {
 
 	void pause() { mPaused = true; }
 
-	class Texture* getTexture(const std::string& name);
-	class Shader* getShader(const std::string& vert, const std::string& frag, const std::string& geom = "");
-	class Renderer* getRenderer() { return mRenderer; }
+	[[nodiscard]] class Texture* getTexture(const std::string& name);
+	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag, const std::string& geom = "");
+	[[nodiscard]] class Renderer* getRenderer() { return mRenderer; }
 
-	inline std::string fullPath(const std::string& path) const { return (mBasePath + "assets" + SEPARATOR + path); };
+	[[nodiscard]] inline std::string fullPath(const std::string& path) const { return (mBasePath + "assets" + SEPARATOR + path); };
 
   private:
 	void input();
