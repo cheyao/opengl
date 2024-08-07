@@ -5,7 +5,7 @@ in VS_OUT {
 	vec2 texPos;
 } fs_in;
 
-out vec4 color;
+layout (location = 0) out vec4 color;
 
 uniform sampler2D texture_diffuse0;
 

@@ -3,7 +3,7 @@ precision mediump float;
 
 in vec2 texPos;
 
-out vec4 color;
+layout (location = 0) out vec4 color;
 
 uniform sampler2D screen;
 

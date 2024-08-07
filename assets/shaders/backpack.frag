@@ -54,7 +54,7 @@ in VS_OUT {
 	vec2 texPos;
 } fs_in;
 
-out vec4 color;
+layout (location = 0) out vec4 color;
 
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
