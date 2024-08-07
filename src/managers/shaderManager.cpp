@@ -20,7 +20,8 @@ ShaderManager::ShaderManager(const std::string& path)
 Shader* ShaderManager::get(const std::string& vert, const std::string& frag, const std::string& geom) {
 	assert(!vert.contains(':') && !frag.contains(':') && !geom.contains(':'));
 
-	if (mTextures.contains(vert + ':' + frag + ':' + geom)) {
+	// Using append avoids copies, this function will be called a couple times per loop
+	if (mTextures.contains((vert + ':').append(frag).append(":").append(geom))) {
 		return mTextures.at(vert + ':' + frag + ':' + geom);
 	}
 
@@ -28,7 +29,7 @@ Shader* ShaderManager::get(const std::string& vert, const std::string& frag, con
 	mTextures[vert + ':' + frag + ':' + geom] = shader;
 
 #ifdef DEBUG
-	// FIXME: This
+	// FIXME: This somehow doesn't work (Incompatabilities with SDL?)
 	mLastEdit[shader] = std::max(std::filesystem::last_write_time(mPath + vert),
 								 std::filesystem::last_write_time(mPath + frag));
 #endif

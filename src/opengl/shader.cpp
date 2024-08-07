@@ -123,26 +123,26 @@ void Shader::setUniform(const std::string_view& name, std::function<void(GLint)>
 	toCall(location);
 }
 
-void Shader::set(const std::string_view& name, const GLboolean& val) const {
+void Shader::set(const std::string_view& name, const GLboolean val) const {
 	setUniform(name, std::bind(glUniform1i, std::placeholders::_1, static_cast<GLint>(val)));
 }
-void Shader::set(const std::string_view& name, const GLint& val) const {
+void Shader::set(const std::string_view& name, const GLint val) const {
 	setUniform(name, std::bind(glUniform1i, std::placeholders::_1, val));
 }
-void Shader::set(const std::string_view& name, const GLuint& val) const {
+void Shader::set(const std::string_view& name, const GLuint val) const {
 	setUniform(name, std::bind(glUniform1ui, std::placeholders::_1, val));
 }
-void Shader::set(const std::string_view& name, const GLfloat& val) const {
+void Shader::set(const std::string_view& name, const GLfloat val) const {
 	setUniform(name, std::bind(glUniform1f, std::placeholders::_1, val));
 }
-void Shader::set(const std::string_view& name, const GLdouble& val) const {
+void Shader::set(const std::string_view& name, const GLdouble val) const {
 	setUniform(name, std::bind(glUniform1f, std::placeholders::_1, static_cast<GLfloat>(val)));
 }
-void Shader::set(const std::string_view& name, const GLfloat& val, const GLfloat& val2) const {
+void Shader::set(const std::string_view& name, const GLfloat val, const GLfloat val2) const {
 	setUniform(name, std::bind(glUniform2f, std::placeholders::_1, val, val2));
 }
-void Shader::set(const std::string_view& name, const GLfloat& val, const GLfloat& val2,
-				 const GLfloat& val3) const {
+void Shader::set(const std::string_view& name, const GLfloat val, const GLfloat val2,
+				 const GLfloat val3) const {
 	setUniform(name, std::bind(glUniform3f, std::placeholders::_1, val, val2, val3));
 }
 void Shader::set(const std::string_view& name, const Eigen::Vector2f& val) const {
@@ -152,7 +152,7 @@ void Shader::set(const std::string_view& name, const Eigen::Vector3f& val) const
 	setUniform(name, std::bind(glUniform3f, std::placeholders::_1, val.x(), val.y(), val.z()));
 }
 void Shader::set(const std::string_view& name, const Eigen::Vector3f& val,
-				 const GLfloat& val2) const {
+				 const GLfloat val2) const {
 	setUniform(name,
 			   std::bind(glUniform4f, std::placeholders::_1, val.x(), val.y(), val.z(), val2));
 }
@@ -161,7 +161,7 @@ void Shader::set(const std::string_view& name, const Eigen::Vector4f& val) const
 			   std::bind(glUniform4f, std::placeholders::_1, val.x(), val.y(), val.z(), val.w()));
 }
 void Shader::set(const std::string_view& name, const Eigen::Affine3f& mat,
-				 const GLboolean& transpose) const {
+				 const GLboolean transpose) const {
 	setUniform(name,
 			   std::bind(glUniformMatrix4fv, std::placeholders::_1, 1, transpose, mat.data()));
 }
@@ -179,7 +179,7 @@ void Shader::bind(std::string_view name, GLuint index) {
 	glUniformBlockBinding(mShaderProgram, blockIndex, index);
 }
 
-void Shader::compile(const std::string_view& fileName, const GLenum& type, GLuint& out) {
+void Shader::compile(const std::string_view& fileName, const GLenum type, GLuint out) {
 	char* shaderSource = static_cast<char*>(SDL_LoadFile(fileName.data(), nullptr));
 #ifdef GLES
 	// #version 400 core

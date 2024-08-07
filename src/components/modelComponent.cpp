@@ -5,7 +5,6 @@
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/types.hpp"
-#include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
 #include "utils.hpp"
 
@@ -57,9 +56,11 @@ void ModelComponent::loadNode(aiNode* node, const aiScene* scene) {
 }
 
 void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
-	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<std::pair<Texture*, TextureType>> textures;
+	std::vector<std::pair<const Texture*, const TextureType>> textures;
+
+	/*
+	std::vector<Vertex> vertices;
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 		Vertex vertex;
@@ -78,6 +79,7 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 
 		vertices.emplace_back(vertex);
 	}
+	*/
 
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 		const aiFace& face = mesh->mFaces[i];
@@ -90,10 +92,10 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
 	// TODO: better
-	const std::vector<Texture*> diffuseMaps = loadTextures(material, aiTextureType_DIFFUSE);
-	const std::vector<Texture*> specularMaps = loadTextures(material, aiTextureType_SPECULAR);
-	const std::vector<Texture*> heightMaps = loadTextures(material, aiTextureType_HEIGHT);
-	const std::vector<Texture*> ambientMaps = loadTextures(material, aiTextureType_AMBIENT);
+	const std::vector<const Texture*> diffuseMaps = loadTextures(material, aiTextureType_DIFFUSE);
+	const std::vector<const Texture*> specularMaps = loadTextures(material, aiTextureType_SPECULAR);
+	const std::vector<const Texture*> heightMaps = loadTextures(material, aiTextureType_HEIGHT);
+	const std::vector<const Texture*> ambientMaps = loadTextures(material, aiTextureType_AMBIENT);
 
 	textures.reserve(diffuseMaps.size() + specularMaps.size() + heightMaps.size() +
 					 ambientMaps.size());
@@ -111,15 +113,37 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 		textures.emplace_back(texture, AMBIENT);
 	}
 
-	mMeshes.emplace_back(new Mesh(vertices, indices, textures));
-	// FIXME: Fix mesh
-	// mMeshes.emplace_back(new Mesh(reinterpret_cast<float*>(mesh->mVertices),
-	// reinterpret_cast<float*>(mesh->mNormals), reinterpret_cast<float*>(mesh->mTextureCoords[0]),
-	// mesh->mNumVertices, indices, textures));
+	/*
+		vertex.position =
+			Eigen::Vector3f(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
+		vertex.normal =
+			Eigen::Vector3f(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+
+		if (mesh->mTextureCoords[0]) {
+			vertex.texturePos =
+				Eigen::Vector2f(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+		} else {
+			vertex.texturePos = Eigen::Vector2f(0.0f, 0.0f);
+		}
+	std::span<float>& positions, const std::span<float>& normals,
+				  const std::span<float>& texturePos, const std::vector<unsigned int>& indices,
+				  const std::vector<std::pair<Texture*, TextureType>>& textures);
+	*/
+	// https://en.cppreference.com/w/cpp/container/span/span
+	// TF
+	std::span<float> texPos;
+	if (mesh->mTextureCoords[0]) {
+		texPos = {&mesh->mTextureCoords[0][0].x, mesh->mNumVertices * 2};
+	}
+
+	mMeshes.emplace_back(new Mesh({&mesh->mVertices[0].x, mesh->mNumVertices * 3},
+								  {&mesh->mNormals[0].x, mesh->mNumVertices * 3}, texPos, indices,
+								  textures));
 }
 
-std::vector<Texture*> ModelComponent::loadTextures(aiMaterial* mat, const aiTextureType type) {
-	std::vector<Texture*> textures;
+std::vector<const Texture*> ModelComponent::loadTextures(const aiMaterial* mat,
+														 const aiTextureType type) {
+	std::vector<const Texture*> textures;
 
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;

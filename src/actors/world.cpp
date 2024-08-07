@@ -49,7 +49,7 @@ World::World(class Game* game) : Actor(game) {
 											1, 3, 7, 1, 7, 5,  // Right
 											0, 2, 3, 0, 3, 1,  // Front
 											4, 7, 6, 4, 5, 7}; // Back
-	const std::vector<std::pair<Texture*, TextureType>> texturesBox = {
+	const std::vector<std::pair<const Texture*, const TextureType>> texturesBox = {
 		std::make_pair(this->getGame()->getTexture("nightsky"), TextureType::DIFFUSE)};
 
 	MeshComponent* const box = new MeshComponent(this, verticesBox, indicesBox, texturesBox, 200);
