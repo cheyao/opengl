@@ -4,7 +4,6 @@
 #include "opengl/texture.hpp"
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
-#include "utils.hpp"
 
 #include <algorithm>
 #include <functional>
@@ -17,7 +16,7 @@
 
 // TODO: Accept non-Vertex data
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices,
-		   const std::vector<std::pair<const Texture*, const TextureType>>& textures)
+		   const std::vector<std::pair<Texture*, const TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures),
 	  mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
@@ -53,7 +52,7 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>&
 
 Mesh::Mesh(const std::span<float> positions, const std::span<float> normals,
 		   const std::span<float> texturePos, const std::vector<unsigned int>& indices,
-		   const std::vector<std::pair<const Texture*, const TextureType>>& textures)
+		   const std::vector<std::pair<Texture*, const TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures),
 	  mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
@@ -161,6 +160,7 @@ Mesh::~Mesh() {
 	glDeleteBuffers(1, &mEBO);
 
 	// Do not delete double buffers
+	// TODO: Better
 	const auto& u = std::ranges::unique(mAttribs);
 	for (auto it = mAttribs.begin(); it != u.begin(); ++it) {
 		glDeleteBuffers(1, &(*it));

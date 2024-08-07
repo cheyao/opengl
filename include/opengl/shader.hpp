@@ -9,7 +9,7 @@ class Shader {
   public:
 	// explicit Shader(const std::string_view& vertName, const std::string_view& fragName);
 	explicit Shader(const std::string_view& vertName, const std::string_view& fragName,
-					const std::string_view geomName = "");
+					const std::string_view& geomName = "");
 	Shader(Shader&&) = delete;
 	Shader(const Shader&) = delete;
 	Shader& operator=(Shader&&) = delete;
@@ -38,7 +38,7 @@ class Shader {
 	void bind(std::string_view name, GLuint index);
 
   private:
-	static void compile(const std::string_view& fileName, const GLenum type, GLuint out);
+	[[nodiscard]] static GLuint compile(const std::string_view& fileName, const GLenum type);
 
 	void setUniform(const std::string_view& name, std::function<void(GLint)> toCall) const;
 

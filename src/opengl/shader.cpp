@@ -46,21 +46,23 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 */
 
 Shader::Shader(const std::string_view& vertName, const std::string_view& fragName,
-			   const std::string_view geomName)
+			   const std::string_view& geomName)
 	: mShaderProgram(glCreateProgram()) {
-	GLuint mVertexShader = 0;
-	GLuint mFragmentShader = 0;
-	GLuint mGeometryShader = 0;
+	assert(glIsProgram(mShaderProgram));
 
-	compile(vertName, GL_VERTEX_SHADER, mVertexShader);
-	compile(fragName, GL_FRAGMENT_SHADER, mFragmentShader);
+	GLuint mVertexShader = compile(vertName, GL_VERTEX_SHADER);
+	assert(glIsShader(mVertexShader));
+	GLuint mFragmentShader = compile(fragName, GL_FRAGMENT_SHADER);
+	assert(glIsShader(mFragmentShader));
+	GLuint mGeometryShader = 0;
 	if (!geomName.empty()) {
-		compile(geomName, GL_GEOMETRY_SHADER, mGeometryShader);
+		mGeometryShader = compile(geomName, GL_GEOMETRY_SHADER);
 	}
 
 	glAttachShader(mShaderProgram, mVertexShader);
 	glAttachShader(mShaderProgram, mFragmentShader);
 	if (!geomName.empty()) {
+		assert(glIsShader(mGeometryShader));
 		glAttachShader(mShaderProgram, mGeometryShader);
 	}
 	glLinkProgram(mShaderProgram);
@@ -179,7 +181,7 @@ void Shader::bind(std::string_view name, GLuint index) {
 	glUniformBlockBinding(mShaderProgram, blockIndex, index);
 }
 
-void Shader::compile(const std::string_view& fileName, const GLenum type, GLuint out) {
+GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 	char* shaderSource = static_cast<char*>(SDL_LoadFile(fileName.data(), nullptr));
 #ifdef GLES
 	// #version 400 core
@@ -204,7 +206,7 @@ void Shader::compile(const std::string_view& fileName, const GLenum type, GLuint
 	}
 	SDL_Log("Loading %s", fileName.data());
 
-	out = glCreateShader(type);
+	GLuint out = glCreateShader(type);
 	glShaderSource(out, 1, &shaderSource, nullptr);
 	glCompileShader(out);
 
@@ -228,4 +230,8 @@ void Shader::compile(const std::string_view& fileName, const GLenum type, GLuint
 
 		throw std::runtime_error("shader.cpp: Failed to compile shader");
 	}
+
+	assert(glIsShader(out));
+
+	return out;
 }

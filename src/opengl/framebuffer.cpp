@@ -52,7 +52,7 @@ Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScr
 		{{+1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // Bot right
 	};
 	const std::vector<unsigned int> indices = {0, 1, 2, 1, 3, 2};
-	const std::vector<std::pair<const Texture*, const TextureType>> textures = {};
+	const std::vector<std::pair<Texture*, const TextureType>> textures = {};
 
 	mScreenMesh = std::make_unique<Mesh>(vertices, indices, textures);
 }

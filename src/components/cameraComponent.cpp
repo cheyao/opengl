@@ -11,9 +11,8 @@
 #include <cmath>
 
 CameraComponent::CameraComponent(Actor* owner, int priority)
-	: Component(owner, priority), mFOV(45) {
-	mProjectionMatrix = Eigen::Affine3f::Identity();
-
+	: Component(owner, priority), mFOV(45), mViewMatrix(Eigen::Affine3f::Identity()),
+	  mProjectionMatrix(Eigen::Affine3f::Identity()) {
 	Eigen::Quaternionf dir = mOwner->getRotation();
 	Eigen::AngleAxisf rot(toRadians(90), Eigen::Vector3f::UnitY());
 	mOwner->setRotation(dir * rot);

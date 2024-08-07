@@ -12,9 +12,6 @@ DrawComponent::DrawComponent(class Actor* owner, int drawOrder)
 	mOwner->getGame()->getRenderer()->addSprite(this);
 }
 
-#include <iostream>
 void DrawComponent::reload() {
 	mShader = mOwner->getGame()->getShader(mVert, mFrag, mGeom);
-	std::cerr << "Mesh" << std::endl;
-	CHECKERROR();
 }
