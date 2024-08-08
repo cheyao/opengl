@@ -47,6 +47,10 @@ void MeshComponent::setDrawFunc(
 
 void MeshComponent::addUniform(const std::function<void(const Shader*)> func) { mMesh->addUniform(func); }
 
-void MeshComponent::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind, GLuint VBO) {
-	mMesh->addAttribArray(size, data, bind, VBO);
+void MeshComponent::addAttribArray(const GLsizeiptr size, const GLvoid* const data, const std::function<void()>& bind) {
+	mMesh->addAttribArray(size, data, bind);
+}
+
+void MeshComponent::addAttribArray(const GLuint VBO, const std::function<void()>& bind) {
+	mMesh->addAttribArray(VBO, bind);
 }

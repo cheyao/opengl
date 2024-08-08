@@ -17,6 +17,7 @@
 #include <string_view>
 #include <utility>
 
+// PERF: Get a manager, no duplicate models
 ModelComponent::ModelComponent(Actor* owner, const std::string_view& path) : DrawComponent(owner) {
 	// NOTE: This importer handles memory
 	// All data is freed after the destruction of this object
@@ -147,9 +148,15 @@ void ModelComponent::addUniform(const std::function<void(const Shader* shader)> 
 	}
 }
 
-void ModelComponent::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind,
-				    GLuint VBO) {
+void ModelComponent::addAttribArray(const GLsizeiptr size, const GLvoid* const data,
+				    const std::function<void()>& bind) {
 	for (const auto& mesh : mMeshes) {
-		mesh->addAttribArray(size, data, bind, VBO);
+		mesh->addAttribArray(size, data, bind);
+	}
+}
+
+void ModelComponent::addAttribArray(const GLuint VBO, const std::function<void()>& bind) {
+	for (const auto& mesh : mMeshes) {
+		mesh->addAttribArray(VBO, bind);
 	}
 }

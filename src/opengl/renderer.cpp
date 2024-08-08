@@ -90,10 +90,8 @@ Renderer::Renderer(Game* game)
 
 	// Matrix uniform
 	mMatricesUBO = std::make_unique<UBO>(2 * sizeof(Eigen::Affine3f));
-	mMatricesUBO->bind(0); // WARNING: Maybe bind every frame
+	mMatricesUBO->bind(0);
 
-	// FUCK
-	// Tuns out my tests were all wrong...
 	// NOTE: Uncomment if testing framebuffer module
 	// glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// SDL_SetWindowRelativeMouseMode(mWindow, 1);
@@ -150,7 +148,6 @@ void Renderer::draw() const {
 	mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
 
 	for (const auto& sprite : mDrawables) {
-		// TODO: Depth?
 		Shader* const shader = sprite->getShader();
 		shader->activate();
 		shader->set("viewPos", mCamera->getOwner()->getPosition()); // Bruh how come I forgot
