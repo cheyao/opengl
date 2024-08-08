@@ -1,6 +1,7 @@
 #include "components/meshComponent.hpp"
 
 #include "actors/actor.hpp"
+#include "components/drawComponent.hpp"
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
@@ -8,14 +9,22 @@
 #include "third_party/glad/glad.h"
 
 #include <memory>
+#include <span>
 #include <utility>
 #include <vector>
 
-MeshComponent::MeshComponent(Actor* owner, const std::vector<const Vertex>& vertices,
-			     const std::vector<const GLuint>& indices,
+MeshComponent::MeshComponent(Actor* owner, const std::span<const Vertex> vertices,
+			     const std::span<const GLuint> indices,
 			     const std::vector<const std::pair<const Texture* const, const TextureType>>& textures,
 			     int drawOrder)
 	: DrawComponent(owner, drawOrder), mMesh(std::make_unique<Mesh>(vertices, indices, textures)) {}
+
+MeshComponent::MeshComponent(Actor* owner, const std::span<const float> positions, const std::span<const float> normals,
+			     const std::span<const float> texturePos, const std::span<const GLuint> indices,
+			     const std::vector<const std::pair<const Texture* const, const TextureType>>& textures,
+			     int drawOrder)
+	: DrawComponent(owner, drawOrder),
+	  mMesh(std::make_unique<Mesh>(positions, normals, texturePos, indices, textures)) {}
 
 void MeshComponent::draw() {
 	if (!getVisible()) {
