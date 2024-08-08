@@ -12,7 +12,7 @@
 #include <vector>
 
 MeshComponent::MeshComponent(Actor* owner, const std::vector<const Vertex>& vertices,
-			     const std::vector<const unsigned int>& indices,
+			     const std::vector<const GLuint>& indices,
 			     const std::vector<const std::pair<const Texture* const, const TextureType>>& textures,
 			     int drawOrder)
 	: DrawComponent(owner, drawOrder), mMesh(std::make_unique<Mesh>(vertices, indices, textures)) {}

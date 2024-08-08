@@ -59,18 +59,19 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 		modelMatrices[i] = model;
 	}
 
+	static_assert(sizeof(Eigen::Affine3f) == 4 * sizeof(Eigen::Vector4f), "mat4 = 4 * vec4");
 	meteorites->addAttribArray(amount * sizeof(Eigen::Affine3f), &modelMatrices[0], []() {
 		constexpr size_t vecSize = sizeof(Eigen::Vector4f);
-
-		glEnableVertexAttribArray(3);
-		glEnableVertexAttribArray(4);
-		glEnableVertexAttribArray(5);
-		glEnableVertexAttribArray(6);
 
 		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vecSize, reinterpret_cast<GLvoid*>(0 * vecSize));
 		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vecSize, reinterpret_cast<GLvoid*>(1 * vecSize));
 		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vecSize, reinterpret_cast<GLvoid*>(2 * vecSize));
 		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vecSize, reinterpret_cast<GLvoid*>(3 * vecSize));
+
+		glEnableVertexAttribArray(3);
+		glEnableVertexAttribArray(4);
+		glEnableVertexAttribArray(5);
+		glEnableVertexAttribArray(6);
 
 		glVertexAttribDivisor(3, 1);
 		glVertexAttribDivisor(4, 1);
