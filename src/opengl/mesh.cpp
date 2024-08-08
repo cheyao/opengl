@@ -7,6 +7,7 @@
 
 #include <SDL3/SDL.h>
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <string>
 #include <utility>
@@ -51,7 +52,7 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
-	SDL_Log("%ulld", mIndicesCount);
+	// SDL_Log("%zu", mIndicesCount);
 
 	glGenVertexArrays(1, &mVAO);
 
@@ -132,6 +133,8 @@ Mesh::~Mesh() {
  * Cons: Hard to implement without causing more bugs
  */
 
+// NOTE: sizeof(std::function<>) == 48
+
 /*
  * bind: function to bind vertexes
  *
@@ -140,13 +143,19 @@ Mesh::~Mesh() {
  * glVertexAttribPointer(index, count, type, GL_FALSE, stride, reinterpret_cast<GLvoid*>(0));
  * glVertexAttribDivisor(index, divisor);
  */
-void Mesh::addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind, GLuint VBO) {
-	if (VBO == static_cast<GLuint>(-1)) {
-		glGenBuffers(1, &VBO);
+void Mesh::addAttribArray(const GLsizeiptr size, const GLvoid* const data, const std::function<void()>& bind) {
+	GLuint VBO;
 
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-	}
+	glGenBuffers(1, &VBO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+
+	addAttribArray(VBO, bind);
+}
+
+void Mesh::addAttribArray(const GLuint VBO, const std::function<void()>& bind) {
+	assert(glIsBuffer(VBO));
 
 	glBindVertexArray(mVAO); // Save it in vertex array
 
@@ -203,4 +212,6 @@ void Mesh::draw(const Shader* shader) const {
 	glBindVertexArray(mVAO);
 	mDrawFunc(GL_TRIANGLES, mIndicesCount, GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
+
+	// SDL_Log("%zu", mIndicesCount);
 }

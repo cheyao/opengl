@@ -8,6 +8,7 @@
 
 #include <SDL3/SDL.h>
 
+// TODO: PlanetActor
 Sun::Sun(class Game* game) : Actor(game) {
 	ModelComponent* const sun =
 		new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "earth.blend"));
@@ -16,6 +17,7 @@ Sun::Sun(class Game* game) : Actor(game) {
 
 	setScale(5.0f);
 
+	// TODO: LightComponent
 	getGame()->getRenderer()->addPointLight(this);
 }
 

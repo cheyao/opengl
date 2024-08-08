@@ -11,7 +11,6 @@
 
 class Mesh {
       public:
-	// TODO: Also span
 	explicit Mesh(const std::span<const Vertex> vertices, const std::span<const GLuint> indices,
 		      const std::vector<const std::pair<const class Texture* const, const TextureType>>& textures);
 	// Non-owning: no copy, uses subbuffer to construct data in place
@@ -41,14 +40,15 @@ class Mesh {
 	void addUniform(const std::function<void(const class Shader* shader)> func) {
 		mUniformFuncs.emplace_back(func);
 	};
-	void addAttribArray(const GLsizeiptr& size, const GLvoid* data, std::function<void()> bind, GLuint VBO = -1);
+	void addAttribArray(const GLsizeiptr size, const GLvoid* const data, const std::function<void()>& bind);
+	void addAttribArray(const GLuint VBO, const std::function<void()>& bind);
 
       private:
 	GLuint mVBO;
 	GLuint mEBO;
 	GLuint mVAO;
 
-	size_t mIndicesCount;
+	std::size_t mIndicesCount;
 	std::vector<const std::pair<const class Texture* const, const TextureType>> mTextures;
 
 	std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)> mDrawFunc;
