@@ -17,7 +17,6 @@
 #include <SDL3/SDL_stdinc.h>
 #include <cassert>
 #include <memory>
-#include <ranges>
 #include <string>
 
 #ifdef IMGUI
@@ -35,15 +34,14 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 #endif
 
 Renderer::Renderer(Game* game)
-	: mOwner(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mWidth(0), mHeight(0),
-	  mCamera(nullptr) {
+	: mOwner(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mWidth(0), mHeight(0), mCamera(nullptr) {
 	mGL = std::make_unique<GLManager>();
 
 	mWindow = SDL_CreateWindow("OpenGL", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to make SDL window, there is something wrong with "
-				  "your system/SDL installation");
+			  "your system/SDL installation");
 
 		throw std::runtime_error("game.cpp: Failed to create SDL window");
 	}
@@ -98,6 +96,7 @@ Renderer::Renderer(Game* game)
 	// Tuns out my tests were all wrong...
 	// NOTE: Uncomment if testing framebuffer module
 	// glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	// SDL_SetWindowRelativeMouseMode(mWindow, 1);
 }
 
 /* NOTE:
@@ -124,9 +123,9 @@ static float constant = 1.0f;
 static float linear = 0.09f;
 static float quadratic = 0.032f;
 
-float a[3] = {0, 0, 0};
-float d[3] = {0, 0, 0};
-float s[3] = {0, 0, 0};
+float a = 0.7f;
+float d = 2.8f;
+float s = 1.0f;
 
 void Renderer::draw() const {
 #ifdef IMGUI
@@ -136,9 +135,9 @@ void Renderer::draw() const {
 	ImGui::SliderFloat("Linear", &linear, -1.0f, 10.0f);
 	ImGui::SliderFloat("Quadratic", &quadratic, -1.0f, 10.0f);
 
-	ImGui::SliderFloat3("Ambient", a, 0.0f, 10.0f);
-	ImGui::SliderFloat3("Diffuse", d, 0.0f, 10.0f);
-	ImGui::SliderFloat3("Specular", s, 0.0f, 10.0f);
+	ImGui::SliderFloat("Ambient", &a, 0.0f, 10.0f);
+	ImGui::SliderFloat("Diffuse", &d, 0.0f, 10.0f);
+	ImGui::SliderFloat("Specular", &s, 0.0f, 10.0f);
 
 	ImGui::End();
 #endif
@@ -234,9 +233,9 @@ void Renderer::setLights(Shader* shader) const {
 		num.append(std::to_string(place));
 
 		shader->set(num + "].position", value->getPosition());
-		shader->set(num + "].ambient", a[0], a[1], a[2]);
-		shader->set(num + "].diffuse", d[0], d[1], d[2]);
-		shader->set(num + "].specular", s[0], s[1], s[2]);
+		shader->set(num + "].ambient", a, a, a);
+		shader->set(num + "].diffuse", d, d, d);
+		shader->set(num + "].specular", s, s, s);
 		shader->set(num + "].constant", constant);
 		shader->set(num + "].linear", linear);
 		shader->set(num + "].quadratic", quadratic);
@@ -256,5 +255,9 @@ void Renderer::setLights(Shader* shader) const {
 
 void Renderer::setWindowRelativeMouseMode(SDL_bool mode) {
 	SDL_SetWindowRelativeMouseMode(mWindow, mode);
-	SDL_Log("Setted mouse mode to %d", mode);
+	if (mode) {
+		SDL_ShowCursor();
+	} else {
+		SDL_HideCursor();
+	}
 }

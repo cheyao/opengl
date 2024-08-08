@@ -12,10 +12,8 @@
 #include <utility>
 #include <vector>
 
-// FIXME: Use something safer then `reinterpret_cast`
-
 // TODO: Accept non-Vertex data
-Mesh::Mesh(const std::span<const Vertex>& vertices, const std::span<const GLuint>& indices,
+Mesh::Mesh(const std::span<const Vertex> vertices, const std::span<const GLuint> indices,
 	   const std::vector<const std::pair<const Texture* const, const TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
@@ -27,7 +25,7 @@ Mesh::Mesh(const std::span<const Vertex>& vertices, const std::span<const GLuint
 
 	// Bind all the vertex data
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
 	// Set the attrib pointers
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
@@ -42,17 +40,18 @@ Mesh::Mesh(const std::span<const Vertex>& vertices, const std::span<const GLuint
 	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndicesCount * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 }
 
 Mesh::Mesh(const std::span<const float> positions, const std::span<const float> normals,
-	   const std::span<const float> texturePos, const std::span<const GLuint>& indices,
+	   const std::span<const float> texturePos, const std::span<const GLuint> indices,
 	   const std::vector<const std::pair<const Texture* const, const TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
+	SDL_Log("%ulld", mIndicesCount);
 
 	glGenVertexArrays(1, &mVAO);
 
@@ -84,7 +83,7 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 		SDL_Log("Mesh.cpp: Normals empty, ignored");
 	}
 
-	if (!texturePos.empty()) {
+	[[unlikely]] if (!texturePos.empty()) {
 		glBufferSubData(GL_ARRAY_BUFFER, offset, texturePos.size() * sizeof(float), texturePos.data());
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
 		glEnableVertexAttribArray(2);
@@ -95,7 +94,7 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 	}
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), indices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndicesCount * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 }

@@ -4,16 +4,21 @@
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
 
+#include <span>
 #include <utility>
 #include <vector>
 
 class MeshComponent : public DrawComponent {
       public:
 	explicit MeshComponent(
-		class Actor* owner, const std::vector<const Vertex>& vertices,
-		const std::vector<const GLuint>& indices,
+		class Actor* owner, const std::span<const Vertex> vertices, const std::span<const GLuint> indices,
 		const std::vector<const std::pair<const class Texture* const, const TextureType>>& textures,
 		int drawOrder = 100);
+	explicit MeshComponent(class Actor* owner, const std::span<const float> positions,
+			       const std::span<const float> normals, const std::span<const float> texturePos,
+			       const std::span<const GLuint> indices,
+			       const std::vector<const std::pair<const Texture* const, const TextureType>>& textures,
+			       int drawOrder = 100);
 	MeshComponent(MeshComponent&&) = delete;
 	MeshComponent(const MeshComponent&) = delete;
 	MeshComponent& operator=(MeshComponent&&) = delete;

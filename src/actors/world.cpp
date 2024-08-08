@@ -13,16 +13,15 @@ World::World(class Game* game) : Actor(game) {
 	model->setGeom("backpack.geom");
 	model->addTexture(std::make_pair(this->getGame()->getTexture("land.png"), TextureType::DIFFUSE));
 
-	// TODO: constexpr? Should be able to do this in c++23 duh
-	const std::vector<const Vertex> verticesBox = {
-		{{-1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 0 FLD
-		{{+1.0f, -1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 1 FRD
-		{{-1.0f, +1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 2 FLU
-		{{+1.0f, +1.0f, +1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 3 FRU
-		{{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 4 BLD
-		{{+1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 5 BRD
-		{{-1.0f, +1.0f, -1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // 6 BLU
-		{{+1.0f, +1.0f, -1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}  // 7 BRU
+	const std::vector<const float> verticesBox = {
+		-1.0f, -1.0f, +1.0f, // 0 FLD
+		+1.0f, -1.0f, +1.0f, // 1 FRD
+		-1.0f, +1.0f, +1.0f, // 2 FLU
+		+1.0f, +1.0f, +1.0f, // 3 FRU
+		-1.0f, -1.0f, -1.0f, // 4 BLD
+		+1.0f, -1.0f, -1.0f, // 5 BRD
+		-1.0f, +1.0f, -1.0f, // 6 BLU
+		+1.0f, +1.0f, -1.0f  // 7 BRU
 	};
 	const std::vector<const GLuint> indicesBox = {2, 6, 7, 2, 7, 3,	 // Top
 						      0, 5, 4, 0, 1, 5,	 // Bottom
@@ -33,7 +32,7 @@ World::World(class Game* game) : Actor(game) {
 	const std::vector<const std::pair<const Texture* const, const TextureType>> texturesBox = {
 		std::make_pair(this->getGame()->getTexture("nightsky"), TextureType::DIFFUSE)};
 
-	MeshComponent* const box = new MeshComponent(this, verticesBox, indicesBox, texturesBox, 200);
+	MeshComponent* const box = new MeshComponent(this, verticesBox, {}, {}, indicesBox, texturesBox, 200);
 	box->setVert("sky.vert");
 	box->setFrag("sky.frag");
 
