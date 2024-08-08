@@ -4,12 +4,10 @@
 #include "opengl/texture.hpp"
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
-#include "utils.hpp"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
 #include <functional>
-#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -17,7 +15,7 @@
 // FIXME: Use something safer then `reinterpret_cast`
 
 // TODO: Accept non-Vertex data
-Mesh::Mesh(const std::span<const Vertex>& vertices, const std::span<const unsigned int>& indices,
+Mesh::Mesh(const std::span<const Vertex>& vertices, const std::span<const GLuint>& indices,
 	   const std::vector<const std::pair<const Texture* const, const TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
@@ -50,7 +48,7 @@ Mesh::Mesh(const std::span<const Vertex>& vertices, const std::span<const unsign
 }
 
 Mesh::Mesh(const std::span<const float> positions, const std::span<const float> normals,
-	   const std::span<const float> texturePos, const std::span<const unsigned int>& indices,
+	   const std::span<const float> texturePos, const std::span<const GLuint>& indices,
 	   const std::vector<const std::pair<const Texture* const, const TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);

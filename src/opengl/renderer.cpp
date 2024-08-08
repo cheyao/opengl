@@ -124,6 +124,10 @@ static float constant = 1.0f;
 static float linear = 0.09f;
 static float quadratic = 0.032f;
 
+float a[3] = {0, 0, 0};
+float d[3] = {0, 0, 0};
+float s[3] = {0, 0, 0};
+
 void Renderer::draw() const {
 #ifdef IMGUI
 	ImGui::Begin("Main Menu");
@@ -131,6 +135,10 @@ void Renderer::draw() const {
 	ImGui::SliderFloat("Constant", &constant, -1.0f, 10.0f);
 	ImGui::SliderFloat("Linear", &linear, -1.0f, 10.0f);
 	ImGui::SliderFloat("Quadratic", &quadratic, -1.0f, 10.0f);
+
+	ImGui::SliderFloat3("Ambient", a, 0.0f, 10.0f);
+	ImGui::SliderFloat3("Diffuse", d, 0.0f, 10.0f);
+	ImGui::SliderFloat3("Specular", s, 0.0f, 10.0f);
 
 	ImGui::End();
 #endif
@@ -180,6 +188,7 @@ void Renderer::reload() const {
 void Renderer::setCamera(class CameraComponent* camera) {
 	mCamera = camera;
 
+	// The projection matrix never gets updated
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
 }
 
@@ -207,13 +216,13 @@ void Renderer::setLights(Shader* shader) const {
 	// TODO: Concat all these
 	const Eigen::Vector4f lightPos(1.2f, 1.0f, 2.0f, 1.0f);
 
-	shader->set("dirLight.direction", -0.2f, -1.0f, -0.3f);
-	shader->set("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-	shader->set("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
-	shader->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
+	// shader->set("dirLight.direction", -0.2f, -1.0f, -0.3f);
+	// shader->set("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+	// shader->set("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
+	// shader->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
 #ifdef __cpp_lib_ranges_enumerate
-	// Duh stdlib doesn't support enumerate
+	// Duh libc++ doesn't support enumerate
 	for (const auto& [place, value] : std::views::enumerate(mPointLights)) {
 #else
 	for (size_t place = 0; place < mPointLights.size(); ++place) {
@@ -225,26 +234,27 @@ void Renderer::setLights(Shader* shader) const {
 		num.append(std::to_string(place));
 
 		shader->set(num + "].position", value->getPosition());
-		shader->set(num + "].ambient", 0.05f, 0.05f, 0.05f);
-		shader->set(num + "].diffuse", 0.5f, 0.5f, 0.5f);
-		shader->set(num + "].specular", 0.5f, 0.5f, 0.5f);
+		shader->set(num + "].ambient", a[0], a[1], a[2]);
+		shader->set(num + "].diffuse", d[0], d[1], d[2]);
+		shader->set(num + "].specular", s[0], s[1], s[2]);
 		shader->set(num + "].constant", constant);
 		shader->set(num + "].linear", linear);
 		shader->set(num + "].quadratic", quadratic);
 	}
 
-	shader->set("spotLight.position", mCamera->getOwner()->getPosition());
-	shader->set("spotLight.direction", mCamera->getOwner()->getForward());
-	shader->set("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-	shader->set("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-	shader->set("spotLight.specular", 1.0f, 1.0f, 1.0f);
-	shader->set("spotLight.constant", 1.0f);
-	shader->set("spotLight.linear", 0.09f);
-	shader->set("spotLight.quadratic", 0.032f);
-	shader->set("spotLight.cutOff", cos(toRadians(12.5f)));
-	shader->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
+	// shader->set("spotLight.position", mCamera->getOwner()->getPosition());
+	// shader->set("spotLight.direction", mCamera->getOwner()->getForward());
+	// shader->set("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+	// shader->set("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+	// shader->set("spotLight.specular", 1.0f, 1.0f, 1.0f);
+	// shader->set("spotLight.constant", 1.0f);
+	// shader->set("spotLight.linear", 0.09f);
+	// shader->set("spotLight.quadratic", 0.032f);
+	// shader->set("spotLight.cutOff", cos(toRadians(12.5f)));
+	// shader->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
 }
 
 void Renderer::setWindowRelativeMouseMode(SDL_bool mode) {
 	SDL_SetWindowRelativeMouseMode(mWindow, mode);
+	SDL_Log("Setted mouse mode to %d", mode);
 }
