@@ -12,13 +12,13 @@
 class Mesh {
       public:
 	explicit Mesh(const std::span<const Vertex> vertices, const std::span<const GLuint> indices,
-		      const std::vector<const std::pair<const class Texture* const, const TextureType>>& textures);
+		      const std::vector<std::pair<class Texture* const, TextureType>>& textures);
 	// Non-owning: no copy, uses subbuffer to construct data in place
 	// Spans fit into 2 registers (16 bytes) so no reference
 	// Vectors are 24 bytes (from cling) so by ref
 	explicit Mesh(const std::span<const float> positions, const std::span<const float> normals,
 		      const std::span<const float> texturePos, const std::span<const GLuint> indices,
-		      const std::vector<const std::pair<const Texture* const, const TextureType>>& textures);
+		      const std::vector<std::pair<Texture* const, TextureType>>& textures);
 
 	Mesh(Mesh&&) = delete;
 	Mesh(const Mesh&) = delete;
@@ -30,7 +30,7 @@ class Mesh {
 
 	size_t indices() const { return mIndicesCount; }
 
-	void addTexture(const std::pair<const class Texture* const, const TextureType> texture) {
+	void addTexture(const std::pair<Texture* const, TextureType> texture) {
 		mTextures.emplace_back(texture);
 	}
 	void
@@ -49,7 +49,7 @@ class Mesh {
 	GLuint mVAO;
 
 	std::size_t mIndicesCount;
-	std::vector<const std::pair<const class Texture* const, const TextureType>> mTextures;
+	std::vector<std::pair<class Texture* const, TextureType>> mTextures;
 
 	std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)> mDrawFunc;
 	std::vector<std::function<void(const Shader* shader)>> mUniformFuncs;

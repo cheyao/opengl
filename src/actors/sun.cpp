@@ -11,7 +11,7 @@
 // TODO: PlanetActor
 Sun::Sun(class Game* game) : Actor(game) {
 	ModelComponent* const sun =
-		new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "earth.blend"), false);
+		new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "earth.obj"), false);
 	sun->setVert("sun.vert");
 	sun->setFrag("sun.frag");
 

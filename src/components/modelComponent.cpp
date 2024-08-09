@@ -60,7 +60,7 @@ void ModelComponent::loadNode(aiNode* node, const aiScene* scene, const bool use
 
 void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene, const bool useTexture) {
 	std::vector<unsigned int> indices;
-	std::vector<const std::pair<const Texture* const, const TextureType>> textures;
+	std::vector<std::pair<Texture* const, TextureType>> textures;
 
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 		const aiFace& face = mesh->mFaces[i];
@@ -75,10 +75,10 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene, const bool use
 
 	if (useTexture) {
 		// PERF: better
-		const std::vector<const Texture*> diffuseMaps = loadTextures(material, aiTextureType_DIFFUSE);
-		const std::vector<const Texture*> specularMaps = loadTextures(material, aiTextureType_SPECULAR);
-		const std::vector<const Texture*> heightMaps = loadTextures(material, aiTextureType_HEIGHT);
-		const std::vector<const Texture*> ambientMaps = loadTextures(material, aiTextureType_AMBIENT);
+		const std::vector<Texture*> diffuseMaps = loadTextures(material, aiTextureType_DIFFUSE);
+		const std::vector<Texture*> specularMaps = loadTextures(material, aiTextureType_SPECULAR);
+		const std::vector<Texture*> heightMaps = loadTextures(material, aiTextureType_HEIGHT);
+		const std::vector<Texture*> ambientMaps = loadTextures(material, aiTextureType_AMBIENT);
 
 		textures.reserve(diffuseMaps.size() + specularMaps.size() + heightMaps.size() + ambientMaps.size());
 
@@ -105,8 +105,8 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene, const bool use
 				      {&mesh->mTextureCoords[0][0].x, mesh->mNumVertices * 3 * useTexture}, indices, textures));
 }
 
-std::vector<const Texture*> ModelComponent::loadTextures(const aiMaterial* mat, const aiTextureType type) {
-	std::vector<const Texture*> textures;
+std::vector<Texture*> ModelComponent::loadTextures(const aiMaterial* mat, const aiTextureType type) {
+	std::vector<Texture*> textures;
 
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;

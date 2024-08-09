@@ -15,7 +15,7 @@
 
 // TODO: Accept non-Vertex data
 Mesh::Mesh(const std::span<const Vertex> vertices, const std::span<const GLuint> indices,
-	   const std::vector<const std::pair<const Texture* const, const TextureType>>& textures)
+	   const std::vector<std::pair<Texture* const, TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
@@ -48,7 +48,7 @@ Mesh::Mesh(const std::span<const Vertex> vertices, const std::span<const GLuint>
 
 Mesh::Mesh(const std::span<const float> positions, const std::span<const float> normals,
 	   const std::span<const float> texturePos, const std::span<const GLuint> indices,
-	   const std::vector<const std::pair<const Texture* const, const TextureType>>& textures)
+	   const std::vector<std::pair<Texture* const, TextureType>>& textures)
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);

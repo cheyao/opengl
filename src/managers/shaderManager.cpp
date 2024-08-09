@@ -88,7 +88,7 @@ void ShaderManager::reload(bool full) {
 			delete shader;
 
 			shader = newTexture;
-		} catch (std::runtime_error error) {
+		} catch (const std::runtime_error& error) {
 			SDL_Log("Error recompiling shaders: %s", error.what());
 
 			shader = this->get("default.vert", "default.frag");
@@ -103,7 +103,7 @@ void ShaderManager::reload(bool full) {
 			delete shader;
 			Shader* newTexture = new Shader(vert, frag, geom);
 			shader = newTexture;
-		} catch (std::runtime_error error) {
+		} catch (const std::runtime_error& error) {
 			shader = this->get("default.vert", "default.frag");
 			throw error;
 		}

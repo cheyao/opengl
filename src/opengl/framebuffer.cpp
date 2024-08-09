@@ -46,20 +46,20 @@ Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScr
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 
-	const static std::vector<const float> pos = {
+	const static std::vector<float> pos = {
 		-1.0f, +1.0f, 0.0f, // Top left
 		-1.0f, -1.0f, 0.0f, // Bot left
 		+1.0f, +1.0f, 0.0f, // Top right
 		+1.0f, -1.0f, 0.0f, // Bot right
 	};
-	const static std::vector<const float> texPos = {
+	const static std::vector<float> texPos = {
 		0.0f, 1.0f, // Top left
 		0.0f, 0.0f, // Bot left
 		1.0f, 1.0f, // Top right
 		1.0f, 0.0f, // Bot right
 	};
-	const std::vector<const unsigned int> indices = {0, 1, 2, 1, 3, 2};
-	const std::vector<const std::pair<const Texture* const, const TextureType>> textures = {};
+	const std::vector<unsigned int> indices = {0, 1, 2, 1, 3, 2};
+	const std::vector<std::pair<Texture* const, TextureType>> textures = {};
 
 	Shader* mShader = mOwner->getShader("framebuffer.vert", "framebuffer.frag");
 	mShader->activate();
