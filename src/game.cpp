@@ -78,6 +78,8 @@ int Game::iterate() {
 	if (mPaused) {
 		mRenderer->setWindowRelativeMouseMode(0);
 
+		//mRenderer->swapWindow();
+
 		// Delay some time to not use too much CPU. Add some more?
 		SDL_Delay(64);
 
@@ -305,6 +307,7 @@ void Game::removeActor(Actor* actor) {
 }
 
 Texture* Game::getTexture(const std::string& name) { return mTextures->get(name); }
+
 Shader* Game::getShader(const std::string& vert, const std::string& frag, const std::string& geom) {
 	return mShaders->get(vert, frag, geom);
 }

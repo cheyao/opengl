@@ -1,6 +1,8 @@
 #version 410 core
 precision mediump float;
 
+const float shininess = 32.0f;
+
 uniform vec3 viewPos;
 
 uniform sampler2D texture_diffuse0;
@@ -37,8 +39,6 @@ void main() {
 }
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
-	const float shininess = 32.0f;
-
 	vec3 lightDir = normalize(light.position - fragPos);
 
 	float diff = max(dot(normal, lightDir), 0.0f);

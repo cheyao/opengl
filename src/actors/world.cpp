@@ -9,7 +9,7 @@
 World::World(class Game* game) : Actor(game) {
 	ModelComponent* const model = new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "earth.blend"));
 	model->setVert("common.vert");
-	model->setFrag("backpack.frag");
+	model->setFrag("earth.frag");
 	model->addTexture(std::make_pair(this->getGame()->getTexture("land.png"), TextureType::DIFFUSE));
 
 	const std::vector<const float> verticesBox = {

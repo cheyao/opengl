@@ -27,28 +27,32 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 						 0, 3, 2, 0, 1, 3,  // Front
 						 4, 6, 7, 4, 7, 5}; // Back
 
+	constexpr const unsigned int amount = 5000;
 	ModelComponent* const meteorites =
 		new ModelComponent(this, this->getGame()->fullPath("models" SEPARATOR "rock.obj"));
 	meteorites->setVert("cube.vert");
 	meteorites->setFrag("cube.frag");
-
-	constexpr const unsigned int amount = 5000;
+	meteorites->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1, std::placeholders::_2,
+					  std::placeholders::_3, std::placeholders::_4, amount));
 
 	Eigen::Affine3f* modelMatrices = new Eigen::Affine3f[amount];
 
 	constexpr const float radius = 25.0f;
 	constexpr const float offset = 2.5f;
-	for (unsigned int i = 0; i < amount; i++) {
+	for (unsigned int i = 0; i < amount; ++i) {
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();
 
 		const float angle = static_cast<float>(i) / static_cast<float>(amount) * 360.0f;
 		Eigen::Vector3f translation;
-		float displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
+
+		float displacement;
+		displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
 		translation.x() = sin(angle) * radius + displacement;
 		displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
 		translation.y() = displacement * 0.4f;
 		displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
 		translation.z() = cos(angle) * radius + displacement;
+
 		model.translate(translation);
 
 		const float scale = (rand() % 20) / 100.0f + 0.05;
@@ -80,15 +84,12 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 		glVertexAttribDivisor(6, 1);
 	});
 
-	meteorites->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1, std::placeholders::_2,
-					  std::placeholders::_3, std::placeholders::_4, amount));
+	delete[] modelMatrices;
+
 	meteorites->addUniform([](const Shader* shader) {
-		Eigen::Affine3f rotation = Eigen::Affine3f::Identity();
-
 		const float time = static_cast<float>(SDL_GetTicks()) / 1000.0f;
-		rotation.rotate(Eigen::AngleAxisf(time/3, Eigen::Vector3f::UnitY()));
 
-		shader->set("rotation", rotation);
+		shader->set("rotation", Eigen::Affine3f(Eigen::AngleAxisf(time / 3, Eigen::Vector3f::UnitY())));
 	});
 
 	setScale(0.25);
