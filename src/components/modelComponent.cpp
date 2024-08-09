@@ -13,6 +13,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <cassert>
 #include <stdexcept>
 #include <string_view>
 #include <utility>

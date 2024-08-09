@@ -14,18 +14,18 @@
 Shader::Shader(const std::string_view& vertName, const std::string_view& fragName,
 			   const std::string_view& geomName)
 	: mShaderProgram(glCreateProgram()) {
-	assert(glIsProgram(mShaderProgram) && "Shader not correctly created");
+	assert(glIsProgram(mShaderProgram) && "Shader.cpp: Shader not correctly created");
 
 	GLuint mVertexShader = compile(vertName, GL_VERTEX_SHADER);
-	assert(glIsShader(mVertexShader) && "Vert shader not loaded correctly");
+	assert(glIsShader(mVertexShader) && "Shader.cpp: Vert shader not loaded correctly");
 
 	GLuint mFragmentShader = compile(fragName, GL_FRAGMENT_SHADER);
-	assert(glIsShader(mFragmentShader) && "Frag shader not loaded correctly");
+	assert(glIsShader(mFragmentShader) && "Shader.cpp: Frag shader not loaded correctly");
 
 	GLuint mGeometryShader = 0;
 	if (!geomName.empty()) {
 		mGeometryShader = compile(geomName, GL_GEOMETRY_SHADER);
-		assert(glIsShader(mGeometryShader) && "Geom shader not loaded correctly");
+		assert(glIsShader(mGeometryShader) && "Shader.cpp: Geom shader not loaded correctly");
 	}
 
 	glAttachShader(mShaderProgram, mVertexShader);
@@ -49,7 +49,7 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 		GLchar* log = new GLchar[len + 1];
 
 		glGetProgramInfoLog(mShaderProgram, 512, nullptr, &log[0]);
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to link shader: \n%s\n", log);
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to link shader: \n%s\n", log);
 		ERROR_BOX("Failed to link shader");
 
 		delete[] log;
@@ -76,7 +76,7 @@ void Shader::setUniform(const std::string_view& name, std::function<void(GLint)>
 	[[unlikely]] if (location == -1) {
 #ifdef DEBUG
 		if (!errored.contains(std::string(name))) {
-			SDL_Log("Failed find uniform location \"%s\"\n", name.data());
+			SDL_Log("Shader.cpp: Failed find uniform location \"%s\"\n", name.data());
 
 			errored[std::string(name)] = true;
 		}
@@ -137,7 +137,7 @@ void Shader::bind(std::string_view name, GLuint index) {
 
 	if (blockIndex == GL_INVALID_INDEX) {
 		// TODO: Warn once
-		SDL_Log("Invalid block: %s", name.data());
+		SDL_Log("Shader.cpp: Invalid block: %s", name.data());
 
 		return;
 	}
@@ -149,18 +149,18 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 	char* shaderSource = static_cast<char*>(SDL_LoadFile(fileName.data(), nullptr));
 
 	[[unlikely]] if (shaderSource == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to read shader shource %s: %s\n",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to read shader shource %s: %s\n",
 						fileName.data(), SDL_GetError());
 
 #ifndef DEBUG
 		ERROR_BOX("Failed to read assets");
 #endif
 
-		throw std::runtime_error("shader.cpp: Failed to read shader source");
+		throw std::runtime_error("Shader.cpp: Failed to read shader source");
 	}
-	SDL_Log("Loading %s", fileName.data());
+	SDL_Log("Shader.cpp: Loading %s", fileName.data());
 
-	assert(shaderSource[0] == '#' && "Checking file version");
+	assert(shaderSource[0] == '#' && "Shader.cpp: Checking file version");
 
 #ifdef GLES
 	// #version 410 core
@@ -188,17 +188,17 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 		GLchar* log = new GLchar[len + 1];
 
 		glGetShaderInfoLog(out, len * sizeof(GLchar), nullptr, &log[0]);
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to compile shader %s: \n%s\n",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to compile shader %s: \n%s\n",
 						fileName.data(), log);
 
 		ERROR_BOX("Failed to compile shader");
 
 		delete[] log;
 
-		throw std::runtime_error("shader.cpp: Failed to compile shader");
+		throw std::runtime_error("Shader.cpp: Failed to compile shader");
 	}
 
-	assert(glIsShader(out) && "Error compiling shader, something wrong with code: should have been catched");
+	assert(glIsShader(out) && "Shader.cpp: Error compiling shader, something wrong with code: should have been catched");
 
 	return out;
 }

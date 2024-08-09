@@ -39,11 +39,11 @@ Renderer::Renderer(Game* game)
 
 	mWindow = SDL_CreateWindow("OpenGL", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Game.cpp: Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to make SDL window, there is something wrong with "
 			  "your system/SDL installation");
 
-		throw std::runtime_error("game.cpp: Failed to create SDL window");
+		throw std::runtime_error("Game.cpp: Failed to create SDL window");
 	}
 
 #ifdef __EMSCRIPTEN__
@@ -121,10 +121,6 @@ static float constant = 1.0f;
 static float linear = 0.09f;
 static float quadratic = 0.032f;
 
-float a = 0.7f;
-float d = 2.8f;
-float s = 1.0f;
-
 void Renderer::draw() const {
 #ifdef IMGUI
 	ImGui::Begin("Main Menu");
@@ -133,14 +129,14 @@ void Renderer::draw() const {
 	ImGui::SliderFloat("Linear", &linear, -1.0f, 10.0f);
 	ImGui::SliderFloat("Quadratic", &quadratic, -1.0f, 10.0f);
 
-	ImGui::SliderFloat("Ambient", &a, 0.0f, 10.0f);
-	ImGui::SliderFloat("Diffuse", &d, 0.0f, 10.0f);
-	ImGui::SliderFloat("Specular", &s, 0.0f, 10.0f);
+	// ImGui::SliderFloat("Ambient", &a, 0.0f, 10.0f);
+	// ImGui::SliderFloat("Diffuse", &d, 0.0f, 10.0f);
+	// ImGui::SliderFloat("Specular", &s, 0.0f, 10.0f);
 
 	ImGui::End();
 #endif
 
-	glClearColor(0.1f, 0.5f, 0.1f, 1.0f);
+	glClearColor(0.1f, 0.0f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	assert(mCamera != nullptr && "Did you forget to uncomment `new Player(this)`?");
@@ -184,7 +180,7 @@ void Renderer::reload() const {
 void Renderer::setCamera(class CameraComponent* camera) {
 	mCamera = camera;
 
-	// The projection matrix never gets updated
+	// The projection matrix never gets updated except when the camera is set
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
 }
 
@@ -229,6 +225,10 @@ void Renderer::setLights(Shader* shader) const {
 		std::string num = "pointLights[";
 		num.append(std::to_string(place));
 
+		constexpr float a = 0.7f;
+		constexpr float d = 2.8f;
+		constexpr float s = 1.0f;
+
 		shader->set(num + "].position", value->getPosition());
 		shader->set(num + "].ambient", a, a, a);
 		shader->set(num + "].diffuse", d, d, d);
@@ -252,6 +252,7 @@ void Renderer::setLights(Shader* shader) const {
 
 void Renderer::setWindowRelativeMouseMode(SDL_bool mode) {
 	SDL_SetWindowRelativeMouseMode(mWindow, mode);
+	SDL_GetWindowRelativeMouseMode(mWindow);
 	if (mode) {
 		SDL_ShowCursor();
 	} else {

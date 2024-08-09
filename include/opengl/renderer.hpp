@@ -6,7 +6,7 @@
 #include <vector>
 
 class Renderer {
-  public:
+      public:
 	explicit Renderer(class Game* game);
 	Renderer(Renderer&&) = delete;
 	Renderer(const Renderer&) = delete;
@@ -29,7 +29,7 @@ class Renderer {
 	void draw() const;
 	void reload() const;
 
-  private:
+      private:
 	void setLights(class Shader* shader) const;
 
 	class Game* mOwner;
