@@ -21,7 +21,6 @@ int SDL_AppInit(void** appstate, int argc, char** argv) {
 	(void)argv;
 
 	// The main class is in charge of sdl
-
 	std::srand(std::time(nullptr));
 
 	SDL_Log("Initializing game\n");
