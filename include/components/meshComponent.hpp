@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components/drawComponent.hpp"
+#include "opengl/mesh.hpp"
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
 
@@ -34,5 +35,5 @@ class MeshComponent : public DrawComponent {
 	void draw() override;
 
       private:
-	std::unique_ptr<class Mesh> mMesh;
+	std::unique_ptr<Mesh> mMesh;
 };

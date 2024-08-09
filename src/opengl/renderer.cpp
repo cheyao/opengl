@@ -25,6 +25,7 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/html5.h>
+#include <emscripten.h>
 
 // Hacks to get browser width and hight
 EM_JS(int, browserHeight, (), { return window.innerHeight; });
@@ -119,7 +120,7 @@ static float constant = 1.0f;
 static float linear = 0.05f;
 static float quadratic = 0.032f;
 
-void Renderer::draw() const {
+void Renderer::draw() {
 #ifdef IMGUI
 	ImGui::Begin("Main Menu");
 
@@ -158,11 +159,11 @@ void Renderer::draw() const {
 
 #ifdef __EMSCRIPTEN__
 	// Emscripten, SDL3 doesn't correctly report resize atm
-	if (browserWidth() != mWindowWidth || browserHeight() != mWindowHeight) {
-		mWindowWidth = browserWidth();
-		mWindowHeight = browserHeight();
+	if (browserWidth() != mWidth || browserHeight() != mHeight) {
+		mWidth = browserWidth();
+		mHeight = browserHeight();
 
-		SDL_SetWindowSize(mWindow, mWindowWidth, mWindowHeight);
+		SDL_SetWindowSize(mWindow, mWidth, mHeight);
 	}
 #endif
 }

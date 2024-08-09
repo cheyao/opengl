@@ -7,11 +7,22 @@
 #include <stdexcept>
 #include <string>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/html5.h>
+#include <emscripten.h>
+#endif
+
 GLManager::GLManager() : mContext(nullptr) {
+#ifdef GLES
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#else
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+#endif
 
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
@@ -35,10 +46,11 @@ void GLManager::bindContext(SDL_Window* window) {
 
 #ifdef GLES
 	if (gladLoadGLES2Loader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress)) == 0) {
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init GLES glad!\n");
 #else
 	if (gladLoadGLLoader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress)) == 0) {
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init GL glad!\n");
 #endif
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init glad!\n");
 		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
 
 		throw std::runtime_error("glManager.cpp: Failed to init glad");

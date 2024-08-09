@@ -26,7 +26,7 @@ class Renderer {
 	void setWindowRelativeMouseMode(int mode) const;
 	// TODO: Add more lights
 
-	void draw() const;
+	void draw();
 	void reload() const;
 	void swapWindow() const;
 
