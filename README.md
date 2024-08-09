@@ -10,6 +10,12 @@ Some concepts are also taken from OpengGL RedBook.
 
 Hope everything works out!
 
+Dependencies:
+
+- Assimp 
+- SDL3 
+- Eigen (Included in the repo)
+
 # Building
 
 ## MacOS and Linux
@@ -27,6 +33,7 @@ $ sudo cmake --install .
 ```
 
 Compile project:
+
 ```
 $ git clone https://github.com/cheyao/opengl.git
 $ cd opengl 

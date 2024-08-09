@@ -8,6 +8,7 @@
 build/
 rel/
 web/
+gcc/
 .compile_commands
 imgui.ini
 

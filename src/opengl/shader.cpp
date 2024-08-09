@@ -158,6 +158,9 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 	// to
 	// #version 300 es
 	shaderSource[9] = '3';
+	shaderSource[10] = '0';
+	shaderSource[11] = '0';
+	shaderSource[12] = ' ';
 	shaderSource[13] = 'e';
 	shaderSource[14] = 's';
 	shaderSource[15] = ' ';
