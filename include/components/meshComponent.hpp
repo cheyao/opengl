@@ -8,17 +8,18 @@
 #include <span>
 #include <utility>
 #include <vector>
+#include <memory>
 
 class MeshComponent : public DrawComponent {
       public:
 	explicit MeshComponent(
 		class Actor* owner, const std::span<const Vertex> vertices, const std::span<const GLuint> indices,
-		const std::vector<const std::pair<const class Texture* const, const TextureType>>& textures,
+		const std::vector<std::pair<class Texture* const, TextureType>>& textures,
 		int drawOrder = 100);
 	explicit MeshComponent(class Actor* owner, const std::span<const float> positions,
 			       const std::span<const float> normals, const std::span<const float> texturePos,
 			       const std::span<const GLuint> indices,
-			       const std::vector<const std::pair<const Texture* const, const TextureType>>& textures,
+			       const std::vector<std::pair<Texture* const, TextureType>>& textures,
 			       int drawOrder = 100);
 	MeshComponent(MeshComponent&&) = delete;
 	MeshComponent(const MeshComponent&) = delete;

@@ -5,11 +5,9 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexPos;
 layout (location = 3) in mat4 aMatrix;
 
-out VS_OUT {
-	vec3 normal;
-	vec3 fragPos;
-	vec2 texPos;
-} vs_out;
+out vec3 vNormal;
+out vec3 vFragPos;
+out vec2 vTexPos;
 
 layout(std140) uniform Matrices {
 	mat4 proj;
@@ -19,7 +17,6 @@ uniform mat4 model;
 uniform mat4 rotation;
 
 void main() {
-	// normalize(mat3(transpose(inverse(model))) * aNormal);
 	vs_out.normal = aNormal;
 	vs_out.fragPos = vec3(rotation * aMatrix * vec4(aPos, 1.0f));
 	vs_out.texPos = aTexPos;

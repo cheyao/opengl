@@ -15,13 +15,13 @@
 
 MeshComponent::MeshComponent(Actor* owner, const std::span<const Vertex> vertices,
 			     const std::span<const GLuint> indices,
-			     const std::vector<const std::pair<const Texture* const, const TextureType>>& textures,
+			     const std::vector<std::pair<Texture* const, TextureType>>& textures,
 			     int drawOrder)
 	: DrawComponent(owner, drawOrder), mMesh(std::make_unique<Mesh>(vertices, indices, textures)) {}
 
 MeshComponent::MeshComponent(Actor* owner, const std::span<const float> positions, const std::span<const float> normals,
 			     const std::span<const float> texturePos, const std::span<const GLuint> indices,
-			     const std::vector<const std::pair<const Texture* const, const TextureType>>& textures,
+			     const std::vector<std::pair<Texture* const, TextureType>>& textures,
 			     int drawOrder)
 	: DrawComponent(owner, drawOrder),
 	  mMesh(std::make_unique<Mesh>(positions, normals, texturePos, indices, textures)) {}

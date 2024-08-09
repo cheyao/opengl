@@ -29,7 +29,7 @@ class ModelComponent : public DrawComponent {
       private:
 	void loadNode(struct aiNode* node, const struct aiScene* scene, const bool useTexture);
 	void loadMesh(struct aiMesh* mesh, const struct aiScene* scene, const bool useTexture);
-	std::vector<const class Texture*> loadTextures(const struct aiMaterial* mat, const aiTextureType type);
+	std::vector<class Texture*> loadTextures(const struct aiMaterial* mat, const aiTextureType type);
 
 	std::vector<class Mesh*> mMeshes;
 };

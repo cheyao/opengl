@@ -4,6 +4,7 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <stdexcept>
 #include <string_view>
 #include <vector>
 
@@ -20,8 +21,7 @@ void Cubemap::load() {
 	glGenTextures(1, &mID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, mID);
 
-	const std::vector faces = {"right.png",	 "left.png",  "top.png",
-							   "bottom.png", "front.png", "back.png"};
+	const std::vector faces = {"right.png", "left.png", "top.png", "bottom.png", "front.png", "back.png"};
 
 	for (unsigned int i = 0; i < faces.size(); i++) {
 		loadface(faces[i], i);
@@ -45,7 +45,7 @@ void Cubemap::loadface(const std::string& face, const unsigned int& i) {
 	[[unlikely]] if (data == nullptr) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load texture: %s\n", name.data());
 		ERROR_BOX("Failed to load textures, the assets is corrupted or you don't "
-				  "have enough memory");
+			  "have enough memory");
 
 		throw std::runtime_error("cubemap.cpp: Failed to load texture");
 	}
@@ -60,16 +60,15 @@ void Cubemap::loadface(const std::string& face, const unsigned int& i) {
 			format = GL_RGBA;
 			break;
 		[[unlikely]] default:
-			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s:%d Unimplemented image format: %s\n",
-						 __FILE__, __LINE__, (name + face).data());
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s:%d Unimplemented image format: %s\n", __FILE__,
+				     __LINE__, (name + face).data());
 			ERROR_BOX("Failed to recognise file color format, the assets is probably "
-					  "corrupted");
+				  "corrupted");
 
 			throw std::runtime_error("cubemap.cpp: Invalid enum");
 	}
 
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format,
-				 GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
 	stbi_image_free(data);
 }

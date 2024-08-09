@@ -20,11 +20,9 @@ struct PointLight {
 
 uniform PointLight pointLight;
 
-in VS_OUT {
-	vec3 normal;
-	vec3 fragPos;
-	vec2 texPos;
-} fs_in;
+in vec3 vNormal;
+in vec3 vFragPos;
+in vec2 vTexPos;
 
 layout (location = 0) out vec4 color;
 

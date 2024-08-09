@@ -322,7 +322,7 @@ endif()
 if(WEB)
 	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -DGLES)
 	target_compile_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
-	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3)
+	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sALLOW_MEMORY_GROWTH)
 	target_link_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
 
 	if(DEBUG)
