@@ -19,7 +19,8 @@
 #include <utility>
 
 // PERF: Get a manager, no duplicate models
-ModelComponent::ModelComponent(Actor* owner, const std::string_view& path) : DrawComponent(owner) {
+ModelComponent::ModelComponent(Actor* owner, const std::string_view& path, const bool useTexture)
+	: DrawComponent(owner) {
 	// NOTE: This importer handles memory
 	// All data is freed after the destruction of this object
 	Assimp::Importer importer;
@@ -35,7 +36,7 @@ ModelComponent::ModelComponent(Actor* owner, const std::string_view& path) : Dra
 		throw std::runtime_error("ModelComponent.cpp: Failed to read model");
 	}
 
-	loadNode(scene->mRootNode, scene);
+	loadNode(scene->mRootNode, scene, useTexture);
 
 	SDL_Log("Successfully loaded model: %s", path.data());
 }
@@ -46,18 +47,18 @@ ModelComponent::~ModelComponent() {
 	}
 }
 
-void ModelComponent::loadNode(aiNode* node, const aiScene* scene) {
+void ModelComponent::loadNode(aiNode* node, const aiScene* scene, const bool useTexture) {
 	for (unsigned int i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		loadMesh(mesh, scene);
+		loadMesh(mesh, scene, useTexture);
 	}
 
 	for (unsigned int i = 0; i < node->mNumChildren; i++) {
-		loadNode(node->mChildren[i], scene);
+		loadNode(node->mChildren[i], scene, useTexture);
 	}
 }
 
-void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
+void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene, const bool useTexture) {
 	std::vector<unsigned int> indices;
 	std::vector<const std::pair<const Texture* const, const TextureType>> textures;
 
@@ -72,32 +73,36 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene) {
 
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-	// PERF: better
-	const std::vector<const Texture*> diffuseMaps = loadTextures(material, aiTextureType_DIFFUSE);
-	const std::vector<const Texture*> specularMaps = loadTextures(material, aiTextureType_SPECULAR);
-	const std::vector<const Texture*> heightMaps = loadTextures(material, aiTextureType_HEIGHT);
-	const std::vector<const Texture*> ambientMaps = loadTextures(material, aiTextureType_AMBIENT);
+	if (useTexture) {
+		// PERF: better
+		const std::vector<const Texture*> diffuseMaps = loadTextures(material, aiTextureType_DIFFUSE);
+		const std::vector<const Texture*> specularMaps = loadTextures(material, aiTextureType_SPECULAR);
+		const std::vector<const Texture*> heightMaps = loadTextures(material, aiTextureType_HEIGHT);
+		const std::vector<const Texture*> ambientMaps = loadTextures(material, aiTextureType_AMBIENT);
 
-	textures.reserve(diffuseMaps.size() + specularMaps.size() + heightMaps.size() + ambientMaps.size());
+		textures.reserve(diffuseMaps.size() + specularMaps.size() + heightMaps.size() + ambientMaps.size());
 
-	for (const auto& texture : diffuseMaps) {
-		textures.emplace_back(texture, DIFFUSE);
-	}
-	for (const auto& texture : specularMaps) {
-		textures.emplace_back(texture, SPECULAR);
-	}
-	for (const auto& texture : heightMaps) {
-		textures.emplace_back(texture, HEIGHT);
-	}
-	for (const auto& texture : ambientMaps) {
-		textures.emplace_back(texture, AMBIENT);
+		for (const auto& texture : diffuseMaps) {
+			textures.emplace_back(texture, DIFFUSE);
+		}
+		for (const auto& texture : specularMaps) {
+			textures.emplace_back(texture, SPECULAR);
+		}
+		for (const auto& texture : heightMaps) {
+			textures.emplace_back(texture, HEIGHT);
+		}
+		for (const auto& texture : ambientMaps) {
+			textures.emplace_back(texture, AMBIENT);
+		}
+	} else {
+		textures.clear();
 	}
 
 	assert(mesh->mTextureCoords[0] && "Unimplimented");
 
 	mMeshes.emplace_back(new Mesh({&mesh->mVertices[0].x, mesh->mNumVertices * 3},
 				      {&mesh->mNormals[0].x, mesh->mNumVertices * 3},
-				      {&mesh->mTextureCoords[0][0].x, mesh->mNumVertices * 3}, indices, textures));
+				      {&mesh->mTextureCoords[0][0].x, mesh->mNumVertices * 3 * useTexture}, indices, textures));
 }
 
 std::vector<const Texture*> ModelComponent::loadTextures(const aiMaterial* mat, const aiTextureType type) {

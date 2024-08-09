@@ -57,6 +57,7 @@ class Game {
 	std::string mBasePath;
 
 	bool mPaused;
+	bool mVsync;
 
 #ifdef DEBUG
 	std::filesystem::file_time_type last_time;

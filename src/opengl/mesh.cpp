@@ -78,7 +78,7 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 		offset += positions.size() * sizeof(float);
 	}
 
-	[[unlikely]] if (!normals.empty()) {
+	if (!normals.empty()) {
 		glBufferSubData(GL_ARRAY_BUFFER, offset, normals.size() * sizeof(float), normals.data());
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
 		glEnableVertexAttribArray(1);
@@ -88,9 +88,9 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 		SDL_Log("Mesh.cpp: Normals empty, ignored");
 	}
 
-	[[unlikely]] if (!texturePos.empty()) {
+	if (!texturePos.empty()) {
 		glBufferSubData(GL_ARRAY_BUFFER, offset, texturePos.size() * sizeof(float), texturePos.data());
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
 		glEnableVertexAttribArray(2);
 
 		offset += texturePos.size() * sizeof(float);
