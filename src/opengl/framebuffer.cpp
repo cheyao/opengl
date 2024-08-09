@@ -46,16 +46,28 @@ Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScr
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 
-	const std::vector<Vertex> vertices = {
-		{{-1.0f, +1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}}, // Top left
-		{{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}, // Bot left
-		{{+1.0f, +1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f}}, // Top right
-		{{+1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}}, // Bot right
+	const static std::vector<const float> pos = {
+		-1.0f, +1.0f, 0.0f, // Top left
+		-1.0f, -1.0f, 0.0f, // Bot left
+		+1.0f, +1.0f, 0.0f, // Top right
+		+1.0f, -1.0f, 0.0f, // Bot right
 	};
-	const std::vector<unsigned int> indices = {0, 1, 2, 1, 3, 2};
+	const static std::vector<const float> texPos = {
+		0.0f, 1.0f, // Top left
+		0.0f, 0.0f, // Bot left
+		1.0f, 1.0f, // Top right
+		1.0f, 0.0f, // Bot right
+	};
+	const std::vector<const unsigned int> indices = {0, 1, 2, 1, 3, 2};
 	const std::vector<const std::pair<const Texture* const, const TextureType>> textures = {};
 
-	mScreenMesh = std::make_unique<Mesh>(vertices, indices, textures);
+	Shader* mShader = mOwner->getShader("framebuffer.vert", "framebuffer.frag");
+	mShader->activate();
+	mShader->set("screen", 0);
+
+	glActiveTexture(GL_TEXTURE0);
+
+	mScreenMesh = std::make_unique<Mesh>(pos, std::span<float>(), texPos, indices, textures);
 }
 
 void Framebuffer::setDemensions(int width, int height) {
@@ -83,12 +95,6 @@ void Framebuffer::swap() {
 	Shader* mShader = mOwner->getShader("framebuffer.vert", "framebuffer.frag");
 	mShader->activate();
 
-	mShader->set("screen", 0);
-
-	mShader->set("width", mOwner->getWidth());
-	mShader->set("height", mOwner->getHeight());
-
-	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mScreenTexture);
 
 	mScreenMesh->draw(mShader);

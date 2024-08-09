@@ -10,7 +10,7 @@
 
 class ModelComponent : public DrawComponent {
       public:
-	explicit ModelComponent(class Actor* owner, const std::string_view& path);
+	explicit ModelComponent(class Actor* owner, const std::string_view& path, const bool useTexture = true);
 	ModelComponent(ModelComponent&&) = delete;
 	ModelComponent(const ModelComponent&) = delete;
 	ModelComponent& operator=(ModelComponent&&) = delete;
@@ -27,8 +27,8 @@ class ModelComponent : public DrawComponent {
 	void addAttribArray(const GLuint VBO, const std::function<void()>& bind);
 
       private:
-	void loadNode(struct aiNode* node, const struct aiScene* scene);
-	void loadMesh(struct aiMesh* mesh, const struct aiScene* scene);
+	void loadNode(struct aiNode* node, const struct aiScene* scene, const bool useTexture);
+	void loadMesh(struct aiMesh* mesh, const struct aiScene* scene, const bool useTexture);
 	std::vector<const class Texture*> loadTextures(const struct aiMaterial* mat, const aiTextureType type);
 
 	std::vector<class Mesh*> mMeshes;

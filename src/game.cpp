@@ -28,7 +28,7 @@
 
 Game::Game()
 	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mUpdatingActors(false), mTicks(0), mBasePath(""),
-	  mPaused(false) {
+	  mPaused(false), mVsync(true) {
 	const char* basepath = SDL_GetBasePath();
 	if (basepath != nullptr) {
 		mBasePath = std::string(basepath);
@@ -49,6 +49,8 @@ Game::Game()
 	*/
 
 	mRenderer->setWindowRelativeMouseMode(1);
+
+	SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
 
 	setup();
 }
@@ -78,7 +80,7 @@ int Game::iterate() {
 	if (mPaused) {
 		mRenderer->setWindowRelativeMouseMode(0);
 
-		//mRenderer->swapWindow();
+		// mRenderer->swapWindow();
 
 		// Delay some time to not use too much CPU. Add some more?
 		SDL_Delay(64);
@@ -172,7 +174,6 @@ void Game::update() {
 void Game::gui() {
 #ifdef IMGUI
 	static bool demoMenu = false;
-	static bool vsync = true;
 	static bool wireframe = false;
 
 	// Update ImGui Frame
@@ -221,7 +222,7 @@ void Game::gui() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
-	SDL_GL_SetSwapInterval(static_cast<int>(vsync));
+	SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
 #endif
 }
 
@@ -246,27 +247,45 @@ int Game::event(const SDL_Event& event) {
 		}
 
 		case SDL_EVENT_KEY_DOWN: {
-			[[unlikely]] if (event.key.key == SDLK_ESCAPE) { return 1; }
-			[[unlikely]] if (event.key.key == SDLK_F1) {
-				rel = !rel;
-				mRenderer->setWindowRelativeMouseMode(static_cast<int>(rel));
-			}
-			[[unlikely]] if (event.key.key == SDLK_F2) {
-#ifdef DEBUG
-				if (mPaused) {
-					mPaused = false;
+			switch (event.key.key) {
+				case SDLK_ESCAPE: {
+					return 1;
 				}
-#endif
-				// mTextures->reload(true);
-				// TODO: Maybe textures
-				mShaders->reload(true);
-				mRenderer->reload();
-			}
-			[[unlikely]] if (event.key.key == SDLK_F3) {
-				mPaused = !mPaused;
+				case SDLK_F1: {
+					rel = !rel;
+					mRenderer->setWindowRelativeMouseMode(static_cast<int>(rel));
 
-				mTicks = SDL_GetTicks();
+					break;
+				}
+				case SDLK_F2: {
+#ifdef DEBUG
+					if (mPaused) {
+						mPaused = false;
+					}
+#endif
+					// TODO: Maybe textures
+					// mTextures->reload(true);
+					mShaders->reload(true);
+					mRenderer->reload();
+
+					break;
+				}
+				case SDLK_F3: {
+					mPaused = !mPaused;
+
+					mTicks = SDL_GetTicks();
+
+					break;
+				}
+				case SDLK_F5: {
+					mVsync = !mVsync;
+
+					SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
+
+					break;
+				}
 			}
+
 			break;
 		}
 

@@ -145,7 +145,6 @@ void Renderer::draw() const {
 		Shader* const shader = sprite->getShader();
 		shader->activate();
 		shader->set("viewPos", mCamera->getOwner()->getPosition()); // Bruh how come I forgot
-		shader->set("time", static_cast<float>(SDL_GetTicks()) / 1000);
 
 		setLights(shader);
 		sprite->draw();

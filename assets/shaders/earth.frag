@@ -1,12 +1,7 @@
 #version 410 core
 precision mediump float;
 
-const float shininess = 32.0f;
-
 uniform vec3 viewPos;
-
-uniform sampler2D texture_diffuse0;
-uniform sampler2D texture_specular0;
 
 struct PointLight {
 	vec3 position;
@@ -25,10 +20,11 @@ uniform PointLight pointLight;
 in VS_OUT {
 	vec3 normal;
 	vec3 fragPos;
-	vec2 texPos;
 } fs_in;
 
 layout (location = 0) out vec4 color;
+
+const float shininess = 32.0f;
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
@@ -50,9 +46,9 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 	float attenuation = 1.0 / (light.constant + light.linear * distance + 
 						light.quadratic * (distance * distance));
 
-	vec3 ambient = light.ambient * vec3(texture(texture_diffuse0, fs_in.texPos));
-	vec3 diffuse = light.diffuse * diff * vec3(texture(texture_diffuse0, fs_in.texPos));
-	vec3 specular = light.specular * spec * vec3(texture(texture_specular0, fs_in.texPos));
+	vec3 ambient = light.ambient * vec3(0.0f, 0.411764705882f, 0.580392156863f);
+	vec3 diffuse = light.diffuse * diff * vec3(0.0f, 0.411764705882f, 0.580392156863f);
+	vec3 specular = light.specular * spec * vec3(0.0f, 0.411764705882f, 0.580392156863f);
 
 	ambient  *= attenuation; 
 	diffuse  *= attenuation;
