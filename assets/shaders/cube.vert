@@ -16,11 +16,12 @@ layout(std140) uniform Matrices {
 	mat4 view;
 };
 uniform mat4 model;
+uniform mat4 rotation;
 
 void main() {
 	// normalize(mat3(transpose(inverse(model))) * aNormal);
 	vs_out.normal = aNormal;
-	vs_out.fragPos = vec3(aMatrix * vec4(aPos, 1.0f));
+	vs_out.fragPos = vec3(rotation * aMatrix * vec4(aPos, 1.0f));
 	vs_out.texPos = aTexPos;
 	gl_Position = proj * view * vec4(vs_out.fragPos, 1.0f);
 }

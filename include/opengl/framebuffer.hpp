@@ -14,7 +14,7 @@ class Framebuffer {
 	~Framebuffer();
 
 	void setDemensions(int width, int height);
-	void swap(struct SDL_Window* window);
+	void swap();
 
   private:
 	class Game* mOwner;
