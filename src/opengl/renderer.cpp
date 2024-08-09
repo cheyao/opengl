@@ -13,9 +13,9 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <algorithm>
 #include <cassert>
 #include <memory>
-#include <string>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -116,26 +116,26 @@ void Renderer::setDemensions(int width, int height) {
 }
 
 static float constant = 1.0f;
-static float linear = 0.09f;
+static float linear = 0.05f;
 static float quadratic = 0.032f;
 
 void Renderer::draw() const {
 #ifdef IMGUI
 	ImGui::Begin("Main Menu");
 
-	ImGui::SliderFloat("Constant", &constant, -1.0f, 10.0f);
-	ImGui::SliderFloat("Linear", &linear, -1.0f, 10.0f);
-	ImGui::SliderFloat("Quadratic", &quadratic, -1.0f, 10.0f);
-
-	// ImGui::SliderFloat("Ambient", &a, 0.0f, 10.0f);
-	// ImGui::SliderFloat("Diffuse", &d, 0.0f, 10.0f);
-	// ImGui::SliderFloat("Specular", &s, 0.0f, 10.0f);
+	ImGui::SliderFloat("Constant", &constant, 0.0f, 1.0f);
+	ImGui::SliderFloat("Linear", &linear, 0.0f, 1.0f);
+	ImGui::SliderFloat("Quadratic", &quadratic, 0.0f, 0.04f);
 
 	ImGui::End();
 #endif
 
+#ifdef DEBUG
 	glClearColor(0.1f, 0.0f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#else
+	glClear(GL_DEPTH_BUFFER_BIT);
+#endif
 
 	assert(mCamera != nullptr && "Did you forget to uncomment `new Player(this)`?");
 
@@ -148,7 +148,6 @@ void Renderer::draw() const {
 		shader->set("time", static_cast<float>(SDL_GetTicks()) / 1000);
 
 		setLights(shader);
-
 		sprite->draw();
 	}
 
@@ -156,7 +155,7 @@ void Renderer::draw() const {
 	ImGui::Render();
 #endif
 
-	mFramebuffer->swap(mWindow);
+	mFramebuffer->swap();
 
 #ifdef __EMSCRIPTEN__
 	// Emscripten, SDL3 doesn't correctly report resize atm
@@ -206,13 +205,13 @@ void Renderer::removeSprite(DrawComponent* sprite) {
 
 void Renderer::setLights(Shader* shader) const {
 	// TODO: Concat all these
-	const Eigen::Vector4f lightPos(1.2f, 1.0f, 2.0f, 1.0f);
 
 	// shader->set("dirLight.direction", -0.2f, -1.0f, -0.3f);
 	// shader->set("dirLight.ambient", 0.05f, 0.05f, 0.05f);
 	// shader->set("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
 	// shader->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
+	/*
 #ifdef __cpp_lib_ranges_enumerate
 	// Duh libc++ doesn't support enumerate
 	for (const auto& [place, value] : std::views::enumerate(mPointLights)) {
@@ -221,7 +220,6 @@ void Renderer::setLights(Shader* shader) const {
 		const auto& value = mPointLights[place];
 #endif
 
-		// TODO: Better
 		std::string num = "pointLights[";
 		num.append(std::to_string(place));
 
@@ -237,6 +235,20 @@ void Renderer::setLights(Shader* shader) const {
 		shader->set(num + "].linear", linear);
 		shader->set(num + "].quadratic", quadratic);
 	}
+	*/
+	const auto& value = mPointLights[0];
+
+	constexpr float a = 0.7f;
+	constexpr float d = 2.8f;
+	constexpr float s = 1.0f;
+
+	shader->set("pointLight.position", value->getPosition());
+	shader->set("pointLight.ambient", a, a, a * 0.7);
+	shader->set("pointLight.diffuse", d, d, d * 0.7);
+	shader->set("pointLight.specular", s, s, s * 0.7);
+	shader->set("pointLight.constant", constant);
+	shader->set("pointLight.linear", linear);
+	shader->set("pointLight.quadratic", quadratic);
 
 	// shader->set("spotLight.position", mCamera->getOwner()->getPosition());
 	// shader->set("spotLight.direction", mCamera->getOwner()->getForward());
@@ -250,12 +262,4 @@ void Renderer::setLights(Shader* shader) const {
 	// shader->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
 }
 
-void Renderer::setWindowRelativeMouseMode(SDL_bool mode) {
-	SDL_SetWindowRelativeMouseMode(mWindow, mode);
-	SDL_GetWindowRelativeMouseMode(mWindow);
-	if (mode) {
-		SDL_ShowCursor();
-	} else {
-		SDL_HideCursor();
-	}
-}
+void Renderer::setWindowRelativeMouseMode(SDL_bool mode) const { SDL_SetWindowRelativeMouseMode(mWindow, mode); }

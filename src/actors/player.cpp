@@ -11,7 +11,7 @@ Player::Player(class Game* owner) : Actor(owner), up(0) {
 	new CameraComponent(this);
 	mMoveComp = new MovementComponent(this);
 
-	setPosition(Eigen::Vector3f(0.0f, 2.0f, -6.0f));
+	setPosition(Eigen::Vector3f(0.0f, 6.0f, 10.0f));
 }
 
 void Player::actorInput(const uint8_t* keystate) {

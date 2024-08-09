@@ -11,8 +11,7 @@
 #include <string_view>
 #include <unordered_map>
 
-Shader::Shader(const std::string_view& vertName, const std::string_view& fragName,
-			   const std::string_view& geomName)
+Shader::Shader(const std::string_view& vertName, const std::string_view& fragName, const std::string_view& geomName)
 	: mShaderProgram(glCreateProgram()) {
 	assert(glIsProgram(mShaderProgram) && "Shader.cpp: Shader not correctly created");
 
@@ -58,9 +57,7 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 	}
 }
 
-Shader::~Shader() {
-	glDeleteProgram(mShaderProgram);
-}
+Shader::~Shader() { glDeleteProgram(mShaderProgram); }
 
 void Shader::activate() const { glUseProgram(mShaderProgram); }
 
@@ -107,29 +104,23 @@ void Shader::set(const std::string_view& name, const GLdouble val) const {
 void Shader::set(const std::string_view& name, const GLfloat val, const GLfloat val2) const {
 	setUniform(name, std::bind(glUniform2f, std::placeholders::_1, val, val2));
 }
-void Shader::set(const std::string_view& name, const GLfloat val, const GLfloat val2,
-				 const GLfloat val3) const {
+void Shader::set(const std::string_view& name, const GLfloat val, const GLfloat val2, const GLfloat val3) const {
 	setUniform(name, std::bind(glUniform3f, std::placeholders::_1, val, val2, val3));
 }
-void Shader::set(const std::string_view& name, const Eigen::Vector2f& val) const {
+void Shader::set(const std::string_view& name, const Eigen::Vector2f val) const {
 	setUniform(name, std::bind(glUniform2f, std::placeholders::_1, val.x(), val.y()));
 }
-void Shader::set(const std::string_view& name, const Eigen::Vector3f& val) const {
+void Shader::set(const std::string_view& name, const Eigen::Vector3f val) const {
 	setUniform(name, std::bind(glUniform3f, std::placeholders::_1, val.x(), val.y(), val.z()));
 }
-void Shader::set(const std::string_view& name, const Eigen::Vector3f& val,
-				 const GLfloat val2) const {
-	setUniform(name,
-			   std::bind(glUniform4f, std::placeholders::_1, val.x(), val.y(), val.z(), val2));
+void Shader::set(const std::string_view& name, const Eigen::Vector3f val, const GLfloat val2) const {
+	setUniform(name, std::bind(glUniform4f, std::placeholders::_1, val.x(), val.y(), val.z(), val2));
 }
-void Shader::set(const std::string_view& name, const Eigen::Vector4f& val) const {
-	setUniform(name,
-			   std::bind(glUniform4f, std::placeholders::_1, val.x(), val.y(), val.z(), val.w()));
+void Shader::set(const std::string_view& name, const Eigen::Vector4f val) const {
+	setUniform(name, std::bind(glUniform4f, std::placeholders::_1, val.x(), val.y(), val.z(), val.w()));
 }
-void Shader::set(const std::string_view& name, const Eigen::Affine3f& mat,
-				 const GLboolean transpose) const {
-	setUniform(name,
-			   std::bind(glUniformMatrix4fv, std::placeholders::_1, 1, transpose, mat.data()));
+void Shader::set(const std::string_view& name, const Eigen::Affine3f& mat, const GLboolean transpose) const {
+	setUniform(name, std::bind(glUniformMatrix4fv, std::placeholders::_1, 1, transpose, mat.data()));
 }
 
 void Shader::bind(std::string_view name, GLuint index) {
@@ -150,7 +141,7 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 
 	[[unlikely]] if (shaderSource == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to read shader shource %s: %s\n",
-						fileName.data(), SDL_GetError());
+				fileName.data(), SDL_GetError());
 
 #ifndef DEBUG
 		ERROR_BOX("Failed to read assets");
@@ -189,7 +180,7 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 
 		glGetShaderInfoLog(out, len * sizeof(GLchar), nullptr, &log[0]);
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to compile shader %s: \n%s\n",
-						fileName.data(), log);
+				fileName.data(), log);
 
 		ERROR_BOX("Failed to compile shader");
 
@@ -198,7 +189,8 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 		throw std::runtime_error("Shader.cpp: Failed to compile shader");
 	}
 
-	assert(glIsShader(out) && "Shader.cpp: Error compiling shader, something wrong with code: should have been catched");
+	assert(glIsShader(out) &&
+	       "Shader.cpp: Error compiling shader, something wrong with code: should have been catched");
 
 	return out;
 }
