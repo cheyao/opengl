@@ -206,7 +206,7 @@ void Game::gui() {
 
 		// ImGui::Checkbox("Debug", &debugMenu);
 		ImGui::Checkbox("Demo", &demoMenu);
-		ImGui::Checkbox("VSync", &vsync);
+		ImGui::Checkbox("VSync", &mVsync);
 		ImGui::Checkbox("Wireframe", &wireframe);
 
 		ImGui::End();
