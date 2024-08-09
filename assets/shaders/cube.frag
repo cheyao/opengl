@@ -20,8 +20,7 @@ struct PointLight {
 	vec3 specular;
 };
 
-#define POINT_LIGHTS 1 // TODO: Non const
-uniform PointLight pointLights[POINT_LIGHTS];
+uniform PointLight pointLights[1];
 
 in VS_OUT {
 	vec3 normal;
@@ -38,14 +37,10 @@ void main() {
 
 	vec3 outColor = vec3(0);
 
-	for (int i = 0; i < POINT_LIGHTS; i++) {
-		outColor += calcPointLight(pointLights[i], fs_in.normal, fs_in.fragPos, viewDir);
-	}
+	outColor += calcPointLight(pointLights[0], fs_in.normal, fs_in.fragPos, viewDir);
 
 	color = vec4(outColor, 1.0f);
 }
-
-// TODO: Concat common parts
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 	vec3 lightDir = normalize(light.position - fragPos);

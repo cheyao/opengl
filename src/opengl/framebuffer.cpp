@@ -2,6 +2,7 @@
 
 #include "game.hpp"
 #include "opengl/mesh.hpp"
+#include "opengl/renderer.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
 #include "third_party/glad/glad.h"
@@ -65,7 +66,7 @@ void Framebuffer::setDemensions(int width, int height) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Framebuffer::swap(SDL_Window* window) {
+void Framebuffer::swap() {
 	GLint mode[2];
 	glGetIntegerv(GL_POLYGON_MODE, mode);
 
@@ -93,7 +94,7 @@ void Framebuffer::swap(SDL_Window* window) {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #endif
 
-	SDL_GL_SwapWindow(window);
+	mOwner->getRenderer()->swapWindow();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 	glEnable(GL_DEPTH_TEST);

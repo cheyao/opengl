@@ -13,8 +13,6 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_mouse.h>
-#include <SDL3/SDL_stdinc.h>
 #include <cassert>
 #include <memory>
 #include <string>
@@ -170,6 +168,8 @@ void Renderer::draw() const {
 	}
 #endif
 }
+
+void Renderer::swapWindow() const { SDL_GL_SwapWindow(mWindow); }
 
 void Renderer::reload() const {
 	for (const auto& sprite : mDrawables) {

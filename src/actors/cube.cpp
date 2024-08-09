@@ -2,6 +2,7 @@
 
 #include "components/modelComponent.hpp"
 #include "game.hpp"
+#include "opengl/shader.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
 
@@ -35,8 +36,8 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 
 	Eigen::Affine3f* modelMatrices = new Eigen::Affine3f[amount];
 
-	float radius = 25.0f;
-	float offset = 2.5f;
+	constexpr const float radius = 25.0f;
+	constexpr const float offset = 2.5f;
 	for (unsigned int i = 0; i < amount; i++) {
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();
 
@@ -81,6 +82,14 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 
 	meteorites->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1, std::placeholders::_2,
 					  std::placeholders::_3, std::placeholders::_4, amount));
+	meteorites->addUniform([](const Shader* shader) {
+		Eigen::Affine3f rotation = Eigen::Affine3f::Identity();
+
+		const float time = static_cast<float>(SDL_GetTicks()) / 1000.0f;
+		rotation.rotate(Eigen::AngleAxisf(time/3, Eigen::Vector3f::UnitY()));
+
+		shader->set("rotation", rotation);
+	});
 
 	setScale(0.25);
 }

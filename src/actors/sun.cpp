@@ -24,7 +24,7 @@ Sun::Sun(class Game* game) : Actor(game) {
 void Sun::updateActor(float delta) {
 	(void)delta;
 
-	float time = static_cast<float>(SDL_GetTicks()) / 1000;
+	float time = static_cast<float>(SDL_GetTicks()) / 1000.0f;
 
 	Eigen::Vector3f pos(cos(time) * 12.0f, 5.0f, sin(time) * 12.0f);
 
