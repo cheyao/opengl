@@ -26,12 +26,10 @@ World::World(class Game* game) : Actor(game) {
 		std::make_pair(this->getGame()->getTexture("nightsky"), TextureType::DIFFUSE)};
 
 	MeshComponent* const sky = new MeshComponent(this, verticesSky, {}, {}, indicesSky, texturesSky, 200);
-	sky->setVert("sky.vert");
-	sky->setFrag("sky.frag");
+	sky->setShaders("sky.vert", "sky.frag");
 
 	ModelComponent* const model = new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "earth.obj"), false);
-	model->setVert("earth.vert");
-	model->setFrag("earth.frag");
+	model->setShaders("earth.vert", "earth.frag");
 
 	setScale(5.0f);
 }

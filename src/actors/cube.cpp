@@ -13,8 +13,7 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 	constexpr const unsigned int amount = 5000;
 	ModelComponent* const meteorites =
 		new ModelComponent(this, this->getGame()->fullPath("models" SEPARATOR "rock.obj"));
-	meteorites->setVert("cube.vert");
-	meteorites->setFrag("cube.frag");
+	meteorites->setShaders("cube.vert", "cube.frag");
 	meteorites->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1, std::placeholders::_2,
 					  std::placeholders::_3, std::placeholders::_4, amount));
 
@@ -32,7 +31,7 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 		displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
 		translation.x() = sin(angle) * radius + displacement;
 		displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
-		translation.y() = displacement * 0.4f;
+		translation.y() = displacement * 0.4f + 5.0f;
 		displacement = (rand() % static_cast<int>(2 * offset * 100)) / 100.0f - offset;
 		translation.z() = cos(angle) * radius + displacement;
 

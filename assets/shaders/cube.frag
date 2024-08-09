@@ -29,9 +29,9 @@ layout (location = 0) out vec4 color;
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void main() {
-	vec3 viewDir = normalize(viewPos - fs_in.fragPos);
+	vec3 viewDir = normalize(viewPos - vFragPos);
 
-	color = vec4(calcPointLight(pointLight, fs_in.normal, fs_in.fragPos, viewDir), 1.0f);
+	color = vec4(calcPointLight(pointLight, vNormal, vFragPos, viewDir), 1.0f);
 }
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
@@ -48,9 +48,9 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 	float attenuation = 1.0 / (light.constant + light.linear * distance + 
 						light.quadratic * (distance * distance));
 
-	vec3 ambient = light.ambient * vec3(texture(texture_diffuse0, fs_in.texPos));
-	vec3 diffuse = light.diffuse * diff * vec3(texture(texture_diffuse0, fs_in.texPos));
-	vec3 specular = light.specular * spec * vec3(texture(texture_specular0, fs_in.texPos));
+	vec3 ambient = light.ambient * vec3(texture(texture_diffuse0, vTexPos));
+	vec3 diffuse = light.diffuse * diff * vec3(texture(texture_diffuse0, vTexPos));
+	vec3 specular = light.specular * spec * vec3(texture(texture_specular0, vTexPos));
 
 	ambient  *= attenuation; 
 	diffuse  *= attenuation;

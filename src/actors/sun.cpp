@@ -12,8 +12,7 @@
 Sun::Sun(class Game* game) : Actor(game) {
 	ModelComponent* const sun =
 		new ModelComponent(this, getGame()->fullPath("models" SEPARATOR "earth.obj"), false);
-	sun->setVert("sun.vert");
-	sun->setFrag("sun.frag");
+	sun->setShaders("sun.vert", "sun.frag");
 
 	setScale(5.0f);
 

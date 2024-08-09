@@ -17,10 +17,8 @@ struct PointLight {
 
 uniform PointLight pointLight;
 
-in VS_OUT {
-	vec3 normal;
-	vec3 fragPos;
-} fs_in;
+in vec3 vNormal;
+in vec3 vFragPos;
 
 layout (location = 0) out vec4 color;
 
@@ -29,9 +27,9 @@ const float shininess = 32.0f;
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void main() {
-	vec3 viewDir = normalize(viewPos - fs_in.fragPos);
+	vec3 viewDir = normalize(viewPos - vFragPos);
 
-	color = vec4(calcPointLight(pointLight, fs_in.normal, fs_in.fragPos, viewDir), 1.0f);
+	color = vec4(calcPointLight(pointLight, vNormal, vFragPos, viewDir), 1.0f);
 }
 
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {

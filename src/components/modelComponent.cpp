@@ -21,6 +21,7 @@
 // PERF: Get a manager, no duplicate models
 ModelComponent::ModelComponent(Actor* owner, const std::string_view& path, const bool useTexture)
 	: DrawComponent(owner) {
+	SDL_Log("ModelComponent.cpp: Loading model: %s", path.data());
 	// NOTE: This importer handles memory
 	// All data is freed after the destruction of this object
 	Assimp::Importer importer;
@@ -38,7 +39,7 @@ ModelComponent::ModelComponent(Actor* owner, const std::string_view& path, const
 
 	loadNode(scene->mRootNode, scene, useTexture);
 
-	SDL_Log("Successfully loaded model: %s", path.data());
+	SDL_Log("ModelComponent.cpp: Successfully loaded model: %s", path.data());
 }
 
 ModelComponent::~ModelComponent() {

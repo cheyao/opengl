@@ -5,7 +5,7 @@
 #include <string>
 
 class DrawComponent : public Component {
-  public:
+      public:
 	DrawComponent(class Actor* owner, int drawOrder = 100);
 	DrawComponent(DrawComponent&&) = delete;
 	DrawComponent(const DrawComponent&) = delete;
@@ -20,14 +20,29 @@ class DrawComponent : public Component {
 	void setVisible(bool visible) { mVisible = visible; }
 	bool getVisible() const { return mVisible; }
 
-	void setVert(const std::string& vert) { mVert = vert; reload(); }
-	void setFrag(const std::string& frag) { mFrag = frag; reload(); }
-	void setGeom(const std::string& geom) { mGeom = geom; reload(); }
+	void setVert(const std::string& vert) {
+		mVert = vert;
+		reload();
+	}
+	void setFrag(const std::string& frag) {
+		mFrag = frag;
+		reload();
+	}
+	void setGeom(const std::string& geom) {
+		mGeom = geom;
+		reload();
+	}
+	void setShaders(const std::string& vert, const std::string& frag, const std::string& geom = "") {
+		mVert = vert;
+		mFrag = frag;
+		mGeom = geom;
+		reload();
+	}
 	class Shader* getShader() const { return mShader; };
 
 	void reload();
 
-  protected:
+      protected:
 	int mDrawOrder;
 	bool mVisible;
 

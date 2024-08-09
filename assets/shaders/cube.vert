@@ -17,8 +17,8 @@ uniform mat4 model;
 uniform mat4 rotation;
 
 void main() {
-	vs_out.normal = aNormal;
-	vs_out.fragPos = vec3(rotation * aMatrix * vec4(aPos, 1.0f));
-	vs_out.texPos = aTexPos;
-	gl_Position = proj * view * vec4(vs_out.fragPos, 1.0f);
+	vNormal = aNormal;
+	vFragPos = vec3(rotation * aMatrix * vec4(aPos, 1.0f));
+	vTexPos = aTexPos;
+	gl_Position = proj * view * vec4(vFragPos, 1.0f);
 }

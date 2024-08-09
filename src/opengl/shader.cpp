@@ -55,6 +55,23 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 
 		throw std::runtime_error("Shader.cpp: Failed to link shader");
 	}
+
+	assert(glIsProgram(mShaderProgram) &&
+	       "Shader.cpp: Error compiling program, something wrong with code: should have been catched");
+
+#ifdef DEBUG
+	GLint len = 0;
+	glGetProgramiv(mShaderProgram, GL_INFO_LOG_LENGTH, &len);
+
+	if (len == 0) {
+		return;
+	}
+
+	GLchar* log = new GLchar[len + 1];
+
+	glGetProgramInfoLog(mShaderProgram, 512, nullptr, &log[0]);
+	SDL_Log("Log of shader compile: \n%s\n", log);
+#endif
 }
 
 Shader::~Shader() { glDeleteProgram(mShaderProgram); }
@@ -194,6 +211,20 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 
 	assert(glIsShader(out) &&
 	       "Shader.cpp: Error compiling shader, something wrong with code: should have been catched");
+
+#ifdef DEBUG
+	GLint len = 0;
+	glGetShaderiv(out, GL_INFO_LOG_LENGTH, &len);
+
+	if (len == 0) {
+		return out;
+	}
+
+	GLchar* log = new GLchar[len + 1];
+
+	glGetShaderInfoLog(out, 512, nullptr, &log[0]);
+	SDL_Log("Log of shader compile: \n%s\n", log);
+#endif
 
 	return out;
 }

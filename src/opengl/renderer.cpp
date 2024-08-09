@@ -67,6 +67,8 @@ Renderer::Renderer(Game* game)
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 #ifdef __EMSCRIPTEN__
 	io.IniFilename = nullptr;
+#else
+	// TODO: Storage path
 #endif
 
 	ImGui::StyleColorsDark();
@@ -80,7 +82,11 @@ Renderer::Renderer(Game* game)
 
 #ifdef IMGUI
 	ImGui_ImplSDL3_InitForOpenGL(mWindow, mGL->getContext());
-	ImGui_ImplOpenGL3_Init("#version 410");
+#ifndef GLES
+	ImGui_ImplOpenGL3_Init("#version 410 core");
+#else
+	ImGui_ImplOpenGL3_Init("#version 300 es");
+#endif
 #endif
 
 	mGL->printInfo();
