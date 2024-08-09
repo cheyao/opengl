@@ -12,6 +12,7 @@ layout(std140) uniform Matrices {
 void main() {
 	texPos = aPos;
 
+	// mat3 mat4 to discard transformation
 	vec4 pos = proj * mat4(mat3(view)) * vec4(aPos, 1.0f);
 	gl_Position = pos.xyww;
 }

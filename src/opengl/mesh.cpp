@@ -60,6 +60,10 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 	glBufferData(GL_ARRAY_BUFFER, (positions.size() + normals.size() + texturePos.size()) * sizeof(float), nullptr,
 		     GL_STATIC_DRAW);
 
+	static_assert(std::is_same_v<decltype(positions[0]), decltype(normals[0])>);
+	static_assert(std::is_same_v<decltype(texturePos[0]), decltype(normals[0])>);
+	static_assert(std::is_same_v<decltype(texturePos[0]), const float&>);
+
 	size_t offset = 0;
 
 	// TODO: Non-hardcoded attrib pointer strides
@@ -93,6 +97,8 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 	} else {
 		SDL_Log("Mesh.cpp: Texture pos empty, ignored");
 	}
+
+	assert((positions.size() + normals.size() + texturePos.size()) * sizeof(float) == offset && "Missing data");
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndicesCount * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
@@ -212,6 +218,4 @@ void Mesh::draw(const Shader* shader) const {
 	glBindVertexArray(mVAO);
 	mDrawFunc(GL_TRIANGLES, mIndicesCount, GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
-
-	// SDL_Log("%zu", mIndicesCount);
 }

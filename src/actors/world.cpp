@@ -22,12 +22,12 @@ World::World(class Game* game) : Actor(game) {
 		-1.0f, +1.0f, -1.0f, // 6 BLU
 		+1.0f, +1.0f, -1.0f  // 7 BRU
 	};
-	const std::vector<const GLuint> indicesBox = {2, 6, 7, 2, 7, 3,	 // Top
-						      0, 5, 4, 0, 1, 5,	 // Bottom
-						      1, 6, 2, 0, 4, 6,	 // Left
-						      1, 3, 7, 1, 7, 5,	 // Right
-						      0, 2, 3, 0, 3, 1,	 // Front
-						      4, 7, 6, 4, 5, 7}; // Back
+	const std::vector<const GLuint> indicesBox = {2, 6, 7, 2, 7, 3, // Top
+						      0, 5, 4, 0, 1, 5, // Bottom
+						      0, 2, 3, 0, 3, 1, // Front
+						      4, 7, 6, 4, 5, 7, // Back
+						      1, 3, 7, 1, 7, 5, // Right
+						      0, 6, 2, 0, 4, 6}; // Left
 	const std::vector<const std::pair<const Texture* const, const TextureType>> texturesBox = {
 		std::make_pair(this->getGame()->getTexture("nightsky"), TextureType::DIFFUSE)};
 
@@ -36,6 +36,4 @@ World::World(class Game* game) : Actor(game) {
 	box->setFrag("sky.frag");
 
 	setScale(5.0f);
-
-	new Sun(game);
 }

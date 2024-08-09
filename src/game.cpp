@@ -3,6 +3,7 @@
 #include "actors/actor.hpp"
 #include "actors/cube.hpp"
 #include "actors/player.hpp"
+#include "actors/sun.hpp"
 #include "actors/world.hpp"
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
@@ -26,8 +27,8 @@
 #endif
 
 Game::Game()
-	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mUpdatingActors(false), mTicks(0),
-	  mBasePath(""), mPaused(false) {
+	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mUpdatingActors(false), mTicks(0), mBasePath(""),
+	  mPaused(false) {
 	const char* basepath = SDL_GetBasePath();
 	if (basepath != nullptr) {
 		mBasePath = std::string(basepath);
@@ -62,24 +63,25 @@ void Game::setup() {
 	new World(this);
 	new Player(this);
 	new Cube(this);
-
-	mTicks = SDL_GetTicks();
+	new Sun(this);
 
 #ifdef DEBUG
 	last_time = std::filesystem::last_write_time(fullPath("shaders"));
 #endif
 
 	SDL_Log("Successfully initialized OpenGL and game\n");
+
+	mTicks = SDL_GetTicks();
 }
 
 int Game::iterate() {
 	if (mPaused) {
-		mTicks = SDL_GetTicks();
-
 		mRenderer->setWindowRelativeMouseMode(0);
 
 		// Delay some time to not use too much CPU. Add some more?
 		SDL_Delay(64);
+
+		mTicks = SDL_GetTicks();
 
 		return 0;
 	}
@@ -127,7 +129,7 @@ void Game::input() {
 	const uint8_t* keys = SDL_GetKeyboardState(nullptr);
 
 	mUpdatingActors = true;
-	for (auto& actor : mActors) {
+	for (const auto& actor : mActors) {
 		actor->input(keys);
 	}
 	mUpdatingActors = false;
@@ -136,14 +138,16 @@ void Game::input() {
 void Game::update() {
 	// Update the game
 	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
-	if (delta > 0.05) {
-		delta = 0.05;
+	if (delta > 0.05f) {
+		delta = 0.05f;
+
+		SDL_Log("Delta > 0.5f, skipping");
 	}
 	mTicks = SDL_GetTicks();
 
 	// Update the Actors
 	mUpdatingActors = true;
-	for (auto& actor : mActors) {
+	for (const auto& actor : mActors) {
 		actor->update(delta);
 	}
 	mUpdatingActors = false;
@@ -153,9 +157,9 @@ void Game::update() {
 	mPendingActors.clear();
 
 	// Remove the dead Actors
-	std::vector<Actor*> deadActors;
+	std::vector<const Actor*> deadActors;
 	std::copy_if(mActors.begin(), mActors.end(), std::back_inserter(deadActors),
-				 [](const Actor* actor) { return (actor->getState() == Actor::DEAD); });
+		     [](const Actor* actor) { return (actor->getState() == Actor::DEAD); });
 
 	// Delete all the dead actors
 	for (const auto& actor : deadActors) {
@@ -179,8 +183,8 @@ void Game::gui() {
 
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::Text("Average %.3f ms/frame (%.1f FPS)", (1000.f / io.Framerate), io.Framerate);
-		ImGui::Text("%d vertices, %d indices (%d triangles)", io.MetricsRenderVertices,
-					io.MetricsRenderIndices, io.MetricsRenderIndices / 3);
+		ImGui::Text("%d vertices, %d indices (%d triangles)", io.MetricsRenderVertices, io.MetricsRenderIndices,
+			    io.MetricsRenderIndices / 3);
 
 		Player* p = nullptr;
 		for (const auto& actor : mActors) {
@@ -194,8 +198,8 @@ void Game::gui() {
 		}
 
 		auto pos = p->getPosition();
-		ImGui::Text("Player position: %dx%dx%d", static_cast<int>(pos.x()),
-					static_cast<int>(pos.y()), static_cast<int>(pos.z()));
+		ImGui::Text("Player position: %dx%dx%d", static_cast<int>(pos.x()), static_cast<int>(pos.y()),
+			    static_cast<int>(pos.z()));
 
 		// ImGui::Checkbox("Debug", &debugMenu);
 		ImGui::Checkbox("Demo", &demoMenu);
@@ -240,14 +244,12 @@ int Game::event(const SDL_Event& event) {
 		}
 
 		case SDL_EVENT_KEY_DOWN: {
-			if (event.key.key == SDLK_ESCAPE) {
-				return 1;
-			}
-			if (event.key.key == SDLK_F1) {
+			[[unlikely]] if (event.key.key == SDLK_ESCAPE) { return 1; }
+			[[unlikely]] if (event.key.key == SDLK_F1) {
 				rel = !rel;
 				mRenderer->setWindowRelativeMouseMode(static_cast<int>(rel));
 			}
-			if (event.key.key == SDLK_F2) {
+			[[unlikely]] if (event.key.key == SDLK_F2) {
 #ifdef DEBUG
 				if (mPaused) {
 					mPaused = false;
@@ -258,8 +260,10 @@ int Game::event(const SDL_Event& event) {
 				mShaders->reload(true);
 				mRenderer->reload();
 			}
-			if (event.key.key == SDLK_F3) {
+			[[unlikely]] if (event.key.key == SDLK_F3) {
 				mPaused = !mPaused;
+
+				mTicks = SDL_GetTicks();
 			}
 			break;
 		}
@@ -269,6 +273,9 @@ int Game::event(const SDL_Event& event) {
 
 			break;
 		}
+
+		[[likely]] default:
+			break;
 	}
 
 	return 0;
@@ -283,16 +290,17 @@ void Game::addActor(Actor* actor) {
 }
 
 void Game::removeActor(Actor* actor) {
-	auto iter = std::find(mPendingActors.begin(), mPendingActors.end(), actor);
+	// NOTE: the pending actors was first
+	auto iter = std::find(mActors.begin(), mActors.end(), actor);
+	[[likely]] if (iter != mActors.end()) {
+		std::iter_swap(iter, mActors.end() - 1);
+		mActors.pop_back();
+	}
+
+	iter = std::find(mPendingActors.begin(), mPendingActors.end(), actor);
 	if (iter != mPendingActors.end()) {
 		std::iter_swap(iter, mPendingActors.end() - 1);
 		mPendingActors.pop_back();
-	}
-
-	iter = std::find(mActors.begin(), mActors.end(), actor);
-	if (iter != mActors.end()) {
-		std::iter_swap(iter, mActors.end() - 1);
-		mActors.pop_back();
 	}
 }
 
