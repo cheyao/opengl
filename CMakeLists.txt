@@ -127,7 +127,6 @@ if(ANDROID STREQUAL ON)
 	return()
 endif()
 
-#Check debug
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release CACHE STRING
 		"Choose the type of build, options are:
