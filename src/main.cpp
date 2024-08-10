@@ -25,15 +25,14 @@ int SDL_AppInit(void** appstate, int argc, char** argv) {
 
 	SDL_Log("Initializing game\n");
 
-#ifdef X11
-	SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "x11");
-#endif
+	/*
 	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft");
 #ifdef GLES
-	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles");
+	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
 #else
 	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
 #endif
+	*/
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD) != 0) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to init SDL: %s\n", SDL_GetError());

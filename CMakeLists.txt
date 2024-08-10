@@ -254,19 +254,25 @@ if (NOT ANDROID)
 		message(FATAL_ERROR "Assimp not found")
 	endif()
 else()
-	add_library(assimp::assimp SHARED IMPORTED) # or STATIC instead of SHARED
+	add_library(assimp::assimp STATIC IMPORTED) # or STATIC instead of SHARED
 	set_target_properties(assimp::assimp PROPERTIES
-	  IMPORTED_LOCATION "/usr/local/lib/libassimp.so"
+	  IMPORTED_LOCATION "/usr/local/lib/libassimp.a"
 	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include"
 	)
 
-	add_library(assimp::android_jniiosystem SHARED IMPORTED) # or STATIC instead of SHARED
+	add_library(assimp::android_jniiosystem STATIC IMPORTED) # or STATIC instead of SHARED
 	set_target_properties(assimp::android_jniiosystem PROPERTIES
 	  IMPORTED_LOCATION "/usr/local/lib/libandroid_jniiosystem.a"
 	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include/"
 	)
 
-	target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp assimp::android_jniiosystem)
+	add_library(assimp::libz SHARED IMPORTED) # or STATIC instead of SHARED
+	set_target_properties(assimp::libz PROPERTIES
+	  IMPORTED_LOCATION "/usr/local/share/android-commandlinetools/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/aarch64-linux-android/24/libz.so"
+	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include/"
+	)
+
+	target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp assimp::android_jniiosystem assimp::libz)
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID)
