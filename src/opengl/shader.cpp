@@ -46,6 +46,9 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 		GLchar* log = new GLchar[len + 1];
 
 		glGetProgramInfoLog(mShaderProgram, 512, nullptr, &log[0]);
+
+		log[len] = 0;
+
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to link shader: \n%s\n", log);
 		ERROR_BOX("Failed to link shader");
 
@@ -66,6 +69,8 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 	}
 
 	GLchar* log = new GLchar[len + 1];
+
+	log[len] = 0;
 
 	glGetProgramInfoLog(mShaderProgram, 512, nullptr, &log[0]);
 	SDL_Log("Log of shader compile: \n%s\n", log);
@@ -198,8 +203,11 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 		GLchar* log = new GLchar[len + 1];
 
 		glGetShaderInfoLog(out, len * sizeof(GLchar), nullptr, &log[0]);
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to compile shader %s: \n%s\n",
-				fileName.data(), log);
+
+		log[len] = 0;
+
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to compile shader %s: \n%s\n%s\n",
+				fileName.data(), shaderSource, log);
 
 		ERROR_BOX("Failed to compile shader");
 
@@ -220,6 +228,8 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 	}
 
 	GLchar* log = new GLchar[len + 1];
+
+	log[len] = 0;
 
 	glGetShaderInfoLog(out, 512, nullptr, &log[0]);
 	SDL_Log("Log of shader compile: \n%s\n", log);

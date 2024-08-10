@@ -8,8 +8,8 @@
 #include <string>
 
 #ifdef __EMSCRIPTEN__
-#include <emscripten/html5.h>
 #include <emscripten.h>
+#include <emscripten/html5.h>
 #endif
 
 GLManager::GLManager() : mContext(nullptr) {
@@ -39,12 +39,10 @@ void GLManager::bindContext(SDL_Window* window) {
 	if (mContext == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to initialize OpenGL Context, there is something "
-				  "wrong with your OpenGL");
+			  "wrong with your OpenGL");
 
-		throw std::runtime_error("glManager.cpp: Failed to get opengl context");
+		throw std::runtime_error("GlManager.cpp: Failed to get opengl context");
 	}
-
-	SDL_GL_MakeCurrent(window, mContext);
 
 #ifdef GLES
 	if (gladLoadGLES2Loader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress)) == 0) {
@@ -58,7 +56,15 @@ void GLManager::bindContext(SDL_Window* window) {
 		throw std::runtime_error("glManager.cpp: Failed to init glad");
 	}
 
-	SDL_GL_SetSwapInterval(1);
+	if (SDL_GL_SetSwapInterval(1)) {
+		SDL_Log("Failed to enable VSync");
+	}
+
+	if (SDL_GL_MakeCurrent(window, mContext)) {
+		SDL_Log("Failed to bind context: %s", SDL_GetError());
+
+		throw std::runtime_error("GlManager.cpp: Failed to bind context");
+	}
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
