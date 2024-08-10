@@ -112,8 +112,14 @@ Mesh::~Mesh() {
 	glDeleteBuffers(1, &mEBO);
 
 	// Do not delete double buffers
+#ifdef __cpp_lib_ranges
 	const auto& u = std::ranges::unique(mAttribs);
 	glDeleteBuffers(mAttribs.size() - u.size(), mAttribs.data());
+#else
+	const auto& u = std::unique(mAttribs.begin(), mAttribs.end());
+	mAttribs.erase(u, mAttribs.end());
+	glDeleteBuffers(mAttribs.size(), mAttribs.data());
+#endif
 }
 
 /*

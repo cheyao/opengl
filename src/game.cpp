@@ -8,7 +8,7 @@
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
 #include "opengl/renderer.hpp"
-#include "third_party/Eigen/src/Core/Matrix.h"
+#include "third_party/Eigen/Core"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>

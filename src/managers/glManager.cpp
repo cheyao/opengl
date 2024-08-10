@@ -44,6 +44,8 @@ void GLManager::bindContext(SDL_Window* window) {
 		throw std::runtime_error("glManager.cpp: Failed to get opengl context");
 	}
 
+	SDL_GL_MakeCurrent(window, mContext);
+
 #ifdef GLES
 	if (gladLoadGLES2Loader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress)) == 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init GLES glad!\n");
@@ -55,8 +57,6 @@ void GLManager::bindContext(SDL_Window* window) {
 
 		throw std::runtime_error("glManager.cpp: Failed to init glad");
 	}
-
-	SDL_GL_MakeCurrent(window, mContext);
 
 	SDL_GL_SetSwapInterval(1);
 

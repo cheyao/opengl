@@ -80,7 +80,9 @@ void Shader::activate() const { glUseProgram(mShaderProgram); }
 
 void Shader::setUniform(const std::string_view& name, std::function<void(GLint)> toCall) const {
 	// Safety checks
+#ifndef ANDROID
 	assert(!name.contains(' '));
+#endif
 	assert(!(name[0] == 'g' && name[1] == 'l' && name[2] == '_'));
 
 	int location = glGetUniformLocation(mShaderProgram, name.data());
@@ -89,13 +91,14 @@ void Shader::setUniform(const std::string_view& name, std::function<void(GLint)>
 
 	[[unlikely]] if (location == -1) {
 #ifdef DEBUG
+#ifdef __cpp_lib_string_contains
 		if (!errored.contains(std::string(name))) {
 			SDL_Log("Shader.cpp: Failed find uniform location \"%s\"\n", name.data());
 
 			errored[std::string(name)] = true;
 		}
 		// TODO: Error?
-
+#endif
 #endif
 		return;
 	}

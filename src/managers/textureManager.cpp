@@ -1,7 +1,7 @@
 #include "managers/textureManager.hpp"
 
-#include "opengl/texture.hpp"
 #include "opengl/cubemap.hpp"
+#include "opengl/texture.hpp"
 #include "utils.hpp"
 
 #include <unordered_map>
@@ -10,8 +10,7 @@
 #include <filesystem>
 #endif
 
-TextureManager::TextureManager(const std::string& path)
-	: mPath(path + "assets" + SEPARATOR + "textures" + SEPARATOR) {}
+TextureManager::TextureManager(const std::string& path) : mPath(path + "assets" + SEPARATOR + "textures" + SEPARATOR) {}
 
 Texture* TextureManager::get(const std::string& name) {
 	if (mTextures.contains(name)) {
@@ -19,7 +18,11 @@ Texture* TextureManager::get(const std::string& name) {
 	}
 
 	Texture* texture;
+#ifndef __cpp_lib_string_contains
+	if (name.find('.') == std::string::npos) {
+#else
 	if (!name.contains('.')) {
+#endif
 		texture = new Cubemap(mPath + name + SEPARATOR);
 	} else {
 		texture = new Texture(mPath + name);

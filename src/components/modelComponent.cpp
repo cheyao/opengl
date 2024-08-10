@@ -19,7 +19,7 @@
 #include <utility>
 
 #ifdef ANDROID
-#include <assimp/port/AndroidJNI/AndroidJNIIOSystem.h>
+#include <AndroidJNIIOSystem.h>
 #endif
 
 // PERF: Get a manager, no duplicate models

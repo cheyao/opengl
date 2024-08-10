@@ -1306,14 +1306,14 @@ inline int queryTopLevelCacheSize() {
  * This wraps C++20's std::construct_at, using placement new instead if it is not available.
  */
 
-#if EIGEN_COMP_CXXVER >= 20
-using std::construct_at;
-#else
+// #if EIGEN_COMP_CXXVER >= 20
+// using std::construct_at;
+// #else
 template <class T, class... Args>
 EIGEN_DEVICE_FUNC T* construct_at(T* p, Args&&... args) {
   return ::new (const_cast<void*>(static_cast<const volatile void*>(p))) T(std::forward<Args>(args)...);
 }
-#endif
+// #endif
 
 /** \internal
  * This wraps C++17's std::destroy_at.  If it's not available it calls the destructor.
