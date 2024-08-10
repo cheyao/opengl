@@ -53,6 +53,55 @@ $ open /Applications/OpenGL.app # Or just openg the app
 
 Best luck, my CMakeLists.txt theoretically can support msvc, but if it doesn't please submit a pr, if it doesn't work just use WSL (or go use liux).
 
+## Android
+
+MacOS Dependencies:
+```
+$ brew install --cask android-platform-tools
+$ brew install --cask android-ndk
+$ brew install --cask android-platform-tools
+$ brew install --cask temurin@17
+$ brew install ninja cmake
+```
+
+Add these to your `.zshrc`:
+```
+export ANDROID_NDK_HOME="/usr/local/share/android-ndk"
+export JAVA_HOME=`/usr/libexec/java_home -v 17`
+export ANDROID_HOME="/usr/local/share/android-commandlinetools/"
+```
+
+For android you need to compile assimp by yourself:
+
+Change the `CMAKE_TOOLCHAIN_FILE` if you are not on MacOS:
+```
+$ git clone https://github.com/assimp/assimp 
+$ cd assimp 
+$ mkdir build && cd build
+$ cmake -G Ninja\ 
+        -DASSIMP_ANDROID_JNIIOSYSTEM=ON \
+        -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/android-ndk/build/cmake/android.toolchain.cmake \
+        -DANDROID_NDK=${ANDROID_NDK_HOME} \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DANDROID_ABI=arm64-v8a \
+        -DBUILD_SHARED_LIBS=1 \
+        -DANDROID_NATIVE_API_LEVEL=24 \
+        ..
+```
+
+Now build the project:
+```
+$ git clone https://github.com/cheyao/opengl.git 
+$ cd opengl
+$ git submodule --init --recrusive
+$ mkdir build && cd build 
+$ cmake -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DANDROID=ON \
+        ..
+$ ninja
+```
+
 # Improving performance
 Compile with the flag `-DOPTIMIZE`, but you won't be able to send the binary to others
 

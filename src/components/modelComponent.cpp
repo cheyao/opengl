@@ -18,6 +18,10 @@
 #include <string_view>
 #include <utility>
 
+#ifdef ANDROID
+#include <assimp/port/AndroidJNI/AndroidJNIIOSystem.h>
+#endif
+
 // PERF: Get a manager, no duplicate models
 ModelComponent::ModelComponent(Actor* owner, const std::string_view& path, const bool useTexture)
 	: DrawComponent(owner) {
@@ -25,6 +29,13 @@ ModelComponent::ModelComponent(Actor* owner, const std::string_view& path, const
 	// NOTE: This importer handles memory
 	// All data is freed after the destruction of this object
 	Assimp::Importer importer;
+	
+#ifdef ANDORID
+	Assimp::AndroidJNIIOSystem *ioSystem = new Assimp::AndroidJNIIOSystem(app->activity);
+	if (nullptr != iosSystem) {
+		importer->SetIOHandler(ioSystem);
+	}
+#endif
 
 	const aiScene* scene =
 		importer.ReadFile(path.data(), aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_OptimizeMeshes);
