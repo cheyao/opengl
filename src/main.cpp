@@ -44,11 +44,11 @@ int SDL_AppInit(void** appstate, int argc, char** argv) {
 	try {
 		*appstate = new Game();
 	} catch (const std::runtime_error& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "main.cpp: Critical error: %s\n", error.what());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Main.cpp: Critical error: %s\n", error.what());
 
 		return 1;
 	} catch (...) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "main.cpp: Uncaught error\n");
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Main.cpp: Uncaught error\n");
 
 		return 1;
 	}
@@ -59,7 +59,13 @@ int SDL_AppInit(void** appstate, int argc, char** argv) {
 }
 
 int SDL_AppEvent(void* appstate, const SDL_Event* event) {
-	return static_cast<Game*>(appstate)->event(*event);
+	try {
+		return static_cast<Game*>(appstate)->event(*event);
+	} catch (...) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Main.cpp: Uncaught event error\n");
+
+		return 1;
+	}
 }
 
 #ifdef DEBUG
@@ -73,7 +79,7 @@ int SDL_AppIterate(void* appstate) {
 #ifdef DEBUG
 	catch (const std::filesystem::filesystem_error& error) {
 
-		SDL_Log("Filesystem Error:");
+		SDL_Log("Main.cpp: Filesystem Error:");
 		SDL_Log("what():  %s", error.what());
 		SDL_Log("path1(): %s", error.path1().c_str());
 		SDL_Log("path2(): %s", error.path2().c_str());
@@ -88,11 +94,11 @@ int SDL_AppIterate(void* appstate) {
 #endif
 	catch (const std::runtime_error& error) {
 #ifdef DEBUG
-		SDL_Log("Uncaught exception: %s", error.what());
+		SDL_Log("Main.cpp: Uncaught exception: %s", error.what());
 
 		static_cast<Game*>(appstate)->pause();
 #else
-		ERROR_BOX("Exception thrown, the game might not function correctly");
+		ERROR_BOX("Main.cpp: Exception thrown, the game might not continue to function correctly");
 #endif
 
 		return 0;

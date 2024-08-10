@@ -13,8 +13,6 @@
 
 Shader::Shader(const std::string_view& vertName, const std::string_view& fragName, const std::string_view& geomName)
 	: mShaderProgram(glCreateProgram()) {
-	assert(glIsProgram(mShaderProgram) && "Shader.cpp: Shader not correctly created");
-
 	GLuint mVertexShader = compile(vertName, GL_VERTEX_SHADER);
 	assert(glIsShader(mVertexShader) && "Shader.cpp: Vert shader not loaded correctly");
 
@@ -163,9 +161,7 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to read shader shource %s: %s\n",
 				fileName.data(), SDL_GetError());
 
-#ifndef DEBUG
 		ERROR_BOX("Failed to read assets");
-#endif
 
 		throw std::runtime_error("Shader.cpp: Failed to read shader source");
 	}
