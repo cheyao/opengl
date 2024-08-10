@@ -26,15 +26,25 @@ void Texture::activate(const unsigned int& num) const {
 void Texture::load() {
 	SDL_Log("Loading texture %s", name.data());
 
+	size_t size = 0;
+	unsigned char* source = static_cast<unsigned char*>(SDL_LoadFile(name.data(), &size));
+	[[unlikely]] if (source == nullptr) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to read texture shource: %s\n", name.data());
+
+		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have enough memory");
+
+		throw std::runtime_error("texture.cpp: Failed to read texture");
+	}
+
 	int width = 0;
 	int height = 0;
 	int channels = 0;
-	unsigned char* data = stbi_load(name.data(), &width, &height, &channels, 0);
+	unsigned char* data = stbi_load_from_memory(source, size, &width, &height, &channels, 0);
+	// unsigned char* data = stbi_load(name.data(), &width, &height, &channels, 0);
 
 	[[unlikely]] if (data == nullptr) {
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load texture: %s\n", name.data());
-		ERROR_BOX("Failed to load textures, the assets is corrupted or you don't "
-				  "have enough memory");
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to decompress texture: %s\n", name.data());
+		ERROR_BOX("Failed to load textures, the assets is corrupted or you don't have enough memory");
 
 		throw std::runtime_error("texture.cpp: Failed to load texture");
 	}
@@ -53,9 +63,9 @@ void Texture::load() {
 			break;
 		[[unlikely]] default:
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s:%d Unimplemented image format: %s: %d\n",
-						 __FILE__, __LINE__, name.data(), channels);
+				     __FILE__, __LINE__, name.data(), channels);
 			ERROR_BOX("Failed to recognise file color format, the assets is probably "
-					  "corrupted");
+				  "corrupted");
 
 			throw std::runtime_error("texture.cpp: Invalid enum");
 	}

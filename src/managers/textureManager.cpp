@@ -6,7 +6,7 @@
 
 #include <unordered_map>
 
-#ifdef DEBUG
+#ifdef HOT
 #include <filesystem>
 #endif
 
@@ -31,7 +31,7 @@ Texture* TextureManager::get(const std::string& name) {
 
 	mTextures[name] = texture;
 
-#ifdef DEBUG
+#ifdef HOT
 	mLastEdit[texture] = std::filesystem::last_write_time(mPath + name);
 #endif
 
@@ -48,7 +48,7 @@ TextureManager::~TextureManager() {
 
 void TextureManager::reload(bool full) {
 	for (auto& [name, texture] : mTextures) {
-#ifdef DEBUG
+#ifdef HOT
 		if (!full && std::filesystem::last_write_time(mPath + name) == mLastEdit[texture]) {
 			continue;
 		}
@@ -58,8 +58,9 @@ void TextureManager::reload(bool full) {
 		auto* newTexture = new Texture(mPath + name);
 		texture = newTexture;
 
-#ifdef DEBUG
+#ifdef HOT
 		mLastEdit[texture] = std::filesystem::last_write_time(mPath + name);
 #endif
+		(void) full;
 	}
 }

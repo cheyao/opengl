@@ -18,10 +18,10 @@ class Actor {
 
 	void update(float delta);
 	void updateComponents(float delta);
-	virtual void updateActor(float delta);
+	virtual void updateActor([[maybe_unused]] float delta);
 
 	void input(const uint8_t* keystate);
-	virtual void actorInput(const uint8_t* keystate);
+	virtual void actorInput([[maybe_unused]] const uint8_t* keystate);
 
 	[[nodiscard]] class Game* getGame() const { return mGame; }
 

@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_map>
 
-#ifdef DEBUG
+#ifdef HOT
 #include <filesystem>
 #endif
 
@@ -25,7 +25,7 @@ class TextureManager {
 
 	std::string mPath;
 
-#ifdef DEBUG
+#ifdef HOT
 	std::unordered_map<class Texture*, std::filesystem::file_time_type> mLastEdit;
 #endif
 };

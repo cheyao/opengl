@@ -3,10 +3,6 @@
 #include <string>
 #include <unordered_map>
 
-#ifdef DEBUG
-#include <filesystem>
-#endif
-
 class ShaderManager {
   public:
 	explicit ShaderManager(const std::string& path);
@@ -24,8 +20,4 @@ class ShaderManager {
 	std::unordered_map<std::string, class Shader*> mTextures;
 
 	std::string mPath;
-
-#ifdef DEBUG
-	std::unordered_map<class Shader*, std::filesystem::file_time_type> mLastEdit;
-#endif
 };

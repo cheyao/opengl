@@ -10,12 +10,7 @@
 #include <string>
 #include <unordered_map>
 
-#ifdef DEBUG
-#include <filesystem>
-#endif
-
-ShaderManager::ShaderManager(const std::string& path)
-	: mPath(path + "assets" + SEPARATOR + "shaders" + SEPARATOR) {}
+ShaderManager::ShaderManager(const std::string& path) : mPath(path + "assets" + SEPARATOR + "shaders" + SEPARATOR) {}
 
 Shader* ShaderManager::get(const std::string& vert, const std::string& frag, const std::string& geom) {
 #ifdef __cpp_lib_string_contains
@@ -31,12 +26,6 @@ Shader* ShaderManager::get(const std::string& vert, const std::string& frag, con
 	Shader* shader = new Shader(mPath + vert, mPath + frag, geom.empty() ? geom : mPath + geom);
 
 	mTextures[concated] = shader;
-
-#ifdef DEBUG
-	// FIXME: This somehow doesn't work (Incompatabilities with SDL?)
-	mLastEdit[shader] = std::max(std::filesystem::last_write_time(mPath + vert),
-								 std::filesystem::last_write_time(mPath + frag));
-#endif
 
 	return shader;
 }
@@ -74,16 +63,6 @@ void ShaderManager::reload(bool full) {
 #ifdef DEBUG
 		SDL_Log("Reloading %s:%s", vert.data(), frag.data());
 
-		// TODO: Some wierd vim write stuff
-		// FIXME: I don't fucking know why this doesn't work
-		std::filesystem::file_time_type lastEditTime;
-		lastEditTime = std::max(std::filesystem::last_write_time(vert),
-									   std::filesystem::last_write_time(frag));
-
-		if (!full && lastEditTime == mLastEdit[shader]) {
-			continue;
-		}
-
 		try {
 			Shader* newTexture = new Shader(vert, frag, geom);
 
@@ -99,7 +78,7 @@ void ShaderManager::reload(bool full) {
 		/*
 		mLastEdit[shader] = lastEditTime;
 		*/
-		(void) full;
+		(void)full;
 #else
 		try {
 			delete shader;

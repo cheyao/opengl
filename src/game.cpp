@@ -74,10 +74,6 @@ $$ |  $$\ $$ |  $$ |$$  __$$ |$$ |  $$ |      $$ |  $$ |$$  __$$ |$$ | $$ | $$ |
 	setup();
 }
 
-#ifdef DEBUG
-#include <filesystem>
-#endif
-
 void Game::setup() {
 	SDL_Log("Setting up game");
 
@@ -85,10 +81,6 @@ void Game::setup() {
 	new Player(this);
 	new Cube(this);
 	new Sun(this);
-
-#ifdef DEBUG
-	last_time = std::filesystem::last_write_time(fullPath("shaders"));
-#endif
 
 	SDL_Log("Successfully initialized OpenGL and game\n");
 
@@ -109,7 +101,7 @@ int Game::iterate() {
 		return 0;
 	}
 
-#ifdef DEBUG
+#ifdef HOT
 	if (std::filesystem::last_write_time(fullPath("shaders")) != last_time) {
 		last_time = std::filesystem::last_write_time(fullPath("shaders"));
 

@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#ifdef DEBUG
+#ifdef HOT
 #include <filesystem>
 #endif
 
@@ -59,7 +59,7 @@ class Game {
 	bool mPaused;
 	bool mVsync;
 
-#ifdef DEBUG
+#ifdef HOT
 	std::filesystem::file_time_type last_time;
 #endif
 };

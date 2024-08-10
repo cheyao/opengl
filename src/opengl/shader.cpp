@@ -206,8 +206,8 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 
 		log[len] = 0;
 
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to compile shader %s: \n%s\n%s\n",
-				fileName.data(), shaderSource, log);
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to compile shader %s: \n%d\n%s\n",
+				fileName.data(), len, log);
 
 		ERROR_BOX("Failed to compile shader");
 

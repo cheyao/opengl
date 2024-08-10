@@ -20,6 +20,7 @@ option(ANDROID		"Build for android" OFF)
 option(OPTIMIZE		"Optimize a lot" OFF)
 option(MOLD		"Use mold" OFF)
 option(X11		"Force x11" OFF)
+option(HOT		"Hot reload" OFF)
 #CMAKE_BUILD_TYPE Release Debug
 
 if(CHECKS STREQUAL ON)
@@ -59,6 +60,7 @@ src/opengl/ubo.cpp
 src/managers/glManager.cpp
 src/managers/shaderManager.cpp
 src/managers/textureManager.cpp
+src/managers/assimpIO.cpp
 
 src/actors/actor.cpp
 src/actors/player.cpp
@@ -89,6 +91,7 @@ include/opengl/ubo.hpp
 include/managers/glManager.hpp
 include/managers/shaderManager.hpp
 include/managers/textureManager.hpp
+include/managers/assimpIO.hpp
 
 include/actors/actor.hpp
 include/actors/player.hpp
@@ -254,25 +257,25 @@ if (NOT ANDROID)
 		message(FATAL_ERROR "Assimp not found")
 	endif()
 else()
-	add_library(assimp::assimp STATIC IMPORTED) # or STATIC instead of SHARED
+	add_library(assimp::assimp SHARED IMPORTED) # or STATIC instead of SHARED
 	set_target_properties(assimp::assimp PROPERTIES
-	  IMPORTED_LOCATION "/usr/local/lib/libassimp.a"
+	  IMPORTED_LOCATION "/usr/local/lib/libassimp.so"
 	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include"
 	)
 
-	add_library(assimp::android_jniiosystem STATIC IMPORTED) # or STATIC instead of SHARED
+	add_library(assimp::android_jniiosystem SHARED IMPORTED) # or STATIC instead of SHARED
 	set_target_properties(assimp::android_jniiosystem PROPERTIES
 	  IMPORTED_LOCATION "/usr/local/lib/libandroid_jniiosystem.a"
 	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include/"
 	)
 
-	add_library(assimp::libz SHARED IMPORTED) # or STATIC instead of SHARED
-	set_target_properties(assimp::libz PROPERTIES
-	  IMPORTED_LOCATION "/usr/local/share/android-commandlinetools/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/aarch64-linux-android/24/libz.so"
-	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include/"
-	)
+	# add_library(assimp::libz SHARED IMPORTED) # or STATIC instead of SHARED
+	# set_target_properties(assimp::libz PROPERTIES
+	#   IMPORTED_LOCATION "/usr/local/share/android-commandlinetools/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/aarch64-linux-android/24/libz.so"
+	#   INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include/"
+	# )
 
-	target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp assimp::android_jniiosystem assimp::libz)
+	target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp assimp::android_jniiosystem)
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID)
@@ -309,6 +312,10 @@ else()
 	else()
 		target_compile_options(${BUILD_NAME} PRIVATE -O3)
 		target_compile_definitions(${BUILD_NAME} PRIVATE -DEIGEN_NO_DEBUG -DNDEBUG)
+	endif()
+
+	if(HOT)
+		target_compile_definitions(${BUILD_NAME} PRIVATE -DHOT)
 	endif()
 
 	if (OPTIMIZE STREQUAL ON)
