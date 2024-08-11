@@ -9,11 +9,10 @@
 #include "managers/textureManager.hpp"
 #include "opengl/renderer.hpp"
 #include "third_party/Eigen/Core"
-#include "ui/UIScreen.hpp"
+#include "ui/controlUI.hpp"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
-#include <cstdint>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -53,7 +52,6 @@ $$ |  $$\ $$ |  $$ |$$  __$$ |$$ |  $$ |      $$ |  $$ |$$  __$$ |$$ | $$ | $$ |
            \______/                                                                                                  \______/                         
 ===========================================================================================================================================================
 )");
-
 #endif
 
 	mTextures = std::make_unique<TextureManager>(mBasePath);
@@ -82,6 +80,10 @@ $$ |  $$\ $$ |  $$ |$$  __$$ |$$ |  $$ |      $$ |  $$ |$$  __$$ |$$ | $$ | $$ |
 }
 
 void Game::setup() {
+	SDL_Log("Setting up UIs");
+
+	new ControlUI(this);
+
 	SDL_Log("Setting up game");
 
 	new World(this);
@@ -191,9 +193,7 @@ void Game::update() {
 	}
 
 	for (const auto& ui : mUI) {
-		[[likely]] if (ui->getState() == UIScreen::Active) {
-			ui->update(delta);
-		}
+		[[likely]] if (ui->getState() == UIScreen::Active) { ui->update(delta); }
 	}
 }
 

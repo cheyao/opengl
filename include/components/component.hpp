@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 class Component {
   public:
 	explicit Component(class Actor* owner, int priority = 100);

@@ -10,6 +10,7 @@
 #include "opengl/ubo.hpp"
 #include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
+#include "ui/UIScreen.hpp"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
@@ -175,8 +176,11 @@ void Renderer::draw() {
 		sprite->draw();
 	}
 
+	glDisable(GL_DEPTH_TEST);
+
+	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
 	for (const auto& ui : mGame->getUIs()) {
-		ui->draw();
+		ui->draw(UIshader);
 	}
 
 #ifdef IMGUI

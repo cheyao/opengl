@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vector>
+
+// TODO: Components?
 class UIScreen {
       public:
 	explicit UIScreen(class Game* game);
@@ -11,16 +14,21 @@ class UIScreen {
 
 	class Game* getGame() const { return mGame; }
 
-	virtual void update([[maybe_unused]] float deltaTime);
-	virtual void draw([[maybe_unused]] class Shader* shader);
-	virtual void processInput([[maybe_unused]] const bool* keys);
+	void update(const float delta);
+	void processInput(const bool* keys);
+	void draw(const class Shader* shader);
 
 	enum UIState { Active, Closed };
 	void close();
 	UIState getState() const { return mState; }
 
+	void addComponent(class UIComponent* component) { mComponents.emplace_back(component); }
+	void removeComponent(class UIComponent* component);
+
       protected:
 	class Game* mGame;
+
+	std::vector<class UIComponent*> mComponents;
 
 	UIState mState;
 };

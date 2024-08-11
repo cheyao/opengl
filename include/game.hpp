@@ -43,7 +43,7 @@ class Game {
 
 	void addUI(class UIScreen* ui) { mUI.emplace_back(ui); };
 	void removeUI(class UIScreen* ui);
-	const std::vector<class UIScreen*>& getUIs() { return mUI; };
+	[[nodiscard]] const std::vector<class UIScreen*>& getUIs() { return mUI; };
 
 	void setKey(const size_t key, const bool val) { mKeys[key] = val; }
 

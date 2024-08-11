@@ -1,15 +1,32 @@
 #include "ui/UIScreen.hpp"
 
 #include "game.hpp"
-#include "opengl/texture.hpp"
+#include "ui/UIComponent.hpp"
 
-UIScreen::UIScreen(Game* game) : mGame(game) { game->addUI(this); 
-}
+UIScreen::UIScreen(Game* game) : mGame(game) { game->addUI(this); }
 
 UIScreen::~UIScreen() { mGame->removeUI(this); }
 
-void update([[maybe_unused]] float deltaTime) {}
+void UIScreen::update(const float delta) {
+	for (const auto& component : mComponents) {
+		component->update(delta);
+	}
+}
 
-void draw([[maybe_unused]] Shader* shader) {}
+void UIScreen::draw(const Shader* shader) {
+	for (const auto& component : mComponents) {
+		component->draw(shader);
+	}
+}
 
-void processInput([[maybe_unused]] const bool* keys) {}
+void UIScreen::processInput(const bool* keys) {
+	for (const auto& component : mComponents) {
+		component->input(keys);
+	}
+}
+
+void UIScreen::removeComponent(UIComponent* component) {
+	const auto& iter = std::find(mComponents.begin(), mComponents.end(), component);
+
+	[[likely]] if (iter != mComponents.end()) { mComponents.erase(iter); }
+}

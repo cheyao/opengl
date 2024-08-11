@@ -68,8 +68,10 @@ src/actors/world.cpp
 src/actors/sun.cpp
 src/actors/cube.cpp
 
+src/ui/buttonComponent.cpp
+src/ui/UIComponent.cpp
 src/ui/UIScreen.cpp
-src/ui/controls.cpp
+src/ui/controlUI.cpp
 
 #Headers
 include/game.hpp
@@ -102,8 +104,10 @@ include/actors/world.hpp
 include/actors/sun.hpp
 include/actors/cube.hpp
 
+include/ui/buttonComponent.hpp
+include/ui/UIComponent.hpp
 include/ui/UIScreen.hpp
-include/ui/controls.hpp
+include/ui/controlUI.hpp
 
 #External
 src/third_party/stb_image.c

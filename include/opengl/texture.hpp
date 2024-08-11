@@ -5,7 +5,9 @@
 #include <string>
 
 class Texture {
-  public:
+	friend class TextureManager;
+
+      public:
 	explicit Texture(const std::string_view& path);
 	Texture(Texture&&) = delete;
 	Texture(const Texture&) = delete;
@@ -14,9 +16,10 @@ class Texture {
 	virtual ~Texture();
 
 	virtual void activate(const unsigned int& num) const;
+
+      protected:
 	virtual void load();
 
-  protected:
 	GLuint mID;
 	std::string name;
 };

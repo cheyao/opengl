@@ -146,7 +146,7 @@ void Shader::set(const std::string_view& name, const Eigen::Affine3f& mat, const
 	setUniform(name, std::bind(glUniformMatrix4fv, std::placeholders::_1, 1, transpose, mat.data()));
 }
 
-void Shader::bind(std::string_view name, GLuint index) {
+void Shader::bind(std::string_view name, GLuint index) const {
 	GLuint blockIndex = glGetUniformBlockIndex(mShaderProgram, name.data());
 
 	if (blockIndex == GL_INVALID_INDEX) {
@@ -206,8 +206,8 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 
 		log[len] = 0;
 
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to compile shader %s: \n%d\n%s\n",
-				fileName.data(), len, log);
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to compile shader %s: \n%s\n",
+				fileName.data(), log);
 
 		ERROR_BOX("Failed to compile shader");
 

@@ -123,9 +123,26 @@ cmake
 
 `./cmake/mac-patch-dylib.sh` Same but for mac, only works for bundled macos app
 
-Others are to-fix stuff (For android and web)
+`./cmake/index.html.in` Is the Emscripten idex
 
-TODO: Improve performance by revamping hot reload
+`./cmake/sign-apk.sh` Is to sign the android apk
+
+
+# TODO
+
+[ ] Add functional hot reload
+[ ] Game pause + resume things
+[ ] Save state
+[ ] Debug menu with ImGUI and item names
+[ ] Read programming gems
+[ ] Better component and actors
+[x] Android build
+    [ ] Android UI
+[x] Emscripten build
+    [ ] Web detect android
+[ ] Windows build
+
+# Notes
 
 From discord:
 
