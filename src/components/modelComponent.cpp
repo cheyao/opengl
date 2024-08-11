@@ -2,6 +2,7 @@
 
 #include "actors/actor.hpp"
 #include "game.hpp"
+#include "managers/assimpIO.hpp"
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/types.hpp"
@@ -18,10 +19,6 @@
 #include <string_view>
 #include <utility>
 
-#ifdef ANDROID
-#include <AndroidJNIIOSystem.h>
-#endif
-
 // PERF: Get a manager, no duplicate models
 ModelComponent::ModelComponent(Actor* owner, const std::string_view& path, const bool useTexture)
 	: DrawComponent(owner) {
@@ -29,13 +26,8 @@ ModelComponent::ModelComponent(Actor* owner, const std::string_view& path, const
 	// NOTE: This importer handles memory
 	// All data is freed after the destruction of this object
 	Assimp::Importer importer;
-	
-#ifdef ANDORID
-	Assimp::AndroidJNIIOSystem *ioSystem = new Assimp::AndroidJNIIOSystem(app->activity);
-	if (nullptr != iosSystem) {
-		importer->SetIOHandler(ioSystem);
-	}
-#endif
+
+	importer.SetIOHandler(new GameIOSystem());
 
 	const aiScene* scene =
 		importer.ReadFile(path.data(), aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_OptimizeMeshes);
@@ -112,9 +104,9 @@ void ModelComponent::loadMesh(aiMesh* mesh, const aiScene* scene, const bool use
 
 	assert(mesh->mTextureCoords[0] && "Unimplimented");
 
-	mMeshes.emplace_back(new Mesh({&mesh->mVertices[0].x, mesh->mNumVertices * 3},
-				      {&mesh->mNormals[0].x, mesh->mNumVertices * 3},
-				      {&mesh->mTextureCoords[0][0].x, mesh->mNumVertices * 3 * useTexture}, indices, textures));
+	mMeshes.emplace_back(new Mesh(
+		{&mesh->mVertices[0].x, mesh->mNumVertices * 3}, {&mesh->mNormals[0].x, mesh->mNumVertices * 3},
+		{&mesh->mTextureCoords[0][0].x, mesh->mNumVertices * 3 * useTexture}, indices, textures));
 }
 
 std::vector<Texture*> ModelComponent::loadTextures(const aiMaterial* mat, const aiTextureType type) {

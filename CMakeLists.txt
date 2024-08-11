@@ -190,7 +190,7 @@ if (ANDROID)
 
 	add_library(${BUILD_NAME} SHARED ${SRC})
 
-	target_compile_options(${BUILD_NAME} PRIVATE -DGLES)
+	target_compile_options(${BUILD_NAME} PRIVATE -DGLES -DANDROID)
 
 	target_link_libraries(${BUILD_NAME} PUBLIC SDL3::SDL3)
 	target_link_libraries(${BUILD_NAME} PUBLIC assimp::assimp)
@@ -242,21 +242,7 @@ else()
 	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
 endif()
 
-if (NOT ANDROID)
-	find_package(assimp REQUIRED)
-
-	if (assimp_FOUND)
-		link_directories(${ASSIMP_LIBRARY_DIR})
-		include_directories(${ASSIMP_INCLUDE_DIRS})
-		target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp)
-		message("Found assimp: ${ASSIMP_LIBRARIES}")
-		# set(ASSIMP_LIBRARY "assimp")
-		# add_library(${ASSIMP_LIBRARY} SHARED IMPORTED)
-		# set_target_properties(${ASSIMP_LIBRARY} PROPERTIES IMPORTED_LOCATION "${ASSIMP_LIBRARY_DIRS}/libassimp.so")
-	else()
-		message(FATAL_ERROR "Assimp not found")
-	endif()
-else()
+if (ANDROID)
 	add_library(assimp::assimp SHARED IMPORTED) # or STATIC instead of SHARED
 	set_target_properties(assimp::assimp PROPERTIES
 	  IMPORTED_LOCATION "/usr/local/lib/libassimp.so"
@@ -276,6 +262,20 @@ else()
 	# )
 
 	target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp assimp::android_jniiosystem)
+else()
+	find_package(assimp REQUIRED)
+
+	if (assimp_FOUND)
+		link_directories(${ASSIMP_LIBRARY_DIR})
+		include_directories(${ASSIMP_INCLUDE_DIRS})
+		target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp)
+		message("Found assimp: ${ASSIMP_LIBRARIES}")
+		# set(ASSIMP_LIBRARY "assimp")
+		# add_library(${ASSIMP_LIBRARY} SHARED IMPORTED)
+		# set_target_properties(${ASSIMP_LIBRARY} PROPERTIES IMPORTED_LOCATION "${ASSIMP_LIBRARY_DIRS}/libassimp.so")
+	else()
+		message(FATAL_ERROR "Assimp not found")
+	endif()
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID)

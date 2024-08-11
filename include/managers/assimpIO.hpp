@@ -1,8 +1,8 @@
 #pragma once
 
+#include <SDL3/SDL.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
-#include <SDL3/SDL.h>
 
 class GameIOStream : public Assimp::IOStream {
 	friend class GameIOSystem;
@@ -24,6 +24,7 @@ class GameIOStream : public Assimp::IOStream {
 };
 
 class GameIOSystem : public Assimp::IOSystem {
+      public:
 	GameIOSystem();
 	~GameIOSystem();
 
