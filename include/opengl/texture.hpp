@@ -17,9 +17,13 @@ class Texture {
 
 	virtual void activate(const unsigned int& num) const;
 
+	int getWidth() const { return mWidth; };
+	int getHeight() const { return mHeight; };
+
       protected:
 	virtual void load();
 
 	GLuint mID;
 	std::string name;
+	int mWidth, mHeight;
 };

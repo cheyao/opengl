@@ -17,7 +17,7 @@ class ButtonComponent : public UIComponent {
 	ButtonComponent& operator=(const ButtonComponent&) = delete;
 	~ButtonComponent() override = default;
 
-	void draw([[maybe_unused]] const Shader* shader) override;
+	void draw(const class Shader* shader) override;
 
       private:
 	class Mesh* mMesh;

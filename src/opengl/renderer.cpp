@@ -274,6 +274,7 @@ void Renderer::setLights(Shader* shader) const {
 	constexpr float d = 2.8f;
 	constexpr float s = 1.0f;
 
+	// PERF: Only set once - redunant setters
 	shader->set("pointLight.position", value->getPosition());
 	shader->set("pointLight.ambient", a, a, a * 0.7);
 	shader->set("pointLight.diffuse", d, d, d * 0.7);

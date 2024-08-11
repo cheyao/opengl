@@ -14,6 +14,6 @@ class UIComponent {
 	// virtual void touch([[maybe_unused]] const bool* keystate);
 	virtual void draw([[maybe_unused]] const class Shader* shader);
 
-      private:
+      protected:
 	class UIScreen* mOwner;
 };

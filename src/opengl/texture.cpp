@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <string_view>
 
-Texture::Texture(const std::string_view& path) : name(path) {}
+Texture::Texture(const std::string_view& path) : name(path), mWidth(0), mHeight(0) {}
 
 Texture::~Texture() {
 	glDeleteTextures(1, &mID);
@@ -36,10 +36,8 @@ void Texture::load() {
 		throw std::runtime_error("texture.cpp: Failed to read texture");
 	}
 
-	int width = 0;
-	int height = 0;
 	int channels = 0;
-	unsigned char* data = stbi_load_from_memory(source, size, &width, &height, &channels, 0);
+	unsigned char* data = stbi_load_from_memory(source, size, &mWidth, &mHeight, &channels, 0);
 	// unsigned char* data = stbi_load(name.data(), &width, &height, &channels, 0);
 
 	[[unlikely]] if (data == nullptr) {
@@ -73,7 +71,7 @@ void Texture::load() {
 	glGenTextures(1, &mID);
 	glBindTexture(GL_TEXTURE_2D, mID);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -84,5 +82,5 @@ void Texture::load() {
 	// SDL_free(source);
 	stbi_image_free(data);
 
-	SDL_Log("Loaded texture %s: %d channels %dx%d", name.data(), channels, width, height);
+	SDL_Log("Loaded texture %s: %d channels %dx%d", name.data(), channels, mWidth, mHeight);
 }
