@@ -24,8 +24,8 @@
 #endif
 
 #ifdef __EMSCRIPTEN__
-#include <emscripten/html5.h>
 #include <emscripten.h>
+#include <emscripten/html5.h>
 
 // Hacks to get browser width and hight
 EM_JS(int, browserHeight, (), { return window.innerHeight; });
@@ -35,8 +35,27 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 Renderer::Renderer(Game* game)
 	: mOwner(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mWidth(0), mHeight(0), mCamera(nullptr) {
 	mGL = std::make_unique<GLManager>();
+	const SDL_DisplayMode* const DM = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
 
-	mWindow = SDL_CreateWindow("OpenGL", 1024, 768, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	SDL_Log("\n");
+	SDL_Log("Display info:");
+	SDL_Log("Display size: %dx%d", DM->w, DM->h);
+	SDL_Log("Display format: %#010x", DM->format);
+	SDL_Log("Refresh rate: %f", DM->refresh_rate);
+	SDL_Log("\n");
+
+#ifdef ANDROID
+	mWidth = DM->w;
+	mHeight = DM->h;
+#elif defined(__EMSCRIPTEN__)
+	mWidth = browserWidth();
+	mHeight = browserHeight();
+#else
+	mWidth = 1024;
+	mHeight = 768;
+#endif
+
+	mWindow = SDL_CreateWindow("OpenGL", mWidth, mHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Game.cpp: Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to make SDL window, there is something wrong with "
@@ -45,13 +64,7 @@ Renderer::Renderer(Game* game)
 		throw std::runtime_error("Game.cpp: Failed to create SDL window");
 	}
 
-#ifdef __EMSCRIPTEN__
-	// Hacks for EMSCRIPTEN Full screen
-	mWidth = browserWidth();
-	mHeight = browserHeight();
-
-	SDL_SetWindowSize(mWindow, mWidth, mHeight);
-#else
+#if !defined(ANDROID) && !defined(__EMSCRIPTEN__)
 	SDL_SetWindowMinimumSize(mWindow, 480, 320);
 #endif
 

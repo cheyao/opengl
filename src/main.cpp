@@ -3,6 +3,7 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_init.h>
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
@@ -18,6 +19,11 @@ int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] cha
 
 	// The main class is in charge of sdl
 	std::srand(std::time(nullptr));
+
+	SDL_SetAppMetadata("Cyao", "1.0", "com.cyao.opengl");
+	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, "OpengGL Game Engine");
+	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_URL_STRING, "https://github.com/cheyao/opengl");
+	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_TYPE_STRING, "game");
 
 	SDL_Log("Initializing game\n");
 

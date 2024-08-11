@@ -34,7 +34,7 @@ Game::Game()
 		mBasePath = std::string(basepath);
 	} else {
 		mBasePath = ""; //std::string(".") + SEPARATOR;
-		SDL_Log("Unable to get base path: %s", SDL_GetError())
+		SDL_Log("Unable to get base path: %s", SDL_GetError());
 	}
 
 #ifdef DEBUG
@@ -54,13 +54,6 @@ $$ |  $$\ $$ |  $$ |$$  __$$ |$$ |  $$ |      $$ |  $$ |$$  __$$ |$$ | $$ | $$ |
 ===========================================================================================================================================================
 )");
 
-	SDL_Log("Base directory: %s", mBasePath.data())
-	SDL_Log("Contents:");
-	int count = 0;
-	char** dir = SDL_GlobDirectory(mBasePath.data(), nullptr, 0, &count);
-	for (int i = 0; i < count; ++i) {
-		SDL_Log("%s", dir[i]);
-	}
 #endif
 
 	mTextures = std::make_unique<TextureManager>(mBasePath);
@@ -235,11 +228,13 @@ void Game::gui() {
 		ImGui::ShowDemoWindow(&demoMenu);
 	}
 
+#ifndef GLES
 	if (wireframe) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	} else {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
+#endif
 
 	SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
 #endif

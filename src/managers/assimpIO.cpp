@@ -20,7 +20,7 @@ GameIOStream::~GameIOStream() { SDL_CloseIO(mIO); }
 
 size_t GameIOStream::Read(void* pvBuffer, size_t pSize, size_t pCount) {
 	for (size_t i = 0; i < pCount; ++i) {
-		const size_t status = SDL_ReadIO(mIO, static_cast<char *>(pvBuffer) + i * pSize, pSize);
+		const size_t status = SDL_ReadIO(mIO, static_cast<char*>(pvBuffer) + i * pSize, pSize);
 
 		if (status == 0) {
 			SDL_Log("Read error: %s", SDL_GetError());
@@ -34,7 +34,7 @@ size_t GameIOStream::Read(void* pvBuffer, size_t pSize, size_t pCount) {
 
 size_t GameIOStream::Write(const void* pvBuffer, size_t pSize, size_t pCount) {
 	for (size_t i = 0; i < pCount; ++i) {
-		const size_t status = SDL_WriteIO(mIO, static_cast<const char *>(pvBuffer) + i * pSize, pSize);
+		const size_t status = SDL_WriteIO(mIO, static_cast<const char*>(pvBuffer) + i * pSize, pSize);
 
 		if (status < pSize) {
 			SDL_Log("Read write: %s", SDL_GetError());
@@ -87,6 +87,7 @@ GameIOSystem::GameIOSystem() {}
 GameIOSystem::~GameIOSystem() {}
 
 bool GameIOSystem::Exists(const char* pFile) const {
+#ifndef ANDROID
 	int stat = SDL_GetPathInfo(pFile, nullptr);
 
 	if (stat == 0) {
@@ -96,6 +97,19 @@ bool GameIOSystem::Exists(const char* pFile) const {
 
 		return false;
 	}
+#else
+	// TODO: Somehow make better
+	SDL_IOStream* file = SDL_IOFromFile(pFile, "r+b");
+	if (file == nullptr) {
+		SDL_Log("File %s doesn't exist: %s", pFile, SDL_GetError());
+
+		return false;
+	} else {
+		SDL_CloseIO(file);
+
+		return true;
+	}
+#endif
 }
 
 char GameIOSystem::getOsSeparator() const { return SEPARATOR[0]; }

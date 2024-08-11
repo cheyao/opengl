@@ -79,10 +79,12 @@ void Framebuffer::setDemensions(int width, int height) {
 }
 
 void Framebuffer::swap() {
+#ifndef GLES
 	GLint mode[2];
 	glGetIntegerv(GL_POLYGON_MODE, mode);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Enable wireframe mode
+#endif
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 #ifdef DEBUG
@@ -108,7 +110,9 @@ void Framebuffer::swap() {
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 	glEnable(GL_DEPTH_TEST);
 
+#ifndef GLES
 	glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
+#endif
 }
 
 Framebuffer::~Framebuffer() {
