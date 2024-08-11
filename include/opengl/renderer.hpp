@@ -33,7 +33,7 @@ class Renderer {
       private:
 	void setLights(class Shader* shader) const;
 
-	class Game* mOwner;
+	class Game* mGame;
 
 	// These are pointers managed by renderer
 	struct SDL_Window* mWindow; // RAII?

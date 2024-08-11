@@ -41,6 +41,10 @@ class Game {
 		return (mBasePath + "assets" + SEPARATOR + path);
 	};
 
+	void addUI(class UIScreen* ui) { mUI.emplace_back(ui); };
+	void removeUI(class UIScreen* ui);
+	const std::vector<class UIScreen*>& getUIs() { return mUI; };
+
 	void setKey(const size_t key, const bool val) { mKeys[key] = val; }
 
       private:
@@ -58,6 +62,8 @@ class Game {
 	std::vector<class Actor*> mActors;
 	std::vector<class Actor*> mPendingActors;
 	bool mUpdatingActors;
+
+	std::vector<class UIScreen*> mUI;
 
 	uint64_t mTicks;
 	std::string mBasePath;

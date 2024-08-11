@@ -33,7 +33,7 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 #endif
 
 Renderer::Renderer(Game* game)
-	: mOwner(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mWidth(0), mHeight(0), mCamera(nullptr) {
+	: mGame(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mWidth(0), mHeight(0), mCamera(nullptr) {
 	mGL = std::make_unique<GLManager>();
 	const SDL_DisplayMode* const DM = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
 
@@ -109,7 +109,7 @@ Renderer::Renderer(Game* game)
 
 	mGL->printInfo();
 
-	mFramebuffer = std::make_unique<Framebuffer>(mOwner);
+	mFramebuffer = std::make_unique<Framebuffer>(mGame);
 
 	// Matrix uniform
 	mMatricesUBO = std::make_unique<UBO>(2 * sizeof(Eigen::Affine3f));
@@ -173,6 +173,10 @@ void Renderer::draw() {
 
 		setLights(shader);
 		sprite->draw();
+	}
+
+	for (const auto& ui : mGame->getUIs()) {
+		ui->draw();
 	}
 
 #ifdef IMGUI

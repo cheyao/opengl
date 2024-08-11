@@ -69,6 +69,7 @@ src/actors/sun.cpp
 src/actors/cube.cpp
 
 src/ui/UIScreen.cpp
+src/ui/controls.cpp
 
 #Headers
 include/game.hpp
@@ -102,6 +103,7 @@ include/actors/sun.hpp
 include/actors/cube.hpp
 
 include/ui/UIScreen.hpp
+include/ui/controls.hpp
 
 #External
 src/third_party/stb_image.c

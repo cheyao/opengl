@@ -9,6 +9,7 @@
 #include "managers/textureManager.hpp"
 #include "opengl/renderer.hpp"
 #include "third_party/Eigen/Core"
+#include "ui/UIScreen.hpp"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
@@ -147,6 +148,10 @@ int Game::iterate() {
 }
 
 void Game::input() {
+	for (const auto& ui : mUI) {
+		ui->processInput(mKeys);
+	}
+
 	mUpdatingActors = true;
 	for (const auto& actor : mActors) {
 		actor->input(mKeys);
@@ -183,6 +188,12 @@ void Game::update() {
 	// Delete all the dead actors
 	for (const auto& actor : deadActors) {
 		delete actor;
+	}
+
+	for (const auto& ui : mUI) {
+		[[likely]] if (ui->getState() == UIScreen::Active) {
+			ui->update(delta);
+		}
 	}
 }
 
@@ -346,6 +357,14 @@ void Game::removeActor(Actor* actor) {
 	[[likely]] if (iter != mPendingActors.end()) {
 		std::iter_swap(iter, mPendingActors.end() - 1);
 		mPendingActors.pop_back();
+	}
+}
+
+void Game::removeUI(UIScreen* ui) {
+	const auto iter = std::find(mUI.begin(), mUI.end(), ui);
+	[[likely]] if (iter != mUI.end()) {
+		std::iter_swap(iter, mUI.end() - 1);
+		mUI.pop_back();
 	}
 }
 
