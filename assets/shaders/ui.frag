@@ -8,5 +8,5 @@ in vec2 vTexPos;
 uniform sampler2D texture_diffuse0;
 
 void main() {
-	color = texture(texture_diffuse0, vTexPos);
+	color = vec4(vec3(texture(texture_diffuse0, vTexPos)), 0.5f);
 } 

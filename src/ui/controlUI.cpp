@@ -13,7 +13,7 @@ ControlUI::ControlUI(Game* game) : UIScreen(game) {
 	game->getTexture("left.png");
 	game->getTexture("right.png");
 	*/
-	new ButtonComponent(this, game->getTexture("up.png"), [] { SDL_Log("Clicked!"); }, Eigen::Vector2f(10.0f, -10.0f));
+	new ButtonComponent(this, game->getTexture("window.png"), [] { SDL_Log("Clicked!"); }, Eigen::Vector2f(10.0f, -10.0f));
 }
 
 ControlUI::~ControlUI() {}
