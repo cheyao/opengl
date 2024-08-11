@@ -10,6 +10,6 @@ Component::Component(Actor* owner, int priority) : mOwner(owner), mUpdatePriorit
 
 Component::~Component() { mOwner->removeComponent(this); }
 
-void Component::update(float delta) { (void)delta; }
+void Component::update([[maybe_unused]] float delta) {}
 
-void Component::input(const uint8_t* keystate) { (void)keystate; }
+void Component::input([[maybe_unused]] const bool* keystate) {}

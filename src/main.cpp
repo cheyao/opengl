@@ -31,8 +31,8 @@ int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] cha
 	SDL_Log("Yay, android!");
 #endif
 
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 	/*
-	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft");
 #ifdef GLES
 	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
 #else

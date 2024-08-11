@@ -2,6 +2,7 @@
 
 #include "utils.hpp"
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -12,7 +13,7 @@
 #endif
 
 class Game {
-  public:
+      public:
 	Game();
 	Game(Game&&) = delete;
 	Game(const Game&) = delete;
@@ -32,12 +33,17 @@ class Game {
 	void pause() { mPaused = true; }
 
 	[[nodiscard]] class Texture* getTexture(const std::string& name);
-	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag, const std::string& geom = "");
+	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
+					      const std::string& geom = "");
 	[[nodiscard]] class Renderer* getRenderer() { return mRenderer; }
 
-	[[nodiscard]] inline std::string fullPath(const std::string& path) const { return (mBasePath + "assets" + SEPARATOR + path); };
+	[[nodiscard]] inline std::string fullPath(const std::string& path) const {
+		return (mBasePath + "assets" + SEPARATOR + path);
+	};
 
-  private:
+	void setKey(const size_t key, const bool val) { mKeys[key] = val; }
+
+      private:
 	void input();
 	void update();
 	void gui();
@@ -58,6 +64,8 @@ class Game {
 
 	bool mPaused;
 	bool mVsync;
+
+	bool* mKeys;
 
 #ifdef HOT
 	std::filesystem::file_time_type last_time;

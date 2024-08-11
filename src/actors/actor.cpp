@@ -37,7 +37,7 @@ void Actor::updateComponents(float delta) {
 
 void Actor::updateActor([[maybe_unused]] float delta) {}
 
-void Actor::input(const uint8_t* keystate) {
+void Actor::input(const bool* keystate) {
 	[[unlikely]] if (mState != ALIVE) { return; }
 
 	for (const auto& component : mComponents) {
@@ -47,7 +47,7 @@ void Actor::input(const uint8_t* keystate) {
 	actorInput(keystate);
 }
 
-void Actor::actorInput([[maybe_unused]] const uint8_t* keystate) {}
+void Actor::actorInput([[maybe_unused]] const bool* keystate) {}
 
 void Actor::addComponent(Component* component) {
 	const int priority = component->getUpdatePriority();

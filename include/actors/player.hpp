@@ -11,7 +11,7 @@ class Player : public Actor {
 	Player& operator=(const Player&) = delete;
 	~Player() override = default;
 
-	void actorInput(const uint8_t* keystate) override;
+	void actorInput(const bool* keystate) override;
 	void updateActor(float delta) override;
 
   private:

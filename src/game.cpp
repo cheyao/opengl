@@ -9,7 +9,6 @@
 #include "managers/textureManager.hpp"
 #include "opengl/renderer.hpp"
 #include "third_party/Eigen/Core"
-#include "utils.hpp"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
@@ -33,7 +32,7 @@ Game::Game()
 	if (basepath != nullptr) {
 		mBasePath = std::string(basepath);
 	} else {
-		mBasePath = ""; //std::string(".") + SEPARATOR;
+		mBasePath = ""; // std::string(".") + SEPARATOR;
 		SDL_Log("Unable to get base path: %s", SDL_GetError());
 	}
 
@@ -71,6 +70,12 @@ $$ |  $$\ $$ |  $$ |$$  __$$ |$$ |  $$ |      $$ |  $$ |$$  __$$ |$$ | $$ | $$ |
 	mRenderer->setWindowRelativeMouseMode(1);
 
 	SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
+
+	mKeys = new bool[SDL_NUM_SCANCODES];
+
+	for (size_t i = 0; i < SDL_NUM_SCANCODES; ++i) {
+		mKeys[i] = false;
+	}
 
 	setup();
 }
@@ -142,11 +147,9 @@ int Game::iterate() {
 }
 
 void Game::input() {
-	const uint8_t* keys = SDL_GetKeyboardState(nullptr);
-
 	mUpdatingActors = true;
 	for (const auto& actor : mActors) {
-		actor->input(keys);
+		actor->input(mKeys);
 	}
 	mUpdatingActors = false;
 }
@@ -300,6 +303,13 @@ int Game::event(const SDL_Event& event) {
 				}
 			}
 
+			mKeys[event.key.scancode] = true;
+
+			break;
+		}
+		case SDL_EVENT_KEY_UP: {
+			mKeys[event.key.scancode] = false;
+
 			break;
 		}
 
@@ -333,7 +343,7 @@ void Game::removeActor(Actor* actor) {
 	}
 
 	iter = std::find(mPendingActors.begin(), mPendingActors.end(), actor);
-	if (iter != mPendingActors.end()) {
+	[[likely]] if (iter != mPendingActors.end()) {
 		std::iter_swap(iter, mPendingActors.end() - 1);
 		mPendingActors.pop_back();
 	}

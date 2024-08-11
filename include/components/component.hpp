@@ -11,8 +11,8 @@ class Component {
 	Component& operator=(const Component&) = default;
 	virtual ~Component();
 
-	virtual void update(float delta);
-	virtual void input(const uint8_t* keystate);
+	virtual void update([[maybe_unused]] float delta);
+	virtual void input([[maybe_unused]] const bool* keystate);
 
 	int getUpdatePriority() const { return mUpdatePriority; }
 

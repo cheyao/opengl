@@ -5,7 +5,6 @@
 #include "game.hpp"
 
 #include <SDL3/SDL.h>
-#include <stdint.h>
 
 Player::Player(class Game* owner) : Actor(owner), up(0) {
 	new CameraComponent(this);
@@ -14,7 +13,7 @@ Player::Player(class Game* owner) : Actor(owner), up(0) {
 	setPosition(Eigen::Vector3f(0.0f, 6.0f, 10.0f));
 }
 
-void Player::actorInput(const uint8_t* keystate) {
+void Player::actorInput(const bool* keystate) {
 	if (keystate[SDL_SCANCODE_W]) {
 		mMoveComp->setForwardSpeed(5.0);
 	} else if (keystate[SDL_SCANCODE_S]) {

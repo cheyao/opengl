@@ -45,8 +45,8 @@ Renderer::Renderer(Game* game)
 	SDL_Log("\n");
 
 #ifdef ANDROID
-	mWidth = DM->w;
-	mHeight = DM->h;
+	mWidth = DM->h;
+	mHeight = DM->w;
 #elif defined(__EMSCRIPTEN__)
 	mWidth = browserWidth();
 	mHeight = browserHeight();
@@ -55,7 +55,12 @@ Renderer::Renderer(Game* game)
 	mHeight = 768;
 #endif
 
-	mWindow = SDL_CreateWindow("OpenGL", mWidth, mHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	mWindow = SDL_CreateWindow("OpenGL", mWidth, mHeight,
+				   SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
+#ifdef ANDROID
+					   | SDL_WINDOW_FULLSCREEN
+#endif
+	);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Game.cpp: Failed to create window: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to make SDL window, there is something wrong with "
@@ -78,7 +83,7 @@ Renderer::Renderer(Game* game)
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-#ifdef __EMSCRIPTEN__
+#if defined(__EMSCRIPTEN__) || defined(ANDROID)
 	io.IniFilename = nullptr;
 #else
 	// TODO: Storage path

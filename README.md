@@ -87,8 +87,6 @@ $ cmake -G Ninja\
         -DBUILD_SHARED_LIBS=1 \
         -DANDROID_NATIVE_API_LEVEL=24 \
         ..
-
-cmake -DASSIMP_ANDROID_JNIIOSYSTEM=ON -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/android-commandlinetools/ndk/25.1.8937393/build/cmake/android.toolchain.cmake -DANDROID_NDK=${ANDROID_NDK_HOME} -DCMAKE_BUILD_TYPE=Release -DANDROID_ABI=arm64-v8a -DBUILD_SHARED_LIBS=1 -DANDROID_NATIVE_API_LEVEL=24 -DBUILD_SHARED_LIBS=OFF -DANDROID_STL=c++_static ..
 ```
 
 Now build the project:
