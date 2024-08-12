@@ -51,14 +51,6 @@ void Texture::load() {
 
 	GLenum format = GL_RGB;
 	switch (channels) {
-		// TODO: Gray scale
-		case 1:
-			format = GL_LUMINANCE;
-			break;
-		case 2:
-			// FIXME: Souldn't be like this
-			format = GL_RG;
-			break;
 		case 3:
 			format = GL_RGB;
 			break;

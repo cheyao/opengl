@@ -25,6 +25,12 @@ void UIScreen::processInput(const bool* keys) {
 	}
 }
 
+void UIScreen::touch(const SDL_FingerID& finger, const float x, const float y, const bool lift) {
+	for (const auto& component : mComponents) {
+		component->touch(finger, x, y, lift);
+	}
+}
+
 void UIScreen::removeComponent(UIComponent* component) {
 	const auto& iter = std::find(mComponents.begin(), mComponents.end(), component);
 

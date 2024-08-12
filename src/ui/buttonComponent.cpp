@@ -13,13 +13,14 @@
 
 ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const std::function<void()>& onClick,
 				 const Eigen::Vector2f padding)
-	: UIComponent(owner), mOnClick(onClick), mPadding(padding) {
+	: UIComponent(owner), mOnClick(onClick), mPadding(padding), mWidth(texture->getWidth()),
+	  mHeight(texture->getHeight()) {
 
 	const std::vector<float> vertices = {
 		000.0f, 000.0f, -10.0f, // TL
 		000.0f, 100.0f, -10.0f, // BL
 		100.0f, 000.0f, -10.0f, // TR
-		100.0f, 100.0f, -10.0f  // BR
+		100.0f, 100.0f, -10.0f	// BR
 	};
 	const std::vector<float> texturePos = {
 		1.0f, 1.0f, // TR
@@ -27,9 +28,9 @@ ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const 
 		0.0f, 1.0f, // TL
 		0.0f, 0.0f  // BL
 	};
-	const std::vector<GLuint> indices = {0, 1, 2,  // a
+	const std::vector<GLuint> indices = {2, 1, 0,  // a
 					     1, 2, 3}; // b
-	const static std::vector<std::pair<Texture* const, TextureType>> textures = {
+	const std::vector<std::pair<Texture* const, TextureType>> textures = {
 		std::make_pair(texture, TextureType::DIFFUSE)};
 
 	mMesh = new Mesh(vertices, {}, texturePos, indices, textures);
@@ -55,4 +56,26 @@ void ButtonComponent::draw(const Shader* shader) {
 	shader->set("model", model);
 
 	mMesh->draw(shader);
+}
+
+void ButtonComponent::touch(const SDL_FingerID& finger, const float x, const float y, const bool lift) {
+	if (!lift) {
+		float bx = mPadding.x();
+		float by = mPadding.y();
+
+		if (bx < 0) {
+			bx += mOwner->getGame()->getWidth();
+		}
+
+		by = -by;
+		if (by < 0) {
+			by += mOwner->getGame()->getHeight();
+		}
+
+		if ((bx <= x && x < (bx + mWidth)) && (by <= y && y < (by + mHeight))) {
+			(void) finger;
+
+			mOnClick();
+		}
+	}
 }

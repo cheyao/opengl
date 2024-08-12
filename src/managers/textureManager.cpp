@@ -18,10 +18,10 @@ Texture* TextureManager::get(const std::string& name) {
 	}
 
 	Texture* texture;
-#ifndef __cpp_lib_string_contains
-	if (name.find('.') == std::string::npos) {
-#else
+#ifdef __cpp_lib_string_contains
 	if (!name.contains('.')) {
+#else
+	if (name.find('.') == std::string::npos) {
 #endif
 		texture = new Cubemap(mPath + name + SEPARATOR);
 	} else {

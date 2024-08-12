@@ -330,6 +330,22 @@ int Game::event(const SDL_Event& event) {
 			break;
 		}
 
+		case SDL_EVENT_FINGER_DOWN: {
+			for (const auto& ui : mUI) {
+				ui->touch(event.tfinger.fingerID, event.tfinger.x * getWidth(), getHeight() - event.tfinger.y * getHeight(), false);
+			}
+
+			break;
+		}
+
+		case SDL_EVENT_FINGER_UP: {
+			for (const auto& ui : mUI) {
+				ui->touch(event.tfinger.fingerID, event.tfinger.x * getWidth(), getHeight() - event.tfinger.y * getHeight(), true);
+			}
+
+			break;
+		}
+
 		[[likely]] default:
 			break;
 	}

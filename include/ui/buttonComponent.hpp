@@ -18,9 +18,12 @@ class ButtonComponent : public UIComponent {
 	~ButtonComponent() override = default;
 
 	void draw(const class Shader* shader) override;
+	void touch(const SDL_FingerID& finger, const float x, const float y, const bool lift) override;
 
       private:
 	class Mesh* mMesh;
 	const std::function<void()> mOnClick;
 	const Eigen::Vector2f mPadding;
+
+	const int mWidth, mHeight;
 };
