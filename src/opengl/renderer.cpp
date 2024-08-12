@@ -119,6 +119,24 @@ Renderer::Renderer(Game* game)
 	// NOTE: Uncomment if testing framebuffer module
 	// glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// SDL_SetWindowRelativeMouseMode(mWindow, 1);
+
+	// Ortho for UI
+	Eigen::Affine3f ortho = Eigen::Affine3f::Identity();
+
+	// ortho(float left, float right, float bottom, float top)
+	constexpr const static float right = 1000.0f;
+	constexpr const static float left = 0.0f;
+	constexpr const static float top = 0.0f;
+	constexpr const static float bottom = 500.0f;
+
+	ortho(0, 0) = 2.0f / (right - left);
+	ortho(1, 1) = 2.0f / (top - bottom);
+	ortho(2, 2) = -1.0f;
+	ortho(3, 0) = -(right + left) / (right - left);
+	ortho(3, 1) = -(top + bottom) / (top - bottom);
+
+	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
+	UIshader->set("proj", ortho);
 }
 
 /* NOTE:
@@ -141,21 +159,7 @@ void Renderer::setDemensions(int width, int height) {
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
 }
 
-static float constant = 1.0f;
-static float linear = 0.05f;
-static float quadratic = 0.032f;
-
 void Renderer::draw() {
-#ifdef IMGUI
-	ImGui::Begin("Main Menu");
-
-	ImGui::SliderFloat("Constant", &constant, 0.0f, 1.0f);
-	ImGui::SliderFloat("Linear", &linear, 0.0f, 1.0f);
-	ImGui::SliderFloat("Quadratic", &quadratic, 0.0f, 0.04f);
-
-	ImGui::End();
-#endif
-
 #ifdef DEBUG
 	glClearColor(0.1f, 0.0f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -270,9 +274,12 @@ void Renderer::setLights(Shader* shader) const {
 	*/
 	const auto& value = mPointLights[0];
 
-	constexpr float a = 0.7f;
-	constexpr float d = 2.8f;
-	constexpr float s = 1.0f;
+	constexpr static const float a = 0.7f;
+	constexpr static const float d = 2.8f;
+	constexpr static const float s = 1.0f;
+	constexpr static const float constant = 1.0f;
+	constexpr static const float linear = 0.05f;
+	constexpr static const float quadratic = 0.032f;
 
 	// PERF: Only set once - redunant setters
 	shader->set("pointLight.position", value->getPosition());
