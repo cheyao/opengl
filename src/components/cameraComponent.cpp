@@ -49,12 +49,12 @@ void CameraComponent::view() {
 }
 
 void CameraComponent::project() {
-	const float near = 0.1f;
-	const float far = 100.0f;
+	constexpr const float near = 0.1f;
+	constexpr const float far = 100.0f;
 	const float aspect =
 		static_cast<float>(mOwner->getGame()->getWidth()) / mOwner->getGame()->getHeight();
 	float theta = mFOV * 0.5;
-	float range = far - near;
+	constexpr const float range = far - near;
 	float invtan = 1.0f / tan(theta);
 
 	// https://www.songho.ca/opengl/gl_projectionmatrix.html

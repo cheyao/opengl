@@ -16,10 +16,10 @@ ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const 
 	: UIComponent(owner), mOnClick(onClick), mPadding(padding) {
 
 	const std::vector<float> vertices = {
-		+1.0f, +1.0f, +0.0f, // TR
-		+1.0f, -1.0f, +0.0f, // BR
-		-1.0f, +1.0f, +0.0f, // TL
-		-1.0f, -1.0f, +0.0f  // BL
+		000.0f, 000.0f, -10.0f, // TL
+		000.0f, 100.0f, -10.0f, // BL
+		100.0f, 000.0f, -10.0f, // TR
+		100.0f, 100.0f, -10.0f  // BR
 	};
 	const std::vector<float> texturePos = {
 		1.0f, 1.0f, // TR
@@ -27,7 +27,8 @@ ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const 
 		0.0f, 1.0f, // TL
 		0.0f, 0.0f  // BL
 	};
-	const std::vector<GLuint> indices = {0, 2, 3, 0, 3, 1};
+	const std::vector<GLuint> indices = {0, 1, 2,  // a
+					     1, 2, 3}; // b
 	const static std::vector<std::pair<Texture* const, TextureType>> textures = {
 		std::make_pair(texture, TextureType::DIFFUSE)};
 

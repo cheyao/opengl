@@ -23,7 +23,7 @@ size_t GameIOStream::Read(void* pvBuffer, size_t pSize, size_t pCount) {
 		const size_t status = SDL_ReadIO(mIO, static_cast<char*>(pvBuffer) + i * pSize, pSize);
 
 		if (status == 0) {
-			SDL_Log("Read error: %s", SDL_GetError());
+			// SDL_Log("Read error: %s", SDL_GetError());
 
 			return status;
 		}
@@ -93,7 +93,7 @@ bool GameIOSystem::Exists(const char* pFile) const {
 	if (stat == 0) {
 		return true;
 	} else {
-		SDL_Log("File %s doesn't exist: %s", pFile, SDL_GetError());
+		// SDL_Log("File %s doesn't exist: %s", pFile, SDL_GetError());
 
 		return false;
 	}
@@ -101,7 +101,7 @@ bool GameIOSystem::Exists(const char* pFile) const {
 	// TODO: Somehow make better
 	SDL_IOStream* file = SDL_IOFromFile(pFile, "r+b");
 	if (file == nullptr) {
-		SDL_Log("File %s doesn't exist: %s", pFile, SDL_GetError());
+		// SDL_Log("File %s doesn't exist: %s", pFile, SDL_GetError());
 
 		return false;
 	} else {
@@ -118,7 +118,7 @@ Assimp::IOStream* GameIOSystem::Open(const char* pFile, const char* pMode) {
 	try {
 		return new GameIOStream(pFile, pMode);
 	} catch (std::runtime_error e) {
-		SDL_Log("GameIO Error: %s: %s", e.what(), SDL_GetError());
+		// SDL_Log("GameIO Error: %s: %s", e.what(), SDL_GetError());
 
 		return nullptr;
 	}

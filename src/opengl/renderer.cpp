@@ -124,18 +124,26 @@ Renderer::Renderer(Game* game)
 	Eigen::Affine3f ortho = Eigen::Affine3f::Identity();
 
 	// ortho(float left, float right, float bottom, float top)
-	constexpr const static float right = 1000.0f;
+	// glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
 	constexpr const static float left = 0.0f;
-	constexpr const static float top = 0.0f;
-	constexpr const static float bottom = 500.0f;
+	constexpr const static float right = 800.0f;
+	constexpr const static float top = 600.0f;
+	constexpr const static float bottom = 0.0f;
+	constexpr const static float near = 0.1f;
+	constexpr const static float far = 100.0f;
 
 	ortho(0, 0) = 2.0f / (right - left);
 	ortho(1, 1) = 2.0f / (top - bottom);
-	ortho(2, 2) = -1.0f;
-	ortho(3, 0) = -(right + left) / (right - left);
-	ortho(3, 1) = -(top + bottom) / (top - bottom);
+	ortho(2, 2) = -2.0f / (far - near);
+	ortho(3, 3) = 1;
+
+	ortho(0, 3) = -(right + left) / (right - left);
+	ortho(1, 3) = -(top + bottom) / (top - bottom);
+	ortho(2, 3) = -(far + near) / (far - near);
+	// (y, x)
 
 	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
+	UIshader->activate();
 	UIshader->set("proj", ortho);
 }
 
@@ -174,7 +182,7 @@ void Renderer::draw() {
 	for (const auto& sprite : mDrawables) {
 		Shader* const shader = sprite->getShader();
 		shader->activate();
-		shader->set("viewPos", mCamera->getOwner()->getPosition()); // Bruh how come I forgot
+		shader->set("viewPos", mCamera->getOwner()->getPosition());
 
 		setLights(shader);
 		sprite->draw();
