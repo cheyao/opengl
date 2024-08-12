@@ -19,13 +19,13 @@ class ButtonComponent : public UIComponent {
 	void draw(const class Shader* shader) override;
 	void touch(const SDL_FingerID& finger, const float x, const float y, const bool lift) override;
 
-	void onClick(const std::function<void(class Game*)> func) { mOnClick = func; }
-	void onRelease(const std::function<void(class Game*)> func) { mOnRelease = func; }
+	void onClick(const std::function<void()> func) { mOnClick = func; }
+	void onRelease(const std::function<void()> func) { mOnRelease = func; }
 
       private:
 	class Mesh* mMesh;
-	std::function<void(class Game*)> mOnClick;
-	std::function<void(class Game*)> mOnRelease;
+	std::function<void()> mOnClick;
+	std::function<void()> mOnRelease;
 	const Eigen::Vector2f mPadding;
 
 	SDL_FingerID mCapture;

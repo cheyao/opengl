@@ -5,7 +5,13 @@
 
 UIScreen::UIScreen(Game* game) : mGame(game) { game->addUI(this); }
 
-UIScreen::~UIScreen() { mGame->removeUI(this); }
+UIScreen::~UIScreen() {
+	mGame->removeUI(this);
+
+	while (!mComponents.empty()) {
+		delete mComponents.back();
+	}
+}
 
 void UIScreen::update(const float delta) {
 	for (const auto& component : mComponents) {

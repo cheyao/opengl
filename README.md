@@ -142,6 +142,11 @@ cmake
     - [ ] Web detect android
 - [ ] Windows build
 - [ ] Pause menu etc
+- [ ] Multitouch
+- [ ] UI
+- [ ] Multithreading
+- [ ] TTF
+- [ ] Localization
 
 # Notes
 

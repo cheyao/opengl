@@ -10,6 +10,7 @@
 #include "opengl/renderer.hpp"
 #include "third_party/Eigen/Core"
 #include "ui/controlUI.hpp"
+#include "ui/mainMenu.hpp"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
@@ -85,6 +86,7 @@ void Game::setup() {
 #ifdef ANDROID
 	new ControlUI(this);
 #endif
+	new MainMenu(this);
 
 	SDL_Log("Setting up game");
 
@@ -101,8 +103,6 @@ void Game::setup() {
 int Game::iterate() {
 	if (mPaused) {
 		mRenderer->setWindowRelativeMouseMode(0);
-
-		// mRenderer->swapWindow();
 
 		SDL_Delay(64);
 
@@ -333,7 +333,8 @@ int Game::event(const SDL_Event& event) {
 
 		case SDL_EVENT_FINGER_DOWN: {
 			for (const auto& ui : mUI) {
-				ui->touch(event.tfinger.fingerID, event.tfinger.x * getWidth(), getHeight() - event.tfinger.y * getHeight(), false);
+				ui->touch(event.tfinger.fingerID, event.tfinger.x * getWidth(),
+					  getHeight() - event.tfinger.y * getHeight(), false);
 			}
 
 			break;
@@ -341,7 +342,8 @@ int Game::event(const SDL_Event& event) {
 
 		case SDL_EVENT_FINGER_UP: {
 			for (const auto& ui : mUI) {
-				ui->touch(event.tfinger.fingerID, event.tfinger.x * getWidth(), getHeight() - event.tfinger.y * getHeight(), true);
+				ui->touch(event.tfinger.fingerID, event.tfinger.x * getWidth(),
+					  getHeight() - event.tfinger.y * getHeight(), true);
 			}
 
 			break;

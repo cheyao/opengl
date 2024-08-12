@@ -23,7 +23,7 @@ BN=`basename "$1"`
 OUT="$DN/repacked-$BN"
 OUT_ALIGNED="$DN/aligned-$BN"
 OUT_SIGNED="$DN/signed-$BN"
-KEYFILE=~/Developer/cheyao-android-key.keystore
+KEYFILE=~/Developer/key.keystore
 
 # Debug mode
 set -x
