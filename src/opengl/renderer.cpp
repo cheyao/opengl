@@ -126,8 +126,8 @@ Renderer::Renderer(Game* game)
 	// ortho(float left, float right, float bottom, float top)
 	// glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
 	constexpr const static float left = 0.0f;
-	constexpr const static float right = 800.0f;
-	constexpr const static float top = 600.0f;
+	const float right = mWidth;
+	const float top = mHeight;
 	constexpr const static float bottom = 0.0f;
 	constexpr const static float near = 0.1f;
 	constexpr const static float far = 100.0f;
@@ -165,6 +165,29 @@ void Renderer::setDemensions(int width, int height) {
 
 	mCamera->project();
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
+
+	Eigen::Affine3f ortho = Eigen::Affine3f::Identity();
+
+	constexpr const static float left = 0.0f;
+	const float right = mWidth;
+	const float top = mHeight;
+	constexpr const static float bottom = 0.0f;
+	constexpr const static float near = 0.1f;
+	constexpr const static float far = 100.0f;
+
+	ortho(0, 0) = 2.0f / (right - left);
+	ortho(1, 1) = 2.0f / (top - bottom);
+	ortho(2, 2) = -2.0f / (far - near);
+	ortho(3, 3) = 1;
+
+	ortho(0, 3) = -(right + left) / (right - left);
+	ortho(1, 3) = -(top + bottom) / (top - bottom);
+	ortho(2, 3) = -(far + near) / (far - near);
+	// (y, x)
+
+	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
+	UIshader->activate();
+	UIshader->set("proj", ortho);
 }
 
 void Renderer::draw() {

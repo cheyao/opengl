@@ -8,7 +8,9 @@
 #include <stdexcept>
 #include <string_view>
 
-Texture::Texture(const std::string_view& path) : name(path), mWidth(0), mHeight(0) {}
+Texture::Texture(const std::string_view& path) : name(path), mWidth(0), mHeight(0) {
+	stbi_set_flip_vertically_on_load(true);
+}
 
 Texture::~Texture() {
 	glDeleteTextures(1, &mID);
@@ -52,6 +54,10 @@ void Texture::load() {
 		// TODO: Gray scale
 		case 1:
 			format = GL_LUMINANCE;
+			break;
+		case 2:
+			// FIXME: Souldn't be like this
+			format = GL_RG;
 			break;
 		case 3:
 			format = GL_RGB;

@@ -39,25 +39,18 @@ void ButtonComponent::draw(const Shader* shader) {
 	shader->activate();
 
 	Eigen::Affine3f model = Eigen::Affine3f::Identity();
-	/*
 	float x = mPadding.x();
 	float y = mPadding.y();
 
 	if (x < 0) {
-		x = mOwner->getGame()->getWidth() + x;
+		x += mOwner->getGame()->getWidth();
 	}
-	x = x / mOwner->getGame()->getWidth() * 2 - 1.0f;
 
-	if (y < 0) {
-		y = mOwner->getGame()->getHeight() + y;
-	}
-	y = y / mOwner->getGame()->getHeight() * 2 - 1.0f;
 	y = -y;
-	SDL_Log("%f, %f", x, y);
-	*/
-
-	// model.translate(Eigen::Vector3f(x, y, 0.0f));
-	// model.scale(0.1f);
+	if (y < 0) {
+		y += mOwner->getGame()->getHeight();
+	}
+	model.translate(Eigen::Vector3f(x, y, 0.0f));
 
 	shader->set("model", model);
 
