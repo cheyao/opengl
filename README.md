@@ -130,17 +130,18 @@ cmake
 
 # TODO
 
-[ ] Add functional hot reload
-[ ] Game pause + resume things
-[ ] Save state
-[ ] Debug menu with ImGUI and item names
-[ ] Read programming gems
-[ ] Better component and actors
-[x] Android build
-    [ ] Android UI
-[x] Emscripten build
-    [ ] Web detect android
-[ ] Windows build
+- [ ] Add functional hot reload
+- [ ] Game pause + resume things
+- [ ] Save state
+- [ ] Debug menu with ImGUI and item names
+- [ ] Read programming gems
+- [ ] Better component and actors
+- [x] Android build
+    - [x] Android UI
+- [x] Emscripten build
+    - [ ] Web detect android
+- [ ] Windows build
+- [ ] Pause menu etc
 
 # Notes
 

@@ -8,6 +8,7 @@
 build/
 rel/
 web/
+webrel/
 gcc/
 and/
 .compile_commands

@@ -259,11 +259,11 @@ if (ANDROID)
 	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include"
 	)
 
-	add_library(assimp::android_jniiosystem SHARED IMPORTED) # or STATIC instead of SHARED
-	set_target_properties(assimp::android_jniiosystem PROPERTIES
-	  IMPORTED_LOCATION "/usr/local/lib/libandroid_jniiosystem.a"
-	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include/"
-	)
+	# add_library(assimp::android_jniiosystem SHARED IMPORTED) # or STATIC instead of SHARED
+	# set_target_properties(assimp::android_jniiosystem PROPERTIES
+	#   IMPORTED_LOCATION "/usr/local/lib/libandroid_jniiosystem.a"
+	#   INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include/"
+	# )
 
 	# add_library(assimp::libz SHARED IMPORTED) # or STATIC instead of SHARED
 	# set_target_properties(assimp::libz PROPERTIES
@@ -271,7 +271,7 @@ if (ANDROID)
 	#   INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include/"
 	# )
 
-	target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp assimp::android_jniiosystem)
+	target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp)# assimp::android_jniiosystem)
 else()
 	find_package(assimp REQUIRED)
 
@@ -355,14 +355,14 @@ if(IMGUI STREQUAL ON AND CHECKS STREQUAL OFF)
 endif()
 
 if(WEB)
-	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -DGLES)
+	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -DGLES -sNO_DISABLE_EXCEPTION_CATCHING)
 	target_compile_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
-	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sALLOW_MEMORY_GROWTH)
+	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sALLOW_MEMORY_GROWTH -sNO_DISABLE_EXCEPTION_CATCHING)
 	target_link_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
 
 	if(DEBUG)
-		target_compile_options(${BUILD_NAME} PRIVATE -gsource-map -sNO_DISABLE_EXCEPTION_CATCHING)
-		target_link_options(${BUILD_NAME} PRIVATE -gsource-map -sNO_DISABLE_EXCEPTION_CATCHING)
+		target_compile_options(${BUILD_NAME} PRIVATE -gsource-map)
+		target_link_options(${BUILD_NAME} PRIVATE -gsource-map)
 		ADD_CUSTOM_TARGET(link_target1 ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../src ${CMAKE_BINARY_DIR}/src)
 		ADD_CUSTOM_TARGET(link_target2 ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../include ${CMAKE_BINARY_DIR}/include)
 	endif()

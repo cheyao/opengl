@@ -82,7 +82,9 @@ $$ |  $$\ $$ |  $$ |$$  __$$ |$$ |  $$ |      $$ |  $$ |$$  __$$ |$$ | $$ | $$ |
 void Game::setup() {
 	SDL_Log("Setting up UIs");
 
+#ifdef ANDROID
 	new ControlUI(this);
+#endif
 
 	SDL_Log("Setting up game");
 
@@ -102,7 +104,6 @@ int Game::iterate() {
 
 		// mRenderer->swapWindow();
 
-		// Delay some time to not use too much CPU. Add some more?
 		SDL_Delay(64);
 
 		mTicks = SDL_GetTicks();
@@ -277,7 +278,7 @@ int Game::event(const SDL_Event& event) {
 		case SDL_EVENT_KEY_DOWN: {
 			switch (event.key.key) {
 				case SDLK_ESCAPE: {
-					return 1;
+					// return 1;
 				}
 				case SDLK_F1: {
 					rel = !rel;

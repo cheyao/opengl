@@ -48,9 +48,11 @@ Renderer::Renderer(Game* game)
 #ifdef ANDROID
 	mWidth = DM->h;
 	mHeight = DM->w;
+	/*
 #elif defined(__EMSCRIPTEN__)
 	mWidth = browserWidth();
 	mHeight = browserHeight();
+	*/
 #else
 	mWidth = 1024;
 	mHeight = 768;
@@ -69,6 +71,13 @@ Renderer::Renderer(Game* game)
 
 		throw std::runtime_error("Game.cpp: Failed to create SDL window");
 	}
+
+#ifdef __EMSCRIPTEN__
+	mWidth = browserWidth();
+	mHeight = browserHeight();
+
+	SDL_SetWindowSize(mWindow, mWidth, mHeight);
+#endif
 
 #if !defined(ANDROID) && !defined(__EMSCRIPTEN__)
 	SDL_SetWindowMinimumSize(mWindow, 480, 320);

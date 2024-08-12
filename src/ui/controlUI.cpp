@@ -17,10 +17,43 @@ ControlUI::ControlUI(Game* game) : UIScreen(game) {
 	constexpr const int padding = 20;
 	constexpr const int buttonSize = 64;
 
-	new ButtonComponent(this, game->getTexture("up.png"), [] { SDL_Log("Clicked!"); }, Eigen::Vector2f(3 * padding + buttonSize, 5 * -padding + 2 * -buttonSize));
-	new ButtonComponent(this, game->getTexture("down.png"), [] { SDL_Log("Clicked!"); }, Eigen::Vector2f(3 * padding + buttonSize, -padding));
-	new ButtonComponent(this, game->getTexture("left.png"), [] { SDL_Log("Clicked!"); }, Eigen::Vector2f(padding, 3 * -padding + -buttonSize));
-	new ButtonComponent(this, game->getTexture("right.png"), [] { SDL_Log("Clicked!"); }, Eigen::Vector2f(5 * padding + 2 * buttonSize, 3 * -padding + -buttonSize));
+	ButtonComponent* up =
+		new ButtonComponent(this, game->getTexture("up.png"),
+				    Eigen::Vector2f(3 * padding + buttonSize, 5 * -padding + 2 * -buttonSize));
+	up->onClick([](Game* game) {
+		game->setKey(SDL_SCANCODE_W, true);
+	});
+	up->onRelease([](Game* game) {
+		game->setKey(SDL_SCANCODE_W, false);
+	});
+
+	ButtonComponent* down = new ButtonComponent(this, game->getTexture("down.png"),
+						    Eigen::Vector2f(3 * padding + buttonSize, -padding));
+	down->onClick([](Game* game) {
+		game->setKey(SDL_SCANCODE_S, true);
+	});
+	down->onRelease([](Game* game) {
+		game->setKey(SDL_SCANCODE_S, false);
+	});
+
+	ButtonComponent* left = new ButtonComponent(this, game->getTexture("left.png"),
+						    Eigen::Vector2f(padding, 3 * -padding + -buttonSize));
+	left->onClick([](Game* game) {
+		game->setKey(SDL_SCANCODE_A, true);
+	});
+	left->onRelease([](Game* game) {
+		game->setKey(SDL_SCANCODE_A, false);
+	});
+
+	ButtonComponent* right =
+		new ButtonComponent(this, game->getTexture("right.png"),
+				    Eigen::Vector2f(5 * padding + 2 * buttonSize, 3 * -padding + -buttonSize));
+	right->onClick([](Game* game) {
+		game->setKey(SDL_SCANCODE_D, true);
+	});
+	right->onRelease([](Game* game) {
+		game->setKey(SDL_SCANCODE_D, false);
+	});
 }
 
 ControlUI::~ControlUI() {}

@@ -32,7 +32,8 @@ int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] cha
 #endif
 
 	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
-	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
+	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+	SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "1");
 	/*
 #ifdef GLES
 	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
@@ -99,12 +100,10 @@ int SDL_AppIterate(void* appstate) {
 	}
 #endif
 	catch (const std::runtime_error& error) {
-#ifdef DEBUG
 		SDL_Log("Main.cpp: Uncaught exception: %s", error.what());
 
+#ifdef DEBUG
 		static_cast<Game*>(appstate)->pause();
-#else
-		ERROR_BOX("Main.cpp: Exception thrown, the game might not continue to function correctly");
 #endif
 
 		return 0;

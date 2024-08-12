@@ -11,10 +11,9 @@
 #include <functional>
 #include <vector>
 
-ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const std::function<void()>& onClick,
-				 const Eigen::Vector2f padding)
-	: UIComponent(owner), mOnClick(onClick), mPadding(padding), mWidth(texture->getWidth()),
-	  mHeight(texture->getHeight()) {
+ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const Eigen::Vector2f padding)
+	: UIComponent(owner), mOnClick(nullptr), mOnRelease(nullptr), mPadding(padding), mCapture(0),
+	  mWidth(texture->getWidth()), mHeight(texture->getHeight()) {
 
 	const std::vector<float> vertices = {
 		000.0f, 000.0f, -10.0f, // TL
@@ -59,23 +58,33 @@ void ButtonComponent::draw(const Shader* shader) {
 }
 
 void ButtonComponent::touch(const SDL_FingerID& finger, const float x, const float y, const bool lift) {
+	float bx = mPadding.x();
+	float by = mPadding.y();
+
+	if (bx < 0) {
+		bx += mOwner->getGame()->getWidth();
+	}
+
+	by = -by;
+	if (by < 0) {
+		by += mOwner->getGame()->getHeight();
+	}
+
 	if (!lift) {
-		float bx = mPadding.x();
-		float by = mPadding.y();
-
-		if (bx < 0) {
-			bx += mOwner->getGame()->getWidth();
-		}
-
-		by = -by;
-		if (by < 0) {
-			by += mOwner->getGame()->getHeight();
-		}
-
 		if ((bx <= x && x < (bx + mWidth)) && (by <= y && y < (by + mHeight))) {
-			(void) finger;
+			if (mOnClick != nullptr) {
+				mOnClick(mOwner->getGame());
+			}
 
-			mOnClick();
+			mCapture = finger;
+		}
+	} else if (mCapture != 0 && finger == mCapture) {
+		if ((bx <= x && x < (bx + mWidth)) && (by <= y && y < (by + mHeight))) {
+			if (mOnRelease != nullptr) {
+				mOnRelease(mOwner->getGame());
+			}
+
+			mCapture = 0;
 		}
 	}
 }
