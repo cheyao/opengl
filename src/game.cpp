@@ -5,6 +5,7 @@
 #include "actors/player.hpp"
 #include "actors/sun.hpp"
 #include "actors/world.hpp"
+#include "managers/eventManager.hpp"
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
 #include "opengl/renderer.hpp"
@@ -52,6 +53,7 @@ Game::Game()
 
 	mTextures = std::make_unique<TextureManager>(mBasePath);
 	mShaders = std::make_unique<ShaderManager>(mBasePath);
+	mEventManager = std::make_unique<EventManager>(this);
 
 	mRenderer = new Renderer(this);
 	mRenderer->swapWindow();
@@ -65,12 +67,6 @@ Game::Game()
 
 	SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
 
-	mKeys = new bool[SDL_NUM_SCANCODES];
-
-	for (size_t i = 0; i < SDL_NUM_SCANCODES; ++i) {
-		mKeys[i] = false;
-	}
-
 	setup();
 }
 
@@ -80,12 +76,9 @@ void Game::setup() {
 #ifdef ANDROID
 	new ControlUI(this);
 #endif
-	// new MainMenu(this);
+	new MainMenu(this);
 
 	SDL_Log("Successfully initialized OpenGL and UI\n");
-
-	// NOTE: Camera must be initialized
-	new Player(this);
 
 	initWorld();
 
@@ -102,6 +95,7 @@ void Game::initWorld() {
 	new World(this);
 	new Cube(this);
 	new Sun(this);
+	new Player(this);
 
 	SDL_Log("Successfully initialized Game World");
 }
@@ -140,12 +134,12 @@ int Game::iterate() {
 
 void Game::input() {
 	for (const auto& ui : mUI) {
-		ui->processInput(mKeys);
+		ui->processInput(mEventManager->getKeystate());
 	}
 
 	if (!mPaused) {
 		for (const auto& actor : mActors) {
-			actor->input(mKeys);
+			actor->input(mEventManager->getKeystate());
 		}
 	}
 }
@@ -238,111 +232,15 @@ void Game::draw() { mRenderer->draw(); }
 int Game::event(const SDL_Event& event) {
 #ifdef IMGUI
 	ImGui_ImplSDL3_ProcessEvent(&event);
+
+	ImGuiIO& io = ImGui::GetIO();
+
+	if (io.WantCaptureMouse || io.WantCaptureKeyboard) {
+		return 0;
+	}
 #endif
 
-	static bool rel = true;
-
-	switch (event.type) {
-		case SDL_EVENT_QUIT: {
-			return 1;
-		}
-
-		case SDL_EVENT_WINDOW_CLOSE_REQUESTED: {
-			return 1;
-
-			break;
-		}
-
-		case SDL_EVENT_KEY_DOWN: {
-			switch (event.key.key) {
-				case SDLK_ESCAPE: {
-					MainMenu* menu = nullptr;
-					for (const auto& element : mUI) {
-						menu = dynamic_cast<MainMenu*>(element);
-
-						if (menu != nullptr) {
-							break;
-						}
-					}
-
-					if (menu == nullptr) {
-						// No main menu present
-						new MainMenu(this);
-					}
-				}
-				case SDLK_F1: {
-					rel = !rel;
-					mRenderer->setWindowRelativeMouseMode(static_cast<int>(rel));
-
-					break;
-				}
-				case SDLK_F2: {
-					if (mPaused) {
-						mPaused = false;
-					}
-
-					// TODO: Maybe textures
-					// mTextures->reload(true);
-					mShaders->reload(true);
-					mRenderer->reload();
-
-					break;
-				}
-				case SDLK_F3: {
-					mPaused = !mPaused;
-
-					mTicks = SDL_GetTicks();
-
-					break;
-				}
-				case SDLK_F5: {
-					mVsync = !mVsync;
-
-					SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
-
-					break;
-				}
-			}
-
-			mKeys[event.key.scancode] = true;
-
-			break;
-		}
-		case SDL_EVENT_KEY_UP: {
-			mKeys[event.key.scancode] = false;
-
-			break;
-		}
-
-		case SDL_EVENT_WINDOW_RESIZED: {
-			mRenderer->setDemensions(event.window.data1, event.window.data2);
-
-			break;
-		}
-
-		case SDL_EVENT_FINGER_DOWN: {
-			for (const auto& ui : mUI) {
-				ui->touch(event.tfinger.fingerID, event.tfinger.x * getWidth(),
-					  getHeight() - event.tfinger.y * getHeight(), false);
-			}
-
-			break;
-		}
-
-		case SDL_EVENT_FINGER_UP: {
-			for (const auto& ui : mUI) {
-				ui->touch(event.tfinger.fingerID, event.tfinger.x * getWidth(),
-					  getHeight() - event.tfinger.y * getHeight(), true);
-			}
-
-			break;
-		}
-
-		[[likely]] default:
-			break;
-	}
-
-	return 0;
+	return mEventManager->manageEvent(event);
 }
 
 void Game::addActor(Actor* actor) {
@@ -402,3 +300,5 @@ Game::~Game() {
 
 [[nodiscard]] int Game::getWidth() const { return mRenderer->getWidth(); }
 [[nodiscard]] int Game::getHeight() const { return mRenderer->getHeight(); }
+
+void Game::setKey(const size_t key, const bool val) { mEventManager->setKey(key, val); }

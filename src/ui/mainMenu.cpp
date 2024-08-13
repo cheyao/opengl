@@ -8,13 +8,14 @@
 #include "ui/buttonComponent.hpp"
 #include "utils.hpp"
 
+#include <SDL3/SDL_log.h>
 #include <cmath>
 
 MainMenu::MainMenu(class Game* game) : UIScreen(game) {
 	game->getRenderer()->setWindowRelativeMouseMode(SDL_FALSE);
 	game->setPause(true);
 
-	new BackgroundComponent(this, Eigen::Vector3f(0.5f, 0.5f, 0.5f));
+	new BackgroundComponent(this, Eigen::Vector3f(1.0f, 0.0f, 0.0f));
 
 	ButtonComponent* start =
 		new ButtonComponent(this, getGame()->getTexture("ui" SEPARATOR "start.png"), Eigen::Vector2f(NAN, NAN));
@@ -23,5 +24,6 @@ MainMenu::MainMenu(class Game* game) : UIScreen(game) {
 		game->getRenderer()->setWindowRelativeMouseMode(SDL_TRUE);
 		game->setPause(false);
 		game->removeUI(this);
+		SDL_Log("Pressed");
 	});
 }

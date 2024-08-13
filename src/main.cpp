@@ -1,9 +1,7 @@
 #include "game.hpp"
-#include "opengl/renderer.hpp"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_init.h>
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
 
@@ -25,7 +23,7 @@ int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] cha
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_URL_STRING, "https://github.com/cheyao/opengl");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_TYPE_STRING, "game");
 
-	SDL_Log("Initializing game\n");
+	SDL_Log("Initializing cyao engine v3.0?\n");
 
 #ifdef ANDROID
 	SDL_Log("Yay, android!");
@@ -35,6 +33,7 @@ int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] cha
 	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
 	SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
+	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "0");
 	/*
 #ifdef GLES
 	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
@@ -74,31 +73,10 @@ int SDL_AppEvent(void* appstate, const SDL_Event* event) {
 	}
 }
 
-#ifdef HOT
-#include <filesystem>
-#endif
-
 int SDL_AppIterate(void* appstate) {
 	try {
 		return static_cast<Game*>(appstate)->iterate();
-	}
-#ifdef HOT
-	catch (const std::filesystem::filesystem_error& error) {
-
-		SDL_Log("Main.cpp: Filesystem Error:");
-		SDL_Log("what():  %s", error.what());
-		SDL_Log("path1(): %s", error.path1().c_str());
-		SDL_Log("path2(): %s", error.path2().c_str());
-		SDL_Log("code().value():    %d", error.code().value());
-		SDL_Log("code().message():  %s", error.code().message().data());
-		SDL_Log("code().category(): %s", error.code().category().name());
-
-		// static_cast<Game*>(appstate)->pause();
-
-		return 0;
-	}
-#endif
-	catch (const std::runtime_error& error) {
+	} catch (const std::runtime_error& error) {
 		SDL_Log("Main.cpp: Uncaught exception: %s", error.what());
 
 #ifdef DEBUG

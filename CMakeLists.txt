@@ -61,6 +61,7 @@ src/opengl/ubo.cpp
 src/managers/glManager.cpp
 src/managers/shaderManager.cpp
 src/managers/textureManager.cpp
+src/managers/eventManager.cpp
 src/managers/assimpIO.cpp
 
 src/actors/actor.cpp
@@ -99,6 +100,7 @@ include/opengl/ubo.hpp
 include/managers/glManager.hpp
 include/managers/shaderManager.hpp
 include/managers/textureManager.hpp
+include/managers/eventManager.hpp
 include/managers/assimpIO.hpp
 
 include/actors/actor.hpp

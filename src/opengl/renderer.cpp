@@ -223,7 +223,9 @@ void Renderer::draw() {
 
 	Shader* UIshader = mGame->getShader("ui.vert", "ui.frag");
 	for (const auto& ui : mGame->getUIs()) {
-		ui->draw(UIshader);
+		if (ui->getState() == UIScreen::Active) {
+			ui->draw(UIshader);
+		}
 	}
 
 #ifdef IMGUI
@@ -347,7 +349,7 @@ void Renderer::setLights(Shader* shader) const {
 	// shader->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
 }
 
-void Renderer::setWindowRelativeMouseMode(SDL_bool mode) const { 
+void Renderer::setWindowRelativeMouseMode(SDL_bool mode) const {
 	if (SDL_SetWindowRelativeMouseMode(mWindow, mode) != 0) {
 		SDL_Log("Failed to set relative mouse mode: %s", SDL_GetError());
 	}

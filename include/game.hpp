@@ -39,14 +39,14 @@ class Game {
 	[[nodiscard]] class Renderer* getRenderer() { return mRenderer; }
 
 	[[nodiscard]] inline std::string fullPath(const std::string& path) const {
-		return (mBasePath + "assets" + SEPARATOR + path);
+		return (mBasePath + "assets" SEPARATOR + path);
 	};
 
 	void addUI(class UIScreen* ui) { mUI.emplace_back(ui); };
 	void removeUI(class UIScreen* ui);
 	[[nodiscard]] const std::vector<class UIScreen*>& getUIs() { return mUI; };
 
-	void setKey(const size_t key, const bool val) { mKeys[key] = val; }
+	void setKey(const size_t key, const bool val);
 
       private:
 	void input();
@@ -59,13 +59,14 @@ class Game {
 
 	std::unique_ptr<class TextureManager> mTextures;
 	std::unique_ptr<class ShaderManager> mShaders;
+	std::unique_ptr<class EventManager> mEventManager;
 
 	class Renderer* mRenderer;
 
 	std::vector<class Actor*> mActors;
 	std::vector<class Actor*> mPendingActors;
 	struct SDL_Mutex* mActorMutex;
-	
+
 	std::vector<class UIScreen*> mUI;
 
 	uint64_t mTicks;
@@ -73,8 +74,6 @@ class Game {
 
 	bool mPaused;
 	bool mVsync;
-
-	bool* mKeys;
 
 #ifdef HOT
 	std::filesystem::file_time_type last_time;
