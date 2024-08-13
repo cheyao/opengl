@@ -45,14 +45,10 @@ Renderer::Renderer(Game* game)
 	SDL_Log("Refresh rate: %f", DM->refresh_rate);
 	SDL_Log("\n");
 
+	// NOTE: Don't set emscripten here, it breakes stuff, idk why
 #ifdef ANDROID
 	mWidth = DM->h;
 	mHeight = DM->w;
-	/*
-#elif defined(__EMSCRIPTEN__)
-	mWidth = browserWidth();
-	mHeight = browserHeight();
-	*/
 #else
 	mWidth = 1024;
 	mHeight = 768;
@@ -136,8 +132,6 @@ Renderer::Renderer(Game* game)
 	// Ortho for UI
 	Eigen::Affine3f ortho = Eigen::Affine3f::Identity();
 
-	// ortho(float left, float right, float bottom, float top)
-	// glm::ortho(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
 	constexpr const static float left = 0.0f;
 	const float right = mWidth;
 	const float top = mHeight;
@@ -153,13 +147,10 @@ Renderer::Renderer(Game* game)
 	ortho(0, 3) = -(right + left) / (right - left);
 	ortho(1, 3) = -(top + bottom) / (top - bottom);
 	ortho(2, 3) = -(far + near) / (far - near);
-	// (y, x)
 
 	Shader* UIshader = mGame->getShader("ui.vert", "ui.frag");
 	UIshader->activate();
 	UIshader->set("proj", ortho);
-	// UIshader->set("width", mWidth);
-	// UIshader->set("height", mHeight);
 }
 
 /* NOTE:
@@ -356,4 +347,16 @@ void Renderer::setLights(Shader* shader) const {
 	// shader->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
 }
 
-void Renderer::setWindowRelativeMouseMode(SDL_bool mode) const { SDL_SetWindowRelativeMouseMode(mWindow, mode); }
+void Renderer::setWindowRelativeMouseMode(SDL_bool mode) const { 
+	if (SDL_SetWindowRelativeMouseMode(mWindow, mode) != 0) {
+		SDL_Log("Failed to set relative mouse mode: %s", SDL_GetError());
+	}
+
+	/*
+	if (mode) {
+		SDL_HideCursor();
+	} else {
+		SDL_ShowCursor();
+	}
+	*/
+}

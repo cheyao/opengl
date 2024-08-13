@@ -45,32 +45,16 @@ Game::Game()
 	if (basepath != nullptr) {
 		mBasePath = std::string(basepath);
 	} else {
-		mBasePath = ""; // std::string(".") + SEPARATOR;
+		mBasePath = "";
+
 		SDL_Log("Unable to get base path: %s", SDL_GetError());
 	}
-
-#ifdef DEBUG
-	SDL_Log(R"(
-============================================================================================================================================================
- $$$$$$\                                       $$$$$$\                                          $$$$$$$$\                     $$\                     
-$$  __$$\                                     $$  __$$\                                         $$  _____|                    \__|                    
-$$ /  \__|$$\   $$\  $$$$$$\   $$$$$$\        $$ /  \__| $$$$$$\  $$$$$$\$$$$\   $$$$$$\        $$ |      $$$$$$$\   $$$$$$\  $$\ $$$$$$$\   $$$$$$\  
-$$ |      $$ |  $$ | \____$$\ $$  __$$\       $$ |$$$$\  \____$$\ $$  _$$  _$$\ $$  __$$\       $$$$$\    $$  __$$\ $$  __$$\ $$ |$$  __$$\ $$  __$$\ 
-$$ |      $$ |  $$ | $$$$$$$ |$$ /  $$ |      $$ |\_$$ | $$$$$$$ |$$ / $$ / $$ |$$$$$$$$ |      $$  __|   $$ |  $$ |$$ /  $$ |$$ |$$ |  $$ |$$$$$$$$ |
-$$ |  $$\ $$ |  $$ |$$  __$$ |$$ |  $$ |      $$ |  $$ |$$  __$$ |$$ | $$ | $$ |$$   ____|      $$ |      $$ |  $$ |$$ |  $$ |$$ |$$ |  $$ |$$   ____|
-\$$$$$$  |\$$$$$$$ |\$$$$$$$ |\$$$$$$  |      \$$$$$$  |\$$$$$$$ |$$ | $$ | $$ |\$$$$$$$\       $$$$$$$$\ $$ |  $$ |\$$$$$$$ |$$ |$$ |  $$ |\$$$$$$$\ 
- \______/  \____$$ | \_______| \______/        \______/  \_______|\__| \__| \__| \_______|      \________|\__|  \__| \____$$ |\__|\__|  \__| \_______|
-          $$\   $$ |                                                                                                $$\   $$ |                        
-          \$$$$$$  |                                                                                                \$$$$$$  |                        
-           \______/                                                                                                  \______/                         
-===========================================================================================================================================================
-)");
-#endif
 
 	mTextures = std::make_unique<TextureManager>(mBasePath);
 	mShaders = std::make_unique<ShaderManager>(mBasePath);
 
 	mRenderer = new Renderer(this);
+	mRenderer->swapWindow();
 
 	// TODO: Icon
 	/*
@@ -78,8 +62,6 @@ $$ |  $$\ $$ |  $$ |$$  __$$ |$$ |  $$ |      $$ |  $$ |$$  __$$ |$$ | $$ | $$ |
 	SDL_SetWindowIcon(mWindow, icon);
 	SDL_backpackShaderroySurface(icon);
 	*/
-
-	mRenderer->setWindowRelativeMouseMode(0);
 
 	SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
 
@@ -125,14 +107,6 @@ void Game::initWorld() {
 }
 
 int Game::iterate() {
-#ifdef HOT
-	if (std::filesystem::last_write_time(fullPath("shaders")) != last_time) {
-		last_time = std::filesystem::last_write_time(fullPath("shaders"));
-
-		mShaders->reload();
-	}
-#endif
-
 	gui();
 	input();
 	update();
@@ -223,6 +197,7 @@ void Game::gui() {
 
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::Text("%.3f ms %.1f FPS", (1000.f / io.Framerate), io.Framerate);
+		ImGui::Text("%d Vsync", mVsync);
 
 		/*
 		Player* p = nullptr;
@@ -232,14 +207,17 @@ void Game::gui() {
 				break;
 			}
 		}
-		if (p == nullptr) {
+		if (p != nullptr) {
 			auto pos = p->getPosition();
 			ImGui::Text("Player position: %dx%dx%d", static_cast<int>(pos.x()), static_cast<int>(pos.y()),
 				    static_cast<int>(pos.z()));
 		}
 		*/
 
-		ImGui::Checkbox("VSync", &mVsync);
+		if (ImGui::Button("VSync")) {
+			mVsync = !mVsync;
+			SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
+		}
 		ImGui::Checkbox("Wireframe", &wireframe);
 
 		ImGui::End();
@@ -252,8 +230,6 @@ void Game::gui() {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 #endif
-
-	SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
 #endif
 }
 

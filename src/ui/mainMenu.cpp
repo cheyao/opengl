@@ -11,8 +11,8 @@
 #include <cmath>
 
 MainMenu::MainMenu(class Game* game) : UIScreen(game) {
+	game->getRenderer()->setWindowRelativeMouseMode(SDL_FALSE);
 	game->setPause(true);
-	game->getRenderer()->setWindowRelativeMouseMode(0);
 
 	new BackgroundComponent(this, Eigen::Vector3f(0.5f, 0.5f, 0.5f));
 
@@ -20,8 +20,8 @@ MainMenu::MainMenu(class Game* game) : UIScreen(game) {
 		new ButtonComponent(this, getGame()->getTexture("ui" SEPARATOR "start.png"), Eigen::Vector2f(NAN, NAN));
 
 	start->onClick([this, game] {
-		game->removeUI(this);
-		game->getRenderer()->setWindowRelativeMouseMode(1);
+		game->getRenderer()->setWindowRelativeMouseMode(SDL_TRUE);
 		game->setPause(false);
+		game->removeUI(this);
 	});
 }

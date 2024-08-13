@@ -87,6 +87,7 @@ void Framebuffer::swap() {
 #endif
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 #ifdef DEBUG
 	glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);

@@ -34,6 +34,7 @@ int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] cha
 	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
 	SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
+	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 	/*
 #ifdef GLES
 	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
@@ -59,8 +60,6 @@ int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] cha
 
 		return 1;
 	}
-
-	static_cast<Game*>(*appstate)->getRenderer()->setWindowRelativeMouseMode(1);
 
 	return 0;
 }
