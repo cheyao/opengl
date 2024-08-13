@@ -51,3 +51,5 @@ inline bool nearZero(float number, float epsilon = 0.001f) {
 	} \
 	}
 
+int launchThreadHelper(void* fn);
+

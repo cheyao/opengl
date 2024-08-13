@@ -115,6 +115,10 @@ Renderer::Renderer(Game* game)
 #else
 	ImGui_ImplOpenGL3_Init("#version 300 es");
 #endif
+
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
+	ImGui::NewFrame();
 #endif
 
 	mGL->printInfo();
@@ -247,6 +251,12 @@ void Renderer::draw() {
 
 		SDL_SetWindowSize(mWindow, mWidth, mHeight);
 	}
+#endif
+
+#ifdef IMGUI
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
+	ImGui::NewFrame();
 #endif
 }
 

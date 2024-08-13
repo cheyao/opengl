@@ -54,7 +54,7 @@ class Game {
 	void draw();
 	void setup();
 
-	void initWorld([[maybe_unused]] void* data);
+	void initWorld();
 
 	std::unique_ptr<class TextureManager> mTextures;
 	std::unique_ptr<class ShaderManager> mShaders;

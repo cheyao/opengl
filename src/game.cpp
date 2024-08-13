@@ -79,7 +79,7 @@ $$ |  $$\ $$ |  $$ |$$  __$$ |$$ |  $$ |      $$ |  $$ |$$  __$$ |$$ | $$ | $$ |
 	SDL_backpackShaderroySurface(icon);
 	*/
 
-	mRenderer->setWindowRelativeMouseMode(1);
+	mRenderer->setWindowRelativeMouseMode(0);
 
 	SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
 
@@ -105,12 +105,16 @@ void Game::setup() {
 	// NOTE: Camera must be initialized
 	new Player(this);
 
-	SDL_CreateThread(std::bind(&Game::initWorld, this), "", (void*)nullptr);
+	initWorld();
+
+	// SDL_CreateThread(std::bind(&Game::initWorld, this), "", (void*)nullptr);
+	// auto fn = std::function<class Fp>(std::bind(&Game::initWorld, this));
+	// SDL_CreateThread(launchThreadHelper, "", static_cast<void*>(&fn));
 
 	mTicks = SDL_GetTicks();
 }
 
-void Game::initWorld([[maybe_unused]] void* data) {
+void Game::initWorld() {
 	SDL_Log("Setting up game");
 
 	new World(this);
@@ -220,21 +224,13 @@ void Game::update() {
 
 void Game::gui() {
 #ifdef IMGUI
-	static bool demoMenu = false;
 	static bool wireframe = false;
-
-	// Update ImGui Frame
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL3_NewFrame();
-	ImGui::NewFrame();
 
 	/* Main menu */ {
 		ImGui::Begin("Main menu");
 
 		ImGuiIO& io = ImGui::GetIO();
-		ImGui::Text("Average %.3f ms/frame (%.1f FPS)", (1000.f / io.Framerate), io.Framerate);
-		ImGui::Text("%d vertices, %d indices (%d triangles)", io.MetricsRenderVertices, io.MetricsRenderIndices,
-			    io.MetricsRenderIndices / 3);
+		ImGui::Text("%.3f ms %.1f FPS", (1000.f / io.Framerate), io.Framerate);
 
 		Player* p = nullptr;
 		for (const auto& actor : mActors) {
@@ -244,23 +240,15 @@ void Game::gui() {
 			}
 		}
 		if (p == nullptr) {
-			return;
+			auto pos = p->getPosition();
+			ImGui::Text("Player position: %dx%dx%d", static_cast<int>(pos.x()), static_cast<int>(pos.y()),
+				    static_cast<int>(pos.z()));
 		}
 
-		auto pos = p->getPosition();
-		ImGui::Text("Player position: %dx%dx%d", static_cast<int>(pos.x()), static_cast<int>(pos.y()),
-			    static_cast<int>(pos.z()));
-
-		// ImGui::Checkbox("Debug", &debugMenu);
-		ImGui::Checkbox("Demo", &demoMenu);
 		ImGui::Checkbox("VSync", &mVsync);
 		ImGui::Checkbox("Wireframe", &wireframe);
 
 		ImGui::End();
-	}
-
-	if (demoMenu) {
-		ImGui::ShowDemoWindow(&demoMenu);
 	}
 
 #ifndef GLES
@@ -377,7 +365,7 @@ int Game::event(const SDL_Event& event) {
 }
 
 void Game::addActor(Actor* actor) {
-	if (SDL_TryLockMutex(mActorMutex) == SDL_MUTEX_TIMEDOUT) {
+	if (SDL_TryLockMutex(mActorMutex) != SDL_MUTEX_TIMEDOUT) {
 		mActors.emplace_back(actor);
 		SDL_UnlockMutex(mActorMutex);
 	} else {

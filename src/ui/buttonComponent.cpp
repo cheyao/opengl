@@ -15,7 +15,6 @@
 ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const Eigen::Vector2f padding)
 	: UIComponent(owner), mOnClick(nullptr), mOnRelease(nullptr), mPadding(padding), mCapture(0),
 	  mWidth(texture->getWidth()), mHeight(texture->getHeight()) {
-
 	const std::vector<float> vertices = {
 		0.0f,
 		0.0f,
@@ -76,17 +75,31 @@ void ButtonComponent::draw(const Shader* shader) {
 }
 
 void ButtonComponent::touch(const SDL_FingerID& finger, const float x, const float y, const bool lift) {
+	// TODO: Cleanup code
 	float bx = mPadding.x();
 	float by = mPadding.y();
 
+	if (std::isnan(bx)) {
+		bx = static_cast<float>(mOwner->getGame()->getWidth()) / 2 - static_cast<float>(mWidth) / 2;
+	}
+
 	if (bx < 0) {
 		bx += mOwner->getGame()->getWidth();
+	}
+
+	if (std::isnan(by)) {
+		by = static_cast<float>(mOwner->getGame()->getHeight()) / 2 + static_cast<float>(mHeight) / 2;
 	}
 
 	by = -by;
 	if (by < 0) {
 		by += mOwner->getGame()->getHeight();
 	}
+
+	assert(!std::isnan(x) && !std::isinf(x));
+	assert(!std::isnan(y) && !std::isinf(y));
+	assert(!std::isnan(bx) && !std::isinf(bx));
+	assert(!std::isnan(by) && !std::isinf(by));
 
 	if (!lift) {
 		if ((bx <= x && x < (bx + mWidth)) && (by <= y && y < (by + mHeight))) {
