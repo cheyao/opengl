@@ -58,7 +58,7 @@ Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScr
 		1.0f, 1.0f, // Top right
 		1.0f, 0.0f, // Bot right
 	};
-	const std::vector<unsigned int> indices = {0, 1, 2, 1, 3, 2};
+	const std::vector<unsigned int> indices = {0, 1, 2, 3, 2, 1};
 	const std::vector<std::pair<Texture* const, TextureType>> textures = {};
 
 	Shader* mShader = mOwner->getShader("framebuffer.vert", "framebuffer.frag");
@@ -89,7 +89,7 @@ void Framebuffer::swap() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 #ifdef DEBUG
-	glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
+	glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 #endif
 
@@ -103,6 +103,7 @@ void Framebuffer::swap() {
 	mScreenMesh->draw(mShader);
 
 #ifdef IMGUI
+	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #endif
 

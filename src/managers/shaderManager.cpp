@@ -31,7 +31,6 @@ Shader* ShaderManager::get(const std::string& vert, const std::string& frag, con
 }
 
 // TODO: Unloading when out of memory
-
 ShaderManager::~ShaderManager() {
 	// Default shader might get used multiple times
 	Shader* def = this->get("default.vert", "default.frag");
@@ -47,7 +46,7 @@ ShaderManager::~ShaderManager() {
 	delete def;
 }
 
-void ShaderManager::reload(bool full) {
+void ShaderManager::reload([[maybe_unused]] bool full) {
 	SDL_Log("Reloading shaders");
 
 	for (auto& [names, shader] : mTextures) {
@@ -74,11 +73,6 @@ void ShaderManager::reload(bool full) {
 
 			shader = this->get("default.vert", "default.frag");
 		}
-
-		/*
-		mLastEdit[shader] = lastEditTime;
-		*/
-		(void)full;
 #else
 		try {
 			delete shader;
@@ -86,6 +80,7 @@ void ShaderManager::reload(bool full) {
 			shader = newTexture;
 		} catch (const std::runtime_error& error) {
 			shader = this->get("default.vert", "default.frag");
+
 			throw error;
 		}
 #endif

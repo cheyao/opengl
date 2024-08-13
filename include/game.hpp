@@ -8,10 +8,6 @@
 #include <string>
 #include <vector>
 
-#ifdef HOT
-#include <filesystem>
-#endif
-
 class Game {
       public:
 	Game();
@@ -55,8 +51,6 @@ class Game {
 	void draw();
 	void setup();
 
-	void initWorld();
-
 	std::unique_ptr<class TextureManager> mTextures;
 	std::unique_ptr<class ShaderManager> mShaders;
 	std::unique_ptr<class EventManager> mEventManager;
@@ -74,8 +68,4 @@ class Game {
 
 	bool mPaused;
 	bool mVsync;
-
-#ifdef HOT
-	std::filesystem::file_time_type last_time;
-#endif
 };

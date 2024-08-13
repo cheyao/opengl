@@ -130,24 +130,27 @@ cmake
 
 # TODO
 
+- [ ] Preload
 - [ ] Add functional hot reload
-- [ ] Game pause + resume things
+- [x] Game pause + resume things
 - [ ] Save state
 - [ ] Debug menu with ImGUI and item names
-- [ ] Read programming gems
+- [ ] Read gpu gems
 - [ ] Better component and actors
 - [x] Android build
     - [x] Android UI
 - [x] Emscripten build
     - [ ] Web detect android
 - [ ] Windows build
-- [ ] Pause menu etc
+- [x] Pause menu etc
+    - [ ] Settings
 - [ ] Multitouch
-- [ ] UI
+- [x] UI
 - [ ] Multithreading
 - [ ] TTF
 - [ ] Localization
 - [ ] UI Scaling
+- [ ] Shadows
 
 # Notes
 

@@ -5,6 +5,7 @@
 #include "opengl/renderer.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_events.h>
 
 EventManager::EventManager(class Game* game) : mGame(game) {
 	mKeys = new bool[SDL_NUM_SCANCODES];
@@ -56,6 +57,24 @@ int EventManager::manageEvent(const SDL_Event& event) {
 			for (const auto& ui : mGame->getUIs()) {
 				ui->touch(event.tfinger.fingerID, event.tfinger.x * mGame->getWidth(),
 					  mGame->getHeight() - event.tfinger.y * mGame->getHeight(), true);
+			}
+
+			break;
+		}
+
+		case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+			for (const auto& ui : mGame->getUIs()) {
+				ui->touch(event.button.which, event.button.x * mGame->getWidth(),
+					  mGame->getHeight() - event.button.y * mGame->getHeight(), false);
+			}
+
+			break;
+		}
+
+		case SDL_EVENT_MOUSE_BUTTON_UP: {
+			for (const auto& ui : mGame->getUIs()) {
+				ui->touch(event.button.which, event.button.x * mGame->getWidth(),
+					  mGame->getHeight() - event.button.y * mGame->getHeight(), true);
 			}
 
 			break;

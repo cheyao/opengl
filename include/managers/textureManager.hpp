@@ -3,10 +3,6 @@
 #include <string>
 #include <unordered_map>
 
-#ifdef HOT
-#include <filesystem>
-#endif
-
 class TextureManager {
   public:
 	explicit TextureManager(const std::string& path);
@@ -24,8 +20,4 @@ class TextureManager {
 	std::unordered_map<std::string, class Texture*> mTextures;
 
 	std::string mPath;
-
-#ifdef HOT
-	std::unordered_map<class Texture*, std::filesystem::file_time_type> mLastEdit;
-#endif
 };

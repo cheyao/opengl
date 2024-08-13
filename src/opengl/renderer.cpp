@@ -111,10 +111,6 @@ Renderer::Renderer(Game* game)
 #else
 	ImGui_ImplOpenGL3_Init("#version 300 es");
 #endif
-
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL3_NewFrame();
-	ImGui::NewFrame();
 #endif
 
 	mGL->printInfo();
@@ -127,30 +123,8 @@ Renderer::Renderer(Game* game)
 
 	// NOTE: Uncomment if testing framebuffer module
 	// glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	// SDL_SetWindowRelativeMouseMode(mWindow, 1);
 
-	// Ortho for UI
-	Eigen::Affine3f ortho = Eigen::Affine3f::Identity();
-
-	constexpr const static float left = 0.0f;
-	const float right = mWidth;
-	const float top = mHeight;
-	constexpr const static float bottom = 0.0f;
-	constexpr const static float near = 0.1f;
-	constexpr const static float far = 100.0f;
-
-	ortho(0, 0) = 2.0f / (right - left);
-	ortho(1, 1) = 2.0f / (top - bottom);
-	ortho(2, 2) = -2.0f / (far - near);
-	ortho(3, 3) = 1;
-
-	ortho(0, 3) = -(right + left) / (right - left);
-	ortho(1, 3) = -(top + bottom) / (top - bottom);
-	ortho(2, 3) = -(far + near) / (far - near);
-
-	Shader* UIshader = mGame->getShader("ui.vert", "ui.frag");
-	UIshader->activate();
-	UIshader->set("proj", ortho);
+	setUIMatrix();
 }
 
 /* NOTE:
@@ -172,35 +146,14 @@ void Renderer::setDemensions(int width, int height) {
 	mCamera->project();
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
 
-	Eigen::Affine3f ortho = Eigen::Affine3f::Identity();
-
-	constexpr const static float left = 0.0f;
-	const float right = mWidth;
-	const float top = mHeight;
-	constexpr const static float bottom = 0.0f;
-	constexpr const static float near = 0.1f;
-	constexpr const static float far = 100.0f;
-
-	ortho(0, 0) = 2.0f / (right - left);
-	ortho(1, 1) = 2.0f / (top - bottom);
-	ortho(2, 2) = -2.0f / (far - near);
-	ortho(3, 3) = 1;
-
-	ortho(0, 3) = -(right + left) / (right - left);
-	ortho(1, 3) = -(top + bottom) / (top - bottom);
-	ortho(2, 3) = -(far + near) / (far - near);
-
-	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
-	UIshader->activate();
-	UIshader->set("proj", ortho);
+	setUIMatrix();
 }
 
 void Renderer::draw() {
 #ifdef DEBUG
-	glClearColor(0.1f, 0.0f, 0.1f, 1.0f);
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #else
-	// One of the longest calls
 	glClear(GL_DEPTH_BUFFER_BIT);
 #endif
 
@@ -228,10 +181,6 @@ void Renderer::draw() {
 		}
 	}
 
-#ifdef IMGUI
-	ImGui::Render();
-#endif
-
 	mFramebuffer->swap();
 
 #ifdef __EMSCRIPTEN__
@@ -242,12 +191,6 @@ void Renderer::draw() {
 
 		SDL_SetWindowSize(mWindow, mWidth, mHeight);
 	}
-#endif
-
-#ifdef IMGUI
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL3_NewFrame();
-	ImGui::NewFrame();
 #endif
 }
 
@@ -336,29 +279,34 @@ void Renderer::setLights(Shader* shader) const {
 	shader->set("pointLight.constant", constant);
 	shader->set("pointLight.linear", linear);
 	shader->set("pointLight.quadratic", quadratic);
-
-	// shader->set("spotLight.position", mCamera->getOwner()->getPosition());
-	// shader->set("spotLight.direction", mCamera->getOwner()->getForward());
-	// shader->set("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-	// shader->set("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-	// shader->set("spotLight.specular", 1.0f, 1.0f, 1.0f);
-	// shader->set("spotLight.constant", 1.0f);
-	// shader->set("spotLight.linear", 0.09f);
-	// shader->set("spotLight.quadratic", 0.032f);
-	// shader->set("spotLight.cutOff", cos(toRadians(12.5f)));
-	// shader->set("spotLight.outerCutOff", cos(toRadians(15.0f)));
 }
 
 void Renderer::setWindowRelativeMouseMode(SDL_bool mode) const {
 	if (SDL_SetWindowRelativeMouseMode(mWindow, mode) != 0) {
 		SDL_Log("Failed to set relative mouse mode: %s", SDL_GetError());
 	}
+}
 
-	/*
-	if (mode) {
-		SDL_HideCursor();
-	} else {
-		SDL_ShowCursor();
-	}
-	*/
+void Renderer::setUIMatrix() const {
+	Eigen::Affine3f ortho = Eigen::Affine3f::Identity();
+
+	constexpr const static float left = 0.0f;
+	const float right = mWidth;
+	const float top = mHeight;
+	constexpr const static float bottom = 0.0f;
+	constexpr const static float near = 0.1f;
+	constexpr const static float far = 100.0f;
+
+	ortho(0, 0) = 2.0f / (right - left);
+	ortho(1, 1) = 2.0f / (top - bottom);
+	ortho(2, 2) = -2.0f / (far - near);
+	ortho(3, 3) = 1;
+
+	ortho(0, 3) = -(right + left) / (right - left);
+	ortho(1, 3) = -(top + bottom) / (top - bottom);
+	ortho(2, 3) = -(far + near) / (far - near);
+
+	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
+	UIshader->activate();
+	UIshader->set("proj", ortho);
 }

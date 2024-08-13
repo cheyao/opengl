@@ -24,6 +24,5 @@ MainMenu::MainMenu(class Game* game) : UIScreen(game) {
 		game->getRenderer()->setWindowRelativeMouseMode(SDL_TRUE);
 		game->setPause(false);
 		game->removeUI(this);
-		SDL_Log("Pressed");
 	});
 }

@@ -19,12 +19,17 @@ Texture::~Texture() {
 }
 
 void Texture::activate(const unsigned int& num) const {
+	/*
+	[[unlikely]] if (!mLoaded) {
+		this->load();
+	}
+	*/
+
 	glActiveTexture(GL_TEXTURE0 + num);
 	glBindTexture(GL_TEXTURE_2D, mID);
 }
 
 // NOTE: Maybe load on demand?
-
 void Texture::load() {
 	SDL_Log("Loading texture %s", name.data());
 

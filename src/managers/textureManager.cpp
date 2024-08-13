@@ -39,7 +39,6 @@ Texture* TextureManager::get(const std::string& name) {
 }
 
 // TODO: Unloading when out of memory
-
 TextureManager::~TextureManager() {
 	for (auto& [_, texture] : mTextures) {
 		delete texture;

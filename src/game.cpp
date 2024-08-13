@@ -80,16 +80,6 @@ void Game::setup() {
 
 	SDL_Log("Successfully initialized OpenGL and UI\n");
 
-	initWorld();
-
-	// SDL_CreateThread(std::bind(&Game::initWorld, this), "", (void*)nullptr);
-	// auto fn = std::function<class Fp>(std::bind(&Game::initWorld, this));
-	// SDL_CreateThread(launchThreadHelper, "", static_cast<void*>(&fn));
-
-	mTicks = SDL_GetTicks();
-}
-
-void Game::initWorld() {
 	SDL_Log("Setting up game");
 
 	new World(this);
@@ -98,7 +88,28 @@ void Game::initWorld() {
 	new Player(this);
 
 	SDL_Log("Successfully initialized Game World");
+
+	// SDL_CreateThread(initWorld, "Game setup", this);
+
+	mTicks = SDL_GetTicks();
 }
+
+/*
+int Game::initWorld(void* gameptr) {
+	SDL_Log("Setting up game");
+
+	Game* game = static_cast<Game*>(gameptr);
+
+	new World(game);
+	new Cube(game);
+	new Sun(game);
+	new Player(game);
+
+	SDL_Log("Successfully initialized Game World");
+
+	return 0;
+}
+*/
 
 int Game::iterate() {
 	gui();
@@ -150,7 +161,7 @@ void Game::update() {
 	if (delta > 0.05f) {
 		delta = 0.05f;
 
-		SDL_Log("Delta > 0.5f, skipping");
+		SDL_Log("Delta > 0.5f, cutting frame short");
 	}
 	mTicks = SDL_GetTicks();
 
@@ -178,12 +189,16 @@ void Game::update() {
 	}
 
 	for (const auto& ui : mUI) {
-		[[likely]] if (ui->getState() == UIScreen::Active) { ui->update(delta); }
+		if (ui->getState() == UIScreen::Active) { ui->update(delta); }
 	}
 }
 
 void Game::gui() {
 #ifdef IMGUI
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
+	ImGui::NewFrame();
+
 	static bool wireframe = false;
 
 	/* Main menu */ {

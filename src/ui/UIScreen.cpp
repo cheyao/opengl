@@ -3,7 +3,7 @@
 #include "game.hpp"
 #include "ui/UIComponent.hpp"
 
-UIScreen::UIScreen(Game* game) : mGame(game) { game->addUI(this); }
+UIScreen::UIScreen(Game* game) : mGame(game), mState(UIScreen::Active) { game->addUI(this); }
 
 UIScreen::~UIScreen() {
 	mGame->removeUI(this);
