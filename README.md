@@ -147,6 +147,7 @@ cmake
 - [ ] Multithreading
 - [ ] TTF
 - [ ] Localization
+- [ ] UI Scaling
 
 # Notes
 

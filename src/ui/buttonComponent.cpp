@@ -17,10 +17,18 @@ ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const 
 	  mWidth(texture->getWidth()), mHeight(texture->getHeight()) {
 
 	const std::vector<float> vertices = {
-		000.0f, 000.0f, -50.0f, // TL
-		000.0f, 100.0f, -50.0f, // BL
-		100.0f, 000.0f, -50.0f, // TR
-		100.0f, 100.0f, -50.0f	// BR
+		0.0f,
+		0.0f,
+		0.0f, // TL
+		0.0f,
+		static_cast<float>(mHeight),
+		0.0f, // BL
+		static_cast<float>(mWidth),
+		0.0f,
+		0.0f, // TR
+		static_cast<float>(mWidth),
+		static_cast<float>(mHeight),
+		0.0f // BR
 	};
 	const std::vector<float> texturePos = {
 		1.0f, 1.0f, // TR
@@ -46,7 +54,6 @@ void ButtonComponent::draw(const Shader* shader) {
 	if (std::isnan(x)) {
 		x = static_cast<float>(mOwner->getGame()->getWidth()) / 2 - static_cast<float>(mWidth) / 2;
 	}
-	SDL_Log("%f", x);
 
 	if (x < 0) {
 		x += mOwner->getGame()->getWidth();

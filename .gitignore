@@ -9,6 +9,7 @@ build/
 rel/
 web/
 webrel/
+nogui/
 gcc/
 and/
 .compile_commands

@@ -154,6 +154,8 @@ Renderer::Renderer(Game* game)
 	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
 	UIshader->activate();
 	UIshader->set("proj", ortho);
+	// UIshader->set("width", mWidth);
+	// UIshader->set("height", mHeight);
 }
 
 /* NOTE:
@@ -197,6 +199,10 @@ void Renderer::setDemensions(int width, int height) {
 	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
 	UIshader->activate();
 	UIshader->set("proj", ortho);
+	/*
+	UIshader->set("width", mWidth);
+	UIshader->set("height", mHeight);
+	*/
 }
 
 void Renderer::draw() {
@@ -222,7 +228,7 @@ void Renderer::draw() {
 
 	glDisable(GL_DEPTH_TEST);
 
-	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
+	Shader* UIshader = mGame->getShader("ui.vert", "ui.frag");
 	for (const auto& ui : mGame->getUIs()) {
 		ui->draw(UIshader);
 	}

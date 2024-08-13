@@ -9,8 +9,12 @@
 #include "managers/textureManager.hpp"
 #include "opengl/renderer.hpp"
 #include "third_party/Eigen/Core"
-#include "ui/controlUI.hpp"
 #include "ui/mainMenu.hpp"
+#include "utils.hpp"
+
+#ifdef ANDROID
+#include "ui/controlUI.hpp"
+#endif
 
 #include <SDL3/SDL.h>
 #include <algorithm>
@@ -27,8 +31,16 @@
 #endif
 
 Game::Game()
-	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mUpdatingActors(false), mTicks(0), mBasePath(""),
+	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mActorMutex(SDL_CreateMutex()), mTicks(0), mBasePath(""),
 	  mPaused(false), mVsync(true) {
+	if (mActorMutex == nullptr) {
+		SDL_Log("Failed to create actor mutex: %s", SDL_GetError());
+
+		ERROR_BOX("Failed to create mutex");
+
+		throw std::runtime_error("Failed to create mutex");
+	}
+
 	const char* basepath = SDL_GetBasePath();
 	if (basepath != nullptr) {
 		mBasePath = std::string(basepath);
@@ -88,23 +100,31 @@ void Game::setup() {
 #endif
 	new MainMenu(this);
 
+	SDL_Log("Successfully initialized OpenGL and UI\n");
+
+	// NOTE: Camera must be initialized
+	new Player(this);
+
+	SDL_CreateThread(std::bind(&Game::initWorld, this), "", (void*)nullptr);
+
+	mTicks = SDL_GetTicks();
+}
+
+void Game::initWorld([[maybe_unused]] void* data) {
 	SDL_Log("Setting up game");
 
 	new World(this);
-	new Player(this);
 	new Cube(this);
 	new Sun(this);
 
-	SDL_Log("Successfully initialized OpenGL and game\n");
-
-	mTicks = SDL_GetTicks();
+	SDL_Log("Successfully initialized Game World");
 }
 
 int Game::iterate() {
 	if (mPaused) {
 		mRenderer->setWindowRelativeMouseMode(0);
 
-		SDL_Delay(64);
+		SDL_Delay(16);
 
 		mTicks = SDL_GetTicks();
 
@@ -155,11 +175,11 @@ void Game::input() {
 		ui->processInput(mKeys);
 	}
 
-	mUpdatingActors = true;
+	SDL_LockMutex(mActorMutex);
 	for (const auto& actor : mActors) {
 		actor->input(mKeys);
 	}
-	mUpdatingActors = false;
+	SDL_UnlockMutex(mActorMutex);
 }
 
 void Game::update() {
@@ -173,11 +193,11 @@ void Game::update() {
 	mTicks = SDL_GetTicks();
 
 	// Update the Actors
-	mUpdatingActors = true;
+	SDL_LockMutex(mActorMutex);
 	for (const auto& actor : mActors) {
 		actor->update(delta);
 	}
-	mUpdatingActors = false;
+	SDL_UnlockMutex(mActorMutex);
 
 	// Append the pending actors
 	std::copy(mPendingActors.begin(), mPendingActors.end(), std::back_inserter(mActors));
@@ -357,8 +377,9 @@ int Game::event(const SDL_Event& event) {
 }
 
 void Game::addActor(Actor* actor) {
-	if (!mUpdatingActors) {
+	if (SDL_TryLockMutex(mActorMutex) == SDL_MUTEX_TIMEDOUT) {
 		mActors.emplace_back(actor);
+		SDL_UnlockMutex(mActorMutex);
 	} else {
 		mPendingActors.emplace_back(actor);
 	}
@@ -410,6 +431,8 @@ Game::~Game() {
 	}
 
 	delete mRenderer;
+
+	SDL_DestroyMutex(mActorMutex);
 }
 
 [[nodiscard]] int Game::getWidth() const { return mRenderer->getWidth(); }
