@@ -3,7 +3,9 @@
 #include <SDL3/SDL.h>
 #include <vector>
 
-// TODO: Components?
+// TODO: Component priority
+
+// NOTE: Component order matters!
 class UIScreen {
       public:
 	explicit UIScreen(class Game* game);

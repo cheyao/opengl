@@ -30,7 +30,8 @@ class Game {
 	[[nodiscard]] int getWidth() const;
 	[[nodiscard]] int getHeight() const;
 
-	void pause() { mPaused = true; }
+	void setPause(bool val) { mPaused = val; }
+	[[nodiscard]] bool isPaused() const { return mPaused; }
 
 	[[nodiscard]] class Texture* getTexture(const std::string& name);
 	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,

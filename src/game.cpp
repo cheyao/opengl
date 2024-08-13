@@ -31,8 +31,8 @@
 #endif
 
 Game::Game()
-	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mActorMutex(SDL_CreateMutex()), mTicks(0), mBasePath(""),
-	  mPaused(false), mVsync(true) {
+	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mActorMutex(SDL_CreateMutex()), mTicks(0),
+	  mBasePath(""), mPaused(false), mVsync(true) {
 	if (mActorMutex == nullptr) {
 		SDL_Log("Failed to create actor mutex: %s", SDL_GetError());
 
@@ -98,7 +98,7 @@ void Game::setup() {
 #ifdef ANDROID
 	new ControlUI(this);
 #endif
-	new MainMenu(this);
+	// new MainMenu(this);
 
 	SDL_Log("Successfully initialized OpenGL and UI\n");
 
@@ -125,16 +125,6 @@ void Game::initWorld() {
 }
 
 int Game::iterate() {
-	if (mPaused) {
-		mRenderer->setWindowRelativeMouseMode(0);
-
-		SDL_Delay(16);
-
-		mTicks = SDL_GetTicks();
-
-		return 0;
-	}
-
 #ifdef HOT
 	if (std::filesystem::last_write_time(fullPath("shaders")) != last_time) {
 		last_time = std::filesystem::last_write_time(fullPath("shaders"));
@@ -179,11 +169,11 @@ void Game::input() {
 		ui->processInput(mKeys);
 	}
 
-	SDL_LockMutex(mActorMutex);
-	for (const auto& actor : mActors) {
-		actor->input(mKeys);
+	if (!mPaused) {
+		for (const auto& actor : mActors) {
+			actor->input(mKeys);
+		}
 	}
-	SDL_UnlockMutex(mActorMutex);
 }
 
 void Game::update() {
@@ -196,16 +186,18 @@ void Game::update() {
 	}
 	mTicks = SDL_GetTicks();
 
-	// Update the Actors
-	SDL_LockMutex(mActorMutex);
-	for (const auto& actor : mActors) {
-		actor->update(delta);
+	if (!mPaused) {
+		// Update the Actors if not paused
+		for (const auto& actor : mActors) {
+			actor->update(delta);
+		}
 	}
-	SDL_UnlockMutex(mActorMutex);
 
 	// Append the pending actors
+	SDL_LockMutex(mActorMutex);
 	std::copy(mPendingActors.begin(), mPendingActors.end(), std::back_inserter(mActors));
 	mPendingActors.clear();
+	SDL_UnlockMutex(mActorMutex);
 
 	// Remove the dead Actors
 	std::vector<const Actor*> deadActors;
@@ -232,6 +224,7 @@ void Game::gui() {
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::Text("%.3f ms %.1f FPS", (1000.f / io.Framerate), io.Framerate);
 
+		/*
 		Player* p = nullptr;
 		for (const auto& actor : mActors) {
 			if (dynamic_cast<Player*>(actor) != nullptr) {
@@ -244,6 +237,7 @@ void Game::gui() {
 			ImGui::Text("Player position: %dx%dx%d", static_cast<int>(pos.x()), static_cast<int>(pos.y()),
 				    static_cast<int>(pos.z()));
 		}
+		*/
 
 		ImGui::Checkbox("VSync", &mVsync);
 		ImGui::Checkbox("Wireframe", &wireframe);
@@ -286,7 +280,19 @@ int Game::event(const SDL_Event& event) {
 		case SDL_EVENT_KEY_DOWN: {
 			switch (event.key.key) {
 				case SDLK_ESCAPE: {
-					// return 1;
+					MainMenu* menu = nullptr;
+					for (const auto& element : mUI) {
+						menu = dynamic_cast<MainMenu*>(element);
+
+						if (menu != nullptr) {
+							break;
+						}
+					}
+
+					if (menu == nullptr) {
+						// No main menu present
+						new MainMenu(this);
+					}
 				}
 				case SDLK_F1: {
 					rel = !rel;
@@ -295,11 +301,10 @@ int Game::event(const SDL_Event& event) {
 					break;
 				}
 				case SDLK_F2: {
-#ifdef DEBUG
 					if (mPaused) {
 						mPaused = false;
 					}
-#endif
+
 					// TODO: Maybe textures
 					// mTextures->reload(true);
 					mShaders->reload(true);
@@ -365,12 +370,8 @@ int Game::event(const SDL_Event& event) {
 }
 
 void Game::addActor(Actor* actor) {
-	if (SDL_TryLockMutex(mActorMutex) != SDL_MUTEX_TIMEDOUT) {
-		mActors.emplace_back(actor);
-		SDL_UnlockMutex(mActorMutex);
-	} else {
-		mPendingActors.emplace_back(actor);
-	}
+	// Everything goes to pending
+	mPendingActors.emplace_back(actor);
 }
 
 void Game::removeActor(Actor* actor) {

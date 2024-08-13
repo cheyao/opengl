@@ -103,7 +103,7 @@ int SDL_AppIterate(void* appstate) {
 		SDL_Log("Main.cpp: Uncaught exception: %s", error.what());
 
 #ifdef DEBUG
-		static_cast<Game*>(appstate)->pause();
+		static_cast<Game*>(appstate)->setPause(true);
 #endif
 
 		return 0;

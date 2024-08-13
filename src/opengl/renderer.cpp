@@ -155,7 +155,7 @@ Renderer::Renderer(Game* game)
 	ortho(2, 3) = -(far + near) / (far - near);
 	// (y, x)
 
-	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
+	Shader* UIshader = mGame->getShader("ui.vert", "ui.frag");
 	UIshader->activate();
 	UIshader->set("proj", ortho);
 	// UIshader->set("width", mWidth);
@@ -198,15 +198,10 @@ void Renderer::setDemensions(int width, int height) {
 	ortho(0, 3) = -(right + left) / (right - left);
 	ortho(1, 3) = -(top + bottom) / (top - bottom);
 	ortho(2, 3) = -(far + near) / (far - near);
-	// (y, x)
 
 	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
 	UIshader->activate();
 	UIshader->set("proj", ortho);
-	/*
-	UIshader->set("width", mWidth);
-	UIshader->set("height", mHeight);
-	*/
 }
 
 void Renderer::draw() {
@@ -214,20 +209,23 @@ void Renderer::draw() {
 	glClearColor(0.1f, 0.0f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #else
+	// One of the longest calls
 	glClear(GL_DEPTH_BUFFER_BIT);
 #endif
 
-	assert(mCamera != nullptr && "Did you forget to uncomment `new Player(this)`?");
+	if (!mGame->isPaused()) {
+		assert(mCamera != nullptr && "Did you forget to uncomment `new Player(this)`?");
 
-	mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
+		mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
 
-	for (const auto& sprite : mDrawables) {
-		Shader* const shader = sprite->getShader();
-		shader->activate();
-		shader->set("viewPos", mCamera->getOwner()->getPosition());
+		for (const auto& sprite : mDrawables) {
+			Shader* const shader = sprite->getShader();
+			shader->activate();
+			shader->set("viewPos", mCamera->getOwner()->getPosition());
 
-		setLights(shader);
-		sprite->draw();
+			setLights(shader);
+			sprite->draw();
+		}
 	}
 
 	glDisable(GL_DEPTH_TEST);

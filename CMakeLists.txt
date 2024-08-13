@@ -70,6 +70,7 @@ src/actors/sun.cpp
 src/actors/cube.cpp
 
 src/ui/buttonComponent.cpp
+src/ui/backgroundComponent.cpp
 src/ui/controlUI.cpp
 src/ui/mainMenu.cpp
 src/ui/UIComponent.cpp
@@ -107,6 +108,7 @@ include/actors/sun.hpp
 include/actors/cube.hpp
 
 include/ui/buttonComponent.hpp
+include/ui/backgroundComponent.hpp
 include/ui/controlUI.hpp
 include/ui/mainMenu.hpp
 include/ui/UIComponent.hpp
