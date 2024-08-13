@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
+#include <unordered_map>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -291,11 +292,12 @@ void Renderer::setUIMatrix() const {
 	Eigen::Affine3f ortho = Eigen::Affine3f::Identity();
 
 	constexpr const static float left = 0.0f;
-	const float right = mWidth;
-	const float top = mHeight;
 	constexpr const static float bottom = 0.0f;
 	constexpr const static float near = 0.1f;
 	constexpr const static float far = 100.0f;
+
+	const float right = mWidth;
+	const float top = mHeight;
 
 	ortho(0, 0) = 2.0f / (right - left);
 	ortho(1, 1) = 2.0f / (top - bottom);
@@ -309,4 +311,6 @@ void Renderer::setUIMatrix() const {
 	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
 	UIshader->activate();
 	UIshader->set("proj", ortho);
+
+	SDL_Log("Y");
 }

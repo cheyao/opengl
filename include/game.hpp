@@ -40,7 +40,8 @@ class Game {
 
 	void addUI(class UIScreen* ui) { mUI.emplace_back(ui); };
 	void removeUI(class UIScreen* ui);
-	[[nodiscard]] const std::vector<class UIScreen*>& getUIs() { return mUI; };
+	[[nodiscard]] const std::vector<class UIScreen*>& getUIs() const { return mUI; };
+	[[nodiscard]] float getScale() const { return mUIScale; };
 
 	void setKey(const size_t key, const bool val);
 
@@ -62,6 +63,7 @@ class Game {
 	struct SDL_Mutex* mActorMutex;
 
 	std::vector<class UIScreen*> mUI;
+	float mUIScale;
 
 	uint64_t mTicks;
 	std::string mBasePath;

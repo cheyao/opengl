@@ -51,7 +51,7 @@ void ButtonComponent::draw(const Shader* shader) {
 	float y = mPadding.y();
 
 	if (std::isnan(x)) {
-		x = static_cast<float>(mOwner->getGame()->getWidth()) / 2 - static_cast<float>(mWidth) / 2;
+		x = static_cast<float>(mOwner->getGame()->getWidth()) / 2 - static_cast<float>(mWidth) * mOwner->getGame()->getScale() / 2;
 	}
 
 	if (x < 0) {
@@ -59,7 +59,7 @@ void ButtonComponent::draw(const Shader* shader) {
 	}
 
 	if (std::isnan(y)) {
-		y = static_cast<float>(mOwner->getGame()->getHeight()) / 2 + static_cast<float>(mHeight) / 2;
+		y = static_cast<float>(mOwner->getGame()->getHeight()) / 2 + static_cast<float>(mHeight) * mOwner->getGame()->getScale() / 2;
 	}
 
 	y = -y;
@@ -68,6 +68,7 @@ void ButtonComponent::draw(const Shader* shader) {
 	}
 
 	model.translate(Eigen::Vector3f(x, y, 0.0f));
+	model.scale(mOwner->getGame()->getScale());
 
 	shader->set("model", model);
 
@@ -76,41 +77,44 @@ void ButtonComponent::draw(const Shader* shader) {
 
 void ButtonComponent::touch(const SDL_FingerID& finger, const float x, const float y, const bool lift) {
 	// TODO: Cleanup code
-	float bx = mPadding.x();
-	float by = mPadding.y();
+	float buttonX = mPadding.x();
+	float buttonY = mPadding.y();
 
-	if (std::isnan(bx)) {
-		bx = static_cast<float>(mOwner->getGame()->getWidth()) / 2 - static_cast<float>(mWidth) / 2;
+	if (std::isnan(buttonX)) {
+		buttonX = static_cast<float>(mOwner->getGame()->getWidth()) / 2 - static_cast<float>(mWidth) * mOwner->getGame()->getScale() / 2;
 	}
 
-	if (bx < 0) {
-		bx += mOwner->getGame()->getWidth();
+	if (buttonX < 0) {
+		buttonX += mOwner->getGame()->getWidth();
 	}
 
-	if (std::isnan(by)) {
-		by = static_cast<float>(mOwner->getGame()->getHeight()) / 2 + static_cast<float>(mHeight) / 2;
+
+	if (std::isnan(buttonY)) {
+		buttonY = static_cast<float>(mOwner->getGame()->getHeight()) / 2 + static_cast<float>(mHeight) * mOwner->getGame()->getScale() / 2;
 	}
 
-	by = -by;
-	if (by < 0) {
-		by += mOwner->getGame()->getHeight();
+	buttonY = -buttonY;
+	if (buttonY < 0) {
+		buttonY += mOwner->getGame()->getHeight();
 	}
 
 	assert(!std::isnan(x) && !std::isinf(x));
 	assert(!std::isnan(y) && !std::isinf(y));
-	assert(!std::isnan(bx) && !std::isinf(bx));
-	assert(!std::isnan(by) && !std::isinf(by));
+	assert(!std::isnan(buttonX) && !std::isinf(buttonX));
+	assert(!std::isnan(buttonY) && !std::isinf(buttonY));
 
-	if (!lift) {
-		if ((bx <= x && x < (bx + mWidth)) && (by <= y && y < (by + mHeight))) {
+	buttonX *= mOwner->getGame()->getScale();
+	buttonY *= mOwner->getGame()->getScale();
+
+	if ((buttonX <= x && x < ((buttonX + mWidth) * mOwner->getGame()->getScale())) &&
+	    (buttonY <= y && y < ((buttonY + mHeight) * mOwner->getGame()->getScale()))) {
+		if (!lift) {
 			if (mOnClick != nullptr) {
 				mOnClick();
 			}
 
 			mCapture = finger;
-		}
-	} else if (mCapture != 0 && finger == mCapture) {
-		if ((bx <= x && x < (bx + mWidth)) && (by <= y && y < (by + mHeight))) {
+		} else if (mCapture != 0 && finger == mCapture) {
 			if (mOnRelease != nullptr) {
 				mOnRelease();
 			}

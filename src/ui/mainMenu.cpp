@@ -14,6 +14,7 @@
 MainMenu::MainMenu(class Game* game) : UIScreen(game) {
 	game->getRenderer()->setWindowRelativeMouseMode(SDL_FALSE);
 	game->setPause(true);
+	game->getRenderer()->setWindowRelativeMouseMode(SDL_FALSE);
 
 	new BackgroundComponent(this, Eigen::Vector3f(1.0f, 0.0f, 0.0f));
 
@@ -24,5 +25,6 @@ MainMenu::MainMenu(class Game* game) : UIScreen(game) {
 		game->getRenderer()->setWindowRelativeMouseMode(SDL_TRUE);
 		game->setPause(false);
 		game->removeUI(this);
+		game->getRenderer()->setWindowRelativeMouseMode(SDL_TRUE);
 	});
 }

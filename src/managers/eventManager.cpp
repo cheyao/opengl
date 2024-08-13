@@ -1,8 +1,8 @@
 #include "managers/eventManager.hpp"
 
 #include "game.hpp"
-#include "ui/mainMenu.hpp"
 #include "opengl/renderer.hpp"
+#include "ui/mainMenu.hpp"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
@@ -20,8 +20,12 @@ int EventManager::manageEvent(const SDL_Event& event) {
 	switch (event.type) {
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 		case SDL_EVENT_QUIT: {
+
+			// TODO: SDL_EVENT_LOW_MEMORY
 			return 1;
 		}
+
+		// TODO: SDL_EVENT_LOW_MEMORY
 
 		case SDL_EVENT_KEY_DOWN: {
 			if (manageKeyboardEvent(event) != 0) {
@@ -32,6 +36,7 @@ int EventManager::manageEvent(const SDL_Event& event) {
 
 			break;
 		}
+
 		case SDL_EVENT_KEY_UP: {
 			mKeys[event.key.scancode] = false;
 
@@ -64,8 +69,8 @@ int EventManager::manageEvent(const SDL_Event& event) {
 
 		case SDL_EVENT_MOUSE_BUTTON_DOWN: {
 			for (const auto& ui : mGame->getUIs()) {
-				ui->touch(event.button.which, event.button.x * mGame->getWidth(),
-					  mGame->getHeight() - event.button.y * mGame->getHeight(), false);
+				ui->touch(event.button.which, event.button.x, mGame->getHeight() - event.button.y,
+					  false);
 			}
 
 			break;
@@ -73,8 +78,8 @@ int EventManager::manageEvent(const SDL_Event& event) {
 
 		case SDL_EVENT_MOUSE_BUTTON_UP: {
 			for (const auto& ui : mGame->getUIs()) {
-				ui->touch(event.button.which, event.button.x * mGame->getWidth(),
-					  mGame->getHeight() - event.button.y * mGame->getHeight(), true);
+				ui->touch(event.button.which, event.button.x, mGame->getHeight() - event.button.y,
+					  true);
 			}
 
 			break;

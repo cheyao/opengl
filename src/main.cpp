@@ -30,7 +30,7 @@ int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] cha
 #endif
 
 	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
-	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "1");
+	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0"); // Translated in-engine
 	SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "0");

@@ -26,36 +26,31 @@ in vec2 vTexPos;
 
 layout (location = 0) out vec4 color;
 
-vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+// vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void main() {
 	vec3 viewDir = normalize(viewPos - vFragPos);
 
-	color = vec4(calcPointLight(pointLight, vNormal, vFragPos, viewDir), 1.0f);
-}
+	vec3 lightDir = pointLight.position - vFragPos;
+	vec3 lightDirNorm = normalize(lightDir);
 
-vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
-	const float shininess = 32.0f;
+	float diff = max(dot(vNormal, lightDirNorm), 0.0f);
 
-	vec3 lightDir = normalize(light.position - fragPos);
+	vec3 halfwayDir = normalize(lightDir + viewDir);
+	float spec = pow(max(dot(halfwayDir, viewDir), 0.0f), 32.0f);
 
-	float diff = max(dot(normal, lightDir), 0.0f);
+	float distance = length(lightDir);
+	float attenuation = 1.0 / (pointLight.constant + pointLight.linear * distance + 
+						pointLight.quadratic * (distance * distance));
 
-	vec3 reflectDir = reflect(-lightDir, normal);
-	float spec = pow(max(dot(reflectDir, viewDir), 0.0f), shininess);
+	vec3 ambient = pointLight.ambient * vec3(texture(texture_diffuse0, vTexPos)) * attenuation;
+	vec3 diffuse = pointLight.diffuse * diff * vec3(texture(texture_diffuse0, vTexPos)) * attenuation;
+	vec3 specular = pointLight.specular * spec * vec3(texture(texture_specular0, vTexPos)) * attenuation;
 
-	float distance = length(light.position - fragPos);
-	float attenuation = 1.0 / (light.constant + light.linear * distance + 
-						light.quadratic * (distance * distance));
+	// ambient  *= attenuation; 
+	// diffuse  *= attenuation;
+	// specular *= attenuation;
 
-	vec3 ambient = light.ambient * vec3(texture(texture_diffuse0, vTexPos));
-	vec3 diffuse = light.diffuse * diff * vec3(texture(texture_diffuse0, vTexPos));
-	vec3 specular = light.specular * spec * vec3(texture(texture_specular0, vTexPos));
-
-	ambient  *= attenuation; 
-	diffuse  *= attenuation;
-	specular *= attenuation;
-
-	return ambient + diffuse + specular;
+	color = vec4(ambient + diffuse + specular, 1.0f);
 }
 
