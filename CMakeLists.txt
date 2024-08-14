@@ -153,18 +153,23 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
 	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
-# Check platforms
+#
+# 1. Check platforms
+#
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Android")
 	set(ANDROID TRUE)
 	set(BUILD_NAME main) # Android needs this as libmain
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-        set(MACOSX TRUE)
+	set(APPLE TRUE)
 	set(BUILD_NAME ${PROJECT_NAME})
 
 	message("Building for MacOS, to build universal package set \"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64?\"")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WINDOWS TRUE)
 	set(BUILD_NAME ${PROJECT_NAME})
+
+	set(CMAKE_EXECUTABLE_SUFFIX .exe) # Is this needed?
 elseif(EMSCRIPTEN)
 	set(WEB TRUE)
 	set(BUILD_NAME ${PROJECT_NAME})
@@ -176,24 +181,128 @@ else()
 endif()
 
 #
-# 1. Include packages
+# 2. Set compile flags and executable
 #
+
+# Clang got some errors with `unordered_map` when using c++23 and libstdc++
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+endif()
+
+# Platform dependent flags
+if (ANDROID)
+	message("Building for Android")
+
+	add_library(${BUILD_NAME} SHARED ${SRC})
+
+	target_compile_options(${BUILD_NAME} PRIVATE -DGLES -DANDROID)
+elseif(APPLE)
+	message("Building for MacOS")
+
+	if(DEBUG)
+		add_executable(${BUILD_NAME} ${SRC})
+	else()
+		# Package into a application bundle
+		add_executable(${BUILD_NAME} MACOSX_BUNDLE ${SRC})
+		set_target_properties(${BUILD_NAME} PROPERTIES
+		    BUNDLE True
+		    MACOSX_BUNDLE_ICON_FILE ${CMAKE_SOURCE_DIR}/cmake/${CMAKE_PROJECT_NAME}.ico
+		    MACOSX_BUNDLE_GUI_IDENTIFIER org.cyao.${BUILD_NAME}
+	   	    MACOSX_BUNDLE_BUNDLE_NAME ${BUILD_NAME}
+		    MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
+		    MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
+		    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/info.plist.in
+		)
+	endif()
+
+	target_include_directories(${BUILD_NAME} PRIVATE ${OPENGL_INCLUDE_DIR})
+
+	target_link_libraries(${BUILD_NAME} PRIVATE ${OPENGL_LIBRARIES})
+elseif(WINDOWS)
+	message("Building for windows")
+
+	add_executable(${BUILD_NAME} WIN32 ${SRC})
+
+	if(NOT MSVC)
+		target_compile_options(${BUILD_NAME} PRIVATE -D__WINDOWS__)
+	endif()
+elseif(WEB)
+	message("Building for the web")
+
+	add_executable(${BUILD_NAME} ${SRC})
+
+	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -DGLES -sNO_DISABLE_EXCEPTION_CATCHING)
+	target_compile_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
+	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sALLOW_MEMORY_GROWTH -sNO_DISABLE_EXCEPTION_CATCHING)
+	target_link_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
+
+	if(DEBUG)
+		target_compile_options(${BUILD_NAME} PRIVATE -gsource-map)
+		target_link_options(${BUILD_NAME} PRIVATE -gsource-map)
+
+		ADD_CUSTOM_TARGET(WebCopySrc ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../src ${CMAKE_BINARY_DIR}/src)
+		ADD_CUSTOM_TARGET(WebCopyInclude ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../include ${CMAKE_BINARY_DIR}/include)
+	endif()
+else()
+	message("Building for linux")
+
+	add_executable(${BUILD_NAME} ${SRC})
+endif()
+
+# General flags
+if(MSVC)
+	if(DEBUG)
+		target_compile_options(${BUILD_NAME} PRIVATE /W4 /WX /MDd /Zi /Ob0 /Od /RTC1 /W3 /GR /EHsc)
+		target_compile_definitions(${BUILD_NAME} PRIVATE /DWIN32 /D__WINDOWS__ /DDEBUG /D_DEBUG)
+	else()
+		target_compile_options(${BUILD_NAME} PRIVATE /MD /O2 /Ob2)
+		target_compile_definitions(${BUILD_NAME} PRIVATE /D__WINDOWS__ /DWIND32 /DEIGEN_NO_DEBUG /DNDEBUG)
+	endif()
+else()
+	if(DEBUG)
+		target_compile_options(${BUILD_NAME} PRIVATE -Wall -Wextra -Werror -g -O0 -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wpointer-arith -Wwrite-strings -Wno-unknown-warning-option)
+		target_compile_definitions(${BUILD_NAME} PRIVATE -DDEBUG -D_DEBUG)
+	else()
+		target_compile_options(${BUILD_NAME} PRIVATE -O3)
+		target_compile_definitions(${BUILD_NAME} PRIVATE -DEIGEN_NO_DEBUG -DNDEBUG)
+	endif()
+
+	if (OPTIMIZE STREQUAL ON)
+		target_compile_options(${BUILD_NAME} PRIVATE -march=native -Ofast -fopenmp -fno-math-errno)
+	endif()
+endif()
+
+# Enable LTO for non debug
+include(CheckIPOSupported)
+check_ipo_supported(RESULT LTOSupported OUTPUT error)
+
+if(LTOSupported AND NOT ANDROID AND NOT DEBUG)
+	message(STATUS "IPO / LTO enabled")
+	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+	set_property(TARGET ${BUILD_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+	message(STATUS "IPO / LTO not supported: <${error}>")
+endif()
+
+#
+# 3. Include packages
+#
+
+# Project include
+target_include_directories(${BUILD_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
 # SDL
 if(NOT ANDROID) # Android projects include themself using subdirectory
 	if(WEB)
-		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-static)
+		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-static Headers)
 	else()
-		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared) # TODO: static build option
+		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared Headers) # TODO: static build option
 	endif()
 
-	if(NOT SDL3_SDL3_FOUND)
-		message(FATAL_ERROR "Failed to find sdl3")
-	endif()
-
-	target_include_directories(${SDL3_SDL_INCLUDE_DIRS})
-	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # Static library?
+	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::Headers) # Static library?
 endif()
+
+target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # Static library?
 
 # Assimp
 if(ANDROID)
@@ -217,112 +326,12 @@ else()
 	target_link_libraries(${BUILD_NAME} PRIVATE ${ASSIMP_LIBRARIES})
 endif()
 
-# Freetype
-# TODO:
-if (ANDROID)
-	message("Building for Android")
-
-	add_library(${BUILD_NAME} SHARED ${SRC})
-
-	target_compile_options(${BUILD_NAME} PRIVATE -DGLES -DANDROID)
-
-	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3)
-
-	# TODO: Freetype
-elseif(MACOSX)
-	message("Building for MacOS")
+# OpenGL - needed by MacOS
+if (MACOS)
 	find_package(OpenGL REQUIRED)
-
-	if(DEBUG)
-		add_executable(${BUILD_NAME} ${SRC})
-	else()
-		#Package into a application bundle
-		add_executable(${BUILD_NAME} MACOSX_BUNDLE ${SRC})            
-		set_target_properties(${BUILD_NAME} PROPERTIES
-		    BUNDLE True
-		    MACOSX_BUNDLE_ICON_FILE ${CMAKE_SOURCE_DIR}/cmake/${CMAKE_PROJECT_NAME}.ico
-		    MACOSX_BUNDLE_GUI_IDENTIFIER org.cyao.${BUILD_NAME}
-	   	    MACOSX_BUNDLE_BUNDLE_NAME ${BUILD_NAME}
-		    MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
-		    MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
-		    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/info.plist.in
-		)
-	
-		file(COPY assets DESTINATION ${CMAKE_BINARY_DIR}/${BUILD_NAME}.app/Contents/Resources)
-
-		target_link_options(${BUILD_NAME} PRIVATE -headerpad_max_install_names)
-
-		file(COPY cmake/mac-patch-dylib.sh DESTINATION ${CMAKE_BINARY_DIR}) # Helper script
-	endif()
-
-	target_include_directories(${BUILD_NAME} PRIVATE ${OPENGL_INCLUDE_DIR})
-	target_include_directories(${BUILD_NAME} PRIVATE ${SDL_INCLUDE_DIRS})
-
-	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3)
-	target_link_libraries(${BUILD_NAME} PRIVATE ${OPENGL_LIBRARIES})
-elseif(WINDOWS)
-	message("Building for windows")
-
-	add_executable(${BUILD_NAME} WIN32 ${SRC})
-
-	if(NOT MSVC)
-		target_compile_options(${BUILD_NAME} PRIVATE -D__WINDOWS__)
-	endif()
-
-	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
-else()
-	message("Building for linux")
-
-	add_executable(${BUILD_NAME} ${SRC})
-
-	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-endif()
-
-# Strip debug symbols
-if(NOT DEBUG AND NOT ANDROID AND NOT WEB)
-	if (WINDOWS)
-		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
-			COMMAND ${CMAKE_STRIP} ${BUILD_NAME}.exe)
-	elseif(MACOSX AND NOT DEBUG)
-		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
-			COMMAND ${CMAKE_STRIP} ${BUILD_NAME}.app/Contents/MacOS/${BUILD_NAME})
-	else()
-		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
-			COMMAND ${CMAKE_STRIP} ${BUILD_NAME})
-	endif()
-endif()
-
-# Set flags
-if(MSVC)
-	if(DEBUG)
-		target_compile_options(${BUILD_NAME} PRIVATE /W4 /WX /MDd /Zi /Ob0 /Od /RTC1 /W3 /GR /EHsc)
-		target_compile_definitions(${BUILD_NAME} PRIVATE /DWIN32 /D__WINDOWS__ /DDEBUG /D_DEBUG)
-	else()
-		target_compile_options(${BUILD_NAME} PRIVATE /MD /O2 /Ob2)
-		target_compile_definitions(${BUILD_NAME} PRIVATE /D__WINDOWS__ /DWIND32 /DEIGEN_NO_DEBUG /DNDEBUG)
-	endif()
-else()
-	if(DEBUG)
-		target_compile_options(${BUILD_NAME} PRIVATE -Wall -Wextra -Werror -g -O0 -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wpointer-arith -Wwrite-strings -Wno-unknown-warning-option)
-		target_compile_definitions(${BUILD_NAME} PRIVATE -DDEBUG -D_DEBUG)
-	else()
-		target_compile_options(${BUILD_NAME} PRIVATE -O3)
-		target_compile_definitions(${BUILD_NAME} PRIVATE -DEIGEN_NO_DEBUG -DNDEBUG)
-	endif()
-
-	if (OPTIMIZE STREQUAL ON)
-		target_compile_options(${BUILD_NAME} PRIVATE -march=native -Ofast -fopenmp -fno-math-errno)
-	endif()
-endif()
-
-if(MOLD STREQUAL ON) 
-	target_link_options(${BUILD_NAME} PRIVATE -fuse-ld=mold)
-endif()
-
+# ImGUI
 if(IMGUI STREQUAL ON AND CHECKS STREQUAL OFF)
 	message("Enabling IMGUI")
 
@@ -340,23 +349,54 @@ if(IMGUI STREQUAL ON AND CHECKS STREQUAL OFF)
 	endif()
 endif()
 
-if(WEB)
-	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -DGLES -sNO_DISABLE_EXCEPTION_CATCHING)
-	target_compile_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
-	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sALLOW_MEMORY_GROWTH -sNO_DISABLE_EXCEPTION_CATCHING)
-	target_link_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
+# Freetype
+# TODO:
 
-	if(DEBUG)
-		target_compile_options(${BUILD_NAME} PRIVATE -gsource-map)
-		target_link_options(${BUILD_NAME} PRIVATE -gsource-map)
-		ADD_CUSTOM_TARGET(link_target1 ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../src ${CMAKE_BINARY_DIR}/src)
-		ADD_CUSTOM_TARGET(link_target2 ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../include ${CMAKE_BINARY_DIR}/include)
+#
+# 4. Post processing
+# 
+
+# Strip debug symbols
+if(NOT DEBUG AND NOT ANDROID AND NOT WEB)
+	if (WINDOWS)
+		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
+			COMMAND ${CMAKE_STRIP} ${BUILD_NAME}.exe)
+	elseif(APPLE AND NOT DEBUG)
+		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
+			COMMAND ${CMAKE_STRIP} ${BUILD_NAME}.app/Contents/MacOS/${BUILD_NAME})
+	else()
+		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
+			COMMAND ${CMAKE_STRIP} ${BUILD_NAME})
 	endif()
 endif()
 
-target_include_directories(include)
+# Copy stuff for apple
+if(APPLE AND NOT DEBUG)
+	# Don't remove, needed by the helper script
+	target_link_options(${BUILD_NAME} PRIVATE -headerpad_max_install_names)
 
-# NOTE: Checks
+	# Add assets
+	file(COPY assets DESTINATION ${CMAKE_BINARY_DIR}/${BUILD_NAME}.app/Contents/Resources)
+	file(COPY cmake/mac-patch-dylib.sh DESTINATION ${CMAKE_BINARY_DIR}) # Dylib helper script
+endif()
+
+# Copy assets
+if(DEBUG)
+	execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../assets ${CMAKE_BINARY_DIR}/assets)
+else()
+	file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
+endif()
+
+#
+# 5. Misc
+#
+
+# Mold linker
+if(MOLD STREQUAL ON) 
+	target_link_options(${BUILD_NAME} PRIVATE -fuse-ld=mold)
+endif()
+
+# Checks
 if(CHECKS STREQUAL ON)
 	set(IWYU ON)
 	set(CLANG_TIDY ON)
@@ -400,24 +440,3 @@ if(UNDEFINED STREQUAL ON)
 	target_compile_options(${BUILD_NAME} PRIVATE -fsanitize=undefined -DADDRESS -g -fno-omit-frame-pointer -O0 -fno-optimize-sibling-calls)
 	target_link_options(${BUILD_NAME} PRIVATE -fsanitize=undefined -g -O0)
 endif()
-
-#Check LTO
-include(CheckIPOSupported)
-check_ipo_supported(RESULT LTOSupported OUTPUT error)
-
-if(LTOSupported AND NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Android")
-	if(NOT DEBUG)
-		message(STATUS "IPO / LTO enabled")
-		set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-		set_property(TARGET ${BUILD_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-	endif()
-else()
-	message(STATUS "IPO / LTO not supported: <${error}>")
-endif()
-
-if(DEBUG)
-	execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../assets ${CMAKE_BINARY_DIR}/assets)
-else()
-	file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
-endif()
-
