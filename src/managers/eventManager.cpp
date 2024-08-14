@@ -68,6 +68,7 @@ int EventManager::manageEvent(const SDL_Event& event) {
 		}
 
 		case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+			SDL_Log("DOWN");
 			for (const auto& ui : mGame->getUIs()) {
 				ui->touch(event.button.which, event.button.x, mGame->getHeight() - event.button.y,
 					  false);

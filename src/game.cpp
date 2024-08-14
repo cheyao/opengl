@@ -9,7 +9,6 @@
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
 #include "opengl/renderer.hpp"
-#include "third_party/Eigen/Core"
 #include "ui/mainMenu.hpp"
 #include "utils.hpp"
 
@@ -32,8 +31,8 @@
 #endif
 
 Game::Game()
-	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mActorMutex(SDL_CreateMutex()), mUIScale(2.0f), mTicks(0),
-	  mBasePath(""), mPaused(false), mVsync(true) {
+	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mActorMutex(SDL_CreateMutex()), mUIScale(2.0f),
+	  mTicks(0), mBasePath(""), mPaused(false), mVsync(true) {
 	if (mActorMutex == nullptr) {
 		SDL_Log("Failed to create actor mutex: %s", SDL_GetError());
 
@@ -189,7 +188,9 @@ void Game::update() {
 	}
 
 	for (const auto& ui : mUI) {
-		if (ui->getState() == UIScreen::Active) { ui->update(delta); }
+		if (ui->getState() == UIScreen::Active) {
+			ui->update(delta);
+		}
 	}
 }
 
@@ -250,8 +251,40 @@ int Game::event(const SDL_Event& event) {
 
 	ImGuiIO& io = ImGui::GetIO();
 
-	if (io.WantCaptureMouse || io.WantCaptureKeyboard) {
-		return 0;
+	switch (event.type) {
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+		case SDL_EVENT_MOUSE_MOTION:
+		case SDL_EVENT_MOUSE_WHEEL:
+			if (io.WantCaptureMouse) {
+				return 0;
+			}
+
+			break;
+
+		case SDL_EVENT_TEXT_INPUT:
+			if (io.WantTextInput) {
+				return 0;
+			}
+
+			break;
+
+		case SDL_EVENT_KEY_UP:
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_WINDOW_MOUSE_ENTER:
+		case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+		case SDL_EVENT_WINDOW_FOCUS_GAINED:
+		case SDL_EVENT_WINDOW_FOCUS_LOST:
+		case SDL_EVENT_GAMEPAD_ADDED:
+		case SDL_EVENT_GAMEPAD_REMOVED:
+			if (io.WantCaptureKeyboard) {
+				return 0;
+			}
+
+			break;
+
+		default:
+			break;
 	}
 #endif
 

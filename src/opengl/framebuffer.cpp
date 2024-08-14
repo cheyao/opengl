@@ -71,6 +71,7 @@ Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScr
 }
 
 void Framebuffer::setDemensions(int width, int height) {
+	SDL_Log("YES");
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 
 	glBindTexture(GL_TEXTURE_2D, mScreenTexture);
