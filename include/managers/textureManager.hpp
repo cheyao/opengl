@@ -14,7 +14,7 @@ class TextureManager {
 
 	class Texture* get(const std::string& name);
 
-	void reload(bool full = false);
+	void reload();
 
   private:
 	std::unordered_map<std::string, class Texture*> mTextures;

@@ -123,8 +123,8 @@ int EventManager::manageKeyboardEvent(const SDL_Event& event) {
 		case SDLK_F2: {
 			// TODO: Maybe reload textures
 
-			// mTextures->reload(true);
-			mShaders->reload(true);
+			// mTextures->reload();
+			mShaders->reload();
 			mRenderer->reload();
 
 			break;

@@ -1,44 +1,28 @@
 cmake_minimum_required(VERSION 3.9)
 project(OpenGL C CXX)
-#CXX standards
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-#Options:
-option(SANITIZE 	"Build with sanitizer support if available" OFF)
-option(VENDOR 		"Vendor libraries" OFF)
+option(IMGUI 		"Enable GUI" OFF)
+option(ANDROID		"Build for android (automatically build with gradle)" OFF)
+option(OPTIMIZE		"Optimize a lot" OFF)
+option(MOLD		"Use mold" OFF)
+# TODO: option(VENDOR 		"Vendor libraries" OFF)
+
+# Misc
+option(ADDRESS	 	"Use address sanitizer" OFF)
+option(LEAK		"Use leak sanitizer" OFF)
+option(UNDEFINED	"Use undefined sanitizer" OFF)
+option(SANITIZE 	"Build with all sanitizer support if available" OFF)
 option(CHECKS 		"Run checks" OFF)
 option(IWYU 		"Run include what you use" OFF)
 option(CLANG_TIDY 	"Run clang tidy" OFF)
 option(CPPCHECK 	"Run cppcheck" OFF)
-option(IMGUI 		"Include GUI" OFF)
-option(ADDRESS	 	"Use address sanitizer" OFF)
-option(LEAK		"Use leak sanitizer" OFF)
-option(UNDEFINED	"Use undefined sanitizer" OFF)
-option(ANDROID		"Build for android" OFF)
-option(OPTIMIZE		"Optimize a lot" OFF)
-option(MOLD		"Use mold" OFF)
-option(X11		"Force x11" OFF)
-option(HOT		"Hot reload" OFF)
-#CMAKE_BUILD_TYPE Release Debug
-
-if(CHECKS STREQUAL ON)
-	set(IWYU ON)
-	set(CLANG_TIDY ON)
-	set(CPPCHECK ON)
-	set(SANITIZE ON)
-	set(CMAKE_BUILD_TYPE Debug)
-endif()
-
-set(GLAD
-src/third_party/glad.c 
-include/third_party/glad/glad.h 
-include/third_party/KHR/khrplatform.h 
-)
 
 set(SRC
-#Sources
+# Sources
 src/main.cpp
 src/game.cpp
 src/utils.cpp
@@ -77,7 +61,7 @@ src/ui/mainMenu.cpp
 src/ui/UIComponent.cpp
 src/ui/UIScreen.cpp
 
-#Headers
+# Headers
 include/game.hpp
 include/utils.hpp
 
@@ -116,11 +100,15 @@ include/ui/mainMenu.hpp
 include/ui/UIComponent.hpp
 include/ui/UIScreen.hpp
 
-#External
+# External
 src/third_party/stb_image.c
 include/third_party/stb_image.h
 
-${GLAD}
+# Glad
+src/third_party/glad.c 
+
+include/third_party/glad/glad.h 
+include/third_party/KHR/khrplatform.h 
 )
 
 set(IMGUI_SRC
@@ -135,10 +123,15 @@ external/imgui/backends/imgui_impl_opengl3.cpp
 )
 
 set(ASSETS_EMBED_WEB
-	--preload-file=assets@assets
+--preload-file=assets@assets
 )
 
 if(ANDROID STREQUAL ON) 
+	message("Building android apk - experimental")
+	message("Progress bar doesn't work, please wait till the end")
+	message("If this doesn't work, go to android folder and run ./gradlew installDebug")
+	# FIXME: No installRelease?
+
 	set(NAMESPACE com.cyao.opengl)
 	set(BUILD_NAME OpenGL)
 
@@ -160,48 +153,72 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
 	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
-#Check platform
+# Check platforms
 if(${CMAKE_SYSTEM_NAME} MATCHES "Android")
 	set(ANDROID TRUE)
-	set(BUILD_NAME main)
+	set(BUILD_NAME main) # Android needs this as libmain
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         set(MACOSX TRUE)
 	set(BUILD_NAME ${PROJECT_NAME})
+
+	message("Building for MacOS, to build universal package set \"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64?\"")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WINDOWS TRUE)
 	set(BUILD_NAME ${PROJECT_NAME})
 elseif(EMSCRIPTEN)
 	set(WEB TRUE)
 	set(BUILD_NAME ${PROJECT_NAME})
+
+	set(CMAKE_EXECUTABLE_SUFFIX .js) # Making javascript from C++ :sunglasses:
+	configure_file(cmake/index.html.in ${CMAKE_BINARY_DIR}/index.html)
 else()
 	set(BUILD_NAME ${PROJECT_NAME})
 endif()
 
-include_directories(include)
+#
+# 1. Include packages
+#
 
-if(NOT ANDROID)
+# SDL
+if(NOT ANDROID) # Android projects include themself using subdirectory
 	if(WEB)
 		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-static)
-
-		set(CMAKE_EXECUTABLE_SUFFIX .js)
-		
-		configure_file(cmake/index.html.in ${CMAKE_BINARY_DIR}/index.html)
-	elseif(VENDOR)
-		add_subdirectory(external/SDL3 EXCLUDE_FROM_ALL)
-		# add_subdirectory(external/SDL3_image EXCLUDE_FROM_ALL)
 	else()
-		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared)
-		find_package(SDL3 REQUIRED CONFIG REQUIRED)
-		# find_package(SDL3_image REQUIRED CONFIG REQUIRED COMPONENTS SDL3_image-shared)
-
-		if(MACOSX AND NOT DEBUG)
-			message("Building for MacOS, did you use -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64?")
-		endif()
+		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared) # TODO: static build option
 	endif()
+
+	if(NOT SDL3_SDL3_FOUND)
+		message(FATAL_ERROR "Failed to find sdl3")
+	endif()
+
+	target_include_directories(${SDL3_SDL_INCLUDE_DIRS})
+	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # Static library?
 endif()
 
-#Find and include SDL2
-#Don't need for Android
+# Assimp
+if(ANDROID)
+	# FIXME: Non-hardcoded lib
+	add_library(assimp::assimp SHARED IMPORTED) # STATIC instad of SHARED for static
+	set_target_properties(assimp::assimp PROPERTIES
+	  IMPORTED_LOCATION "/usr/local/lib/libassimp.so"
+	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include"
+	)
+
+	target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp)
+else()
+	find_package(assimp REQUIRED CONFIG)
+
+	if (NOT assimp_FOUND)
+		message(FATAL_ERROR "Assimp not found")
+	endif()
+
+	link_directories(${ASSIMP_LIBRARY_DIR})
+	include_directories(${ASSIMP_INCLUDE_DIRS})
+	target_link_libraries(${BUILD_NAME} PRIVATE ${ASSIMP_LIBRARIES})
+endif()
+
+# Freetype
+# TODO:
 if (ANDROID)
 	message("Building for Android")
 
@@ -209,8 +226,9 @@ if (ANDROID)
 
 	target_compile_options(${BUILD_NAME} PRIVATE -DGLES -DANDROID)
 
-	target_link_libraries(${BUILD_NAME} PUBLIC SDL3::SDL3)
-	target_link_libraries(${BUILD_NAME} PUBLIC assimp::assimp)
+	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3)
+
+	# TODO: Freetype
 elseif(MACOSX)
 	message("Building for MacOS")
 	find_package(OpenGL REQUIRED)
@@ -238,8 +256,9 @@ elseif(MACOSX)
 	endif()
 
 	target_include_directories(${BUILD_NAME} PRIVATE ${OPENGL_INCLUDE_DIR})
+	target_include_directories(${BUILD_NAME} PRIVATE ${SDL_INCLUDE_DIRS})
 
-	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
+	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3)
 	target_link_libraries(${BUILD_NAME} PRIVATE ${OPENGL_LIBRARIES})
 elseif(WINDOWS)
 	message("Building for windows")
@@ -257,42 +276,6 @@ else()
 	add_executable(${BUILD_NAME} ${SRC})
 
 	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # SDL3_image::SDL3_image)
-endif()
-
-if (ANDROID)
-	add_library(assimp::assimp SHARED IMPORTED) # or STATIC instead of SHARED
-	set_target_properties(assimp::assimp PROPERTIES
-	  IMPORTED_LOCATION "/usr/local/lib/libassimp.so"
-	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include"
-	)
-
-	# add_library(assimp::android_jniiosystem SHARED IMPORTED) # or STATIC instead of SHARED
-	# set_target_properties(assimp::android_jniiosystem PROPERTIES
-	#   IMPORTED_LOCATION "/usr/local/lib/libandroid_jniiosystem.a"
-	#   INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include/"
-	# )
-
-	# add_library(assimp::libz SHARED IMPORTED) # or STATIC instead of SHARED
-	# set_target_properties(assimp::libz PROPERTIES
-	#   IMPORTED_LOCATION "/usr/local/share/android-commandlinetools/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/usr/lib/aarch64-linux-android/24/libz.so"
-	#   INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include/"
-	# )
-
-	target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp)# assimp::android_jniiosystem)
-else()
-	find_package(assimp REQUIRED)
-
-	if (assimp_FOUND)
-		link_directories(${ASSIMP_LIBRARY_DIR})
-		include_directories(${ASSIMP_INCLUDE_DIRS})
-		target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp)
-		message("Found assimp: ${ASSIMP_LIBRARIES}")
-		# set(ASSIMP_LIBRARY "assimp")
-		# add_library(${ASSIMP_LIBRARY} SHARED IMPORTED)
-		# set_target_properties(${ASSIMP_LIBRARY} PROPERTIES IMPORTED_LOCATION "${ASSIMP_LIBRARY_DIRS}/libassimp.so")
-	else()
-		message(FATAL_ERROR "Assimp not found")
-	endif()
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID)
@@ -329,10 +312,6 @@ else()
 	else()
 		target_compile_options(${BUILD_NAME} PRIVATE -O3)
 		target_compile_definitions(${BUILD_NAME} PRIVATE -DEIGEN_NO_DEBUG -DNDEBUG)
-	endif()
-
-	if(HOT)
-		target_compile_definitions(${BUILD_NAME} PRIVATE -DHOT)
 	endif()
 
 	if (OPTIMIZE STREQUAL ON)
@@ -375,14 +354,23 @@ if(WEB)
 	endif()
 endif()
 
-# IWYU
+target_include_directories(include)
+
+# NOTE: Checks
+if(CHECKS STREQUAL ON)
+	set(IWYU ON)
+	set(CLANG_TIDY ON)
+	set(CPPCHECK ON)
+	set(SANITIZE ON)
+	set(CMAKE_BUILD_TYPE Debug)
+endif()
+
 if(IWYU STREQUAL ON)
 	message("Running IWYU")
 	find_program(IWYU_EXE NAMES include-what-you-use iwyu REQUIRED)
 	set(IWYU_COMMAND "${IWYU_EXE}" "-Xiwyu" "--mapping_file=${CMAKE_SOURCE_DIR}/.iwyu.imp")
 	set_target_properties(${BUILD_NAME} PROPERTIES CXX_INCLUDE_WHAT_YOU_USE "${IWYU_COMMAND}")
 endif()
-
 if(CLANG_TIDY STREQUAL ON)
 	message("Running clang tidy")
 	find_program(CLANG_TIDY_EXE NAMES clang-tidy REQUIRED)
@@ -390,7 +378,6 @@ if(CLANG_TIDY STREQUAL ON)
 	set(CLANG_TIDY_COMMAND "${CLANG_TIDY_EXE}" "--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy;--use-color")
 	set_target_properties(${BUILD_NAME} PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
-
 if(CPPCHECK STREQUAL ON)
 	message("Running cppcheck")
 	find_program(CPPCHECK_EXE NAMES cppcheck REQUIRED)
@@ -398,8 +385,6 @@ if(CPPCHECK STREQUAL ON)
 	set(CPPCHECK_COMMAND "${CPPCHECK_EXE}" "--enable=all" "--inconclusive" "--force" "--inline-suppr" "--suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck-ignore" "-i${CMAKE_SOURCE_DIR}/external/")
 	set_target_properties(${BUILD_NAME} PROPERTIES CXX_CPPCHECK "${CPPCHECK_COMMAND}")
 endif()
-
-#Sanitize
 if(ADDRESS STREQUAL ON)
 	message("Sanitizer enabled")
 	target_compile_options(${BUILD_NAME} PRIVATE -fsanitize=address -DADDRESS --coverage -g -fno-omit-frame-pointer -O0 -fno-optimize-sibling-calls)
@@ -416,12 +401,6 @@ if(UNDEFINED STREQUAL ON)
 	target_link_options(${BUILD_NAME} PRIVATE -fsanitize=undefined -g -O0)
 endif()
 
-if(X11 STREQUAL ON)
-	message("Forcing x11")
-	target_compile_options(${BUILD_NAME} PRIVATE -DX11)
-endif()
-
-#do LTO
 #Check LTO
 include(CheckIPOSupported)
 check_ipo_supported(RESULT LTOSupported OUTPUT error)

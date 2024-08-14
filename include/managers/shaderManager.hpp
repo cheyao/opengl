@@ -14,7 +14,7 @@ class ShaderManager {
 
 	class Shader* get(const std::string& vert, const std::string& frag, const std::string& geom = "");
 
-	void reload(bool full = false);
+	void reload();
 
   private:
 	std::unordered_map<std::string, class Shader*> mTextures;

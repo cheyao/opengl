@@ -14,6 +14,7 @@ ShaderManager::ShaderManager(const std::string& path) : mPath(path + "assets" + 
 
 Shader* ShaderManager::get(const std::string& vert, const std::string& frag, const std::string& geom) {
 #ifdef __cpp_lib_string_contains
+	// Ugh don't mind assering when the libc++ isn't up to date
 	assert(!vert.contains(':') && !frag.contains(':') && !geom.contains(':'));
 #endif
 
@@ -36,28 +37,24 @@ ShaderManager::~ShaderManager() {
 	Shader* def = this->get("default.vert", "default.frag");
 
 	for (const auto& [_, shader] : mTextures) {
-		if (shader == def) {
-			continue;
+		if (shader != def) {
+			delete shader;
 		}
-
-		delete shader;
 	}
 
 	delete def;
 }
 
-void ShaderManager::reload([[maybe_unused]] bool full) {
+void ShaderManager::reload() {
 	SDL_Log("Reloading shaders");
 
 	for (auto& [names, shader] : mTextures) {
 		const size_t pos = names.find(':');
 		const size_t pos2 = names.find(':', pos + 1);
-		std::string vert = mPath + names.substr(0, pos);
-		std::string frag = mPath + names.substr(pos + 1, pos2 - pos - 1);
+		const std::string vert = mPath + names.substr(0, pos);
+		const std::string frag = mPath + names.substr(pos + 1, pos2 - pos - 1);
 		std::string geom = names.substr(pos2 + 1, names.size() - pos);
 		geom = geom.empty() ? "" : mPath + geom;
-
-		SDL_Log("%s:%s:%s", vert.data(), frag.data(), geom.data());
 
 #ifdef DEBUG
 		SDL_Log("Reloading %s:%s", vert.data(), frag.data());
@@ -76,7 +73,9 @@ void ShaderManager::reload([[maybe_unused]] bool full) {
 #else
 		try {
 			delete shader;
+
 			Shader* newTexture = new Shader(vert, frag, geom);
+
 			shader = newTexture;
 		} catch (const std::runtime_error& error) {
 			shader = this->get("default.vert", "default.frag");
