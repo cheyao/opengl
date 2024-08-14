@@ -37,9 +37,8 @@ Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScr
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRBO);
 
 	[[unlikely]] if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Framebuffer is not compleate\n");
-		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have "
-			  "enough memory");
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Framebuffer is not complete");
+		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have enough memory");
 
 		throw std::runtime_error("Framebuffer.cpp: Failed to create framebuffer");
 	}
@@ -70,8 +69,7 @@ Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScr
 	mScreenMesh = std::make_unique<Mesh>(pos, std::span<float>(), texPos, indices, textures);
 }
 
-void Framebuffer::setDemensions(int width, int height) {
-	SDL_Log("YES");
+void Framebuffer::setDemensions(const int width, const int height) {
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 
 	glBindTexture(GL_TEXTURE_2D, mScreenTexture);

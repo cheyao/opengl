@@ -13,7 +13,7 @@ class Framebuffer {
 	Framebuffer& operator=(const Framebuffer&) = delete;
 	~Framebuffer();
 
-	void setDemensions(int width, int height);
+	void setDemensions(const int width, const int height);
 	void swap();
 
   private:

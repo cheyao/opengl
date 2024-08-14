@@ -311,6 +311,4 @@ void Renderer::setUIMatrix() const {
 	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
 	UIshader->activate();
 	UIshader->set("proj", ortho);
-
-	SDL_Log("Y");
 }

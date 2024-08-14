@@ -6,9 +6,12 @@
 
 #include <functional>
 
+#define CENTER std::numeric_limits<float>::max()
+
 class ButtonComponent : public UIComponent {
       public:
 	// TODO: Resizable padding
+	// TODO: Auto size when with text
 	explicit ButtonComponent(class UIScreen* owner, class Texture* const texture, const Eigen::Vector2f padding);
 	ButtonComponent(ButtonComponent&&) = delete;
 	ButtonComponent(const ButtonComponent&) = delete;
