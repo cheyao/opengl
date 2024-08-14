@@ -10,7 +10,7 @@
 #include <string>
 #include <unordered_map>
 
-ShaderManager::ShaderManager(const std::string& path) : mPath(path + "assets" + SEPARATOR + "shaders" + SEPARATOR) {}
+ShaderManager::ShaderManager(const std::string& path) : mPath(path + "assets" SEPARATOR "shaders" SEPARATOR) {}
 
 Shader* ShaderManager::get(const std::string& vert, const std::string& frag, const std::string& geom) {
 #ifdef __cpp_lib_string_contains

@@ -149,8 +149,9 @@ cmake
 - [ ] Multithreading
 - [ ] TTF
 - [ ] Localization
-- [ ] UI Scaling
+- [x] UI Scaling
 - [ ] Shadows
+- [ ] Maybe [ICU?](https://icu.unicode.org/)
 
 # Notes
 

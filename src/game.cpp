@@ -9,6 +9,7 @@
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
 #include "opengl/renderer.hpp"
+#include "ui/freetype.hpp"
 #include "ui/mainMenu.hpp"
 #include "utils.hpp"
 
@@ -53,6 +54,7 @@ Game::Game()
 	mTextures = std::make_unique<TextureManager>(mBasePath);
 	mShaders = std::make_unique<ShaderManager>(mBasePath);
 	mEventManager = std::make_unique<EventManager>(this);
+	mFontManager = std::make_unique<FontManager>(mBasePath);
 
 	mRenderer = new Renderer(this);
 	mRenderer->swapWindow();

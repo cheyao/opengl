@@ -55,6 +55,7 @@ class Game {
 	std::unique_ptr<class TextureManager> mTextures;
 	std::unique_ptr<class ShaderManager> mShaders;
 	std::unique_ptr<class EventManager> mEventManager;
+	std::unique_ptr<class FontManager> mFontManager;
 
 	class Renderer* mRenderer;
 

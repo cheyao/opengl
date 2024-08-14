@@ -54,12 +54,15 @@ src/actors/world.cpp
 src/actors/sun.cpp
 src/actors/cube.cpp
 
+src/ui/UIComponent.cpp
 src/ui/buttonComponent.cpp
 src/ui/backgroundComponent.cpp
+src/ui/textComponent.cpp
+src/ui/freetype.cpp
+
+src/ui/UIScreen.cpp
 src/ui/controlUI.cpp
 src/ui/mainMenu.cpp
-src/ui/UIComponent.cpp
-src/ui/UIScreen.cpp
 
 # Headers
 include/game.hpp
@@ -93,12 +96,15 @@ include/actors/world.hpp
 include/actors/sun.hpp
 include/actors/cube.hpp
 
+include/ui/UIComponent.hpp
 include/ui/buttonComponent.hpp
 include/ui/backgroundComponent.hpp
+include/ui/textComponent.hpp
+include/ui/freetype.hpp
+
+include/ui/UIScreen.hpp
 include/ui/controlUI.hpp
 include/ui/mainMenu.hpp
-include/ui/UIComponent.hpp
-include/ui/UIScreen.hpp
 
 # External
 src/third_party/stb_image.c
@@ -127,9 +133,9 @@ set(ASSETS_EMBED_WEB
 )
 
 if(ANDROID STREQUAL ON) 
-	message("Building android apk - experimental")
-	message("Progress bar doesn't work, please wait till the end")
-	message("If this doesn't work, go to android folder and run ./gradlew installDebug")
+	message("-- Building android apk - experimental")
+	message("-- Progress bar doesn't work, please wait till the end")
+	message("-- If this doesn't work, go to android folder and run ./gradlew installDebug")
 	# FIXME: No installRelease?
 
 	set(NAMESPACE com.cyao.opengl)
@@ -148,7 +154,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
-	message("Debug enabled")
+	message("-- Debug enabled")
 	set(DEBUG TRUE)
 	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
@@ -164,7 +170,7 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	set(APPLE TRUE)
 	set(BUILD_NAME ${PROJECT_NAME})
 
-	message("Building for MacOS, to build universal package set \"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64?\"")
+	message("-- Building for MacOS, to build universal package set \"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64?\"")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WINDOWS TRUE)
 	set(BUILD_NAME ${PROJECT_NAME})
@@ -191,13 +197,13 @@ endif()
 
 # Platform dependent flags
 if (ANDROID)
-	message("Building for Android")
+	message("-- Building for Android")
 
 	add_library(${BUILD_NAME} SHARED ${SRC})
 
 	target_compile_options(${BUILD_NAME} PRIVATE -DGLES -DANDROID)
 elseif(APPLE)
-	message("Building for MacOS")
+	message("-- Building for MacOS")
 
 	if(DEBUG)
 		add_executable(${BUILD_NAME} ${SRC})
@@ -219,7 +225,7 @@ elseif(APPLE)
 
 	target_link_libraries(${BUILD_NAME} PRIVATE ${OPENGL_LIBRARIES})
 elseif(WINDOWS)
-	message("Building for windows")
+	message("-- Building for windows")
 
 	add_executable(${BUILD_NAME} WIN32 ${SRC})
 
@@ -227,7 +233,7 @@ elseif(WINDOWS)
 		target_compile_options(${BUILD_NAME} PRIVATE -D__WINDOWS__)
 	endif()
 elseif(WEB)
-	message("Building for the web")
+	message("-- Building for the web")
 
 	add_executable(${BUILD_NAME} ${SRC})
 
@@ -244,7 +250,7 @@ elseif(WEB)
 		ADD_CUSTOM_TARGET(WebCopyInclude ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../include ${CMAKE_BINARY_DIR}/include)
 	endif()
 else()
-	message("Building for linux")
+	message("-- Building for linux")
 
 	add_executable(${BUILD_NAME} ${SRC})
 endif()
@@ -280,7 +286,7 @@ if(LTOSupported AND NOT ANDROID AND NOT DEBUG)
 	message(STATUS "IPO / LTO enabled")
 	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 	set_property(TARGET ${BUILD_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-else()
+elseif(NOT DEBUG)
 	message(STATUS "IPO / LTO not supported: <${error}>")
 endif()
 
@@ -299,10 +305,10 @@ if(NOT ANDROID) # Android projects include themself using subdirectory
 		find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3-shared Headers) # TODO: static build option
 	endif()
 
-	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::Headers) # Static library?
+	target_link_libraries(${BUILD_NAME} PRIVATE ${SDL3_LIBRARIES} SDL3::Headers) # Static library?
+else()
+	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # Static library?
 endif()
-
-target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # Static library?
 
 # Assimp
 if(ANDROID)
@@ -321,26 +327,33 @@ else()
 		message(FATAL_ERROR "Assimp not found")
 	endif()
 
-	link_directories(${ASSIMP_LIBRARY_DIR})
-	include_directories(${ASSIMP_INCLUDE_DIRS})
+	target_link_directories(${BUILD_NAME} PRIVATE ${ASSIMP_LIBRARY_DIR})
+	target_include_directories(${BUILD_NAME} PRIVATE ${ASSIMP_INCLUDE_DIRS})
 	target_link_libraries(${BUILD_NAME} PRIVATE ${ASSIMP_LIBRARIES})
 endif()
+
+# Freetype
+find_package(Freetype REQUIRED)
+target_include_directories(${BUILD_NAME} PRIVATE ${FREETYPE_INCLUDE_DIRS})
+target_link_libraries(${BUILD_NAME} PRIVATE ${FREETYPE_LIBRARIES})
 
 # OpenGL - needed by MacOS
 if (MACOS)
 	find_package(OpenGL REQUIRED)
+	
+	target_link_libraries(OpenGL ${OPENGL_LIBRARIES})
 endif()
 
 # ImGUI
 if(IMGUI STREQUAL ON AND CHECKS STREQUAL OFF)
-	message("Enabling IMGUI")
+	message("-- Enabling IMGUI")
 
 	if(EXISTS external/imgui/backends)
 		message(FATAL_ERROR "Please run git submodule update --remote --init external/imgui")
 	endif()
 
 	target_sources(${BUILD_NAME} PRIVATE ${IMGUI_SRC})
-	include_directories(external/imgui)
+	target_include_directories(${BUILD_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/external/imgui)
 
 	if(MSVC)
 		target_compile_definitions(${BUILD_NAME} PRIVATE /DIMGUI)
@@ -348,9 +361,6 @@ if(IMGUI STREQUAL ON AND CHECKS STREQUAL OFF)
 		target_compile_definitions(${BUILD_NAME} PRIVATE -DIMGUI)
 	endif()
 endif()
-
-# Freetype
-# TODO:
 
 #
 # 4. Post processing
@@ -406,37 +416,37 @@ if(CHECKS STREQUAL ON)
 endif()
 
 if(IWYU STREQUAL ON)
-	message("Running IWYU")
+	message("-- Running IWYU")
 	find_program(IWYU_EXE NAMES include-what-you-use iwyu REQUIRED)
 	set(IWYU_COMMAND "${IWYU_EXE}" "-Xiwyu" "--mapping_file=${CMAKE_SOURCE_DIR}/.iwyu.imp")
 	set_target_properties(${BUILD_NAME} PROPERTIES CXX_INCLUDE_WHAT_YOU_USE "${IWYU_COMMAND}")
 endif()
 if(CLANG_TIDY STREQUAL ON)
-	message("Running clang tidy")
+	message("-- Running clang tidy")
 	find_program(CLANG_TIDY_EXE NAMES clang-tidy REQUIRED)
 	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 	set(CLANG_TIDY_COMMAND "${CLANG_TIDY_EXE}" "--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy;--use-color")
 	set_target_properties(${BUILD_NAME} PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
 if(CPPCHECK STREQUAL ON)
-	message("Running cppcheck")
+	message("-- Running cppcheck")
 	find_program(CPPCHECK_EXE NAMES cppcheck REQUIRED)
 	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 	set(CPPCHECK_COMMAND "${CPPCHECK_EXE}" "--enable=all" "--inconclusive" "--force" "--inline-suppr" "--suppressions-list=${CMAKE_SOURCE_DIR}/.cppcheck-ignore" "-i${CMAKE_SOURCE_DIR}/external/")
 	set_target_properties(${BUILD_NAME} PROPERTIES CXX_CPPCHECK "${CPPCHECK_COMMAND}")
 endif()
 if(ADDRESS STREQUAL ON)
-	message("Sanitizer enabled")
+	message("-- Address sanitizer enabled")
 	target_compile_options(${BUILD_NAME} PRIVATE -fsanitize=address -DADDRESS --coverage -g -fno-omit-frame-pointer -O0 -fno-optimize-sibling-calls)
 	target_link_options(${BUILD_NAME} PRIVATE -fsanitize=address --coverage -g -O0)
 endif()
 if(LEAK STREQUAL ON)
-	message("Sanitizer enabled")
+	message("-- Leak sanitizer enabled")
 	target_compile_options(${BUILD_NAME} PRIVATE -fsanitize=leak --coverage -g -fno-omit-frame-pointer -O0 -fno-optimize-sibling-calls)
 	target_link_options(${BUILD_NAME} PRIVATE -fsanitize=leak --coverage -g -O0)
 endif()
 if(UNDEFINED STREQUAL ON)
-	message("Sanitizer enabled")
+	message("-- Undefined sanitizer enabled")
 	target_compile_options(${BUILD_NAME} PRIVATE -fsanitize=undefined -DADDRESS -g -fno-omit-frame-pointer -O0 -fno-optimize-sibling-calls)
 	target_link_options(${BUILD_NAME} PRIVATE -fsanitize=undefined -g -O0)
 endif()
