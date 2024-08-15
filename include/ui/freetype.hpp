@@ -9,7 +9,7 @@
 #include <wchar.h>
 
 struct Glyph {
-	class Texture* textureID;
+	class Texture* texture;
 	Eigen::Vector2f size;
 	Eigen::Vector2f bearing;
 	Eigen::Vector2f advance;
@@ -34,6 +34,7 @@ class FontManager {
 
 	FT_Library mLibrary;
 	FT_Face mFace;
+	FT_Byte* mFontData;
 
 	// TODO: Unicode support
 	// TODO: unordered map

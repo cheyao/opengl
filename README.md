@@ -162,3 +162,6 @@ From discord:
 It's generally recommended to const-ref objects of which size extends 2 * sizeof(std::uintmax_t) aka 16 bytes
 
 Thx to Thimas Kole for his earth model: "Planet Earth (Alt-Drag to change Lighting)" (https://skfb.ly/Ft8J).
+
+https://harfbuzz.github.io/ ?
+https://github.com/fribidi/fribidi/ ?

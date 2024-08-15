@@ -311,4 +311,7 @@ void Renderer::setUIMatrix() const {
 	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
 	UIshader->activate();
 	UIshader->set("proj", ortho);
+	Shader* const Textshader = mGame->getShader("text.vert", "text.frag");
+	Textshader->activate();
+	Textshader->set("proj", ortho);
 }

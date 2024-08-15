@@ -34,7 +34,7 @@ class Game {
 	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
 					      const std::string& geom = "");
 	[[nodiscard]] class Renderer* getRenderer() const { return mRenderer; }
-	[[nodiscard]] const struct Glyph& getGlyph(const char32_t character);
+	[[nodiscard]] class FontManager* getFontManager() const { return mFontManager; }
 
 	[[nodiscard]] inline std::string fullPath(const std::string& path) const {
 		return (mBasePath + "assets" SEPARATOR + path);
@@ -57,8 +57,8 @@ class Game {
 	std::unique_ptr<class TextureManager> mTextures;
 	std::unique_ptr<class ShaderManager> mShaders;
 	std::unique_ptr<class EventManager> mEventManager;
-	std::unique_ptr<class FontManager> mFontManager;
 
+	class FontManager* mFontManager;
 	class Renderer* mRenderer;
 
 	std::vector<class Actor*> mActors;

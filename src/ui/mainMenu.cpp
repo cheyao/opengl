@@ -6,6 +6,7 @@
 #include "ui/UIScreen.hpp"
 #include "ui/backgroundComponent.hpp"
 #include "ui/buttonComponent.hpp"
+#include "ui/textComponent.hpp"
 #include "utils.hpp"
 
 MainMenu::MainMenu(class Game* game) : UIScreen(game) {
@@ -22,4 +23,8 @@ MainMenu::MainMenu(class Game* game) : UIScreen(game) {
 		game->removeUI(this);
 		game->getRenderer()->setWindowRelativeMouseMode(SDL_TRUE);
 	});
+
+        // Test "Hello 你好 こんにちは Bonne journée"
+	TextComponent* text = new TextComponent(this, "Hello");
+	(void)text;
 }

@@ -32,7 +32,7 @@
 #endif
 
 Game::Game()
-	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mActorMutex(SDL_CreateMutex()), mUIScale(2.0f),
+	: mTextures(nullptr), mShaders(nullptr), mFontManager(nullptr), mRenderer(nullptr), mActorMutex(SDL_CreateMutex()), mUIScale(2.0f),
 	  mTicks(0), mBasePath(""), mPaused(false), mVsync(true) {
 	if (mActorMutex == nullptr) {
 		SDL_Log("Failed to create actor mutex: %s", SDL_GetError());
@@ -54,7 +54,9 @@ Game::Game()
 	mTextures = std::make_unique<TextureManager>(mBasePath);
 	mShaders = std::make_unique<ShaderManager>(mBasePath);
 	mEventManager = std::make_unique<EventManager>(this);
-	mFontManager = std::make_unique<FontManager>(mBasePath);
+
+	mFontManager = new FontManager(mBasePath);
+	mFontManager->loadFont("FiraSans.ttf");
 
 	mRenderer = new Renderer(this);
 	mRenderer->swapWindow();
@@ -350,6 +352,5 @@ Game::~Game() {
 
 [[nodiscard]] int Game::getWidth() const { return mRenderer->getWidth(); }
 [[nodiscard]] int Game::getHeight() const { return mRenderer->getHeight(); }
-[[nodiscard]] const Glyph& Game::getGlyph(const char32_t character) { return mFontManager->getGlyph(character); }
 
 void Game::setKey(const size_t key, const bool val) { mEventManager->setKey(key, val); }
