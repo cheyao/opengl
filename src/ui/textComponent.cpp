@@ -9,6 +9,6 @@
 TextComponent::TextComponent(class UIScreen* owner, std::string_view text) : UIComponent(owner), mText(text) {
 }
 
-void TextComponent::draw([[maybe_unused]] const Shader* shader) {
-	mOwner->getGame()->getFontManager()->drawGlyph(U'h', mOwner->getGame());
+void TextComponent::drawText([[maybe_unused]] const Shader* shader) {
+	mOwner->getGame()->getFontManager()->drawGlyph(U'h', shader);
 }

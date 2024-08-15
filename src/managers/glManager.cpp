@@ -69,8 +69,8 @@ void GLManager::bindContext(SDL_Window* window) {
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
 
 	// glEnable(GL_STENCIL_TEST);
 	// glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);

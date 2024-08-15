@@ -176,9 +176,11 @@ void Renderer::draw() {
 	glDisable(GL_DEPTH_TEST);
 
 	Shader* UIshader = mGame->getShader("ui.vert", "ui.frag");
+	Shader* textShader = mGame->getShader("text.vert", "text.frag");
 	for (const auto& ui : mGame->getUIs()) {
 		if (ui->getState() == UIScreen::Active) {
 			ui->draw(UIshader);
+			ui->drawText(textShader);
 		}
 	}
 
@@ -311,7 +313,7 @@ void Renderer::setUIMatrix() const {
 	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
 	UIshader->activate();
 	UIshader->set("proj", ortho);
-	Shader* const Textshader = mGame->getShader("text.vert", "text.frag");
-	Textshader->activate();
-	Textshader->set("proj", ortho);
+	Shader* const textshader = mGame->getShader("text.vert", "text.frag");
+	textshader->activate();
+	textshader->set("proj", ortho);
 }

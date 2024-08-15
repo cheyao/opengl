@@ -36,10 +36,10 @@ FontManager::FontManager(const std::string& path, const unsigned int size)
 	 * Not the best thing here.
 	 */
 	const static float vertices[] = {
-		0.0f, 0.0f, 0.0f, // TL
-		0.0f, 1.0f, 0.0f, // BR
-		1.0f, 0.0f, 0.0f, // TR
-		1.0f, 1.0f, 0.0f  // BL
+		0.0f,	0.0f,	0.0f, // TL
+		0.0f,	100.0f, 0.0f, // BR
+		100.0f, 0.0f,	0.0f, // TR
+		100.0f, 100.0f, 0.0f  // BL
 	};
 
 	const static float texturePos[] = {
@@ -165,31 +165,23 @@ void FontManager::setFontSize(const unsigned int size) {
 	mGlyphMap.clear();
 }
 
-void FontManager::drawGlyph(const char32_t character, Game* game) {
-	(void)game;
-	(void)character;
-	/*
+void FontManager::drawGlyph(const char32_t character, const Shader* shader) {
 	if (!mGlyphMap.contains(character)) {
 		// TODO: try catch and sub char
 		mGlyphMap[character] = loadGlyph(character);
 	}
 
-	// assert(gylph.advance.y() == 0);
-	
 	const Glyph& glyph = mGlyphMap[character];
 
-	const Shader* shader = game->getShader("text.vert", "text.frag");
-
 	shader->activate();
-	// NOTE: This overrides the last setted texture
-	shader->set("letter", 5);
-	glyph.texture->activate(5);
+	shader->set("letter", 0);
 	shader->set("size", glyph.size);
+
+	glyph.texture->activate(0);
 
 	glBindVertexArray(mVAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
-	*/
 }
 
 Glyph FontManager::loadGlyph(const char32_t character) {

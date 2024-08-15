@@ -25,6 +25,12 @@ void UIScreen::draw(const Shader* shader) {
 	}
 }
 
+void UIScreen::drawText(const Shader* shader) {
+	for (const auto& component : mComponents) {
+		component->drawText(shader);
+	}
+}
+
 void UIScreen::processInput(const bool* keys) {
 	for (const auto& component : mComponents) {
 		component->input(keys);

@@ -27,5 +27,5 @@ MainMenu::MainMenu(class Game* game) : UIScreen(game) {
 	// Test "Hello 你好 こんにちは Bonne journée"
 	// TextComponent* text = new TextComponent(this, "Hello");
 	// (void)text;
-	// new TextComponent(this, "Hello");
+	new TextComponent(this, "Hello");
 }

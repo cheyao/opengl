@@ -3,7 +3,6 @@
 #include "game.hpp"
 #include "ui/UIScreen.hpp"
 #include "ui/buttonComponent.hpp"
-#include "util.h"
 
 #include <SDL3/SDL.h>
 
