@@ -12,9 +12,5 @@ TextComponent::TextComponent(class UIScreen* owner, std::string_view text) : UIC
 }
 
 void TextComponent::draw([[maybe_unused]] const Shader* shader) {
-	const Shader* textShader = mOwner->getGame()->getShader("text.vert", "text.frag");
-	const Glyph& c = mOwner->getGame()->getFontManager()->getGlyph(U'h');
-
-
-	(void)textShader;
+	mOwner->getGame()->getFontManager()->drawGlyph(U'h', mOwner->getGame());
 }

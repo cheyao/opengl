@@ -38,6 +38,7 @@ Texture::~Texture() {
 }
 
 void Texture::activate(const unsigned int& num) const {
+	assert(num < 80);
 	/*
 	[[unlikely]] if (!mLoaded) {
 		this->load();

@@ -2,11 +2,14 @@
 
 Hello and welcome to the repo of my tiny game engine.
 
-Im currently following [Learn OpenGL](https://learnopengl.com), but instead of their flat, multifile style of coding, I am integrating everything into a component-based game system.
+The resources that I used are:
+- [Learn OpenGL](https://learnopengl.com)
+- [Game Programming in C++](https://github.com/gameprogcpp/code)
+- [OpenGL RedBook](https://www.opengl-redbook.com)
 
-Most of the assets and stuff are ones that I found online, and some critical code concepts (passing `std::functions` etc.)
+But instead of their flat, multifile style of coding, I am integrating everything into a component-based game system.
 
-Some concepts are also taken from OpengGL RedBook.
+The UI part is compleatly thought up and created by me.
 
 Hope everything works out!
 
@@ -16,9 +19,9 @@ Dependencies:
 - SDL3 
 - Eigen (Included in the repo)
 
-# Building
+## Building
 
-## MacOS and Linux
+### MacOS and Linux
 
 Install `assimp` with your package manager
 
@@ -35,7 +38,7 @@ $ sudo cmake --install .
 Compile project:
 
 ```
-$ git clone https://github.com/cheyao/opengl.git
+$ git clone --depth 1 https://github.com/cheyao/opengl.git
 $ cd opengl 
 $ mkdir build && cd build 
 $ cmake ..
@@ -49,11 +52,11 @@ $ mv OpenGL.app /Applications/
 $ open /Applications/OpenGL.app # Or just openg the app
 ```
 
-## Windows
+### Windows
 
 Best luck, my CMakeLists.txt theoretically can support msvc, but if it doesn't please submit a pr, if it doesn't work just use WSL (or go use liux).
 
-## Android
+### Android
 
 MacOS Dependencies:
 ```
@@ -75,7 +78,7 @@ For android you need to compile assimp by yourself:
 
 Change the `CMAKE_TOOLCHAIN_FILE` if you are not on MacOS:
 ```
-$ git clone https://github.com/assimp/assimp 
+$ git clone --depth 1 https://github.com/assimp/assimp 
 $ cd assimp 
 $ mkdir build && cd build
 $ cmake -G Ninja\ 
@@ -91,7 +94,7 @@ $ cmake -G Ninja\
 
 Now build the project:
 ```
-$ git clone https://github.com/cheyao/opengl.git 
+$ git clone --depth 1 https://github.com/cheyao/opengl.git 
 $ cd opengl
 $ git submodule --init --recrusive
 $ mkdir build && cd build 
@@ -102,10 +105,10 @@ $ cmake -G Ninja \
 $ ninja
 ```
 
-# Improving performance
-Compile with the flag `-DOPTIMIZE`, but you won't be able to send the binary to others
+## Improving performance
+Compile with the flag `-DOPTIMIZE=ON`, but you won't be able to send the binary to others (Enables also unsafe floating points)
 
-# Distribuing
+## Distribuing
 There are scripts in the cmake folder:
 
 ```
@@ -127,8 +130,7 @@ cmake
 
 `./cmake/sign-apk.sh` Is to sign the android apk
 
-
-# TODO
+## TODO
 
 - [ ] Preload
 - [ ] Add functional hot reload
@@ -144,6 +146,7 @@ cmake
 - [ ] Windows build
 - [x] Pause menu etc
     - [ ] Settings
+    - [ ] Text
 - [ ] Multitouch
 - [x] UI
 - [ ] Multithreading
@@ -157,7 +160,7 @@ cmake
 - [x] UI Scaling
 - [ ] Shadows
 
-# Notes
+## Notes
 
 From discord:
 

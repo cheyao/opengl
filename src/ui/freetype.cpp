@@ -1,5 +1,7 @@
 #include "ui/freetype.hpp"
 
+#include "game.hpp"
+#include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
 #include "third_party/Eigen/Core"
 #include "utils.hpp"
@@ -33,74 +35,46 @@ FontManager::FontManager(const std::string& path, const unsigned int size)
 	 * This works by setting all the vectors to 1, and multiply the cords by the offset
 	 * Not the best thing here.
 	 */
-	const float vertices[] = {
+	const static float vertices[] = {
 		0.0f, 0.0f, 0.0f, // TL
 		0.0f, 1.0f, 0.0f, // BR
 		1.0f, 0.0f, 0.0f, // TR
 		1.0f, 1.0f, 0.0f  // BL
 	};
 
-	const float texturePos[] = {
+	const static float texturePos[] = {
 		1.0f, 1.0f, // TR
 		1.0f, 0.0f, // BR
 		0.0f, 1.0f, // TL
 		0.0f, 0.0f  // BL
 	};
 
-	const GLuint indices[] = {2, 1, 0,  // a
-				  1, 2, 3}; // b
-	
+	const static GLuint indices[] = {2, 1, 0,  // a
+					 1, 2, 3}; // b
+	static_assert(sizeof(indices) == 6 * sizeof(GLuint) && "Just a square, why not 6 indices?");
+
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
 
 	glGenVertexArrays(1, &mVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferData(GL_ARRAY_BUFFER, (vertices.size() + normals.size() + texturePos.size()) * sizeof(float), nullptr,
-		     GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + sizeof(texturePos), nullptr, GL_STATIC_DRAW);
 
-	static_assert(std::is_same_v<decltype(positions[0]), decltype(normals[0])>);
-	static_assert(std::is_same_v<decltype(texturePos[0]), decltype(normals[0])>);
-	static_assert(std::is_same_v<decltype(texturePos[0]), const float&>);
-
-	size_t offset = 0;
-
-	// TODO: Non-hardcoded attrib pointer strides
-	// TODO: Prettier
 	glBindVertexArray(mVAO);
-	assert(!positions.empty());
-	{
-		glBufferSubData(GL_ARRAY_BUFFER, offset, positions.size() * sizeof(float), positions.data());
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
-		glEnableVertexAttribArray(0);
 
-		offset += positions.size() * sizeof(float);
-	}
+	// Vertices
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(0));
+	glEnableVertexAttribArray(0);
 
-	if (!normals.empty()) {
-		glBufferSubData(GL_ARRAY_BUFFER, offset, normals.size() * sizeof(float), normals.data());
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
-		glEnableVertexAttribArray(1);
-
-		offset += normals.size() * sizeof(float);
-	} else {
-		SDL_Log("Mesh.cpp: Normals empty, ignored");
-	}
-
-	if (!texturePos.empty()) {
-		glBufferSubData(GL_ARRAY_BUFFER, offset, texturePos.size() * sizeof(float), texturePos.data());
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
-		glEnableVertexAttribArray(2);
-
-		offset += texturePos.size() * sizeof(float);
-	} else {
-		SDL_Log("Mesh.cpp: Texture pos empty, ignored");
-	}
-
-	assert((positions.size() + normals.size() + texturePos.size()) * sizeof(float) == offset && "Missing data");
+	// TexPos
+	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), sizeof(texturePos), texturePos);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<GLvoid*>(sizeof(vertices)));
+	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndicesCount * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
 }
@@ -158,7 +132,7 @@ void FontManager::loadFont(const std::string& name) {
 		throw std::runtime_error("Freetype.cpp: Failed to load font");
 	}
 
-	// TODO : https://freetype.org/freetype2/docs/tutorial/step1.html#section-1
+	// TODO: https://freetype.org/freetype2/docs/tutorial/step1.html#section-1
 	// TODO: Fractions with `FT_Set_Char_Size`
 	if (FT_Set_Pixel_Sizes(newFace, 0, mSize)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to set font size: %s", name.data());
@@ -191,45 +165,44 @@ void FontManager::setFontSize(const unsigned int size) {
 	mGlyphMap.clear();
 }
 
-const Glyph& FontManager::getGlyph(const char32_t character) {
-	if (mGlyphMap.contains(character)) {
-		return mGlyphMap.at(character);
+void FontManager::drawGlyph(const char32_t character, Game* game) {
+	if (!mGlyphMap.contains(character)) {
+		// TODO: try catch and sub char
+		mGlyphMap[character] = loadGlyph(character);
 	}
 
+	// assert(gylph.advance.y() == 0);
+	
+	const Glyph& glyph = mGlyphMap[character];
+
+	const Shader* shader = game->getShader("text.vert", "text.frag");
+
+	shader->activate();
+	// NOTE: This overrides the last setted texture
+	shader->set("letter", 5);
+	glyph.texture->activate(5);
+	shader->set("size", glyph.size);
+
+	glBindVertexArray(mVAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+	glBindVertexArray(0);
+}
+
+Glyph FontManager::loadGlyph(const char32_t character) {
 	assert(mFace != nullptr);
 
 	// FT_Get_Glyph & FT_Glyph_To_Bitmap?
-	if (FT_Load_Char(mFace, 'h', FT_LOAD_RENDER)) {
+	if (FT_Load_Char(mFace, character, FT_LOAD_RENDER)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to load character: 0x%x", character);
 		ERROR_BOX("Failed load character, please reinstall assets and the freetype library");
 
 		throw std::runtime_error("Freetype.cpp: Failed to load character");
 	}
 
-	/*
-	if (mFace->glyph->format != FT_GLYPH_FORMAT_BITMAP) {
-		if (FT_Render_Glyph(mFace->glyph, FT_RENDER_MODE_NORMAL)) {
-			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to load bitmap for character: %x",
-					character);
-			ERROR_BOX("Failed load character bitmap, please reinstall assets and the freetype library");
-
-			throw std::runtime_error("Freetype.cpp: Failed to load character bitmap");
-		}
-	}
-	*/
-
 	Glyph glyph = {new Texture(mFace->glyph->bitmap),
 		       Eigen::Vector2f(mFace->glyph->bitmap.width, mFace->glyph->bitmap.rows),
 		       Eigen::Vector2f(mFace->glyph->bitmap_left, mFace->glyph->bitmap_top),
 		       Eigen::Vector2f(mFace->glyph->advance.x, mFace->glyph->advance.y)};
 
-	// assert(gylph.advance.y() == 0);
-
-	mGlyphMap[character] = glyph;
-
-	glBindVertexArray(mVAO);
-	mDrawFunc(GL_TRIANGLES, mIndicesCount, GL_UNSIGNED_INT, nullptr);
-	glBindVertexArray(0);
-
-	return mGlyphMap[character];
+	return glyph;
 }

@@ -58,8 +58,8 @@ class Game {
 	std::unique_ptr<class ShaderManager> mShaders;
 	std::unique_ptr<class EventManager> mEventManager;
 
-	class FontManager* mFontManager;
 	class Renderer* mRenderer;
+	class FontManager* mFontManager;
 
 	std::vector<class Actor*> mActors;
 	std::vector<class Actor*> mPendingActors;

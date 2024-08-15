@@ -11,7 +11,7 @@ uniform mat4 model; // TODO: Maybe offset vec2?
 uniform vec2 size;
 
 void main() {
-	gl_Position = proj * model * vec4(aPos.xy, 0.0f, 1.0f);
+	gl_Position = proj * model * vec4(aPos.x * size.x, aPos.y * size.y, 0.0f, 1.0f);
 
 	vTexPos = aTexPos;
 }

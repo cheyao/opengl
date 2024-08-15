@@ -32,7 +32,7 @@
 #endif
 
 Game::Game()
-	: mTextures(nullptr), mShaders(nullptr), mFontManager(nullptr), mRenderer(nullptr),
+	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mFontManager(nullptr),
 	  mActorMutex(SDL_CreateMutex()), mUIScale(2.0f), mTicks(0), mBasePath(""), mPaused(false), mVsync(true) {
 	if (mActorMutex == nullptr) {
 		SDL_Log("Failed to create actor mutex: %s", SDL_GetError());
@@ -55,11 +55,11 @@ Game::Game()
 	mShaders = std::make_unique<ShaderManager>(mBasePath);
 	mEventManager = std::make_unique<EventManager>(this);
 
-	mFontManager = new FontManager(mBasePath);
-	mFontManager->loadFont("FiraSans.ttf");
-
 	mRenderer = new Renderer(this);
 	mRenderer->swapWindow();
+
+	mFontManager = new FontManager(mBasePath);
+	mFontManager->loadFont("FiraSans.ttf");
 
 	// TODO: Icon
 	/*

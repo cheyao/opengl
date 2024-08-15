@@ -27,9 +27,11 @@ class FontManager {
 
 	void loadFont(const std::string& name);
 	void setFontSize(const unsigned int size);
-	const Glyph& getGlyph(const char32_t character);
+	void drawGlyph(const char32_t character, class Game* game);
 
       private:
+	Glyph loadGlyph(const char32_t character);
+
 	std::string mPath;
 	unsigned int mSize;
 
