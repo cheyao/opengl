@@ -166,6 +166,9 @@ void FontManager::setFontSize(const unsigned int size) {
 }
 
 void FontManager::drawGlyph(const char32_t character, Game* game) {
+	(void)game;
+	(void)character;
+	/*
 	if (!mGlyphMap.contains(character)) {
 		// TODO: try catch and sub char
 		mGlyphMap[character] = loadGlyph(character);
@@ -186,6 +189,7 @@ void FontManager::drawGlyph(const char32_t character, Game* game) {
 	glBindVertexArray(mVAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
+	*/
 }
 
 Glyph FontManager::loadGlyph(const char32_t character) {
