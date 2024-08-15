@@ -1,6 +1,7 @@
 #pragma once
 
 #include "third_party/Eigen/Core"
+#include "third_party/glad/glad.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -39,4 +40,9 @@ class FontManager {
 	// TODO: Unicode support
 	// TODO: unordered map
 	std::unordered_map<char32_t, Glyph> mGlyphMap;
+
+	// OpenGL stuff
+	GLuint mVBO;
+	GLuint mEBO;
+	GLuint mVAO;
 };

@@ -32,8 +32,8 @@
 #endif
 
 Game::Game()
-	: mTextures(nullptr), mShaders(nullptr), mFontManager(nullptr), mRenderer(nullptr), mActorMutex(SDL_CreateMutex()), mUIScale(2.0f),
-	  mTicks(0), mBasePath(""), mPaused(false), mVsync(true) {
+	: mTextures(nullptr), mShaders(nullptr), mFontManager(nullptr), mRenderer(nullptr),
+	  mActorMutex(SDL_CreateMutex()), mUIScale(2.0f), mTicks(0), mBasePath(""), mPaused(false), mVsync(true) {
 	if (mActorMutex == nullptr) {
 		SDL_Log("Failed to create actor mutex: %s", SDL_GetError());
 

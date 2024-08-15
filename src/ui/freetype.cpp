@@ -10,15 +10,99 @@
 #include <stdexcept>
 #include <wchar.h>
 
+// PERF: Optimize with font atlas when using small fonts
+// https://stackoverflow.com/questions/2071621/how-to-do-opengl-live-text-rendering-for-a-gui
+// FIXME: Anti aliasing?
+// FIXME: Lignatures
+// FIXME: Maybe add support for emojis
+// FIXME: Better unicode support
+// FIXME: Some kind of fallback font
 // FIXME: Verical text https://freetype.org/freetype2/docs/tutorial/step2.html
 FontManager::FontManager(const std::string& path, const unsigned int size)
-	: mPath(path + "assets" SEPARATOR "fonts" SEPARATOR), mSize(size), mLibrary(nullptr), mFace(nullptr), mFontData(nullptr) {
+	: mPath(path + "assets" SEPARATOR "fonts" SEPARATOR), mSize(size), mLibrary(nullptr), mFace(nullptr),
+	  mFontData(nullptr) {
 	if (FT_Init_FreeType(&mLibrary)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to init freetype");
 		ERROR_BOX("Failed to init freetype, please reinstall your freetype library");
 
 		throw std::runtime_error("Freetype.cpp: Failed to init library");
 	}
+
+	/*
+	 * NOTE:
+	 * This works by setting all the vectors to 1, and multiply the cords by the offset
+	 * Not the best thing here.
+	 */
+	const float vertices[] = {
+		0.0f, 0.0f, 0.0f, // TL
+		0.0f, 1.0f, 0.0f, // BR
+		1.0f, 0.0f, 0.0f, // TR
+		1.0f, 1.0f, 0.0f  // BL
+	};
+
+	const float texturePos[] = {
+		1.0f, 1.0f, // TR
+		1.0f, 0.0f, // BR
+		0.0f, 1.0f, // TL
+		0.0f, 0.0f  // BL
+	};
+
+	const GLuint indices[] = {2, 1, 0,  // a
+				  1, 2, 3}; // b
+	
+	glGenBuffers(1, &mVBO);
+	glGenBuffers(1, &mEBO);
+
+	glGenVertexArrays(1, &mVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+	glBufferData(GL_ARRAY_BUFFER, (vertices.size() + normals.size() + texturePos.size()) * sizeof(float), nullptr,
+		     GL_STATIC_DRAW);
+
+	static_assert(std::is_same_v<decltype(positions[0]), decltype(normals[0])>);
+	static_assert(std::is_same_v<decltype(texturePos[0]), decltype(normals[0])>);
+	static_assert(std::is_same_v<decltype(texturePos[0]), const float&>);
+
+	size_t offset = 0;
+
+	// TODO: Non-hardcoded attrib pointer strides
+	// TODO: Prettier
+	glBindVertexArray(mVAO);
+	assert(!positions.empty());
+	{
+		glBufferSubData(GL_ARRAY_BUFFER, offset, positions.size() * sizeof(float), positions.data());
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
+		glEnableVertexAttribArray(0);
+
+		offset += positions.size() * sizeof(float);
+	}
+
+	if (!normals.empty()) {
+		glBufferSubData(GL_ARRAY_BUFFER, offset, normals.size() * sizeof(float), normals.data());
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
+		glEnableVertexAttribArray(1);
+
+		offset += normals.size() * sizeof(float);
+	} else {
+		SDL_Log("Mesh.cpp: Normals empty, ignored");
+	}
+
+	if (!texturePos.empty()) {
+		glBufferSubData(GL_ARRAY_BUFFER, offset, texturePos.size() * sizeof(float), texturePos.data());
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
+		glEnableVertexAttribArray(2);
+
+		offset += texturePos.size() * sizeof(float);
+	} else {
+		SDL_Log("Mesh.cpp: Texture pos empty, ignored");
+	}
+
+	assert((positions.size() + normals.size() + texturePos.size()) * sizeof(float) == offset && "Missing data");
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndicesCount * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
 }
 
 FontManager::~FontManager() {
@@ -31,6 +115,10 @@ FontManager::~FontManager() {
 	}
 
 	FT_Done_FreeType(mLibrary);
+
+	glDeleteVertexArrays(1, &mVAO);
+	glDeleteBuffers(1, &mVBO);
+	glDeleteBuffers(1, &mEBO);
 }
 
 void FontManager::loadFont(const std::string& name) {
@@ -138,6 +226,10 @@ const Glyph& FontManager::getGlyph(const char32_t character) {
 	// assert(gylph.advance.y() == 0);
 
 	mGlyphMap[character] = glyph;
+
+	glBindVertexArray(mVAO);
+	mDrawFunc(GL_TRIANGLES, mIndicesCount, GL_UNSIGNED_INT, nullptr);
+	glBindVertexArray(0);
 
 	return mGlyphMap[character];
 }
