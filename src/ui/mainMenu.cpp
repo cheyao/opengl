@@ -15,8 +15,8 @@ MainMenu::MainMenu(class Game* game) : UIScreen(game) {
 
 	new BackgroundComponent(this, Eigen::Vector3f(1.0f, 0.0f, 0.0f));
 
-	ButtonComponent* start =
-		new ButtonComponent(this, getGame()->getTexture("ui" SEPARATOR "start.png"), Eigen::Vector2f(CENTER, CENTER));
+	ButtonComponent* start = new ButtonComponent(this, getGame()->getTexture("ui" SEPARATOR "start.png"),
+						     Eigen::Vector2f(CENTER, CENTER));
 
 	start->onClick([this, game] {
 		game->setPause(false);
@@ -24,7 +24,8 @@ MainMenu::MainMenu(class Game* game) : UIScreen(game) {
 		game->getRenderer()->setWindowRelativeMouseMode(SDL_TRUE);
 	});
 
-        // Test "Hello 你好 こんにちは Bonne journée"
-	TextComponent* text = new TextComponent(this, "Hello");
-	(void)text;
+	// Test "Hello 你好 こんにちは Bonne journée"
+	// TextComponent* text = new TextComponent(this, "Hello");
+	// (void)text;
+	// new TextComponent(this, "Hello");
 }

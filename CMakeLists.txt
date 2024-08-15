@@ -237,9 +237,9 @@ elseif(WEB)
 
 	add_executable(${BUILD_NAME} ${SRC})
 
-	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -DGLES -sNO_DISABLE_EXCEPTION_CATCHING)
+	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -DGLES -sNO_DISABLE_EXCEPTION_CATCHING)
 	target_compile_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
-	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sALLOW_MEMORY_GROWTH -sNO_DISABLE_EXCEPTION_CATCHING)
+	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sALLOW_MEMORY_GROWTH -sNO_DISABLE_EXCEPTION_CATCHING)
 	target_link_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
 
 	if(DEBUG)
@@ -333,9 +333,11 @@ else()
 endif()
 
 # Freetype
-find_package(Freetype REQUIRED)
-target_include_directories(${BUILD_NAME} PRIVATE ${FREETYPE_INCLUDE_DIRS})
-target_link_libraries(${BUILD_NAME} PRIVATE ${FREETYPE_LIBRARIES})
+if (NOT WEB)
+	find_package(Freetype REQUIRED)
+	target_include_directories(${BUILD_NAME} PRIVATE ${FREETYPE_INCLUDE_DIRS})
+	target_link_libraries(${BUILD_NAME} PRIVATE ${FREETYPE_LIBRARIES})
+endif()
 
 # OpenGL - needed by MacOS
 if (MACOS)

@@ -1,8 +1,6 @@
 #include "ui/textComponent.hpp"
 
 #include "game.hpp"
-#include "opengl/texture.hpp"
-#include "opengl/types.hpp"
 #include "ui/UIComponent.hpp"
 #include "ui/UIScreen.hpp"
 #include "ui/freetype.hpp"
