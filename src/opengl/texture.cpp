@@ -4,6 +4,8 @@
 #include "third_party/stb_image.h"
 #include "utils.hpp"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include <SDL3/SDL.h>
 #include <stdexcept>
 #include <string_view>

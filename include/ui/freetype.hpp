@@ -1,17 +1,18 @@
 #pragma once
 
-#include "third_party/Eiegn/Core"
+#include "third_party/Eigen/Core"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include <map>
 #include <string>
+#include <unordered_map>
+#include <wchar.h>
 
-struct Gylph {
-    unsigned int TextureID;
-    Eiegn::Vector2f   Size;
-    Eiegn::Vector2f   Bearing;
-    unsigned int Advance;
+struct Glyph {
+	class Texture* textureID;
+	Eigen::Vector2f size;
+	Eigen::Vector2f bearing;
+	Eigen::Vector2f advance;
 };
 
 class FontManager {
@@ -25,7 +26,7 @@ class FontManager {
 
 	void loadFont(const std::string& name);
 	void setFontSize(const unsigned int size);
-	Gylph getGylph(const char character);
+	Glyph getGylph(const char32_t character);
 
       private:
 	std::string mPath;
@@ -36,5 +37,5 @@ class FontManager {
 
 	// TODO: Unicode support
 	// TODO: unordered map
-	std::map<char, Gylph> mGylphMap;
+	std::unordered_map<char32_t, Glyph> mGlyphMap;
 };
