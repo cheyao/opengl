@@ -10,8 +10,25 @@
 #include <stdexcept>
 #include <string_view>
 
-Texture::Texture(const std::string_view& path) : name(path), mWidth(0), mHeight(0) {
-	stbi_set_flip_vertically_on_load(true);
+Texture::Texture(const std::string_view& path) : name(path), mWidth(0), mHeight(0) {}
+
+Texture::Texture(const FT_Bitmap& bitmap) {
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	SDL_Log("Loading texture %s", name.data());
+
+	glGenTextures(1, &mID);
+	glBindTexture(GL_TEXTURE_2D, mID);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, bitmap.width, bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	SDL_Log("Loaded freetype bitmap: %dx%d", bitmap.width, bitmap.rows);
 }
 
 Texture::~Texture() {
@@ -47,7 +64,7 @@ void Texture::load() {
 
 	int channels = 0;
 	unsigned char* data = stbi_load_from_memory(source, size, &mWidth, &mHeight, &channels, 0);
-	// unsigned char* data = stbi_load(name.data(), &width, &height, &channels, 0);
+	SDL_free(source);
 
 	[[unlikely]] if (data == nullptr) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to decompress texture: %s\n", name.data());
@@ -84,7 +101,6 @@ void Texture::load() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	// SDL_free(source);
 	stbi_image_free(data);
 
 	SDL_Log("Loaded texture %s: %d channels %dx%d", name.data(), channels, mWidth, mHeight);

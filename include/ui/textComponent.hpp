@@ -11,5 +11,7 @@ class TextComponent : public UIComponent {
 	TextComponent& operator=(const TextComponent&) = delete;
 	~TextComponent() = default;
 
+	void draw([[maybe_unused]] const class Shader* shader) override;
+
       private:
 };

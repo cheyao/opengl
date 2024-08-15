@@ -2,8 +2,6 @@
 
 #include "actors/actor.hpp"
 
-#include <cstdint>
-
 Component::Component(Actor* owner, int priority) : mOwner(owner), mUpdatePriority(priority) {
 	mOwner->addComponent(this);
 }

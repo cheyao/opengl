@@ -134,11 +134,11 @@ cmake
 - [ ] Add functional hot reload
 - [x] Game pause + resume things
 - [ ] Save state
-- [ ] Debug menu with ImGUI and item names
 - [ ] Read gpu gems
+- [ ] Debug menu with ImGUI and item names
 - [ ] Better component and actors
 - [x] Android build
-    - [x] Android UI
+    - [x] Android controls
 - [x] Emscripten build
     - [ ] Web detect android
 - [ ] Windows build
@@ -148,10 +148,12 @@ cmake
 - [x] UI
 - [ ] Multithreading
 - [ ] TTF
+    - [ ] Button auto scale + text
 - [ ] Localization
+    - [ ] Maybe [ICU?](https://icu.unicode.org/)
+    - [ ] Vertial text
 - [x] UI Scaling
 - [ ] Shadows
-- [ ] Maybe [ICU?](https://icu.unicode.org/)
 
 # Notes
 

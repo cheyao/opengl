@@ -2,11 +2,14 @@
 
 #include "opengl/cubemap.hpp"
 #include "opengl/texture.hpp"
+#include "third_party/stb_image.h"
 #include "utils.hpp"
 
 #include <unordered_map>
 
-TextureManager::TextureManager(const std::string& path) : mPath(path + "assets" + SEPARATOR + "textures" + SEPARATOR) {}
+TextureManager::TextureManager(const std::string& path) : mPath(path + "assets" + SEPARATOR + "textures" + SEPARATOR) {
+	stbi_set_flip_vertically_on_load(true);
+}
 
 Texture* TextureManager::get(const std::string& name) {
 	if (mTextures.contains(name)) {

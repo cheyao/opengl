@@ -52,6 +52,7 @@ void Cubemap::loadface(const std::string& face, const unsigned int& i) {
 	int height = 0;
 	int channels = 0;
 	unsigned char* data = stbi_load_from_memory(source, size, &width, &height, &channels, 0);
+	SDL_free(source);
 	// unsigned char* data = stbi_load((name + face).data(), &width, &height, &channels, 0);
 
 	[[unlikely]] if (data == nullptr) {

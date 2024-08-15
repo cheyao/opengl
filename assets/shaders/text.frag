@@ -9,6 +9,7 @@ uniform sampler2D texture_diffuse0;
 uniform vec3 textColor;
 
 void main() {    
-    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(texture_diffuse0, vTexPos).r);
-    color = vec4(textColor, 1.0) * sampled;
+	vec4 sampled = vec4(1.0, 1.0, 1.0, texture(texture_diffuse0, vTexPos).r);
+
+	color = vec4(textColor, 1.0) * sampled;
 }  

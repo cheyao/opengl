@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <wchar.h>
 
+// FIXME: Verical text https://freetype.org/freetype2/docs/tutorial/step2.html
 FontManager::FontManager(const std::string& path, const unsigned int size)
 	: mPath(path + "assets" SEPARATOR "fonts" SEPARATOR), mSize(size), mLibrary(nullptr), mFace(nullptr) {
 	if (FT_Init_FreeType(&mLibrary)) {
@@ -39,7 +40,7 @@ void FontManager::loadFont(const std::string& name) {
 	}
 
 	size_t size = 0;
-	const FT_Byte* data = static_cast<const FT_Byte*>(SDL_LoadFile((mPath + name).data(), &size));
+	FT_Byte* data = static_cast<FT_Byte*>(SDL_LoadFile((mPath + name).data(), &size));
 	if (data == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: SDL failed to load file %s: %s", name.data(),
 				SDL_GetError());
@@ -54,13 +55,19 @@ void FontManager::loadFont(const std::string& name) {
 				name.data());
 		ERROR_BOX("Failed load font, unknown file format, please reinstall assets and the freetype library");
 
+		SDL_free(static_cast<void*>(data));
+
 		throw std::runtime_error("Freetype.cpp: Failed to load font: unknown file format");
 	} else if (status) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to load font: %s", name.data());
 		ERROR_BOX("Failed load font, please reinstall assets and the freetype library");
 
+		SDL_free(static_cast<void*>(data));
+
 		throw std::runtime_error("Freetype.cpp: Failed to load font");
 	}
+	SDL_free(static_cast<void*>(data));
+	// TODO : https://freetype.org/freetype2/docs/tutorial/step1.html#section-1
 
 	// Maybe `FT_Set_Char_Size`
 	if (FT_Set_Pixel_Sizes(mFace, 0, mSize)) {
@@ -70,40 +77,34 @@ void FontManager::loadFont(const std::string& name) {
 		throw std::runtime_error("Freetype.cpp: Failed to set font size");
 	}
 
-	mGylphMap.clear();
+	mGlyphMap.clear();
 }
 
 void FontManager::setFontSize(const unsigned int size) {
 	mSize = size;
 
 	if (mFace != nullptr) {
+		// TODO: fractions
 		FT_Set_Pixel_Sizes(mFace, 0, mSize);
 	}
 
-	mGylphMap.clear();
+	mGlyphMap.clear();
 }
 
-Glyph FontManager::getGylph(const char32_t character) {
-	if (mGylphMap.contains(character)) {
-		return mGylphMap.at(character);
+const Glyph& FontManager::getGylph(const char32_t character) {
+	if (mGlyphMap.contains(character)) {
+		return mGlyphMap.at(character);
 	}
 
-	FT_UInt index = FT_Get_Char_Index(mFace, character);
-	if (index == 0) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
-				"Freetype.cpp: Failed to load character: %x (undefined char code)", character);
-		ERROR_BOX("Failed load character, please reinstall assets and the freetype library");
-
-		throw std::runtime_error("Freetype.cpp: Failed to load character - undefine char code");
-	}
-
-	if (FT_Load_Glyph(mFace, character, FT_LOAD_RENDER)) {
+	// FT_Get_Glyph & FT_Glyph_To_Bitmap?
+	if (FT_Load_Char(mFace, character, FT_LOAD_RENDER)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to load character: %x", character);
 		ERROR_BOX("Failed load character, please reinstall assets and the freetype library");
 
 		throw std::runtime_error("Freetype.cpp: Failed to load character");
 	}
 
+	/*
 	if (mFace->glyph->format != FT_GLYPH_FORMAT_BITMAP) {
 		if (FT_Render_Glyph(mFace->glyph, FT_RENDER_MODE_NORMAL)) {
 			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to load bitmap for character: %x",
@@ -113,6 +114,7 @@ Glyph FontManager::getGylph(const char32_t character) {
 			throw std::runtime_error("Freetype.cpp: Failed to load character bitmap");
 		}
 	}
+	*/
 
 	Glyph glyph = {new Texture(mFace->glyph->bitmap),
 		       Eigen::Vector2f(mFace->glyph->bitmap.width, mFace->glyph->bitmap.rows),
@@ -123,5 +125,5 @@ Glyph FontManager::getGylph(const char32_t character) {
 
 	mGlyphMap[character] = glyph;
 
-	return glyph;
+	return mGlyphMap[character];
 }

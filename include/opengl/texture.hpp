@@ -11,6 +11,7 @@ class Texture {
 
       public:
 	explicit Texture(const std::string_view& path);
+	// NOTE: Doesn't need load
 	explicit Texture(const FT_Bitmap& bitmap);
 	Texture(Texture&&) = delete;
 	Texture(const Texture&) = delete;
