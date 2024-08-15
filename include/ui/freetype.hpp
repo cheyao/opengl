@@ -26,7 +26,7 @@ class FontManager {
 
 	void loadFont(const std::string& name);
 	void setFontSize(const unsigned int size);
-	const Glyph& getGylph(const char32_t character);
+	const Glyph& getGlyph(const char32_t character);
 
       private:
 	std::string mPath;

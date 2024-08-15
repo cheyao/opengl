@@ -91,7 +91,7 @@ void FontManager::setFontSize(const unsigned int size) {
 	mGlyphMap.clear();
 }
 
-const Glyph& FontManager::getGylph(const char32_t character) {
+const Glyph& FontManager::getGlyph(const char32_t character) {
 	if (mGlyphMap.contains(character)) {
 		return mGlyphMap.at(character);
 	}

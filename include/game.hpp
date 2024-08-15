@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+// TODO: Cleanup this
 class Game {
       public:
 	Game();
@@ -32,16 +33,17 @@ class Game {
 	[[nodiscard]] class Texture* getTexture(const std::string& name);
 	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
 					      const std::string& geom = "");
-	[[nodiscard]] class Renderer* getRenderer() { return mRenderer; }
+	[[nodiscard]] class Renderer* getRenderer() const { return mRenderer; }
+	[[nodiscard]] const struct Glyph& getGlyph(const char32_t character);
 
 	[[nodiscard]] inline std::string fullPath(const std::string& path) const {
 		return (mBasePath + "assets" SEPARATOR + path);
-	};
+	}
 
-	void addUI(class UIScreen* ui) { mUI.emplace_back(ui); };
+	void addUI(class UIScreen* ui) { mUI.emplace_back(ui); }
 	void removeUI(class UIScreen* ui);
-	[[nodiscard]] const std::vector<class UIScreen*>& getUIs() const { return mUI; };
-	[[nodiscard]] float getScale() const { return mUIScale; };
+	[[nodiscard]] const std::vector<class UIScreen*>& getUIs() const { return mUI; }
+	[[nodiscard]] float getScale() const { return mUIScale; }
 
 	void setKey(const size_t key, const bool val);
 

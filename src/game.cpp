@@ -350,5 +350,6 @@ Game::~Game() {
 
 [[nodiscard]] int Game::getWidth() const { return mRenderer->getWidth(); }
 [[nodiscard]] int Game::getHeight() const { return mRenderer->getHeight(); }
+[[nodiscard]] const Glyph& Game::getGlyph(const char32_t character) { return mFontManager->getGlyph(character); }
 
 void Game::setKey(const size_t key, const bool val) { mEventManager->setKey(key, val); }
