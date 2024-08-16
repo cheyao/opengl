@@ -30,6 +30,7 @@ class FontManager {
 	void drawGlyph(const char32_t character, const class Shader* shader, const Eigen::Vector2f offset);
 
 	[[nodiscard]] Eigen::Vector2f getOffset(const char32_t character);
+	[[nodiscard]] Eigen::Vector2f getSize(const char32_t character);
 
       private:
 	Glyph loadGlyph(const char32_t character);

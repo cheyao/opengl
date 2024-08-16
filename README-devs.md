@@ -2,24 +2,6 @@
 
 Notes:
 
-UI components have padding, negative is from bottom/right of screen and positive from top/left of screen
-```
-+---------------------------------------------------------------+
-|                |            |                                 |
-|                |            |                                 |
-|                |            |                                 |
-|                |            |-24x, -18y                       |
-|----------------+            |     +----------------------------|
-|         +12x, +5y           |     |                           |
-|                             |     |                           |
-|-----------------------------+     |                           |
-|                         NAN, NAN  |                           |
-|                                   |                           |
-|                                   |                           |
-|                                   |                           |
-|                                   |                           |
-|                                   |                           |
-+---------------------------------------------------------------+
-```
+`CENTER` for center
 
-Nan is center
+0,0 is left down

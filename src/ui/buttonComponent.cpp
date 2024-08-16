@@ -43,11 +43,13 @@ ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const 
 	mMesh = new Mesh(vertices, {}, texturePos, indices, textures);
 }
 
-// This is usually not a good practice, but trust me, I need it 
+// This is usually not a good practice, but trust me, I need it
 // I defined a magic number for center, so I must comare to it
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wfloat-equal"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wfloat-equal"
 #endif
 
 void ButtonComponent::draw(const Shader* shader) {
@@ -70,11 +72,9 @@ void ButtonComponent::draw(const Shader* shader) {
 	if (y == CENTER) {
 		y = static_cast<float>(mOwner->getGame()->getHeight()) / 2 -
 		    (static_cast<float>(mHeight) * mOwner->getGame()->getScale()) / 2;
-	} else  {
-		if (y > 0) {
-			y = mOwner->getGame()->getHeight() - mHeight * mOwner->getGame()->getScale() - y;
-		} else {
-			y = -y;
+	} else {
+		if (y < 0) {
+			y += mOwner->getGame()->getHeight();
 		}
 	}
 
@@ -98,19 +98,17 @@ void ButtonComponent::touch(const SDL_FingerID& finger, const float x, const flo
 
 	if (buttonX == CENTER) {
 		buttonX = static_cast<float>(mOwner->getGame()->getWidth()) / 2 -
-		    static_cast<float>(mWidth) * mOwner->getGame()->getScale() / 2;
+			  static_cast<float>(mWidth) * mOwner->getGame()->getScale() / 2;
 	} else if (buttonX < 0) {
 		buttonX += mOwner->getGame()->getWidth();
 	}
 
 	if (buttonY == CENTER) {
 		buttonY = static_cast<float>(mOwner->getGame()->getHeight()) / 2 -
-		    (static_cast<float>(mHeight) * mOwner->getGame()->getScale()) / 2;
-	} else  {
-		if (buttonY > 0) {
-			buttonY = mOwner->getGame()->getHeight() - mHeight * mOwner->getGame()->getScale() - buttonY;
-		} else {
-			buttonY = -buttonY;
+			  (static_cast<float>(mHeight) * mOwner->getGame()->getScale()) / 2;
+	} else {
+		if (buttonY < 0) {
+			buttonY += mOwner->getGame()->getHeight();
 		}
 	}
 

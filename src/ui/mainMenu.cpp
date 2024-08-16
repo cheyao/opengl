@@ -16,7 +16,7 @@ MainMenu::MainMenu(class Game* game) : UIScreen(game) {
 	new BackgroundComponent(this, Eigen::Vector3f(1.0f, 0.0f, 0.0f));
 
 	ButtonComponent* start = new ButtonComponent(this, getGame()->getTexture("ui" SEPARATOR "start.png"),
-						     Eigen::Vector2f(CENTER, CENTER));
+						     Eigen::Vector2f(-10, -10));
 
 	start->onClick([this, game] {
 		game->setPause(false);
@@ -27,5 +27,5 @@ MainMenu::MainMenu(class Game* game) : UIScreen(game) {
 	// Test "Hello 你好 こんにちは Bonne journée"
 	// TextComponent* text = new TextComponent(this, "Hello");
 	// (void)text;
-	new TextComponent(this, "Hello");
+	new TextComponent(this, "Hello world with text!", Eigen::Vector2f(CENTER, CENTER));
 }

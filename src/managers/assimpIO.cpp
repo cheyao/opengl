@@ -117,7 +117,7 @@ char GameIOSystem::getOsSeparator() const { return SEPARATOR[0]; }
 Assimp::IOStream* GameIOSystem::Open(const char* pFile, const char* pMode) {
 	try {
 		return new GameIOStream(pFile, pMode);
-	} catch (std::runtime_error e) {
+	} catch (const std::runtime_error& e) {
 		// SDL_Log("GameIO Error: %s: %s", e.what(), SDL_GetError());
 
 		return nullptr;

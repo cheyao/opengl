@@ -23,9 +23,11 @@ int EventManager::manageEvent(const SDL_Event& event) {
 
 			// TODO: SDL_EVENT_LOW_MEMORY
 			return 1;
+
+			break;
 		}
 
-		// TODO: SDL_EVENT_LOW_MEMORY
+			// TODO: SDL_EVENT_LOW_MEMORY
 
 		case SDL_EVENT_KEY_DOWN: {
 			if (manageKeyboardEvent(event) != 0) {
@@ -110,7 +112,9 @@ int EventManager::manageKeyboardEvent(const SDL_Event& event) {
 				// No main menu present
 				new MainMenu(mGame);
 			}
+			break;
 		}
+
 		case SDLK_F1: {
 			rel = !rel;
 			mGame->getRenderer()->setWindowRelativeMouseMode(static_cast<int>(rel));
@@ -135,6 +139,9 @@ int EventManager::manageKeyboardEvent(const SDL_Event& event) {
 
 			break;
 		}
+
+		default:
+			break;
 	}
 
 	return 0;

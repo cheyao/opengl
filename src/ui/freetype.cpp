@@ -1,6 +1,5 @@
 #include "ui/freetype.hpp"
 
-#include "game.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
 #include "third_party/Eigen/Core"
@@ -190,9 +189,19 @@ void FontManager::drawGlyph(const char32_t character, const Shader* shader, cons
 }
 
 Eigen::Vector2f FontManager::getOffset(const char32_t character) {
-	assert(mGlyphMap.contains(character) && "What are you doing with a offset of a unloaded char?");
+	if (!mGlyphMap.contains(character)) {
+		mGlyphMap[character] = loadGlyph(character);
+	}
 
 	return mGlyphMap[character].advance;
+}
+
+Eigen::Vector2f FontManager::getSize(const char32_t character) {
+	if (!mGlyphMap.contains(character)) {
+		mGlyphMap[character] = loadGlyph(character);
+	}
+
+	return mGlyphMap[character].size;
 }
 
 Glyph FontManager::loadGlyph(const char32_t character) {
