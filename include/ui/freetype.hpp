@@ -27,7 +27,9 @@ class FontManager {
 
 	void loadFont(const std::string& name);
 	void setFontSize(const unsigned int size);
-	void drawGlyph(const char32_t character, const class Shader* shader);
+	void drawGlyph(const char32_t character, const class Shader* shader, const Eigen::Vector2f offset);
+
+	[[nodiscard]] Eigen::Vector2f getOffset(const char32_t character);
 
       private:
 	Glyph loadGlyph(const char32_t character);

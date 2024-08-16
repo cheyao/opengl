@@ -125,19 +125,19 @@ int Game::iterate() {
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		switch (err) {
 			case GL_INVALID_ENUM:
-				SDL_Log("GLError: Invalid enum");
+				SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mGLError: Invalid enum\033[0m");
 				break;
 			case GL_INVALID_VALUE:
-				SDL_Log("GLError: Invalid value");
+				SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mGLError: Invalid value\033[0m");
 				break;
 			case GL_INVALID_OPERATION:
-				SDL_Log("GLError: Invalid operation");
+				SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mGLError: Invalid operation\033[0m");
 				break;
 			case GL_INVALID_FRAMEBUFFER_OPERATION:
-				SDL_Log("GLError: Invalid framebuffer op");
+				SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mGLError: Invalid framebuffer op\033[0m");
 				break;
 			case GL_OUT_OF_MEMORY:
-				SDL_Log("GLError: Out of memory");
+				SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mGLError: Out of memory\033[0m");
 				break;
 		}
 	}

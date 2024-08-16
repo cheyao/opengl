@@ -36,17 +36,17 @@ FontManager::FontManager(const std::string& path, const unsigned int size)
 	 * Not the best thing here.
 	 */
 	const static float vertices[] = {
-		0.0f,	0.0f,	0.0f, // TL
-		0.0f,	100.0f, 0.0f, // BR
-		100.0f, 0.0f,	0.0f, // TR
-		100.0f, 100.0f, 0.0f  // BL
+		0.0f, 0.0f, 0.0f, // TL
+		0.0f, 1.0f, 0.0f, // BR
+		1.0f, 0.0f, 0.0f, // TR
+		1.0f, 1.0f, 0.0f  // BL
 	};
 
 	const static float texturePos[] = {
-		1.0f, 1.0f, // TR
-		1.0f, 0.0f, // BR
-		0.0f, 1.0f, // TL
-		0.0f, 0.0f  // BL
+		0.0f, 1.0f, // TR
+		0.0f, 0.0f, // BR
+		1.0f, 1.0f, // TL
+		1.0f, 0.0f  // BL
 	};
 
 	const static GLuint indices[] = {2, 1, 0,  // a
@@ -165,7 +165,7 @@ void FontManager::setFontSize(const unsigned int size) {
 	mGlyphMap.clear();
 }
 
-void FontManager::drawGlyph(const char32_t character, const Shader* shader) {
+void FontManager::drawGlyph(const char32_t character, const Shader* shader, const Eigen::Vector2f offset) {
 	if (!mGlyphMap.contains(character)) {
 		// TODO: try catch and sub char
 		mGlyphMap[character] = loadGlyph(character);
@@ -177,11 +177,22 @@ void FontManager::drawGlyph(const char32_t character, const Shader* shader) {
 	shader->set("letter", 0);
 	shader->set("size", glyph.size);
 
+	// TODO: Scale
+	float x = offset.x() + glyph.bearing.x();
+	float y = offset.y() - (glyph.size.y() - glyph.bearing.y());
+	shader->set("offset", x, y);
+
 	glyph.texture->activate(0);
 
 	glBindVertexArray(mVAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
+}
+
+Eigen::Vector2f FontManager::getOffset(const char32_t character) {
+	assert(mGlyphMap.contains(character) && "What are you doing with a offset of a unloaded char?");
+
+	return mGlyphMap[character].advance;
 }
 
 Glyph FontManager::loadGlyph(const char32_t character) {
@@ -198,7 +209,7 @@ Glyph FontManager::loadGlyph(const char32_t character) {
 	Glyph glyph = {new Texture(mFace->glyph->bitmap),
 		       Eigen::Vector2f(mFace->glyph->bitmap.width, mFace->glyph->bitmap.rows),
 		       Eigen::Vector2f(mFace->glyph->bitmap_left, mFace->glyph->bitmap_top),
-		       Eigen::Vector2f(mFace->glyph->advance.x, mFace->glyph->advance.y)};
+		       Eigen::Vector2f(mFace->glyph->advance.x >> 6, mFace->glyph->advance.y >> 6)};
 
 	return glyph;
 }
