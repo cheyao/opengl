@@ -1,5 +1,6 @@
 #pragma once
 
+#include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
 
 #include <memory>
@@ -16,6 +17,7 @@ class Renderer {
 
 	[[nodiscard]] inline int getWidth() const { return mWidth; }
 	[[nodiscard]] inline int getHeight() const { return mHeight; }
+	[[nodiscard]] Eigen::Vector2f getDPI() const;
 
 	void setDemensions(int width, int height);
 	void setCamera(class CameraComponent* camera);

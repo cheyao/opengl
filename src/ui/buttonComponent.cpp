@@ -66,16 +66,14 @@ void ButtonComponent::draw(const Shader* shader) {
 		x = static_cast<float>(mOwner->getGame()->getWidth()) / 2 -
 		    static_cast<float>(mWidth) * mOwner->getGame()->getScale() / 2;
 	} else if (x < 0) {
-		x += mOwner->getGame()->getWidth();
+		x = mOwner->getGame()->getWidth() - static_cast<float>(mWidth) * mOwner->getGame()->getScale() + x;
 	}
 
 	if (y == CENTER) {
 		y = static_cast<float>(mOwner->getGame()->getHeight()) / 2 -
 		    (static_cast<float>(mHeight) * mOwner->getGame()->getScale()) / 2;
-	} else {
-		if (y < 0) {
-			y += mOwner->getGame()->getHeight();
-		}
+	} else if (y < 0) {
+		y = mOwner->getGame()->getHeight() - static_cast<float>(mHeight) * mOwner->getGame()->getScale() + y;
 	}
 
 	model.translate(Eigen::Vector3f(x, y, 0.0f));
@@ -100,16 +98,16 @@ void ButtonComponent::touch(const SDL_FingerID& finger, const float x, const flo
 		buttonX = static_cast<float>(mOwner->getGame()->getWidth()) / 2 -
 			  static_cast<float>(mWidth) * mOwner->getGame()->getScale() / 2;
 	} else if (buttonX < 0) {
-		buttonX += mOwner->getGame()->getWidth();
+		buttonX = mOwner->getGame()->getWidth() - static_cast<float>(mWidth) * mOwner->getGame()->getScale() +
+			  buttonX;
 	}
 
 	if (buttonY == CENTER) {
 		buttonY = static_cast<float>(mOwner->getGame()->getHeight()) / 2 -
 			  (static_cast<float>(mHeight) * mOwner->getGame()->getScale()) / 2;
-	} else {
-		if (buttonY < 0) {
-			buttonY += mOwner->getGame()->getHeight();
-		}
+	} else if (buttonY < 0) {
+		buttonY = mOwner->getGame()->getHeight() - static_cast<float>(mHeight) * mOwner->getGame()->getScale() +
+			  buttonY;
 	}
 
 	if ((buttonX <= x && x < (buttonX + mWidth * mOwner->getGame()->getScale())) &&

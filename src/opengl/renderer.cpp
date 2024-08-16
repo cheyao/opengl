@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
-#include <unordered_map>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -316,4 +315,17 @@ void Renderer::setUIMatrix() const {
 	Shader* const textshader = mGame->getShader("text.vert", "text.frag");
 	textshader->activate();
 	textshader->set("proj", ortho);
+}
+
+[[nodiscard]] Eigen::Vector2f Renderer::getDPI() const {
+	int winx, winy;
+	SDL_GetWindowSize(mWindow, &winx, &winy);
+	int glx, gly;
+	SDL_GL_GetDrawableSize(mWindow, &glx, &gly);
+
+
+		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
+			     SDL_GetError());
+
+		return Eigen::Vector3f();
 }

@@ -33,7 +33,7 @@
 
 Game::Game()
 	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mFontManager(nullptr),
-	  mActorMutex(SDL_CreateMutex()), mUIScale(2.0f), mTicks(0), mBasePath(""), mPaused(false), mVsync(true) {
+	  mActorMutex(SDL_CreateMutex()), mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mVsync(true) {
 	if (mActorMutex == nullptr) {
 		SDL_Log("Failed to create actor mutex: %s", SDL_GetError());
 
@@ -42,13 +42,21 @@ Game::Game()
 		throw std::runtime_error("Failed to create mutex");
 	}
 
+	mUIScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
+	if (mUIScale == 0.0f) {
+		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
+			     SDL_GetError());
+
+		mUIScale = 1.0f;
+	}
+
 	const char* basepath = SDL_GetBasePath();
 	if (basepath != nullptr) {
 		mBasePath = std::string(basepath);
 	} else {
 		mBasePath = "";
 
-		SDL_Log("Unable to get base path: %s", SDL_GetError());
+		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get base path: %s\033[0m", SDL_GetError());
 	}
 
 	mTextures = std::make_unique<TextureManager>(mBasePath);
@@ -58,7 +66,7 @@ Game::Game()
 	mRenderer = new Renderer(this);
 	mRenderer->swapWindow();
 
-	mFontManager = new FontManager(mBasePath);
+	mFontManager = new FontManager(mBasePath, this);
 	mFontManager->loadFont("FiraSans.ttf");
 
 	// TODO: Icon

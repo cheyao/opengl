@@ -1,5 +1,6 @@
 #include "ui/freetype.hpp"
 
+#include "game.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
 #include "third_party/Eigen/Core"
@@ -19,9 +20,9 @@
 // FIXME: Better unicode support
 // FIXME: Some kind of fallback font
 // FIXME: Verical text https://freetype.org/freetype2/docs/tutorial/step2.html
-FontManager::FontManager(const std::string& path, const unsigned int size)
-	: mPath(path + "assets" SEPARATOR "fonts" SEPARATOR), mSize(size), mLibrary(nullptr), mFace(nullptr),
-	  mFontData(nullptr) {
+FontManager::FontManager(const std::string& path, Game* game, const unsigned int size)
+	: mGame(game), mPath(path + "assets" SEPARATOR "fonts" SEPARATOR), mSize(size), mLibrary(nullptr),
+	  mFace(nullptr), mFontData(nullptr) {
 	if (FT_Init_FreeType(&mLibrary)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to init freetype");
 		ERROR_BOX("Failed to init freetype, please reinstall your freetype library");
@@ -133,7 +134,7 @@ void FontManager::loadFont(const std::string& name) {
 
 	// TODO: https://freetype.org/freetype2/docs/tutorial/step1.html#section-1
 	// TODO: Fractions with `FT_Set_Char_Size`
-	if (FT_Set_Pixel_Sizes(newFace, 0, mSize)) {
+	if (FT_Set_Char_Size(newFace, 0, 16 * 64, 1064, 768)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to set font size: %s", name.data());
 		ERROR_BOX("Failed set font size, please reinstall assets and the freetype library");
 
@@ -155,7 +156,7 @@ void FontManager::setFontSize(const unsigned int size) {
 	mSize = size;
 
 	if (mFace != nullptr) {
-		FT_Set_Pixel_Sizes(mFace, 0, mSize);
+		FT_Set_Char_Size(mFace, 0, mSize * 64);
 	}
 
 	for (const auto& [_, texture] : mGlyphMap) {

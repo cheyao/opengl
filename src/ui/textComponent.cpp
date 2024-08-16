@@ -29,7 +29,6 @@ void TextComponent::drawText([[maybe_unused]] const Shader* shader) {
 	for (const char32_t c : mText) {
 		size.x() += manager->getOffset(c).x();
 		size.y() = std::max(size.y(), manager->getSize(c).y());
-		SDL_Log("%f", size.x());
 	}
 
 	Eigen::Vector2f offset = mPosition;

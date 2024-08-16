@@ -150,7 +150,7 @@ cmake
 - [ ] Multitouch
 - [x] UI
 - [ ] Multithreading
-- [ ] TTF
+- [x] TTF
     - [ ] Button auto scale + text
 - [ ] Localization
     - [ ] Maybe [ICU?](https://icu.unicode.org/)

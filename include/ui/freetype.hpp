@@ -18,7 +18,7 @@ struct Glyph {
 
 class FontManager {
       public:
-	explicit FontManager(const std::string& path, const unsigned int size = 48);
+	explicit FontManager(const std::string& path, class Game* game, const unsigned int size = 48);
 	FontManager(FontManager&&) = delete;
 	FontManager(const FontManager&) = delete;
 	FontManager& operator=(FontManager&&) = delete;
@@ -26,6 +26,7 @@ class FontManager {
 	~FontManager();
 
 	void loadFont(const std::string& name);
+	// Size in 1/64 of a pixel
 	void setFontSize(const unsigned int size);
 	void drawGlyph(const char32_t character, const class Shader* shader, const Eigen::Vector2f offset);
 
@@ -34,6 +35,8 @@ class FontManager {
 
       private:
 	Glyph loadGlyph(const char32_t character);
+
+	class Game* mGame;
 
 	std::string mPath;
 	unsigned int mSize;
