@@ -144,6 +144,8 @@ assets
 - `./assets/shaders/` shaders
 - `./assets/textures/` Textures, the models will look here for the corresponding textures
 - `./assets/textures/ui` Textures for the UI
+- `./assets/strings.csv` Source loc csv file (See [here](https://en.wikipedia.org/wiki/IETF_language_tag) for language codes)
+- `./assets/strings.json` Output loc file (to be generated) 
 
 ## TODO
 
@@ -174,10 +176,15 @@ assets
     - [ ] Vertial text
     - [ ] Ligatures???
     - [ ] Fallback fonts....
+    - [ ] Compress loc files
 - [x] UI Scaling
 - [ ] Shadows
 
 ## Notes
+
+Language tags are first looking up main tag, if matching, use it, otherwise find sumtag, and if still not present, use `en`.
+
+Just use `git diff` to get the changes
 
 From discord:
 
