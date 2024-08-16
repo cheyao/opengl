@@ -134,7 +134,7 @@ void FontManager::loadFont(const std::string& name) {
 
 	// TODO: https://freetype.org/freetype2/docs/tutorial/step1.html#section-1
 	// TODO: Fractions with `FT_Set_Char_Size`
-	if (FT_Set_Char_Size(newFace, 0, 16 * 64, 1064, 768)) {
+	if (FT_Set_Char_Size(newFace, 0, 24 * 64, 226, 226)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to set font size: %s", name.data());
 		ERROR_BOX("Failed set font size, please reinstall assets and the freetype library");
 
@@ -156,7 +156,7 @@ void FontManager::setFontSize(const unsigned int size) {
 	mSize = size;
 
 	if (mFace != nullptr) {
-		FT_Set_Char_Size(mFace, 0, mSize * 64);
+		FT_Set_Char_Size(mFace, 0, mSize * 64, 226, 226);
 	}
 
 	for (const auto& [_, texture] : mGlyphMap) {

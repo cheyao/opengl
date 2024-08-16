@@ -81,6 +81,8 @@ Renderer::Renderer(Game* game)
 
 	mGL->bindContext(mWindow);
 
+	setDisplayScale();
+
 #ifdef IMGUI
 	SDL_Log("Initializing ImGUI");
 
@@ -319,13 +321,27 @@ void Renderer::setUIMatrix() const {
 
 [[nodiscard]] Eigen::Vector2f Renderer::getDPI() const {
 	int winx, winy;
-	SDL_GetWindowSize(mWindow, &winx, &winy);
-	int glx, gly;
-	SDL_GL_GetDrawableSize(mWindow, &glx, &gly);
-
-
+	SDL_GetWindowSizeInPixels(mWindow, &winx, &winy);
+	float scale = SDL_GetWindowDisplayScale(mWindow);
+	if (scale == 0.0f) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
 			     SDL_GetError());
 
-		return Eigen::Vector3f();
+		scale = 1.0f;
+	}
+
+	return Eigen::Vector2f::Zero();
+}
+
+void Renderer::setDisplayScale() const {
+	assert(mWindow != nullptr);
+
+	float scale = SDL_GetWindowDisplayScale(mWindow);
+	if (scale == 0.0f) {
+		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
+			     SDL_GetError());
+
+		scale = 1.0f;
+	}
+	mGame->setUIScale(scale);
 }

@@ -87,6 +87,11 @@ int EventManager::manageEvent(const SDL_Event& event) {
 			break;
 		}
 
+		case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED: {
+			mGame->getRenderer()->setDisplayScale();
+			break;
+		}
+
 		[[likely]] default:
 			break;
 	}

@@ -21,6 +21,7 @@ class Renderer {
 
 	void setDemensions(int width, int height);
 	void setCamera(class CameraComponent* camera);
+	void setDisplayScale() const;
 
 	void addSprite(class DrawComponent* sprite);
 	void removeSprite(class DrawComponent* sprite);
