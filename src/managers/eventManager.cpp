@@ -20,7 +20,6 @@ int EventManager::manageEvent(const SDL_Event& event) {
 	switch (event.type) {
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 		case SDL_EVENT_QUIT: {
-
 			// TODO: SDL_EVENT_LOW_MEMORY
 			return 1;
 
@@ -46,6 +45,7 @@ int EventManager::manageEvent(const SDL_Event& event) {
 		}
 
 		case SDL_EVENT_WINDOW_RESIZED: {
+	//	case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: {
 			mGame->getRenderer()->setDemensions(event.window.data1, event.window.data2);
 
 			break;

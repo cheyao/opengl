@@ -103,6 +103,8 @@ void Game::setup() {
 	// SDL_CreateThread(initWorld, "Game setup", this);
 
 	mTicks = SDL_GetTicks();
+
+	mRenderer->setDemensions(getWidth(), getHeight());
 }
 
 /*

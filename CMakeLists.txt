@@ -11,6 +11,8 @@ option(OPTIMIZE		"Optimize a lot" OFF)
 option(MOLD		"Use mold" OFF)
 # TODO: option(VENDOR 		"Vendor libraries" OFF)
 
+option(HIDPI		"High dpi" OFF)
+
 # Misc
 option(ADDRESS	 	"Use address sanitizer" OFF)
 option(LEAK		"Use leak sanitizer" OFF)
@@ -264,6 +266,10 @@ if(MSVC)
 		target_compile_options(${BUILD_NAME} PRIVATE /MD /O2 /Ob2)
 		target_compile_definitions(${BUILD_NAME} PRIVATE /D__WINDOWS__ /DWIND32 /DEIGEN_NO_DEBUG /DNDEBUG)
 	endif()
+
+	if (HIDPI STREQUAL ON)
+		target_compile_definitions(${BUILD_NAME} PRIVATE /DHIDPI)
+	endif()
 else()
 	if(DEBUG)
 		target_compile_options(${BUILD_NAME} PRIVATE -Wall -Wextra -Werror -g -O0 -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wpointer-arith -Wwrite-strings -Wno-unknown-warning-option)
@@ -271,6 +277,10 @@ else()
 	else()
 		target_compile_options(${BUILD_NAME} PRIVATE -O3)
 		target_compile_definitions(${BUILD_NAME} PRIVATE -DEIGEN_NO_DEBUG -DNDEBUG)
+	endif()
+
+	if (HIDPI STREQUAL ON)
+		target_compile_definitions(${BUILD_NAME} PRIVATE -DHIDPI)
 	endif()
 
 	if (OPTIMIZE STREQUAL ON)

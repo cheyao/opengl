@@ -59,6 +59,10 @@ Renderer::Renderer(Game* game)
 #ifdef ANDROID
 					   | SDL_WINDOW_FULLSCREEN
 #endif
+#ifdef HIDPI
+					   | SDL_WINDOW_HIGH_PIXEL_DENSITY
+#endif
+
 	);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Game.cpp: Failed to create window: %s\n", SDL_GetError());
@@ -104,8 +108,6 @@ Renderer::Renderer(Game* game)
 
 	SDL_GetWindowSize(mWindow, &mWidth, &mHeight);
 
-	glViewport(0, 0, mWidth, mHeight);
-
 #ifdef IMGUI
 	ImGui_ImplSDL3_InitForOpenGL(mWindow, mGL->getContext());
 #ifndef GLES
@@ -115,18 +117,17 @@ Renderer::Renderer(Game* game)
 #endif
 #endif
 
-	mGL->printInfo();
-
 	mFramebuffer = std::make_unique<Framebuffer>(mGame);
+	// NOTE: Uncomment if testing framebuffer module
+	// glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// Matrix uniform
 	mMatricesUBO = std::make_unique<UBO>(2 * sizeof(Eigen::Affine3f));
 	mMatricesUBO->bind(0);
-
-	// NOTE: Uncomment if testing framebuffer module
-	// glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 	setUIMatrix();
+
+	// Misc
+	mGL->printInfo();
 }
 
 /* NOTE:
@@ -142,8 +143,11 @@ void Renderer::setDemensions(int width, int height) {
 	mWidth = width;
 	mHeight = height;
 
-	glViewport(0, 0, width, height);
-	mFramebuffer->setDemensions(width, height);
+	int w, h;
+	SDL_GetWindowSizeInPixels(mWindow, &w, &h);
+
+	glViewport(0, 0, w, h);
+	mFramebuffer->setDemensions(w, h);
 
 	mCamera->project();
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
@@ -343,5 +347,14 @@ void Renderer::setDisplayScale() const {
 
 		scale = 1.0f;
 	}
+
 	mGame->setUIScale(scale);
+
+	/*
+#ifdef IMGUI
+	ImGuiIO& io = ImGui::GetIO();
+
+	ImFont* font = io.Fonts->AddFontFromFileTTF(mGame->fullPath("fonts" SEPARATOR "FiraSans.ttf").data(), 16.0f *
+scale); IM_ASSERT(font != NULL); #endif
+*/
 }

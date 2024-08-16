@@ -152,6 +152,8 @@ cmake
 - [ ] Multithreading
 - [x] TTF
     - [ ] Button auto scale + text
+    - [ ] Generate texturemap
+    - [ ] Signed distance field fonts https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf
 - [ ] Localization
     - [ ] Maybe [ICU?](https://icu.unicode.org/)
     - [ ] Vertial text
