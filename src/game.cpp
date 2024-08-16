@@ -68,7 +68,7 @@ Game::Game()
 
 	mFontManager = new FontManager(mBasePath, this);
 	mFontManager->loadFont("NotoSans.ttf");
-	// mFontManager->loadFont("NotoSansSC-VF.ttf");
+	// mFontManager->loadFont("NotoSansCJK.ttc");
 
 	// TODO: Icon
 	/*

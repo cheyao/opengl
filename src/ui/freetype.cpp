@@ -35,14 +35,14 @@ FontManager::FontManager(const std::string& path, Game* game, const unsigned int
 	 * This works by setting all the vectors to 1, and multiply the cords by the offset
 	 * Not the best thing here.
 	 */
-	const static float vertices[] = {
+	constexpr const static float vertices[] = {
 		0.0f, 0.0f, 0.0f, // TL
 		0.0f, 1.0f, 0.0f, // BR
 		1.0f, 0.0f, 0.0f, // TR
 		1.0f, 1.0f, 0.0f  // BL
 	};
 
-	const static float texturePos[] = {
+	constexpr const static float texturePos[] = {
 		0.0f, 1.0f, // TR
 		0.0f, 0.0f, // BR
 		1.0f, 1.0f, // TL
@@ -81,7 +81,7 @@ FontManager::FontManager(const std::string& path, Game* game, const unsigned int
 	// TODO: Dyn load
 	if (!final) {
 		mChild = new FontManager(path, game, size, true);
-		mChild->loadFont("NotoSansCJK-Regular.ttc");
+		mChild->loadFont("NotoSansCJK.ttc");
 	}
 }
 
@@ -154,6 +154,13 @@ void FontManager::loadFont(const std::string& name) {
 	}
 	mFace = newFace;
 
+	if (FT_Select_Charmap(mFace, FT_ENCODING_UNICODE)) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to select unicode: %s", name.data());
+		ERROR_BOX("Failed select unicode, please reinstall assets and the freetype library");
+
+		throw std::runtime_error("Freetype.cpp: Failed to select unicode");
+	}
+
 	for (const auto& [_, texture] : mGlyphMap) {
 		delete texture.texture;
 	}
@@ -213,19 +220,18 @@ Eigen::Vector2f FontManager::getSize(const char32_t character) {
 	return mGlyphMap[character].size;
 }
 
-		// FIXME: Loading two times
+// FIXME: Loading two times
 Glyph FontManager::loadGlyph(const char32_t character) {
 	assert(mFace != nullptr);
 
-	// FT_Get_Glyph & FT_Glyph_To_Bitmap?
-	FT_UInt c = FT_Get_Char_Index(mFace, character);
+	const FT_UInt index = FT_Get_Char_Index(mFace, character);
 
-	if (c == 0 && mChild != nullptr) {
-		return mChild->loadGlyph(c);
+	if (index == 0 && mChild != nullptr) {
+		SDL_Log("Loading 0x%x fron fallback font", character);
+		return mChild->loadGlyph(character);
 	}
-	SDL_Log("%x", character);
 
-	if (FT_Load_Glyph(mFace, c, FT_LOAD_RENDER)) {
+	if (FT_Load_Glyph(mFace, index, FT_LOAD_RENDER)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to load character: 0x%x", character);
 		ERROR_BOX("Failed load character, please reinstall assets and the freetype library");
 

@@ -9,8 +9,8 @@
 #include <wchar.h>
 
 // TODO: Size change
-TextComponent::TextComponent(class UIScreen* owner, const std::basic_string<char32_t>& text, Eigen::Vector2f position) : UIComponent(owner), mText(text), mPosition(position) {
-}
+TextComponent::TextComponent(class UIScreen* owner, const std::basic_string<char32_t>& text, Eigen::Vector2f position)
+	: UIComponent(owner), mText(text), mPosition(position) {}
 
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -34,19 +34,16 @@ void TextComponent::drawText([[maybe_unused]] const Shader* shader) {
 	Eigen::Vector2f offset = mPosition;
 
 	if (offset.x() == CENTER) {
-		offset.x() = static_cast<float>(mOwner->getGame()->getWidth()) / 2 -
-			  static_cast<float>(size.x()) / 2;
+		offset.x() = static_cast<float>(mOwner->getGame()->getWidth()) / 2 - static_cast<float>(size.x()) / 2;
 	} else if (offset.x() < 0) {
 		offset.x() += mOwner->getGame()->getWidth();
 	}
 
 	if (offset.y() == CENTER) {
-		offset.y() = static_cast<float>(mOwner->getGame()->getHeight()) / 2 -
-			  (static_cast<float>(size.y())) / 2;
-	} else {
-		if (offset.y() < 0) {
-			offset.y() += mOwner->getGame()->getHeight();
-		}
+		offset.y() =
+			static_cast<float>(mOwner->getGame()->getHeight()) / 2 - (static_cast<float>(size.y())) / 2;
+	} else if (offset.y() < 0) {
+		offset.y() += mOwner->getGame()->getHeight() - size.y();
 	}
 
 	for (const char32_t c : mText) {

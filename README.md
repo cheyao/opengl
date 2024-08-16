@@ -122,13 +122,28 @@ cmake
 └── sign-apk.sh
 ```
 
-`./cmake/distribute-linux.sh` For patching the executable then copying the dlibs into `libs` folder, should be enough to patch for linux release
+- `./cmake/distribute-linux.sh` For patching the executable then copying the dlibs into `libs` folder, should be enough to patch for linux release
+- `./cmake/mac-patch-dylib.sh` Same but for mac, only works for bundled macos app
+- `./cmake/index.html.in` Is the Emscripten idex
+- `./cmake/sign-apk.sh` Is to sign the android apk
 
-`./cmake/mac-patch-dylib.sh` Same but for mac, only works for bundled macos app
+## Assets
+The assets should be bundled automatically with android and macos, on other platforms you must distribute with the assets (that are copied into the project folder)
 
-`./cmake/index.html.in` Is the Emscripten idex
+```
+assets
+├── fonts
+├── models
+├── shaders
+└── textures
+    └── ui
+```
 
-`./cmake/sign-apk.sh` Is to sign the android apk
+- `./assets/fonts/` Fonts
+- `./assets/models/` 3D models
+- `./assets/shaders/` shaders
+- `./assets/textures/` Textures, the models will look here for the corresponding textures
+- `./assets/textures/ui` Textures for the UI
 
 ## TODO
 

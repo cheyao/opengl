@@ -83,10 +83,6 @@ Renderer::Renderer(Game* game)
 	SDL_SetWindowMinimumSize(mWindow, 480, 320);
 #endif
 
-	mGL->bindContext(mWindow);
-
-	setDisplayScale();
-
 #ifdef IMGUI
 	SDL_Log("Initializing ImGUI");
 
@@ -100,6 +96,10 @@ Renderer::Renderer(Game* game)
 #else
 	// TODO: Storage path
 #endif
+
+	mGL->bindContext(mWindow);
+
+	setDisplayScale();
 
 	ImGui::StyleColorsDark();
 
@@ -347,15 +347,16 @@ void Renderer::setDisplayScale() const {
 
 		scale = 1.0f;
 	}
-	SDL_Log("%f", scale);
 
 	mGame->setUIScale(scale);
 
-	/*
 #ifdef IMGUI
 	ImGuiIO& io = ImGui::GetIO();
 
-	ImFont* font = io.Fonts->AddFontFromFileTTF(mGame->fullPath("fonts" SEPARATOR "FiraSans.ttf").data(), 16.0f *
-scale); IM_ASSERT(font != NULL); #endif
-*/
+	ImFont* font =
+		io.Fonts->AddFontFromFileTTF(mGame->fullPath("fonts" SEPARATOR "NotoSans.ttf").data(), 16.0f * scale);
+	IM_ASSERT(font != NULL);
+
+	// ImGuiStyle::ScaleAllSizes(scale);
+#endif
 }
