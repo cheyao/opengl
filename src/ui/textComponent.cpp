@@ -9,7 +9,7 @@
 #include <wchar.h>
 
 // TODO: Size change
-TextComponent::TextComponent(class UIScreen* owner, std::string_view text, Eigen::Vector2f position) : UIComponent(owner), mText(text), mPosition(position) {
+TextComponent::TextComponent(class UIScreen* owner, const std::basic_string<char32_t>& text, Eigen::Vector2f position) : UIComponent(owner), mText(text), mPosition(position) {
 }
 
 #if defined(__clang__)

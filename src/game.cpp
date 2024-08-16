@@ -67,7 +67,8 @@ Game::Game()
 	mRenderer->swapWindow();
 
 	mFontManager = new FontManager(mBasePath, this);
-	mFontManager->loadFont("FiraSans.ttf");
+	mFontManager->loadFont("NotoSans.ttf");
+	// mFontManager->loadFont("NotoSansSC-VF.ttf");
 
 	// TODO: Icon
 	/*

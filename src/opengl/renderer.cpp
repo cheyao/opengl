@@ -347,6 +347,7 @@ void Renderer::setDisplayScale() const {
 
 		scale = 1.0f;
 	}
+	SDL_Log("%f", scale);
 
 	mGame->setUIScale(scale);
 

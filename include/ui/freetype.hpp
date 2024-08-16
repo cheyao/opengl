@@ -18,7 +18,7 @@ struct Glyph {
 
 class FontManager {
       public:
-	explicit FontManager(const std::string& path, class Game* game, const unsigned int size = 48);
+	explicit FontManager(const std::string& path, class Game* game, const unsigned int size = 48, bool final = false);
 	FontManager(FontManager&&) = delete;
 	FontManager(const FontManager&) = delete;
 	FontManager& operator=(FontManager&&) = delete;
@@ -53,4 +53,6 @@ class FontManager {
 	GLuint mVBO;
 	GLuint mEBO;
 	GLuint mVAO;
+
+	FontManager* mChild;
 };

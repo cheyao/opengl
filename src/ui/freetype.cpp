@@ -20,9 +20,9 @@
 // FIXME: Better unicode support
 // FIXME: Some kind of fallback font
 // FIXME: Verical text https://freetype.org/freetype2/docs/tutorial/step2.html
-FontManager::FontManager(const std::string& path, Game* game, const unsigned int size)
+FontManager::FontManager(const std::string& path, Game* game, const unsigned int size, bool final)
 	: mGame(game), mPath(path + "assets" SEPARATOR "fonts" SEPARATOR), mSize(size), mLibrary(nullptr),
-	  mFace(nullptr), mFontData(nullptr) {
+	  mFace(nullptr), mFontData(nullptr), mChild(nullptr) {
 	if (FT_Init_FreeType(&mLibrary)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to init freetype");
 		ERROR_BOX("Failed to init freetype, please reinstall your freetype library");
@@ -77,6 +77,12 @@ FontManager::FontManager(const std::string& path, Game* game, const unsigned int
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	glBindVertexArray(0);
+
+	// TODO: Dyn load
+	if (!final) {
+		mChild = new FontManager(path, game, size, true);
+		mChild->loadFont("NotoSansCJK-Regular.ttc");
+	}
 }
 
 FontManager::~FontManager() {
@@ -93,6 +99,8 @@ FontManager::~FontManager() {
 	glDeleteVertexArrays(1, &mVAO);
 	glDeleteBuffers(1, &mVBO);
 	glDeleteBuffers(1, &mEBO);
+
+	delete mChild;
 }
 
 void FontManager::loadFont(const std::string& name) {
@@ -134,7 +142,7 @@ void FontManager::loadFont(const std::string& name) {
 
 	// TODO: https://freetype.org/freetype2/docs/tutorial/step1.html#section-1
 	// TODO: Fractions with `FT_Set_Char_Size`
-	if (FT_Set_Char_Size(newFace, 0, 24 * 64, 226, 226)) {
+	if (FT_Set_Pixel_Sizes(newFace, 0, 24)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to set font size: %s", name.data());
 		ERROR_BOX("Failed set font size, please reinstall assets and the freetype library");
 
@@ -156,7 +164,7 @@ void FontManager::setFontSize(const unsigned int size) {
 	mSize = size;
 
 	if (mFace != nullptr) {
-		FT_Set_Char_Size(mFace, 0, mSize * 64, 226, 226);
+		FT_Set_Pixel_Sizes(mFace, 0, mSize);
 	}
 
 	for (const auto& [_, texture] : mGlyphMap) {
@@ -205,11 +213,19 @@ Eigen::Vector2f FontManager::getSize(const char32_t character) {
 	return mGlyphMap[character].size;
 }
 
+		// FIXME: Loading two times
 Glyph FontManager::loadGlyph(const char32_t character) {
 	assert(mFace != nullptr);
 
 	// FT_Get_Glyph & FT_Glyph_To_Bitmap?
-	if (FT_Load_Char(mFace, character, FT_LOAD_RENDER)) {
+	FT_UInt c = FT_Get_Char_Index(mFace, character);
+
+	if (c == 0 && mChild != nullptr) {
+		return mChild->loadGlyph(c);
+	}
+	SDL_Log("%x", character);
+
+	if (FT_Load_Glyph(mFace, c, FT_LOAD_RENDER)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to load character: 0x%x", character);
 		ERROR_BOX("Failed load character, please reinstall assets and the freetype library");
 
