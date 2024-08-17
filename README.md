@@ -184,6 +184,8 @@ assets
 
 Language tags are first looking up main tag, if matching, use it, otherwise find sumtag, and if still not present, use `en`.
 
+ISO-639 language specifier (such as "en" for English, "de" for German, etc). Country strings are in the format YY, where "YY" is an ISO-3166 country code
+
 Just use `git diff` to get the changes
 
 From discord:

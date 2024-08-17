@@ -3,6 +3,7 @@
 #include "third_party/json.hpp"
 
 #include <string>
+#include <codecvt>
 
 class LocaleManager {
       public:
@@ -23,4 +24,6 @@ class LocaleManager {
 	std::string mLocale;
 
 	nlohmann::json mLocaleData;
+
+	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> mConverter;
 };
