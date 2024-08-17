@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import csv
+import json
 import sys
 import os
 
@@ -25,6 +26,13 @@ with open(sys.argv[1]) as input:
 outDir = os.path.dirname(sys.argv[1]);
 
 for i in range(len(langs[2:])):
-    with open(outDir + langs[i] + ".json") as output:
-        continue;
+    data = {"version": 100};
+
+    for row in strings:
+        data[row[0]] = row[i+2];
+
+    #print(data)
+
+    with open(outDir + "/" + langs[i+2] + ".json", "w") as output:
+        json.dump(data, output);
 
