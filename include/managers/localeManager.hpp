@@ -13,9 +13,14 @@ class LocaleManager {
 	LocaleManager& operator=(const LocaleManager&) = delete;
 	~LocaleManager();
 
+	void changeLocale(std::string_view locale) { mLocale = locale; loadLocale();}
+	std::u32string get(std::string_view id);
+
       private:
+	void loadLocale();
+
 	const std::string mLocaleDir;
 	std::string mLocale;
 
-	nlohmann::json mLocalData;
+	nlohmann::json mLocaleData;
 };

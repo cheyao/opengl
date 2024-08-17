@@ -4,6 +4,8 @@ import json
 import sys
 import os
 
+# TODO: Jsmin
+
 langs = []
 strings = []
 

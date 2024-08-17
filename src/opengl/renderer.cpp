@@ -91,6 +91,9 @@ Renderer::Renderer(Game* game)
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+#ifdef DEBUG
+	io.ConfigDebugIsDebuggerPresent = true;
+#endif
 #if defined(__EMSCRIPTEN__) || defined(ANDROID)
 	io.IniFilename = nullptr;
 #else

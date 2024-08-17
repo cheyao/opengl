@@ -83,7 +83,7 @@ void Shader::activate() const { glUseProgram(mShaderProgram); }
 
 void Shader::setUniform(const std::string_view& name, std::function<void(GLint)> toCall) const {
 	// Safety checks
-#ifndef ANDROID
+#ifdef __cpp_lib_string_contains
 	assert(!name.contains(' '));
 #endif
 	assert(!(name[0] == 'g' && name[1] == 'l' && name[2] == '_'));
@@ -189,6 +189,7 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 #endif
 
 	GLuint out = glCreateShader(type);
+	// Zero terminated, so no need for length
 	glShaderSource(out, 1, &shaderSource, nullptr);
 	glCompileShader(out);
 

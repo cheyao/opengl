@@ -9,8 +9,8 @@
 #include <wchar.h>
 
 // TODO: Size change
-TextComponent::TextComponent(class UIScreen* owner, const std::basic_string<char32_t>& text, Eigen::Vector2f position)
-	: UIComponent(owner), mText(text), mPosition(position) {}
+TextComponent::TextComponent(class UIScreen* owner, const std::string& id, Eigen::Vector2f position)
+	: UIComponent(owner), mTextID(id), mPosition(position) {}
 
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -26,7 +26,7 @@ void TextComponent::drawText([[maybe_unused]] const Shader* shader) {
 
 	// PERF: Only calculate if center
 	Eigen::Vector2f size = Eigen::Vector2f::Zero();
-	for (const char32_t c : mText) {
+	for (const char32_t c : mOwner->getGame()->getLocaleManager()->get(mTextID)) {
 		size.x() += manager->getOffset(c).x();
 		size.y() = std::max(size.y(), manager->getSize(c).y());
 	}
@@ -46,7 +46,7 @@ void TextComponent::drawText([[maybe_unused]] const Shader* shader) {
 		offset.y() += mOwner->getGame()->getHeight() - size.y();
 	}
 
-	for (const char32_t c : mText) {
+	for (const char32_t c : mOwner->getGame()->getLocaleManager()->get(mTextID)) {
 		manager->drawGlyph(c, shader, offset);
 
 		offset += manager->getOffset(c);

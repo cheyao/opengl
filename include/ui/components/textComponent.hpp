@@ -9,7 +9,7 @@
 
 class TextComponent : public UIComponent {
       public:
-	explicit TextComponent(class UIScreen* owner, const std::basic_string<char32_t>& text,
+	explicit TextComponent(class UIScreen* owner, const std::string& id,
 			       Eigen::Vector2f position);
 	TextComponent(TextComponent&&) = delete;
 	TextComponent(const TextComponent&) = delete;
@@ -20,6 +20,6 @@ class TextComponent : public UIComponent {
 	void drawText([[maybe_unused]] const class Shader* shader) override;
 
       private:
-	const std::basic_string<char32_t> mText;
+	const std::string mTextID;
 	Eigen::Vector2f mPosition;
 };

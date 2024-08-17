@@ -27,6 +27,6 @@ MainUI::MainUI(class Game* game) : UIScreen(game) {
 	// Test "Hello 你好 こんにちは Bonne journée"
 	// TextComponent* text = new TextComponent(this, "Hello");
 	// (void)text;
-	new TextComponent(this, U"Hello! 你好！こんにちは！Bonjour! привет! ¡Hola!", Eigen::Vector2f(CENTER, -10));
-	new TextComponent(this, U"start_game", Eigen::Vector2f(CENTER, CENTER));
+	// new TextComponent(this, U"Hello! 你好！こんにちは！Bonjour! привет! ¡Hola!", Eigen::Vector2f(CENTER, -10));
+	new TextComponent(this, "start_game", Eigen::Vector2f(CENTER, CENTER));
 }
