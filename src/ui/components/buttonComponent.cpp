@@ -49,6 +49,7 @@ ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wfloat-equal"
 #elif defined(__GNUC__)
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #endif
 
@@ -130,4 +131,6 @@ void ButtonComponent::touch(const SDL_FingerID& finger, const float x, const flo
 
 #if defined(__clang__)
 #pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
 #endif

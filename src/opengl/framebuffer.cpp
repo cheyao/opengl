@@ -19,6 +19,8 @@
 #endif
 
 Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScreenTexture(0) {
+	SDL_Log("Framebuffer.cpp: Generating framebuffer");
+
 	glGenFramebuffers(1, &mScreen);
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 

@@ -384,7 +384,7 @@ endif()
 # 
 
 # Strip debug symbols
-if(NOT DEBUG AND NOT ANDROID)
+if(NOT DEBUG AND NOT ANDROID AND NOT WEB)
 	message("-- Striping debug symbols")
 
 	if(APPLE)

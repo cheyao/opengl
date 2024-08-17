@@ -250,6 +250,12 @@ void Game::gui() {
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::Text("%.3f ms %.1f FPS", (1000.f / io.Framerate), io.Framerate);
 
+		const char* locales[] = {"en", "fr", "zh-CN"};
+		static int current = 0;
+		if (ImGui::Combo("language", &current, locales, IM_ARRAYSIZE(locales))) {
+			mLocaleManager->changeLocale(locales[current]);
+		}
+
 		/*
 		Player* p = nullptr;
 		for (const auto& actor : mActors) {
@@ -260,8 +266,8 @@ void Game::gui() {
 		}
 		if (p != nullptr) {
 			auto pos = p->getPosition();
-			ImGui::Text("Player position: %dx%dx%d", static_cast<int>(pos.x()), static_cast<int>(pos.y()),
-				    static_cast<int>(pos.z()));
+			ImGui::Text("Player position: %dx%dx%d", static_cast<int>(pos.x()),
+		static_cast<int>(pos.y()), static_cast<int>(pos.z()));
 		}
 		*/
 

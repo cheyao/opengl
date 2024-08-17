@@ -171,12 +171,13 @@ assets
     - [ ] Button auto scale + text
     - [ ] Generate texturemap
     - [ ] Signed distance field fonts https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf
-- [ ] Localization
+- [x] Localization
     - [ ] Maybe [ICU?](https://icu.unicode.org/)
     - [ ] Vertial text
     - [ ] Ligatures???
-    - [ ] Fallback fonts....
+    - [x] Fallback fonts.
     - [ ] Compress loc files
+    - [ ] Formatter
 - [x] UI Scaling
 - [ ] Shadows
 
