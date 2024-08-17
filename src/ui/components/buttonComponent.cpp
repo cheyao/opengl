@@ -1,4 +1,4 @@
-#include "ui/buttonComponent.hpp"
+#include "ui/components/buttonComponent.hpp"
 
 #include "game.hpp"
 #include "opengl/mesh.hpp"

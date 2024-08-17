@@ -1,4 +1,4 @@
-#include "ui/backgroundComponent.hpp"
+#include "ui/components/backgroundComponent.hpp"
 
 #include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"

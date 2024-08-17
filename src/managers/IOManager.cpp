@@ -1,4 +1,4 @@
-#include "managers/assimpIO.hpp"
+#include "managers/IOManager.hpp"
 
 #include "utils.hpp"
 

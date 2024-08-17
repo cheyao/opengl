@@ -1,4 +1,4 @@
-#include "ui/textComponent.hpp"
+#include "ui/components/textComponent.hpp"
 
 #include "game.hpp"
 #include "third_party/Eigen/Core"

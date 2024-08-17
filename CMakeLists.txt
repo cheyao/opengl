@@ -48,7 +48,8 @@ src/managers/glManager.cpp
 src/managers/shaderManager.cpp
 src/managers/textureManager.cpp
 src/managers/eventManager.cpp
-src/managers/assimpIO.cpp
+src/managers/IOManager.cpp
+src/managers/fontManager.cpp
 
 src/actors/actor.cpp
 src/actors/player.cpp
@@ -57,14 +58,14 @@ src/actors/sun.cpp
 src/actors/cube.cpp
 
 src/ui/UIComponent.cpp
-src/ui/buttonComponent.cpp
-src/ui/backgroundComponent.cpp
-src/ui/textComponent.cpp
-src/ui/freetype.cpp
-
 src/ui/UIScreen.cpp
-src/ui/controlUI.cpp
-src/ui/mainMenu.cpp
+
+src/ui/screens/controlUI.cpp
+src/ui/screens/mainUI.cpp
+
+src/ui/components/buttonComponent.cpp
+src/ui/components/backgroundComponent.cpp
+src/ui/components/textComponent.cpp
 
 # Headers
 include/game.hpp
@@ -90,7 +91,9 @@ include/managers/glManager.hpp
 include/managers/shaderManager.hpp
 include/managers/textureManager.hpp
 include/managers/eventManager.hpp
-include/managers/assimpIO.hpp
+include/managers/localeManager.hpp
+include/managers/IOManager.hpp
+include/managers/fontManager.hpp
 
 include/actors/actor.hpp
 include/actors/player.hpp
@@ -99,18 +102,19 @@ include/actors/sun.hpp
 include/actors/cube.hpp
 
 include/ui/UIComponent.hpp
-include/ui/buttonComponent.hpp
-include/ui/backgroundComponent.hpp
-include/ui/textComponent.hpp
-include/ui/freetype.hpp
-
 include/ui/UIScreen.hpp
-include/ui/controlUI.hpp
-include/ui/mainMenu.hpp
+
+include/ui/screens/controlUI.hpp
+include/ui/screens/mainUI.hpp
+
+include/ui/components/buttonComponent.hpp
+include/ui/components/backgroundComponent.hpp
+include/ui/components/textComponent.hpp
 
 # External
 src/third_party/stb_image.c
 include/third_party/stb_image.h
+include/third_party/json.hpp
 
 # Glad
 src/third_party/glad.c 
@@ -353,7 +357,7 @@ endif()
 if (MACOS)
 	find_package(OpenGL REQUIRED)
 	
-	target_link_libraries(OpenGL ${OPENGL_LIBRARIES})
+	target_link_libraries(${BUILD_NAME} ${OPENGL_LIBRARIES})
 endif()
 
 # ImGUI
@@ -379,16 +383,23 @@ endif()
 # 
 
 # Strip debug symbols
-if(NOT DEBUG AND NOT ANDROID AND NOT WEB)
-	if (WINDOWS)
-		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
-			COMMAND ${CMAKE_STRIP} ${BUILD_NAME}.exe)
-	elseif(APPLE AND NOT DEBUG)
-		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
-			COMMAND ${CMAKE_STRIP} ${BUILD_NAME}.app/Contents/MacOS/${BUILD_NAME})
+if(NOT DEBUG AND NOT ANDROID)
+	message("-- Striping debug symbols")
+
+	if(APPLE)
+		add_custom_command(
+			TARGET ${BUILD_NAME} 
+			POST_BUILD
+			COMMAND ${CMAKE_STRIP} 
+			ARGS ${BUILD_NAME}.app/Contents/MacOS/${BUILD_NAME}
+		)
 	else()
-		add_custom_command(TARGET ${BUILD_NAME} POST_BUILD
-			COMMAND ${CMAKE_STRIP} ${BUILD_NAME})
+		add_custom_command(
+			TARGET ${BUILD_NAME} 
+			POST_BUILD
+			COMMAND ${CMAKE_STRIP} 
+			ARGS ${BUILD_NAME}${CMAKE_EXECUTABLE_SUFFIX}
+		)
 	endif()
 endif()
 
@@ -402,9 +413,25 @@ if(APPLE AND NOT DEBUG)
 	file(COPY cmake/mac-patch-dylib.sh DESTINATION ${CMAKE_BINARY_DIR}) # Dylib helper script
 endif()
 
+# Generate locals
+# FIXME: This prob brakes with some platforms
+add_custom_command(
+	POST_BUILD
+	OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/assets/strings/en.json"
+	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/localize.py" ARGS "${CMAKE_CURRENT_BINARY_DIR}/assets/strings/strings.csv"
+	DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/strings.csv"
+)
+add_custom_target(localize ALL DEPENDS "${CMAKE_BINARY_DIR}/assets/strings/en.json")
+
 # Copy assets
 if(DEBUG)
-	execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ../assets ${CMAKE_BINARY_DIR}/assets)
+	add_custom_command(
+		POST_BUILD
+		OUTPUT ${CMAKE_BINARY_DIR}/assets
+		COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/assets
+	)
+	add_custom_target(copy-assets ALL DEPENDS ${CMAKE_BINARY_DIR}/assets)
 else()
 	file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 endif()

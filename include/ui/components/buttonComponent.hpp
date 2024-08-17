@@ -2,7 +2,6 @@
 
 #include "third_party/Eigen/Core"
 #include "ui/UIComponent.hpp"
-#include "ui/UIScreen.hpp"
 
 #include <functional>
 

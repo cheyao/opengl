@@ -1,4 +1,4 @@
-#include "ui/freetype.hpp"
+#include "managers/fontManager.hpp"
 
 #include "game.hpp"
 #include "opengl/shader.hpp"

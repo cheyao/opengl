@@ -1,15 +1,15 @@
-#include "ui/mainMenu.hpp"
+#include "ui/screens/mainUI.hpp"
 
 #include "game.hpp"
 #include "opengl/renderer.hpp"
 #include "third_party/Eigen/Core"
 #include "ui/UIScreen.hpp"
-#include "ui/backgroundComponent.hpp"
-#include "ui/buttonComponent.hpp"
-#include "ui/textComponent.hpp"
+#include "ui/components/backgroundComponent.hpp"
+#include "ui/components/buttonComponent.hpp"
+#include "ui/components/textComponent.hpp"
 #include "utils.hpp"
 
-MainMenu::MainMenu(class Game* game) : UIScreen(game) {
+MainUI::MainUI(class Game* game) : UIScreen(game) {
 	game->setPause(true);
 	game->getRenderer()->setWindowRelativeMouseMode(SDL_FALSE);
 

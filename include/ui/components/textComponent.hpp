@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ui/UIComponent.hpp"
 #include "third_party/Eigen/Core"
+#include "ui/UIComponent.hpp"
 
 #include <string>
 
@@ -9,7 +9,8 @@
 
 class TextComponent : public UIComponent {
       public:
-	explicit TextComponent(class UIScreen* owner, const std::basic_string<char32_t>& text, Eigen::Vector2f position);
+	explicit TextComponent(class UIScreen* owner, const std::basic_string<char32_t>& text,
+			       Eigen::Vector2f position);
 	TextComponent(TextComponent&&) = delete;
 	TextComponent(const TextComponent&) = delete;
 	TextComponent& operator=(TextComponent&&) = delete;
