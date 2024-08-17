@@ -2,7 +2,7 @@
 
 #include "actors/actor.hpp"
 #include "game.hpp"
-#include "managers/assimpIO.hpp"
+#include "managers/IOManager.hpp"
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/types.hpp"

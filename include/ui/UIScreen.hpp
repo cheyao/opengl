@@ -23,6 +23,7 @@ class UIScreen {
 	void drawText(const class Shader* shader);
 	void touch(const SDL_FingerID& finger, const float x, const float y, const bool lift);
 
+	// TODO: Paused
 	enum UIState { Active, Closed };
 	void close();
 	UIState getState() const { return mState; }

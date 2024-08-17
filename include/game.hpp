@@ -1,5 +1,6 @@
 #pragma once
 
+#include "managers/localeManager.hpp"
 #include "utils.hpp"
 
 #include <cstddef>
@@ -37,6 +38,7 @@ class Game {
 					      const std::string& geom = "");
 	[[nodiscard]] class Renderer* getRenderer() const { return mRenderer; }
 	[[nodiscard]] class FontManager* getFontManager() const { return mFontManager; }
+	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager; }
 
 	[[nodiscard]] inline std::string fullPath(const std::string& path) const {
 		return (mBasePath + "assets" SEPARATOR + path);
@@ -62,6 +64,7 @@ class Game {
 
 	class Renderer* mRenderer;
 	class FontManager* mFontManager;
+	class LocaleManager* mLocaleManager;
 
 	std::vector<class Actor*> mActors;
 	std::vector<class Actor*> mPendingActors;

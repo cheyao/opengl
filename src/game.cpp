@@ -6,11 +6,12 @@
 #include "actors/sun.hpp"
 #include "actors/world.hpp"
 #include "managers/eventManager.hpp"
+#include "managers/fontManager.hpp"
+#include "managers/localeManager.hpp"
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
 #include "opengl/renderer.hpp"
-#include "ui/freetype.hpp"
-#include "ui/mainMenu.hpp"
+#include "ui/screens/mainUI.hpp"
 #include "utils.hpp"
 
 #ifdef ANDROID
@@ -68,6 +69,8 @@ Game::Game()
 
 	mFontManager = new FontManager(mBasePath, this);
 	mFontManager->loadFont("NotoSans.ttf");
+
+	mLocaleManager = new LocaleManager();
 	// mFontManager->loadFont("NotoSansCJK.ttc");
 
 	// TODO: Icon
@@ -88,7 +91,7 @@ void Game::setup() {
 #ifdef ANDROID
 	new ControlUI(this);
 #endif
-	new MainMenu(this);
+	new MainUI(this);
 
 	SDL_Log("Successfully initialized OpenGL and UI\n");
 

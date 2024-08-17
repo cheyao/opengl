@@ -4,7 +4,7 @@
 #include "third_party/Eigen/Core"
 #include "ui/UIComponent.hpp"
 #include "ui/UIScreen.hpp"
-#include "ui/freetype.hpp"
+#include "managers/fontManager.hpp"
 
 #include <wchar.h>
 

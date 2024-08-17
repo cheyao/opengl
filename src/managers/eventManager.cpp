@@ -2,7 +2,7 @@
 
 #include "game.hpp"
 #include "opengl/renderer.hpp"
-#include "ui/mainMenu.hpp"
+#include "ui/screens/mainUI.hpp"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_events.h>
@@ -104,9 +104,9 @@ int EventManager::manageKeyboardEvent(const SDL_Event& event) {
 
 	switch (event.key.key) {
 		case SDLK_ESCAPE: {
-			MainMenu* menu = nullptr;
+			MainUI* menu = nullptr;
 			for (const auto& element : mGame->getUIs()) {
-				menu = dynamic_cast<MainMenu*>(element);
+				menu = dynamic_cast<MainUI*>(element);
 
 				if (menu != nullptr) {
 					break;
@@ -115,7 +115,7 @@ int EventManager::manageKeyboardEvent(const SDL_Event& event) {
 
 			if (menu == nullptr) {
 				// No main menu present
-				new MainMenu(mGame);
+				new MainUI(mGame);
 			}
 			break;
 		}
