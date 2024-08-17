@@ -7,7 +7,8 @@
 
 #include <unordered_map>
 
-TextureManager::TextureManager(const std::string& path) : mPath(path + "assets" + SEPARATOR + "textures" + SEPARATOR) {
+TextureManager::TextureManager(const std::string& path) : mPath(path + "assets" SEPARATOR "textures" SEPARATOR) {
+	// OpenGL wants this
 	stbi_set_flip_vertically_on_load(true);
 }
 

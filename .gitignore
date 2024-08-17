@@ -12,6 +12,7 @@ webrel/
 nogui/
 gcc/
 and/
+mem/
 assets/strings/*.json
 .compile_commands
 imgui.ini

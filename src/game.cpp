@@ -34,7 +34,7 @@
 
 Game::Game()
 	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mFontManager(nullptr),
-	  mActorMutex(SDL_CreateMutex()), mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mVsync(true) {
+	  mActorMutex(SDL_CreateMutex()), mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false) {
 	if (mActorMutex == nullptr) {
 		SDL_Log("Failed to create actor mutex: %s", SDL_GetError());
 
@@ -70,7 +70,7 @@ Game::Game()
 	mFontManager = new FontManager(mBasePath, this);
 	mFontManager->loadFont("NotoSans.ttf");
 
-	mLocaleManager = new LocaleManager();
+	mLocaleManager = new LocaleManager(mBasePath);
 	// mFontManager->loadFont("NotoSansCJK.ttc");
 
 	// TODO: Icon
@@ -80,9 +80,31 @@ Game::Game()
 	SDL_backpackShaderroySurface(icon);
 	*/
 
-	SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
+	SDL_GL_SetSwapInterval(1);
 
 	setup();
+}
+
+Game::~Game() {
+	SDL_Log("Quitting game\n");
+
+#ifdef IMGUI
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplSDL3_Shutdown();
+	ImGui::DestroyContext();
+#endif
+
+	while (!mActors.empty()) {
+		delete mActors.back();
+	}
+	while (!mPendingActors.empty()) {
+		delete mPendingActors.back();
+	}
+
+	delete mRenderer;
+	// delete mLocaleManager;
+
+	SDL_DestroyMutex(mActorMutex);
 }
 
 void Game::setup() {
@@ -219,13 +241,14 @@ void Game::gui() {
 	ImGui::NewFrame();
 
 	static bool wireframe = false;
+	static bool vsync = true;
+	static bool demo = false;
 
 	/* Main menu */ {
 		ImGui::Begin("Main menu");
 
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::Text("%.3f ms %.1f FPS", (1000.f / io.Framerate), io.Framerate);
-		ImGui::Text("%d Vsync", mVsync);
 
 		/*
 		Player* p = nullptr;
@@ -242,22 +265,24 @@ void Game::gui() {
 		}
 		*/
 
-		if (ImGui::Button("VSync")) {
-			mVsync = !mVsync;
-			SDL_GL_SetSwapInterval(static_cast<int>(mVsync));
+		if (ImGui::Checkbox("VSync", &vsync)) {
+			SDL_GL_SetSwapInterval(static_cast<int>(vsync));
 		}
-		ImGui::Checkbox("Wireframe", &wireframe);
+
+#ifndef GLES
+		// GLES doesn't have polygon mode
+		if (ImGui::Checkbox("Wireframe", &wireframe)) {
+			glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+		}
+#endif
+		ImGui::Checkbox("Demo", &demo);
 
 		ImGui::End();
 	}
 
-#ifndef GLES
-	if (wireframe) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	} else {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	if (demo) {
+		ImGui::ShowDemoWindow(&demo);
 	}
-#endif
 #endif
 }
 
@@ -341,27 +366,6 @@ Texture* Game::getTexture(const std::string& name) { return mTextures->get(name)
 
 Shader* Game::getShader(const std::string& vert, const std::string& frag, const std::string& geom) {
 	return mShaders->get(vert, frag, geom);
-}
-
-Game::~Game() {
-	SDL_Log("Quitting game\n");
-
-#ifdef IMGUI
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplSDL3_Shutdown();
-	ImGui::DestroyContext();
-#endif
-
-	while (!mActors.empty()) {
-		delete mActors.back();
-	}
-	while (!mPendingActors.empty()) {
-		delete mPendingActors.back();
-	}
-
-	delete mRenderer;
-
-	SDL_DestroyMutex(mActorMutex);
 }
 
 [[nodiscard]] int Game::getWidth() const { return mRenderer->getWidth(); }

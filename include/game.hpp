@@ -77,5 +77,4 @@ class Game {
 	std::string mBasePath;
 
 	bool mPaused;
-	bool mVsync;
 };

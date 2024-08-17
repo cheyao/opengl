@@ -50,6 +50,7 @@ src/managers/textureManager.cpp
 src/managers/eventManager.cpp
 src/managers/IOManager.cpp
 src/managers/fontManager.cpp
+src/managers/localeManager.cpp
 
 src/actors/actor.cpp
 src/actors/player.cpp
@@ -403,6 +404,29 @@ if(NOT DEBUG AND NOT ANDROID)
 	endif()
 endif()
 
+# Generate locals
+# FIXME: This prob brakes with some platforms
+add_custom_command(
+	POST_BUILD
+	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/en.json"
+	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/localize.py" ARGS "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/strings.csv"
+	DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/strings.csv"
+)
+add_custom_target(localize ALL DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/en.json")
+
+# Copy assets
+if(DEBUG)
+	add_custom_command(
+		POST_BUILD
+		OUTPUT ${CMAKE_BINARY_DIR}/assets
+		COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/assets" "${CMAKE_CURRENT_BINARY_DIR}/assets"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets" "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/en.json"
+	)
+	add_custom_target(copy-assets ALL DEPENDS ${CMAKE_BINARY_DIR}/assets)
+else()
+	file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
+endif()
+
 # Copy stuff for apple
 if(APPLE AND NOT DEBUG)
 	# Don't remove, needed by the helper script
@@ -411,29 +435,6 @@ if(APPLE AND NOT DEBUG)
 	# Add assets
 	file(COPY assets DESTINATION ${CMAKE_BINARY_DIR}/${BUILD_NAME}.app/Contents/Resources)
 	file(COPY cmake/mac-patch-dylib.sh DESTINATION ${CMAKE_BINARY_DIR}) # Dylib helper script
-endif()
-
-# Generate locals
-# FIXME: This prob brakes with some platforms
-add_custom_command(
-	POST_BUILD
-	OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/assets/strings/en.json"
-	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/localize.py" ARGS "${CMAKE_CURRENT_BINARY_DIR}/assets/strings/strings.csv"
-	DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/strings.csv"
-)
-add_custom_target(localize ALL DEPENDS "${CMAKE_BINARY_DIR}/assets/strings/en.json")
-
-# Copy assets
-if(DEBUG)
-	add_custom_command(
-		POST_BUILD
-		OUTPUT ${CMAKE_BINARY_DIR}/assets
-		COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets
-		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/assets
-	)
-	add_custom_target(copy-assets ALL DEPENDS ${CMAKE_BINARY_DIR}/assets)
-else()
-	file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 
 #

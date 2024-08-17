@@ -31,8 +31,6 @@ for i in range(len(langs[2:])):
     for row in strings:
         data[row[0]] = row[i+2];
 
-    #print(data)
-
     with open(outDir + "/" + langs[i+2] + ".json", "w") as output:
         json.dump(data, output);
 
