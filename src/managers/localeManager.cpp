@@ -3,6 +3,7 @@
 #include "third_party/json.hpp"
 #include "utils.hpp"
 
+#include <codecvt>
 #include <stdexcept>
 #include <string>
 
@@ -52,6 +53,14 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 	loadLocale();
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 std::u32string LocaleManager::get(std::string_view id) {
 	if (!mLocaleData.contains(id)) {
 		SDL_Log("\x1B[31mLocaleManager.cpp: Error! Unknown id %s\033[0m", id.data());
@@ -63,8 +72,9 @@ std::u32string LocaleManager::get(std::string_view id) {
 		return U"";
 	}
 
+	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
 	try {
-		return mConverter.from_bytes(mLocaleData[id].get<std::string>());
+		return conv.from_bytes(mLocaleData[id].get<std::string>());
 	} catch (const std::range_error& e) {
 		SDL_Log("\x1B[31mLocaleManager.cpp: Error! Unknown id %s\033[0m", id.data());
 
@@ -72,9 +82,15 @@ std::u32string LocaleManager::get(std::string_view id) {
 		throw std::runtime_error("LocaleManager.cpp: Unable to convert to UTF32!");
 #endif
 
-		return mConverter.from_bytes(mLocaleData[id].get<std::string>().substr(0, mConverter.converted()));
+		return conv.from_bytes(mLocaleData[id].get<std::string>().substr(0, conv.converted()));
 	}
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 void LocaleManager::loadLocale() {
 	SDL_Log("LocalManager.cpp: Loading %s", mLocale.data());

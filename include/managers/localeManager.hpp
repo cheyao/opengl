@@ -2,15 +2,6 @@
 
 #include "third_party/json.hpp"
 
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-
-#include <codecvt>
 #include <string>
 
 class LocaleManager {
@@ -35,13 +26,4 @@ class LocaleManager {
 	std::string mLocale;
 
 	nlohmann::json mLocaleData;
-
-	// FIXME: Decaprated
-	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> mConverter;
 };
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif

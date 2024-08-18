@@ -21,7 +21,12 @@ Texture::Texture(const FT_Bitmap& bitmap) {
 	glGenTextures(1, &mID);
 	glBindTexture(GL_TEXTURE_2D, mID);
 
+#ifdef GLES
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, bitmap.width, bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
+#else
+	// See https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, bitmap.width, bitmap.rows, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
+#endif
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
