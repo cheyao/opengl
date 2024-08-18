@@ -19,6 +19,9 @@
 #include <memory>
 
 #ifdef IMGUI
+#ifdef GLES
+#define IMGUI_IMPL_OPENGL_ES3
+#endif
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_sdl3.h>
 #include <imgui.h>
@@ -91,23 +94,20 @@ Renderer::Renderer(Game* game)
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-#ifdef DEBUG
-	io.ConfigDebugIsDebuggerPresent = true;
-#endif
 #if defined(__EMSCRIPTEN__) || defined(ANDROID)
 	io.IniFilename = nullptr;
 #else
 	// TODO: Storage path
 #endif
 
-	mGL->bindContext(mWindow);
-
-	setDisplayScale();
-
 	ImGui::StyleColorsDark();
 
 	SDL_Log("Finished Initializing ImGUI");
 #endif
+
+	mGL->bindContext(mWindow);
+
+	setDisplayScale();
 
 	SDL_GetWindowSize(mWindow, &mWidth, &mHeight);
 
@@ -131,6 +131,8 @@ Renderer::Renderer(Game* game)
 
 	// Misc
 	mGL->printInfo();
+
+	assert(mGL->getContext() != nullptr);
 }
 
 /* NOTE:

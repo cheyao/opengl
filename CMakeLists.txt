@@ -27,7 +27,6 @@ set(SRC
 # Sources
 src/main.cpp
 src/game.cpp
-src/utils.cpp
 
 src/components/cameraComponent.cpp
 src/components/component.cpp

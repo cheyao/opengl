@@ -5931,3 +5931,9 @@ GLAD_API_CALL int gladLoadGLES2( GLADloadfunc load);
 }
 #endif
 #endif
+
+#ifdef GLES
+#include <SDL3/SDL_opengles2.h>
+#else
+#include <SDL3/SDL_opengl.h>
+#endif

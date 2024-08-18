@@ -13,6 +13,9 @@
 #include <stdexcept>
 
 #ifdef IMGUI
+#ifdef GLES
+#define IMGUI_IMPL_OPENGL_ES3
+#endif
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_sdl3.h>
 #include <imgui.h>
@@ -79,13 +82,12 @@ void Framebuffer::setDemensions(const int width, const int height) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-#define GLES
 void Framebuffer::swap() {
 #ifndef GLES
 	GLint mode[2];
 	glGetIntegerv(GL_POLYGON_MODE, mode);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Enable wireframe mode
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 #endif
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -118,7 +120,6 @@ void Framebuffer::swap() {
 	glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
 #endif
 }
-#undef GLES
 
 Framebuffer::~Framebuffer() {
 	glDeleteTextures(1, &mScreenTexture);

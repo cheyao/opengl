@@ -27,6 +27,9 @@
 #include <third_party/Eigen/Core>
 
 #ifdef IMGUI
+#ifdef GLES
+#define IMGUI_IMPL_OPENGL_ES3
+#endif
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_sdl3.h>
 #include <imgui.h>
@@ -65,7 +68,6 @@ Game::Game()
 	mEventManager = std::make_unique<EventManager>(this);
 
 	mRenderer = new Renderer(this);
-	mRenderer->swapWindow();
 
 	mFontManager = new FontManager(mBasePath, this);
 	mFontManager->loadFont("NotoSans.ttf");

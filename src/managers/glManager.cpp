@@ -4,6 +4,7 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <cassert>
 #include <stdexcept>
 #include <string>
 
@@ -13,6 +14,7 @@
 #endif
 
 GLManager::GLManager() : mContext(nullptr) {
+	// Note: These must be set before the window is created https://wiki.libsdl.org/SDL3/SDL_GLattr
 #ifdef GLES
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
@@ -21,7 +23,9 @@ GLManager::GLManager() : mContext(nullptr) {
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#ifdef __APPLE__
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+#endif
 #endif
 
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -31,10 +35,13 @@ GLManager::GLManager() : mContext(nullptr) {
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	// Used to force hardware accell:
+	// SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 }
 
 void GLManager::bindContext(SDL_Window* window) {
+	assert(mContext == nullptr);
+
 	mContext = SDL_GL_CreateContext(window);
 	if (mContext == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
@@ -69,12 +76,6 @@ void GLManager::bindContext(SDL_Window* window) {
 		SDL_Log("Failed to enable VSync");
 	}
 
-	if (SDL_GL_MakeCurrent(window, mContext)) {
-		SDL_Log("Failed to bind context: %s", SDL_GetError());
-
-		throw std::runtime_error("GlManager.cpp: Failed to bind context");
-	}
-
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
@@ -86,11 +87,15 @@ void GLManager::bindContext(SDL_Window* window) {
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 GLManager::~GLManager() { SDL_GL_DestroyContext(mContext); }
 
-void GLManager::printInfo() {
+void GLManager::printInfo() const {
+	assert(mContext != nullptr);
+
 	SDL_Log("Debugging information:");
 	SDL_Log("Video driver: %s\n", SDL_GetCurrentVideoDriver());
 	SDL_Log("Vendor      : %s\n", glGetString(GL_VENDOR));

@@ -3,7 +3,6 @@
 #include "third_party/json.hpp"
 #include "utils.hpp"
 
-#include <codecvt>
 #include <stdexcept>
 #include <string>
 
@@ -61,6 +60,9 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
+#include <codecvt>
+
+// FIXME: Decaprated utf8 to utf32
 std::u32string LocaleManager::get(std::string_view id) {
 	if (!mLocaleData.contains(id)) {
 		SDL_Log("\x1B[31mLocaleManager.cpp: Error! Unknown id %s\033[0m", id.data());

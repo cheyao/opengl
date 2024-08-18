@@ -11,7 +11,7 @@ public:
 	GLManager &operator=(const GLManager &) = delete;
 	~GLManager();
 
-	static void printInfo();
+	void printInfo() const;
 	void bindContext(SDL_Window* window);
 
 	SDL_GLContext getContext() const { return mContext; }
