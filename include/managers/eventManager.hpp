@@ -9,7 +9,7 @@ class EventManager {
 	EventManager(const EventManager&) = delete;
 	EventManager& operator=(EventManager&&) = delete;
 	EventManager& operator=(const EventManager&) = delete;
-	~EventManager() = default;
+	~EventManager();
 
 	[[nodiscard]] int manageEvent(const union SDL_Event& event);
 

@@ -13,9 +13,10 @@
 #include <ctime>
 #include <stdexcept>
 
+// The main class is in charge of sdl
 int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
+	SDL_Log("Initializing cyao engine v3.0\n");
 
-	// The main class is in charge of sdl
 	std::srand(std::time(nullptr));
 
 	SDL_SetAppMetadata("Cyao", "1.0", "com.cyao.opengl");
@@ -23,10 +24,10 @@ int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] cha
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_URL_STRING, "https://github.com/cheyao/opengl");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_TYPE_STRING, "game");
 
-	SDL_Log("Initializing cyao engine v3.0?\n");
-
-#ifdef ANDROID
-	SDL_Log("Yay, android!");
+#ifdef __ANDROID__
+	SDL_Log("Hello, android!");
+#elif defined(__EMSCRIPTEN__)
+	SDL_Log("Hello, web!");
 #endif
 
 	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
@@ -82,6 +83,10 @@ int SDL_AppIterate(void* appstate) {
 #ifdef DEBUG
 		static_cast<Game*>(appstate)->setPause(true);
 #endif
+
+		return 0;
+	} catch (...) {
+		SDL_Log("Main.cpp: Uncaught exception of unknown type");
 
 		return 0;
 	}

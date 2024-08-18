@@ -15,6 +15,10 @@ EventManager::EventManager(class Game* game) : mGame(game) {
 	}
 }
 
+EventManager::~EventManager() {
+	delete[] mKeys;
+}
+
 int EventManager::manageEvent(const SDL_Event& event) {
 	// NOTE: Returns in switch!
 	switch (event.type) {

@@ -38,7 +38,6 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 
 Renderer::Renderer(Game* game)
 	: mGame(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mWidth(0), mHeight(0), mCamera(nullptr) {
-	mGL = std::make_unique<GLManager>();
 	const SDL_DisplayMode* const DM = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
 
 	SDL_Log("\n");
@@ -47,6 +46,31 @@ Renderer::Renderer(Game* game)
 	SDL_Log("Display format: %#010x", DM->format);
 	SDL_Log("Refresh rate: %f", DM->refresh_rate);
 	SDL_Log("\n");
+
+	// Note: These must be set before the window is created https://wiki.libsdl.org/SDL3/SDL_GLattr
+#ifdef GLES
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#else
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#ifdef __APPLE__
+	// Dunno why but apple want's this
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+#endif
+#endif
+
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	// Used to force hardware accell:
+	// SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
 	// NOTE: Don't set emscripten here, it breakes stuff, idk why
 #ifdef ANDROID
@@ -69,8 +93,7 @@ Renderer::Renderer(Game* game)
 	);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Game.cpp: Failed to create window: %s\n", SDL_GetError());
-		ERROR_BOX("Failed to make SDL window, there is something wrong with "
-			  "your system/SDL installation");
+		ERROR_BOX("Failed to make SDL window, there is something wrong with your system/SDL installation");
 
 		throw std::runtime_error("Game.cpp: Failed to create SDL window");
 	}
@@ -86,6 +109,8 @@ Renderer::Renderer(Game* game)
 	SDL_SetWindowMinimumSize(mWindow, 480, 320);
 #endif
 
+	mGL = std::make_unique<GLManager>(mWindow);
+
 #ifdef IMGUI
 	SDL_Log("Initializing ImGUI");
 
@@ -94,7 +119,7 @@ Renderer::Renderer(Game* game)
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-#if defined(__EMSCRIPTEN__) || defined(ANDROID)
+#if defined(__EMSCRIPTEN__) || defined(__ANDROID__)
 	io.IniFilename = nullptr;
 #else
 	// TODO: Storage path
@@ -102,23 +127,19 @@ Renderer::Renderer(Game* game)
 
 	ImGui::StyleColorsDark();
 
-	SDL_Log("Finished Initializing ImGUI");
-#endif
-
-	mGL->bindContext(mWindow);
-
-	setDisplayScale();
-
-	SDL_GetWindowSize(mWindow, &mWidth, &mHeight);
-
-#ifdef IMGUI
 	ImGui_ImplSDL3_InitForOpenGL(mWindow, mGL->getContext());
 #ifndef GLES
 	ImGui_ImplOpenGL3_Init("#version 410 core");
 #else
-	ImGui_ImplOpenGL3_Init("#version 300 es");
+	ImGui_ImplOpenGL3_Init("#version 300 es  ");
 #endif
+
+	SDL_Log("Finished Initializing ImGUI");
 #endif
+
+	setDisplayScale();
+
+	SDL_GetWindowSize(mWindow, &mWidth, &mHeight);
 
 	mFramebuffer = std::make_unique<Framebuffer>(mGame);
 	// NOTE: Uncomment if testing framebuffer module

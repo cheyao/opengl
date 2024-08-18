@@ -4,7 +4,7 @@
 
 class GLManager {
 public:
-	GLManager();
+	GLManager(SDL_Window* window);
 	GLManager(GLManager &&) = delete;
 	GLManager(const GLManager &) = delete;
 	GLManager &operator=(GLManager &&) = delete;
@@ -12,7 +12,6 @@ public:
 	~GLManager();
 
 	void printInfo() const;
-	void bindContext(SDL_Window* window);
 
 	SDL_GLContext getContext() const { return mContext; }
 

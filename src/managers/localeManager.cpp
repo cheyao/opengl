@@ -39,10 +39,13 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 			loadLocale();
 		} catch (const std::runtime_error& error) {
 			SDL_Log("LocaleManager.cpp: Failed to load locale %s: %s", l.data(), error.what());
+
 			continue;
 		}
 
 		SDL_Log("LocaleManager.cpp: Successfully loaded locale %s", l.data());
+
+		SDL_free(loc);
 
 		return;
 	}
@@ -50,6 +53,8 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 	mLocale = "en-US";
 	SDL_Log("\x1B[31mLocaleManager.cpp: Failed to find valid locale! Falling back to english.\033[0m");
 	loadLocale();
+
+	SDL_free(loc);
 }
 
 #if defined(__clang__)
@@ -126,6 +131,8 @@ void LocaleManager::loadLocale() {
 	}
 
 	mLocaleData = nlohmann::json::parse(localeData);
+
+	SDL_free(localeData);
 
 	SDL_Log("LocaleManager.cpp: Found locale %s version %d", mLocale.data(), mLocaleData["version"].get<int>());
 

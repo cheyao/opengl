@@ -11,7 +11,7 @@ class LocaleManager {
 	LocaleManager(const LocaleManager&) = delete;
 	LocaleManager& operator=(LocaleManager&&) = delete;
 	LocaleManager& operator=(const LocaleManager&) = delete;
-	~LocaleManager();
+	~LocaleManager() = default;
 
 	void changeLocale(std::string_view locale) {
 		mLocale = locale;

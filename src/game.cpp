@@ -104,7 +104,8 @@ Game::~Game() {
 	}
 
 	delete mRenderer;
-	// delete mLocaleManager;
+	delete mLocaleManager;
+	delete mFontManager;
 
 	SDL_DestroyMutex(mActorMutex);
 }

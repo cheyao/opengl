@@ -13,64 +13,38 @@
 #include <emscripten/html5.h>
 #endif
 
-GLManager::GLManager() : mContext(nullptr) {
-	// Note: These must be set before the window is created https://wiki.libsdl.org/SDL3/SDL_GLattr
-#ifdef GLES
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-#else
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-#ifdef __APPLE__
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
-#endif
-#endif
-
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	// Used to force hardware accell:
-	// SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-}
-
-void GLManager::bindContext(SDL_Window* window) {
+GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
+	assert(window != nullptr && "Forgot to init window?");
 	assert(mContext == nullptr);
 
 	mContext = SDL_GL_CreateContext(window);
 	if (mContext == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s\n", SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s", SDL_GetError());
 		ERROR_BOX("Failed to initialize OpenGL Context, there is something "
 			  "wrong with your OpenGL");
 
 		throw std::runtime_error("GlManager.cpp: Failed to get opengl context");
 	}
 
-/*
 #ifdef GLES
-	if (gladLoadGLES2Loader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress)) == 0) {
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init GLES glad!\n");
+	SDL_Log("Loading OpenGL ES");
+
+	int version = gladLoadGLES2(static_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
+	if (version == 0) {
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init GLES glad!");
 #else
-	if (gladLoadGLLoader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress)) == 0) {
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init GL glad!\n");
+	SDL_Log("Loading OpenGL");
+
+	int version = gladLoadGL(static_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
+	if (version == 0) {
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init GL glad!");
 #endif
 		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
 
 		throw std::runtime_error("glManager.cpp: Failed to init glad");
 	}
-*/
-#ifdef GLES
-	int version = gladLoadGL(static_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
-#else
-	int version = gladLoadGLES2(static_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
-#endif
 
-	SDL_Log("Loaded glad %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+	SDL_Log("Loaded glad OpenGL %d.%d", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
 	if (SDL_GL_SetSwapInterval(1)) {
 		SDL_Log("Failed to enable VSync");
