@@ -93,7 +93,7 @@ std::u32string LocaleManager::get(std::string_view id) {
 #endif
 
 void LocaleManager::loadLocale() {
-	SDL_Log("LocalManager.cpp: Loading %s", mLocale.data());
+	SDL_Log("LocaleManager.cpp: Loading %s", mLocale.data());
 
 	std::string main;
 
@@ -125,7 +125,7 @@ void LocaleManager::loadLocale() {
 
 	mLocaleData = nlohmann::json::parse(localeData);
 
-	SDL_Log("LocalManager.cpp: Locale %s version %d", mLocale.data(), mLocaleData["version"].get<int>());
+	SDL_Log("LocaleManager.cpp: Found locale %s version %d", mLocale.data(), mLocaleData["version"].get<int>());
 
-	SDL_Log("LocalManager.cpp: Successfully loaded locale %s", mLocale.data());
+	SDL_Log("LocaleManager.cpp: Successfully loaded locale %s", mLocale.data());
 }

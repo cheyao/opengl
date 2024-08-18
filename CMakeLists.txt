@@ -354,13 +354,6 @@ if (NOT WEB)
 	target_link_libraries(${BUILD_NAME} PRIVATE ${FREETYPE_LIBRARIES})
 endif()
 
-# OpenGL - needed by MacOS
-if (MACOS)
-	find_package(OpenGL REQUIRED)
-	
-	target_link_libraries(${BUILD_NAME} ${OPENGL_LIBRARIES})
-endif()
-
 # ImGUI
 if(IMGUI STREQUAL ON AND CHECKS STREQUAL OFF)
 	message("-- Enabling IMGUI")

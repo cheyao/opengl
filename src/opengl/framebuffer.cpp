@@ -79,6 +79,7 @@ void Framebuffer::setDemensions(const int width, const int height) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+#define GLES
 void Framebuffer::swap() {
 #ifndef GLES
 	GLint mode[2];
@@ -117,6 +118,7 @@ void Framebuffer::swap() {
 	glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
 #endif
 }
+#undef GLES
 
 Framebuffer::~Framebuffer() {
 	glDeleteTextures(1, &mScreenTexture);

@@ -44,6 +44,7 @@ void GLManager::bindContext(SDL_Window* window) {
 		throw std::runtime_error("GlManager.cpp: Failed to get opengl context");
 	}
 
+/*
 #ifdef GLES
 	if (gladLoadGLES2Loader(reinterpret_cast<GLADloadproc>(SDL_GL_GetProcAddress)) == 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init GLES glad!\n");
@@ -55,6 +56,14 @@ void GLManager::bindContext(SDL_Window* window) {
 
 		throw std::runtime_error("glManager.cpp: Failed to init glad");
 	}
+*/
+#ifdef GLES
+	int version = gladLoadGL(static_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
+#else
+	int version = gladLoadGLES2(static_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
+#endif
+
+	SDL_Log("Loaded glad %d.%d\n", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
 	if (SDL_GL_SetSwapInterval(1)) {
 		SDL_Log("Failed to enable VSync");

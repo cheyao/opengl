@@ -11,6 +11,7 @@
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
 #include "opengl/renderer.hpp"
+#include "third_party/glad/glad.h"
 #include "ui/screens/mainUI.hpp"
 #include "utils.hpp"
 
@@ -24,7 +25,6 @@
 #include <memory>
 #include <string>
 #include <third_party/Eigen/Core>
-#include <third_party/glad/glad.h>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
