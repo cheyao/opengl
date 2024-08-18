@@ -15,9 +15,5 @@ void UIComponent::input([[maybe_unused]] const bool* keystate) {}
 void UIComponent::draw([[maybe_unused]] const Shader* shader) {}
 void UIComponent::drawText([[maybe_unused]] const Shader* shader) {}
 
-void UIComponent::touch(const SDL_FingerID& finger, const float x, const float y, const bool lift) {
-	(void)finger;
-	(void)x;
-	(void)y;
-	(void)lift;
-}
+void UIComponent::touch([[maybe_unused]] const SDL_FingerID& finger, [[maybe_unused]] const float x,
+			[[maybe_unused]] const float y, [[maybe_unused]] const bool lift) {}

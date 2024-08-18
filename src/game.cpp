@@ -12,12 +12,9 @@
 #include "managers/textureManager.hpp"
 #include "opengl/renderer.hpp"
 #include "third_party/glad/glad.h"
+#include "ui/screens/controlUI.hpp"
 #include "ui/screens/mainUI.hpp"
 #include "utils.hpp"
-
-#ifdef ANDROID
-#include "ui/controlUI.hpp"
-#endif
 
 #include <SDL3/SDL.h>
 #include <algorithm>
@@ -113,9 +110,8 @@ Game::~Game() {
 void Game::setup() {
 	SDL_Log("Setting up UIs");
 
-#ifdef ANDROID
+	// Maybe HUD?
 	new ControlUI(this);
-#endif
 	new MainUI(this);
 
 	SDL_Log("Successfully initialized OpenGL and UI\n");
@@ -231,9 +227,19 @@ void Game::update() {
 	}
 
 	for (const auto& ui : mUI) {
-		if (ui->getState() == UIScreen::Active) {
+		if (ui->getState() == UIScreen::ACTIVE) {
 			ui->update(delta);
 		}
+	}
+
+	// Remove the dead Actors
+	std::vector<const UIScreen*> deadUI;
+	std::copy_if(mUI.begin(), mUI.end(), std::back_inserter(deadUI),
+		     [](const UIScreen* actor) { return (actor->getState() == UIScreen::DEAD); });
+
+	// Delete all the dead actors
+	for (const auto& ui : deadUI) {
+		delete ui;
 	}
 }
 

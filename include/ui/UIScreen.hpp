@@ -24,7 +24,7 @@ class UIScreen {
 	void touch(const SDL_FingerID& finger, const float x, const float y, const bool lift);
 
 	// TODO: Paused
-	enum UIState { Active, Closed };
+	enum UIState { ACTIVE, CLOSED, DEAD };
 	void close();
 	UIState getState() const { return mState; }
 

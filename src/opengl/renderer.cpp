@@ -209,7 +209,7 @@ void Renderer::draw() {
 	Shader* UIshader = mGame->getShader("ui.vert", "ui.frag");
 	Shader* textShader = mGame->getShader("text.vert", "text.frag");
 	for (const auto& ui : mGame->getUIs()) {
-		if (ui->getState() == UIScreen::Active) {
+		if (ui->getState() == UIScreen::ACTIVE) {
 			ui->draw(UIshader);
 			ui->drawText(textShader);
 		}

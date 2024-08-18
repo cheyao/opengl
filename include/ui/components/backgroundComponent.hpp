@@ -12,7 +12,7 @@ class BackgroundComponent : public UIComponent {
 	BackgroundComponent& operator=(const BackgroundComponent&) = delete;
 	~BackgroundComponent() = default;
 
-	void draw([[maybe_unused]] const class Shader* shader);
+	void draw([[maybe_unused]] const class Shader* shader) override;
 
       private:
 	Eigen::Vector3f mColor;

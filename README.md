@@ -161,6 +161,7 @@ assets
 - [x] Emscripten build
     - [ ] Web detect android
     - [ ] Progress bar
+    - [ ] White text
 - [ ] Windows build
 - [x] Pause menu etc
     - [ ] Settings
