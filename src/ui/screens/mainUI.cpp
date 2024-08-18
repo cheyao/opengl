@@ -22,6 +22,7 @@ MainUI::MainUI(class Game* game) : UIScreen(game) {
 		game->setPause(false);
 		game->removeUI(this);
 		game->getRenderer()->setWindowRelativeMouseMode(SDL_TRUE);
+		delete this;
 	});
 
 	// Test "Hello 你好 こんにちは Bonne journée"

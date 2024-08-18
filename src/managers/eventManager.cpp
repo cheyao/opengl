@@ -15,9 +15,7 @@ EventManager::EventManager(class Game* game) : mGame(game) {
 	}
 }
 
-EventManager::~EventManager() {
-	delete[] mKeys;
-}
+EventManager::~EventManager() { delete[] mKeys; }
 
 int EventManager::manageEvent(const SDL_Event& event) {
 	// NOTE: Returns in switch!
@@ -49,7 +47,7 @@ int EventManager::manageEvent(const SDL_Event& event) {
 		}
 
 		case SDL_EVENT_WINDOW_RESIZED: {
-	//	case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: {
+			//	case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: {
 			mGame->getRenderer()->setDemensions(event.window.data1, event.window.data2);
 
 			break;
@@ -75,8 +73,8 @@ int EventManager::manageEvent(const SDL_Event& event) {
 
 		case SDL_EVENT_MOUSE_BUTTON_DOWN: {
 			for (const auto& ui : mGame->getUIs()) {
-				ui->touch(event.button.which, event.button.x, mGame->getHeight() - event.button.y,
-					  false);
+				ui->touch(static_cast<SDL_FingerID>(event.button.which), event.button.x,
+					  static_cast<float>(mGame->getHeight()) - event.button.y, false);
 			}
 
 			break;
@@ -84,8 +82,8 @@ int EventManager::manageEvent(const SDL_Event& event) {
 
 		case SDL_EVENT_MOUSE_BUTTON_UP: {
 			for (const auto& ui : mGame->getUIs()) {
-				ui->touch(event.button.which, event.button.x, mGame->getHeight() - event.button.y,
-					  true);
+				ui->touch(static_cast<SDL_FingerID>(event.button.which), event.button.x,
+					  static_cast<float>(mGame->getHeight()) - event.button.y, true);
 			}
 
 			break;

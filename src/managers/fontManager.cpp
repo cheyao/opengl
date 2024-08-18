@@ -96,6 +96,10 @@ FontManager::~FontManager() {
 
 	FT_Done_FreeType(mLibrary);
 
+	for (const auto& [_, texture] : mGlyphMap) {
+		delete texture.texture;
+	}
+
 	glDeleteVertexArrays(1, &mVAO);
 	glDeleteBuffers(1, &mVBO);
 	glDeleteBuffers(1, &mEBO);

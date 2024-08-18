@@ -16,7 +16,7 @@ class ButtonComponent : public UIComponent {
 	ButtonComponent(const ButtonComponent&) = delete;
 	ButtonComponent& operator=(ButtonComponent&&) = delete;
 	ButtonComponent& operator=(const ButtonComponent&) = delete;
-	~ButtonComponent() override = default;
+	~ButtonComponent() override;
 
 	void draw(const class Shader* shader) override;
 	void touch(const SDL_FingerID& finger, const float x, const float y, const bool lift) override;

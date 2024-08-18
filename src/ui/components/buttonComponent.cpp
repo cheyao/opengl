@@ -43,6 +43,10 @@ ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const 
 	mMesh = new Mesh(vertices, {}, texturePos, indices, textures);
 }
 
+ButtonComponent::~ButtonComponent() {
+	delete mMesh;
+}
+
 // This is usually not a good practice, but trust me, I need it
 // I defined a magic number for center, so I must comare to it
 #if defined(__clang__)
