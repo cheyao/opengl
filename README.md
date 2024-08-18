@@ -160,6 +160,7 @@ assets
     - [x] Android controls
 - [x] Emscripten build
     - [ ] Web detect android
+    - [ ] Progress bar
 - [ ] Windows build
 - [x] Pause menu etc
     - [ ] Settings

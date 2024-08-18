@@ -13,8 +13,8 @@
 #include <vector>
 
 ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const Eigen::Vector2f padding)
-	: UIComponent(owner), mOnClick(nullptr), mOnRelease(nullptr), mPadding(padding), mCapture(0),
-	  mWidth(texture->getWidth()), mHeight(texture->getHeight()) {
+	: UIComponent(owner), mPadding(padding), mWidth(texture->getWidth()), mHeight(texture->getHeight()),
+	  mOnClick(nullptr), mOnRelease(nullptr), mCapture(0) {
 	const std::vector<float> vertices = {
 		0.0f,
 		0.0f,
@@ -43,9 +43,7 @@ ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const 
 	mMesh = new Mesh(vertices, {}, texturePos, indices, textures);
 }
 
-ButtonComponent::~ButtonComponent() {
-	delete mMesh;
-}
+ButtonComponent::~ButtonComponent() { delete mMesh; }
 
 // This is usually not a good practice, but trust me, I need it
 // I defined a magic number for center, so I must comare to it
@@ -123,7 +121,7 @@ void ButtonComponent::touch(const SDL_FingerID& finger, const float x, const flo
 			}
 
 			mCapture = finger;
-		} else if (mCapture != 0 && finger == mCapture) {
+		} else if (finger == mCapture) {
 			if (mOnRelease != nullptr) {
 				mOnRelease();
 			}

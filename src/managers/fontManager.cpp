@@ -192,6 +192,10 @@ void FontManager::drawGlyph(const char32_t character, const Shader* shader, cons
 
 	const Glyph& glyph = mGlyphMap[character];
 
+	if (glyph.size.x() <= 0 || glyph.size.y() <= 0) {
+		return;
+	}
+
 	shader->activate();
 	shader->set("letter", 0);
 	shader->set("size", glyph.size);
@@ -242,7 +246,9 @@ Glyph FontManager::loadGlyph(const char32_t character) {
 		throw std::runtime_error("Freetype.cpp: Failed to load character");
 	}
 
-	Glyph glyph = {new Texture(mFace->glyph->bitmap),
+	Glyph glyph = {(mFace->glyph->bitmap.rows > 0 && mFace->glyph->bitmap.width > 0)
+			       ? new Texture(mFace->glyph->bitmap)
+			       : nullptr,
 		       Eigen::Vector2f(mFace->glyph->bitmap.width, mFace->glyph->bitmap.rows),
 		       Eigen::Vector2f(mFace->glyph->bitmap_left, mFace->glyph->bitmap_top),
 		       Eigen::Vector2f(mFace->glyph->advance.x >> 6, mFace->glyph->advance.y >> 6)};

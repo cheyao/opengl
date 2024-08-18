@@ -38,7 +38,7 @@ class FontManager {
 
 	class Game* mGame;
 
-	std::string mPath;
+	const std::string mPath;
 	unsigned int mSize;
 
 	FT_Library mLibrary;

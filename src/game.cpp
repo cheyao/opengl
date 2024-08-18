@@ -243,7 +243,9 @@ void Game::gui() {
 	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
 
+#ifndef GLES
 	static bool wireframe = false;
+#endif
 	static bool vsync = true;
 	static bool demo = false;
 

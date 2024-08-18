@@ -4,6 +4,7 @@
 #include "ui/UIComponent.hpp"
 
 #include <functional>
+#include <SDL3/SDL.h>
 
 #define CENTER std::numeric_limits<float>::max()
 
@@ -21,16 +22,16 @@ class ButtonComponent : public UIComponent {
 	void draw(const class Shader* shader) override;
 	void touch(const SDL_FingerID& finger, const float x, const float y, const bool lift) override;
 
-	void onClick(const std::function<void()> func) { mOnClick = func; }
-	void onRelease(const std::function<void()> func) { mOnRelease = func; }
+	void onClick(const std::function<void()>& func) { mOnClick = func; }
+	void onRelease(const std::function<void()>& func) { mOnRelease = func; }
 
       private:
 	class Mesh* mMesh;
+	const Eigen::Vector2f mPadding;
+	const int mWidth, mHeight;
+
 	std::function<void()> mOnClick;
 	std::function<void()> mOnRelease;
-	const Eigen::Vector2f mPadding;
 
 	SDL_FingerID mCapture;
-
-	const int mWidth, mHeight;
 };
