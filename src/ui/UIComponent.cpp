@@ -1,10 +1,13 @@
 #include "ui/UIComponent.hpp"
 
+#include "third_party/Eigen/Core"
 #include "ui/UIScreen.hpp"
 
 #include <SDL3/SDL.h>
 
-UIComponent::UIComponent(UIScreen* owner) : mOwner(owner) { mOwner->addComponent(this); }
+UIComponent::UIComponent(UIScreen* owner, Eigen::Vector2f position) : mOwner(owner), mPosition(position) {
+	mOwner->addComponent(this);
+}
 
 UIComponent::~UIComponent() { mOwner->removeComponent(this); }
 

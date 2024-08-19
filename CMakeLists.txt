@@ -62,6 +62,7 @@ src/ui/UIScreen.cpp
 
 src/ui/screens/controlUI.cpp
 src/ui/screens/mainUI.cpp
+src/ui/screens/divUI.cpp
 
 src/ui/components/buttonComponent.cpp
 src/ui/components/backgroundComponent.cpp
@@ -106,6 +107,7 @@ include/ui/UIScreen.hpp
 
 include/ui/screens/controlUI.hpp
 include/ui/screens/mainUI.hpp
+include/ui/screens/divUI.hpp
 
 include/ui/components/buttonComponent.hpp
 include/ui/components/backgroundComponent.hpp

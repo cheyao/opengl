@@ -169,6 +169,7 @@ assets
 - [x] Multitouch
 - [x] UI
     - [ ] Divs
+    - [ ] Embed text in buttons
 - [ ] Multithreading
 - [x] TTF
     - [ ] Button auto scale + text

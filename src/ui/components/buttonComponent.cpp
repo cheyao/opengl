@@ -13,7 +13,7 @@
 #include <vector>
 
 ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const Eigen::Vector2f padding)
-	: UIComponent(owner), mPadding(padding), mWidth(texture->getWidth()), mHeight(texture->getHeight()),
+	: UIComponent(owner, padding), mPadding(padding), mWidth(texture->getWidth()), mHeight(texture->getHeight()),
 	  mOnClick(nullptr), mOnRelease(nullptr), mCapture(0) {
 	const std::vector<float> vertices = {
 		0.0f,

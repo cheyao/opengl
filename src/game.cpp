@@ -204,12 +204,25 @@ void Game::update() {
 	}
 	mTicks = SDL_GetTicks();
 
+#ifdef IMGUI
+	ImGui::Begin("Actors");
+	ImGui::Text("The current game state: %d", mPaused);
+#endif
 	if (!mPaused) {
 		// Update the Actors if not paused
 		for (const auto& actor : mActors) {
+#ifdef IMGUI
+			const auto& pos = actor->getPosition();
+			ImGui::Text("Actor: %lx state: %d position: %f %f %f", reinterpret_cast<uintptr_t>(actor),
+				    actor->getState(), pos.x(), pos.y(), pos.z());
+#endif
+
 			actor->update(delta);
 		}
 	}
+#ifdef IMGUI
+	ImGui::End();
+#endif
 
 	// Append the pending actors
 	SDL_LockMutex(mActorMutex);
@@ -220,26 +233,36 @@ void Game::update() {
 	// Remove the dead Actors
 	std::vector<const Actor*> deadActors;
 	std::copy_if(mActors.begin(), mActors.end(), std::back_inserter(deadActors),
-		     [](const Actor* actor) { return (actor->getState() == Actor::DEAD); });
+		     [](const auto* const actor) { return (actor->getState() == Actor::DEAD); });
 
 	// Delete all the dead actors
 	for (const auto& actor : deadActors) {
 		delete actor;
 	}
 
+#ifdef IMGUI
+	ImGui::Begin("UI components");
+#endif
 	for (const auto& ui : mUI) {
+#ifdef IMGUI
+		ImGui::Text("Component: %lx state: %d", reinterpret_cast<uintptr_t>(ui), ui->getState());
+#endif
+
 		if (ui->getState() == UIScreen::ACTIVE) {
 			ui->update(delta);
 		}
 	}
+#ifdef IMGUI
+	ImGui::End();
+#endif
 
-	// Remove the dead Actors
-	std::vector<const UIScreen*> deadUI;
-	std::copy_if(mUI.begin(), mUI.end(), std::back_inserter(deadUI),
-		     [](const UIScreen* actor) { return (actor->getState() == UIScreen::DEAD); });
+	// Remove the dead UIs
+	std::vector<const UIScreen*> deadUIs;
+	std::copy_if(mUI.begin(), mUI.end(), std::back_inserter(deadUIs),
+		     [](const auto* const ui) { return (ui->getState() == UIScreen::DEAD); });
 
 	// Delete all the dead actors
-	for (const auto& ui : deadUI) {
+	for (const auto& ui : deadUIs) {
 		delete ui;
 	}
 }

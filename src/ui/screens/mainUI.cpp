@@ -7,6 +7,7 @@
 #include "ui/components/backgroundComponent.hpp"
 #include "ui/components/buttonComponent.hpp"
 #include "ui/components/textComponent.hpp"
+#include "ui/screens/divUI.hpp"
 #include "utils.hpp"
 
 MainUI::MainUI(class Game* game) : UIScreen(game) {
@@ -15,15 +16,17 @@ MainUI::MainUI(class Game* game) : UIScreen(game) {
 
 	new BackgroundComponent(this, Eigen::Vector3f(1.0f, 0.0f, 0.0f));
 
-	ButtonComponent* start = new ButtonComponent(this, getGame()->getTexture("ui" SEPARATOR "start.png"),
+	DivUI* div = new DivUI(game, this);
+
+	ButtonComponent* start = new ButtonComponent(div, getGame()->getTexture("ui" SEPARATOR "start.png"),
 						     Eigen::Vector2f(CENTER, CENTER));
 
-	start->onClick([this] {
-		this->getGame()->setPause(false);
-		this->getGame()->removeUI(this);
-		this->getGame()->getRenderer()->setWindowRelativeMouseMode(SDL_TRUE);
-		this->mState = UIScreen::DEAD;
+	start->onClick([div] {
+		div->getGame()->setPause(false);
+		// div->getGame()->removeUI(div);
+		div->getGame()->getRenderer()->setWindowRelativeMouseMode(SDL_TRUE);
+		div->setState(UIScreen::DEAD);
 	});
 
-	new TextComponent(this, "start_game", Eigen::Vector2f(CENTER, CENTER));
+	new TextComponent(div, "start_game", Eigen::Vector2f(CENTER, CENTER));
 }

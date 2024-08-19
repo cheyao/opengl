@@ -18,6 +18,7 @@ class UIScreen {
 	class Game* getGame() const { return mGame; }
 
 	void update(const float delta);
+	virtual void updateScreen(const float delta);
 	void processInput(const bool* keys);
 	void draw(const class Shader* shader);
 	void drawText(const class Shader* shader);
@@ -25,8 +26,8 @@ class UIScreen {
 
 	// TODO: Paused
 	enum UIState { ACTIVE, CLOSED, DEAD };
-	void close();
 	UIState getState() const { return mState; }
+	void setState(const UIState state) { mState = state; }
 
 	void addComponent(class UIComponent* component) { mComponents.emplace_back(component); }
 	void removeComponent(class UIComponent* component);

@@ -14,10 +14,14 @@ UIScreen::~UIScreen() {
 }
 
 void UIScreen::update(const float delta) {
+	updateScreen(delta);
+
 	for (const auto& component : mComponents) {
 		component->update(delta);
 	}
 }
+
+void UIScreen::updateScreen([[maybe_unused]] const float delta) {}
 
 void UIScreen::draw(const Shader* shader) {
 	for (const auto& component : mComponents) {
