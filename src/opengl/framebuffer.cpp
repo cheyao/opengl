@@ -24,14 +24,18 @@
 Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScreenTexture(0) {
 	SDL_Log("Framebuffer.cpp: Generating framebuffer");
 
+	assert(glGenFramebuffers != nullptr);
+
 	glGenFramebuffers(1, &mScreen);
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 
 	glGenTextures(1, &mScreenTexture);
 	glBindTexture(GL_TEXTURE_2D, mScreenTexture);
+
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1024, 768, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mScreenTexture, 0);
@@ -56,12 +60,6 @@ Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScr
 		+1.0f, +1.0f, 0.0f, // Top right
 		+1.0f, -1.0f, 0.0f, // Bot right
 	};
-	const static std::vector<float> texPos = {
-		0.0f, 1.0f, // Top left
-		0.0f, 0.0f, // Bot left
-		1.0f, 1.0f, // Top right
-		1.0f, 0.0f, // Bot right
-	};
 	const std::vector<unsigned int> indices = {0, 1, 2, 3, 2, 1};
 	const std::vector<std::pair<Texture* const, TextureType>> textures = {};
 
@@ -71,7 +69,7 @@ Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScr
 
 	glActiveTexture(GL_TEXTURE0);
 
-	mScreenMesh = std::make_unique<Mesh>(pos, std::span<float>(), texPos, indices, textures);
+	mScreenMesh = std::make_unique<Mesh>(pos, std::span<float>(), std::span<float>(), indices, textures);
 }
 
 void Framebuffer::setDemensions(const int width, const int height) {

@@ -5,7 +5,7 @@
 #include <vector>
 
 class Actor {
-  public:
+      public:
 	enum State { ALIVE, PAUSED, DEAD };
 
 	explicit Actor(class Game* game);
@@ -43,11 +43,10 @@ class Actor {
 		return mRotation.toRotationMatrix() * Eigen::Vector3f::UnitZ();
 	}
 
-
 	void addComponent(class Component* component);
 	void removeComponent(class Component* component);
 
-  private:
+      private:
 	State mState;
 
 	Eigen::Vector3f mPosition;

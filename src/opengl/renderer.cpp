@@ -194,19 +194,17 @@ void Renderer::draw() {
 	glClear(GL_DEPTH_BUFFER_BIT);
 #endif
 
-	if (!mGame->isPaused()) {
-		assert(mCamera != nullptr && "Did you forget to uncomment `new Player(this)`?");
+	assert(mCamera != nullptr && "Did you forget to uncomment `new Player(this)`?");
 
-		mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
+	mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
 
-		for (const auto& sprite : mDrawables) {
-			Shader* const shader = sprite->getShader();
-			shader->activate();
-			shader->set("viewPos", mCamera->getOwner()->getPosition());
+	for (const auto& sprite : mDrawables) {
+		Shader* const shader = sprite->getShader();
+		shader->activate();
+		shader->set("viewPos", mCamera->getOwner()->getPosition());
 
-			setLights(shader);
-			sprite->draw();
-		}
+		setLights(shader);
+		sprite->draw();
 	}
 
 	glDisable(GL_DEPTH_TEST);

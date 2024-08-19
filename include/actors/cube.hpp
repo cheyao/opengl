@@ -1,9 +1,10 @@
 #pragma once
 
 #include "actors/actor.hpp"
+#include "components/modelComponent.hpp"
 
 class Cube : public Actor {
-  public:
+      public:
 	explicit Cube(class Game* owner);
 	Cube(Cube&&) = delete;
 	Cube(const Cube&) = delete;
@@ -11,5 +12,8 @@ class Cube : public Actor {
 	Cube& operator=(const Cube&) = delete;
 	~Cube() override = default;
 
-  private:
+	void updateActor([[maybe_unused]] float delta) override;
+
+      private:
+	ModelComponent* mMeteorites;
 };

@@ -340,7 +340,9 @@ SDL_AppResult Game::event(const SDL_Event& event) {
 	ImGui_ImplSDL3_ProcessEvent(&event);
 
 	ImGuiIO& io = ImGui::GetIO();
+	(void) io;
 
+	/*
 	switch (event.type) {
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		case SDL_EVENT_MOUSE_BUTTON_UP:
@@ -376,6 +378,7 @@ SDL_AppResult Game::event(const SDL_Event& event) {
 		default:
 			break;
 	}
+	*/
 #endif
 
 	return mEventManager->manageEvent(event);

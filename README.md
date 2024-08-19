@@ -1,5 +1,9 @@
 # Tiny Game Engine
 
+[See the Project on hackclub.com](https://hackclub.com/arcade/showcase/project/receEPjMZdAepNusN/)
+
+[Web version](https://cheyao.github.io/game)
+
 Hello and welcome to the repo of my tiny game engine.
 
 The resources that I used are:
@@ -154,7 +158,7 @@ assets
 - [x] Game pause + resume things
 - [ ] Save state
 - [ ] Read gpu gems
-- [ ] Debug menu with ImGUI and item names
+- [x] Debug menu with ImGUI and item names
 - [ ] Better component and actors
 - [x] Android build
     - [x] Android controls
@@ -168,8 +172,8 @@ assets
     - [x] Text
 - [x] Multitouch
 - [x] UI
-    - [ ] Divs
-    - [ ] Embed text in buttons
+    - [x] Divs
+    - [x] Embed text in buttons
 - [ ] Multithreading
 - [x] TTF
     - [ ] Button auto scale + text

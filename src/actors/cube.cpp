@@ -9,22 +9,27 @@
 #include <SDL3/SDL.h>
 #include <cstdlib>
 
+#ifdef IMGUI
+#include "imgui.h"
+#endif
+
 Cube::Cube(class Game* owner) : Actor(owner) {
-	constexpr const unsigned int amount = 5000;
+	constexpr const GLuint ammount = 5000;
 	ModelComponent* const meteorites =
 		new ModelComponent(this, this->getGame()->fullPath("models" SEPARATOR "rock.obj"));
+	mMeteorites = meteorites;
 	meteorites->setShaders("cube.vert", "cube.frag");
 	meteorites->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1, std::placeholders::_2,
-					  std::placeholders::_3, std::placeholders::_4, amount));
+					  std::placeholders::_3, std::placeholders::_4, ammount));
 
-	Eigen::Affine3f* modelMatrices = new Eigen::Affine3f[amount];
+	Eigen::Affine3f* modelMatrices = new Eigen::Affine3f[ammount];
 
 	constexpr const float radius = 25.0f;
 	constexpr const float offset = 2.5f;
-	for (unsigned int i = 0; i < amount; ++i) {
+	for (unsigned int i = 0; i < ammount; ++i) {
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();
 
-		const float angle = static_cast<float>(i) / static_cast<float>(amount) * 360.0f;
+		const float angle = static_cast<float>(i) / static_cast<float>(ammount) * 360.0f;
 		Eigen::Vector3f translation;
 
 		float displacement;
@@ -47,7 +52,7 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 	}
 
 	static_assert(sizeof(Eigen::Affine3f) == 4 * sizeof(Eigen::Vector4f), "mat4 = 4 * vec4");
-	meteorites->addAttribArray(amount * sizeof(Eigen::Affine3f), &modelMatrices[0], []() {
+	meteorites->addAttribArray(ammount * sizeof(Eigen::Affine3f), &modelMatrices[0], []() {
 		constexpr size_t vecSize = sizeof(Eigen::Vector4f);
 
 		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vecSize, reinterpret_cast<GLvoid*>(0 * vecSize));
@@ -75,4 +80,17 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 	});
 
 	setScale(0.25);
+}
+
+void Cube::updateActor([[maybe_unused]] float delta) {
+#ifdef IMGUI
+	static int ammount = 5000;
+	
+	ImGui::Begin("Cube");
+	if (ImGui::SliderInt("Ammount", &ammount, 0, 20000)) {
+		mMeteorites->setDrawFunc(std::bind(glDrawElementsInstanced, std::placeholders::_1, std::placeholders::_2,
+						  std::placeholders::_3, std::placeholders::_4, ammount));
+	}
+	ImGui::End();
+#endif
 }
