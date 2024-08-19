@@ -119,10 +119,15 @@ Renderer::Renderer(Game* game)
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_IsSRGB;
 #if defined(__EMSCRIPTEN__) || defined(__ANDROID__)
 	io.IniFilename = nullptr;
 #else
 	// TODO: Storage path
+#endif
+#ifdef __ANDROID__
+	io.ConfigFlags |= ImGuiConfigFlags_IsTouchScreen;
 #endif
 
 	ImGui::StyleColorsDark();

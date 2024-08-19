@@ -7,8 +7,8 @@
 
 class TextComponent : public UIComponent {
       public:
-	explicit TextComponent(class UIScreen* owner, const std::string& id,
-			       Eigen::Vector2f position);
+	explicit TextComponent(class UIScreen* owner, class UIComponent* parent, const std::string& id,
+			       const Eigen::Vector2f offset = Eigen::Vector2f::Zero());
 	TextComponent(TextComponent&&) = delete;
 	TextComponent(const TextComponent&) = delete;
 	TextComponent& operator=(TextComponent&&) = delete;
@@ -19,5 +19,6 @@ class TextComponent : public UIComponent {
 
       private:
 	const std::string mTextID;
-	Eigen::Vector2f mPosition;
+	const class UIComponent* mParent;
+	const Eigen::Vector2f mOffset;
 };

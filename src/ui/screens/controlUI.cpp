@@ -42,7 +42,7 @@ ControlUI::ControlUI(Game* game) : UIScreen(game, "ControlUI") {
 		right->onRelease([game] { game->setKey(SDL_SCANCODE_D, false); });
 	}
 
-	new TextComponent(this, "controls", Eigen::Vector2f(10, -10));
+	new TextComponent(this, nullptr, "controls", Eigen::Vector2f(10, -10));
 }
 
 ControlUI::~ControlUI() {}

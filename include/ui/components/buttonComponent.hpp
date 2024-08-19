@@ -10,7 +10,7 @@ class ButtonComponent : public UIComponent {
       public:
 	// TODO: Resizable padding
 	// TODO: Auto size when with text
-	explicit ButtonComponent(class UIScreen* owner, class Texture* const texture, const Eigen::Vector2f padding);
+	explicit ButtonComponent(class UIScreen* owner, class Texture* const texture, const Eigen::Vector2f position);
 	ButtonComponent(ButtonComponent&&) = delete;
 	ButtonComponent(const ButtonComponent&) = delete;
 	ButtonComponent& operator=(ButtonComponent&&) = delete;
@@ -25,7 +25,6 @@ class ButtonComponent : public UIComponent {
 
       private:
 	class Mesh* mMesh;
-	const Eigen::Vector2f mPadding;
 	const int mWidth, mHeight;
 
 	std::function<void()> mOnClick;

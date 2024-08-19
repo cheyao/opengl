@@ -35,6 +35,6 @@ MainUI::MainUI(class Game* const game) : UIScreen(game, "MainUI") {
 		div->getGame()->quit();
 	});
 
-	new TextComponent(div, "start_game", Eigen::Vector2f(CENTER, CENTER));
-	new TextComponent(div, "quit_game", Eigen::Vector2f(CENTER, 0));
+	new TextComponent(div, quit, "quit_game", Eigen::Vector2f(CENTER, CENTER));
+	new TextComponent(div, start, "start_game", Eigen::Vector2f(CENTER, CENTER));
 }

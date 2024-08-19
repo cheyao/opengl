@@ -13,8 +13,8 @@
 #include <functional>
 #include <vector>
 
-ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const Eigen::Vector2f padding)
-	: UIComponent(owner, padding, "ButtonComponent"), mPadding(padding), mWidth(texture->getWidth()), mHeight(texture->getHeight()),
+ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const Eigen::Vector2f position)
+	: UIComponent(owner, position, "ButtonComponent"), mWidth(texture->getWidth()), mHeight(texture->getHeight()),
 	  mOnClick(nullptr), mOnRelease(nullptr), mCapture(0) {
 	const std::vector<float> vertices = {
 		0.0f,
@@ -62,8 +62,8 @@ void ButtonComponent::draw(const Shader* shader) {
 	shader->activate();
 
 	Eigen::Affine3f model = Eigen::Affine3f::Identity();
-	float x = mPadding.x();
-	float y = mPadding.y();
+	float x = mPosition.x();
+	float y = mPosition.y();
 
 	assert(!std::isnan(x) && !std::isinf(x));
 	assert(!std::isnan(y) && !std::isinf(y));
@@ -92,8 +92,8 @@ void ButtonComponent::draw(const Shader* shader) {
 
 void ButtonComponent::touch(const SDL_FingerID& finger, const float x, const float y, const bool lift) {
 	// TODO: Cleanup code
-	float buttonX = mPadding.x();
-	float buttonY = mPadding.y();
+	float buttonX = mPosition.x();
+	float buttonY = mPosition.y();
 
 	assert(!std::isnan(x) && !std::isinf(x));
 	assert(!std::isnan(y) && !std::isinf(y));
