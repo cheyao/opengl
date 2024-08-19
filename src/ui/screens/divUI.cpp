@@ -20,15 +20,16 @@ void DivUI::updateScreen([[maybe_unused]] const float delta) {
 		size.y() += component->getSize().y();
 	}
 
-	const float yOffset = getGame()->getHeight();
+	float yOffset = (getGame()->getHeight() - size.y()) / 2;
 
 	for (size_t i = 0; i < mComponents.size(); ++i) {
 		Eigen::Vector2f position = Eigen::Vector2f::Zero();
 
 		position.x() = CENTER;
-		position.y() = size.y();
+		position.y() = yOffset;
 
-		mComponents[i]->setPosition();
+		mComponents[i]->setPosition(position);
+
+		yOffset += mComponents[i]->getSize().y();
 	}
 }
-

@@ -14,11 +14,9 @@
 
 // PERF: Optimize with font atlas when using small fonts
 // https://stackoverflow.com/questions/2071621/how-to-do-opengl-live-text-rendering-for-a-gui
-// FIXME: Anti aliasing?
 // FIXME: Lignatures
 // FIXME: Maybe add support for emojis
 // FIXME: Better unicode support
-// FIXME: Some kind of fallback font
 // FIXME: Verical text https://freetype.org/freetype2/docs/tutorial/step2.html
 FontManager::FontManager(const std::string& path, Game* game, const unsigned int size, bool final)
 	: mGame(game), mPath(path + "assets" SEPARATOR "fonts" SEPARATOR), mSize(size), mLibrary(nullptr),

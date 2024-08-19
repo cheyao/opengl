@@ -21,11 +21,20 @@ MainUI::MainUI(class Game* const game) : UIScreen(game, "MainUI") {
 	ButtonComponent* const start = new ButtonComponent(div, getGame()->getTexture("ui" SEPARATOR "start.png"),
 							   Eigen::Vector2f(CENTER, CENTER));
 
+	ButtonComponent* const quit = new ButtonComponent(div, getGame()->getTexture("ui" SEPARATOR "start.png"),
+							   Eigen::Vector2f(CENTER, CENTER));
+
+	// TODO: To on release
 	start->onClick([div] {
 		div->getGame()->setPause(false);
 		div->getGame()->getRenderer()->setWindowRelativeMouseMode(SDL_TRUE);
 		div->setState(UIScreen::DEAD);
 	});
 
+	quit->onClick([div] {
+		div->getGame()->quit();
+	});
+
 	new TextComponent(div, "start_game", Eigen::Vector2f(CENTER, CENTER));
+	new TextComponent(div, "quit_game", Eigen::Vector2f(CENTER, 0));
 }

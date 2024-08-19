@@ -4,8 +4,10 @@
 #include "ui/UIScreen.hpp"
 
 #include <SDL3/SDL.h>
+#include <string_view>
 
-UIComponent::UIComponent(UIScreen* owner, Eigen::Vector2f position) : mOwner(owner), mPosition(position), mSize(Eigen::Vector2f::Zero()) {
+UIComponent::UIComponent(UIScreen* owner, const Eigen::Vector2f position, const std::string_view& name)
+	: mOwner(owner), mName(name), mPosition(position), mSize(Eigen::Vector2f::Zero()) {
 	mOwner->addComponent(this);
 }
 

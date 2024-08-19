@@ -1,6 +1,7 @@
 #include "ui/UIScreen.hpp"
 
 #include "game.hpp"
+#include "imgui.h"
 #include "ui/UIComponent.hpp"
 
 UIScreen::UIScreen(Game* game, const std::string name) : mGame(game), mState(UIScreen::ACTIVE), mName(name) {
@@ -18,9 +19,19 @@ UIScreen::~UIScreen() {
 void UIScreen::update(const float delta) {
 	updateScreen(delta);
 
+#ifdef IMGUI
+	ImGui::Begin("UI Components");
+#endif
 	for (const auto& component : mComponents) {
+#ifdef IMGUI
+		// TODO: Changable stuff (sliders)
+		ImGui::Text("Component: %s position: %f %f", component->getName().data(), component->getPosition().x(), component->getPosition().y());
+#endif
 		component->update(delta);
 	}
+#ifdef IMGUI
+	ImGui::End();
+#endif
 }
 
 void UIScreen::updateScreen([[maybe_unused]] const float delta) {}

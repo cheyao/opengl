@@ -51,12 +51,15 @@ class Game {
 
 	void setKey(const size_t key, const bool val);
 
+	void quit() { mQuit = true; }
+
       private:
+	void setup();
+	
+	void gui();
 	void input();
 	void update();
-	void gui();
 	void draw();
-	void setup();
 
 	std::unique_ptr<class TextureManager> mTextures;
 	std::unique_ptr<class ShaderManager> mShaders;
@@ -77,4 +80,5 @@ class Game {
 	std::string mBasePath;
 
 	bool mPaused;
+	bool mQuit;
 };

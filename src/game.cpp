@@ -35,7 +35,7 @@
 
 Game::Game()
 	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mFontManager(nullptr),
-	  mActorMutex(SDL_CreateMutex()), mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false) {
+	  mActorMutex(SDL_CreateMutex()), mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(false) {
 	if (mActorMutex == nullptr) {
 		SDL_Log("Failed to create actor mutex: %s", SDL_GetError());
 
@@ -151,6 +151,10 @@ int Game::initWorld(void* gameptr) {
 */
 
 SDL_AppResult Game::iterate() {
+	if (mQuit) {
+		return SDL_APP_SUCCESS;
+	}
+
 	gui();
 	input();
 	update();
@@ -180,92 +184,6 @@ SDL_AppResult Game::iterate() {
 #endif
 
 	return SDL_APP_CONTINUE;
-}
-
-void Game::input() {
-	for (const auto& ui : mUI) {
-		ui->processInput(mEventManager->getKeystate());
-	}
-
-	if (!mPaused) {
-		for (const auto& actor : mActors) {
-			actor->input(mEventManager->getKeystate());
-		}
-	}
-}
-
-void Game::update() {
-	// Update the game
-	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
-	if (delta > 0.05f) {
-		delta = 0.05f;
-
-		SDL_Log("Delta > 0.5f, cutting frame short");
-	}
-	mTicks = SDL_GetTicks();
-
-#ifdef IMGUI
-	ImGui::Begin("Actors");
-	ImGui::Text("The current game state: %d", mPaused);
-#endif
-	if (!mPaused) {
-		// Update the Actors if not paused
-		for (const auto& actor : mActors) {
-#ifdef IMGUI
-			const auto& pos = actor->getPosition();
-			ImGui::Text("Actor: %lx state: %d position: %f %f %f", reinterpret_cast<uintptr_t>(actor),
-				    actor->getState(), pos.x(), pos.y(), pos.z());
-#endif
-
-			actor->update(delta);
-		}
-	}
-#ifdef IMGUI
-	ImGui::End();
-#endif
-
-	// Append the pending actors
-	SDL_LockMutex(mActorMutex);
-	std::copy(mPendingActors.begin(), mPendingActors.end(), std::back_inserter(mActors));
-	mPendingActors.clear();
-	SDL_UnlockMutex(mActorMutex);
-
-	// Remove the dead Actors
-	std::vector<const Actor*> deadActors;
-	std::copy_if(mActors.begin(), mActors.end(), std::back_inserter(deadActors),
-		     [](const auto* const actor) { return (actor->getState() == Actor::DEAD); });
-
-	// Delete all the dead actors
-	for (const auto& actor : deadActors) {
-		delete actor;
-	}
-
-#ifdef IMGUI
-	ImGui::Begin("UI components");
-#endif
-	for (const auto& ui : mUI) {
-#ifdef IMGUI
-		ImGui::Text("Component: %s %lx state: %d", ui->getName().data(), reinterpret_cast<uintptr_t>(ui),
-			    ui->getState());
-#endif
-
-		if (ui->getState() == UIScreen::ACTIVE) {
-			ui->update(delta);
-		}
-	}
-#ifdef IMGUI
-	ImGui::End();
-#endif
-
-	// Remove the dead UIs
-	std::vector<const UIScreen*> deadUIs;
-	std::copy_if(mUI.begin(), mUI.end(), std::back_inserter(deadUIs),
-		     [](const auto* const ui) { return (ui->getState() == UIScreen::DEAD); });
-
-	// Delete all the dead uis
-	for (const auto& ui : deadUIs) {
-		delete ui;
-	}
 }
 
 void Game::gui() {
@@ -327,6 +245,92 @@ void Game::gui() {
 		ImGui::ShowDemoWindow(&demo);
 	}
 #endif
+}
+
+void Game::input() {
+	for (const auto& ui : mUI) {
+		ui->processInput(mEventManager->getKeystate());
+	}
+
+	if (!mPaused) {
+		for (const auto& actor : mActors) {
+			actor->input(mEventManager->getKeystate());
+		}
+	}
+}
+
+void Game::update() {
+	// Update the game
+	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
+	if (delta > 0.05f) {
+		delta = 0.05f;
+
+		SDL_Log("Delta > 0.5f, cutting frame short");
+	}
+	mTicks = SDL_GetTicks();
+
+#ifdef IMGUI
+	ImGui::Begin("Actors");
+	ImGui::Text("The current game state: %d", mPaused);
+#endif
+	if (!mPaused) {
+		// Update the Actors if not paused
+		for (const auto& actor : mActors) {
+#ifdef IMGUI
+			const auto& pos = actor->getPosition();
+			ImGui::Text("Actor: %lx state: %d position: %f %f %f", reinterpret_cast<uintptr_t>(actor),
+				    actor->getState(), pos.x(), pos.y(), pos.z());
+#endif
+
+			actor->update(delta);
+		}
+	}
+#ifdef IMGUI
+	ImGui::End();
+#endif
+
+	// Append the pending actors
+	SDL_LockMutex(mActorMutex);
+	std::copy(mPendingActors.begin(), mPendingActors.end(), std::back_inserter(mActors));
+	mPendingActors.clear();
+	SDL_UnlockMutex(mActorMutex);
+
+	// Remove the dead Actors
+	std::vector<const Actor*> deadActors;
+	std::copy_if(mActors.begin(), mActors.end(), std::back_inserter(deadActors),
+		     [](const auto* const actor) { return (actor->getState() == Actor::DEAD); });
+
+	// Delete all the dead actors
+	for (const auto& actor : deadActors) {
+		delete actor;
+	}
+
+#ifdef IMGUI
+	ImGui::Begin("UIs");
+#endif
+	for (const auto& ui : mUI) {
+#ifdef IMGUI
+		ImGui::Text("UI: %s %lx state: %d", ui->getName().data(), reinterpret_cast<uintptr_t>(ui),
+			    ui->getState());
+#endif
+
+		if (ui->getState() == UIScreen::ACTIVE) {
+			ui->update(delta);
+		}
+	}
+#ifdef IMGUI
+	ImGui::End();
+#endif
+
+	// Remove the dead UIs
+	std::vector<const UIScreen*> deadUIs;
+	std::copy_if(mUI.begin(), mUI.end(), std::back_inserter(deadUIs),
+		     [](const auto* const ui) { return (ui->getState() == UIScreen::DEAD); });
+
+	// Delete all the dead uis
+	for (const auto& ui : deadUIs) {
+		delete ui;
+	}
 }
 
 void Game::draw() { mRenderer->draw(); }
