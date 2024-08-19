@@ -25,7 +25,7 @@ class Texture {
 	int getHeight() const { return mHeight; };
 
       protected:
-	virtual void load();
+	virtual void load(const bool srgb);
 
 	GLuint mID;
 	std::string name;

@@ -83,12 +83,12 @@ void Framebuffer::setDemensions(const int width, const int height) {
 }
 
 void Framebuffer::swap() {
-#ifndef GLES
 	GLint mode[2];
-	glGetIntegerv(GL_POLYGON_MODE, mode);
+	if (glPolygonMode != nullptr) {
+		glGetIntegerv(GL_POLYGON_MODE, mode);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-#endif
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -116,9 +116,9 @@ void Framebuffer::swap() {
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 	glEnable(GL_DEPTH_TEST);
 
-#ifndef GLES
-	glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
-#endif
+	if (glPolygonMode != nullptr) {
+		glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
+	}
 }
 
 Framebuffer::~Framebuffer() {

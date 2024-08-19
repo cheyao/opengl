@@ -165,9 +165,10 @@ assets
 - [ ] Windows build
 - [x] Pause menu etc
     - [ ] Settings
-    - [ ] Text
-- [ ] Multitouch
+    - [x] Text
+- [x] Multitouch
 - [x] UI
+    - [ ] Divs
 - [ ] Multithreading
 - [x] TTF
     - [ ] Button auto scale + text

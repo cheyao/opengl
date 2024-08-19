@@ -33,7 +33,7 @@ class Game {
 
 	void setUIScale(const float scale) { mUIScale = scale; }
 
-	[[nodiscard]] class Texture* getTexture(const std::string& name);
+	[[nodiscard]] class Texture* getTexture(const std::string& name, const bool srgb = false);
 	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
 					      const std::string& geom = "");
 	[[nodiscard]] class Renderer* getRenderer() const { return mRenderer; }

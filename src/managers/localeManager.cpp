@@ -14,10 +14,12 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 	std::string locList = "";
 	for (int i = 0; i < c; ++i) {
 		locList += loc[i]->language;
+
 		if (loc[i]->language != 0) {
 			locList += '-';
 			locList += loc[i]->country;
 		}
+
 		locList += ' ';
 	}
 
@@ -26,7 +28,7 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 	for (int i = 0; i < c; ++i) {
 		std::string l;
 		l += loc[i]->language;
-		if (loc[i]->language != 0) {
+		if (loc[i]->country != 0) {
 			l += '-';
 			l += loc[i]->country;
 		}
@@ -50,11 +52,11 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 		return;
 	}
 
+	SDL_free(loc);
+
 	mLocale = "en-US";
 	SDL_Log("\x1B[31mLocaleManager.cpp: Failed to find valid locale! Falling back to english.\033[0m");
 	loadLocale();
-
-	SDL_free(loc);
 }
 
 #if defined(__clang__)

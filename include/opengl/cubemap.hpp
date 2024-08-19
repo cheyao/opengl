@@ -7,7 +7,7 @@
 #include <string_view>
 
 class Cubemap : public Texture {
-  public:
+      public:
 	explicit Cubemap(const std::string_view& path);
 	Cubemap(Cubemap&&) = delete;
 	Cubemap(const Cubemap&) = delete;
@@ -16,8 +16,8 @@ class Cubemap : public Texture {
 	~Cubemap() = default;
 
 	void activate(const unsigned int& num) const override;
-	void load() override;
+	void load(const bool srgb) override;
 
-  private:
-	void loadface(const std::string& face, const unsigned int& i);
+      private:
+	void loadface(const std::string& face, const unsigned int i, const bool srgb);
 };

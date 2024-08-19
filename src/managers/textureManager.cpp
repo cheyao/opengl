@@ -12,7 +12,7 @@ TextureManager::TextureManager(const std::string& path) : mPath(path + "assets" 
 	stbi_set_flip_vertically_on_load(true);
 }
 
-Texture* TextureManager::get(const std::string& name) {
+Texture* TextureManager::get(const std::string& name, const bool srgb) {
 	if (mTextures.contains(name)) {
 		return mTextures.at(name);
 	}
@@ -27,7 +27,7 @@ Texture* TextureManager::get(const std::string& name) {
 	} else {
 		texture = new Texture(mPath + name);
 	}
-	texture->load();
+	texture->load(srgb);
 
 	mTextures[name] = texture;
 

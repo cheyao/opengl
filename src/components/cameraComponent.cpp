@@ -17,12 +17,12 @@ CameraComponent::CameraComponent(Actor* owner, int priority)
 	Eigen::AngleAxisf rot(toRadians(90), Eigen::Vector3f::UnitY());
 	mOwner->setRotation(dir * rot);
 
-	project(); // NOTE: Order important
+	project(); // NOTE: Order important, the game will set the matrix when we set the camera
 
 	mOwner->getGame()->getRenderer()->setCamera(this);
 };
 
-void CameraComponent::update(float delta) {
+void CameraComponent::update([[maybe_unused]] float delta) {
 	float x = 0;
 	float y = 0;
 	SDL_GetRelativeMouseState(&x, &y);
@@ -33,8 +33,6 @@ void CameraComponent::update(float delta) {
 	mOwner->setRotation(dir * rot * yaw);
 
 	view();
-
-	(void)delta;
 }
 
 void CameraComponent::view() {
@@ -51,11 +49,10 @@ void CameraComponent::view() {
 void CameraComponent::project() {
 	constexpr const float near = 0.1f;
 	constexpr const float far = 100.0f;
-	const float aspect =
-		static_cast<float>(mOwner->getGame()->getWidth()) / mOwner->getGame()->getHeight();
-	float theta = mFOV * 0.5;
+	const float aspect = static_cast<float>(mOwner->getGame()->getWidth()) / mOwner->getGame()->getHeight();
+	const float theta = mFOV * 0.5;
 	constexpr const float range = far - near;
-	float invtan = 1.0f / tan(theta);
+	const float invtan = 1.0f / tan(theta);
 
 	// https://www.songho.ca/opengl/gl_projectionmatrix.html
 	mProjectionMatrix(0, 0) = invtan / aspect;

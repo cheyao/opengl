@@ -18,6 +18,7 @@
 
 #include <SDL3/SDL.h>
 #include <algorithm>
+#include <cstdint>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -286,12 +287,13 @@ void Game::gui() {
 			SDL_GL_SetSwapInterval(static_cast<int>(vsync));
 		}
 
-#ifndef GLES
-		// GLES doesn't have polygon mode
-		if (ImGui::Checkbox("Wireframe", &wireframe)) {
-			glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+		if (glPolygonMode != nullptr) {
+			// GLES doesn't have polygon mode
+			if (ImGui::Checkbox("Wireframe", &wireframe)) {
+				glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+			}
 		}
-#endif
+
 		ImGui::Checkbox("Demo", &demo);
 
 		ImGui::End();
@@ -379,7 +381,7 @@ void Game::removeUI(UIScreen* ui) {
 	}
 }
 
-Texture* Game::getTexture(const std::string& name) { return mTextures->get(name); }
+Texture* Game::getTexture(const std::string& name, const bool srgb) { return mTextures->get(name, srgb); }
 
 Shader* Game::getShader(const std::string& vert, const std::string& frag, const std::string& geom) {
 	return mShaders->get(vert, frag, geom);

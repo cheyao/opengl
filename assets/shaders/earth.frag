@@ -44,6 +44,7 @@ vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
 	float distance = length(light.position - fragPos);
 	float attenuation = 1.0 / (light.constant + light.linear * distance + 
 						light.quadratic * (distance * distance));
+	// float attenuation = 1.0 / (distance * distance);
 
 	vec3 ambient = light.ambient * vec3(0.0f, 0.411764705882f, 0.580392156863f);
 	vec3 diffuse = light.diffuse * diff * vec3(0.0f, 0.411764705882f, 0.580392156863f);

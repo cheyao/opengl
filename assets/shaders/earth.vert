@@ -13,7 +13,8 @@ layout(std140) uniform Matrices {
 uniform mat4 model;
 
 void main() {
-	vNormal = normalize(mat3(transpose(inverse(model))) * aNormal);
+	// vNormal = normalize(mat3(transpose(inverse(model))) * aNormal);
+	vNormal =aNormal;
 	vFragPos = vec3(model * vec4(aPos, 1.0f));
 	gl_Position = proj * view * vec4(vFragPos, 1.0f);
 }

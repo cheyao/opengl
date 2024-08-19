@@ -117,7 +117,7 @@ std::vector<Texture*> ModelComponent::loadTextures(const aiMaterial* mat, const 
 
 		mat->GetTexture(type, i, &str);
 
-		textures.emplace_back(mOwner->getGame()->getTexture(str.C_Str()));
+		textures.emplace_back(mOwner->getGame()->getTexture(str.C_Str(), type == aiTextureType_DIFFUSE));
 	}
 
 	return textures;

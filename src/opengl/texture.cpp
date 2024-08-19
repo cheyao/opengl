@@ -55,7 +55,7 @@ void Texture::activate(const unsigned int& num) const {
 }
 
 // NOTE: Maybe load on demand?
-void Texture::load() {
+void Texture::load(const bool srgb) {
 	SDL_Log("Loading texture %s", name.data());
 
 	size_t size = 0;
@@ -80,12 +80,15 @@ void Texture::load() {
 	}
 
 	GLenum format = GL_RGB;
+	GLenum intFormat = GL_SRGB;
 	switch (channels) {
 		case 3:
 			format = GL_RGB;
+			intFormat = GL_SRGB;
 			break;
 		case 4:
 			format = GL_RGBA;
+			intFormat = GL_SRGB_ALPHA;
 			break;
 		[[unlikely]] default:
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s:%d Unimplemented image format: %s: %d\n",
@@ -100,7 +103,7 @@ void Texture::load() {
 	glBindTexture(GL_TEXTURE_2D, mID);
 
 	assert(mWidth > 0 && mHeight > 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, format, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, srgb ? intFormat : format, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

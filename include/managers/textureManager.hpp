@@ -12,7 +12,7 @@ class TextureManager {
 	TextureManager& operator=(const TextureManager&) = delete;
 	~TextureManager();
 
-	class Texture* get(const std::string& name);
+	class Texture* get(const std::string& name, const bool srgb);
 
 	void reload();
 

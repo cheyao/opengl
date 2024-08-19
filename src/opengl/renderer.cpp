@@ -237,6 +237,8 @@ void Renderer::reload() const {
 }
 
 void Renderer::setCamera(class CameraComponent* camera) {
+	assert(camera != nullptr && "Forgot to init camera?");
+
 	mCamera = camera;
 
 	// The projection matrix never gets updated except when the camera is set
@@ -341,10 +343,10 @@ void Renderer::setUIMatrix() const {
 	ortho(1, 3) = -(top + bottom) / (top - bottom);
 	ortho(2, 3) = -(far + near) / (far - near);
 
-	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
+	const Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
 	UIshader->activate();
 	UIshader->set("proj", ortho);
-	Shader* const textshader = mGame->getShader("text.vert", "text.frag");
+	const Shader* const textshader = mGame->getShader("text.vert", "text.frag");
 	textshader->activate();
 	textshader->set("proj", ortho);
 }
@@ -383,6 +385,7 @@ void Renderer::setDisplayScale() const {
 		io.Fonts->AddFontFromFileTTF(mGame->fullPath("fonts" SEPARATOR "NotoSans.ttf").data(), 16.0f * scale);
 	IM_ASSERT(font != NULL);
 
-	// ImGuiStyle::ScaleAllSizes(scale);
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.ScaleAllSizes(scale);
 #endif
 }

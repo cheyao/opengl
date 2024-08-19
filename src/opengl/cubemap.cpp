@@ -15,7 +15,7 @@ void Cubemap::activate(const unsigned int& num) const {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, mID);
 }
 
-void Cubemap::load() {
+void Cubemap::load(const bool srgb) {
 	SDL_Log("Loading cubemap %s", name.data());
 
 	glGenTextures(1, &mID);
@@ -24,7 +24,7 @@ void Cubemap::load() {
 	const std::vector faces = {"right.png", "left.png", "top.png", "bottom.png", "front.png", "back.png"};
 
 	for (unsigned int i = 0; i < faces.size(); i++) {
-		loadface(faces[i], i);
+		loadface(faces[i], i, srgb);
 	}
 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -36,7 +36,7 @@ void Cubemap::load() {
 	SDL_Log("Loaded cubemap %s", name.data());
 }
 
-void Cubemap::loadface(const std::string& face, const unsigned int& i) {
+void Cubemap::loadface(const std::string& face, const unsigned int i, const bool srgb) {
 	size_t size = 0;
 	unsigned char* source = static_cast<unsigned char*>(SDL_LoadFile((name + face).data(), &size));
 	[[unlikely]] if (source == nullptr) {
@@ -63,13 +63,16 @@ void Cubemap::loadface(const std::string& face, const unsigned int& i) {
 	}
 
 	GLenum format = GL_RGB;
+	GLenum intFormat = GL_SRGB;
 	switch (channels) {
 		// TODO: Gray scale
 		case 3:
 			format = GL_RGB;
+			intFormat = GL_SRGB;
 			break;
 		case 4:
 			format = GL_RGBA;
+			intFormat = GL_SRGB_ALPHA;
 			break;
 		[[unlikely]] default:
 			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s:%d Unimplemented image format: %s\n", __FILE__,
@@ -80,7 +83,7 @@ void Cubemap::loadface(const std::string& face, const unsigned int& i) {
 			throw std::runtime_error("cubemap.cpp: Invalid enum");
 	}
 
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, srgb ? intFormat : format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
 	stbi_image_free(data);
 }

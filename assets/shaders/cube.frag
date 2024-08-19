@@ -42,6 +42,7 @@ void main() {
 	float distance = length(lightDir);
 	float attenuation = 1.0 / (pointLight.constant + pointLight.linear * distance + 
 						pointLight.quadratic * (distance * distance));
+	// float attenuation = 1.0 / (distance * distance);
 
 	vec3 ambient = pointLight.ambient * vec3(texture(texture_diffuse0, vTexPos)) * attenuation;
 	vec3 diffuse = pointLight.diffuse * diff * vec3(texture(texture_diffuse0, vTexPos)) * attenuation;
