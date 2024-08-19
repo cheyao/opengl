@@ -8,7 +8,7 @@
 // NOTE: Component order matters!
 class UIScreen {
       public:
-	explicit UIScreen(class Game* game);
+	explicit UIScreen(class Game* game, const std::string name);
 	UIScreen(UIScreen&&) = delete;
 	UIScreen(const UIScreen&) = delete;
 	UIScreen& operator=(UIScreen&&) = delete;
@@ -29,6 +29,8 @@ class UIScreen {
 	UIState getState() const { return mState; }
 	void setState(const UIState state) { mState = state; }
 
+	const std::string& getName() const { return mName; }
+
 	void addComponent(class UIComponent* component) { mComponents.emplace_back(component); }
 	void removeComponent(class UIComponent* component);
 
@@ -38,4 +40,7 @@ class UIScreen {
 	std::vector<class UIComponent*> mComponents;
 
 	UIState mState;
+
+      private:
+	const std::string mName;
 };

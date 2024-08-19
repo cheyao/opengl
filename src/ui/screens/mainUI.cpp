@@ -10,20 +10,19 @@
 #include "ui/screens/divUI.hpp"
 #include "utils.hpp"
 
-MainUI::MainUI(class Game* game) : UIScreen(game) {
+MainUI::MainUI(class Game* const game) : UIScreen(game, "MainUI") {
 	game->setPause(true);
 	game->getRenderer()->setWindowRelativeMouseMode(SDL_FALSE);
 
 	new BackgroundComponent(this, Eigen::Vector3f(1.0f, 0.0f, 0.0f));
 
-	DivUI* div = new DivUI(game, this);
+	DivUI* const div = new DivUI(game, this);
 
-	ButtonComponent* start = new ButtonComponent(div, getGame()->getTexture("ui" SEPARATOR "start.png"),
-						     Eigen::Vector2f(CENTER, CENTER));
+	ButtonComponent* const start = new ButtonComponent(div, getGame()->getTexture("ui" SEPARATOR "start.png"),
+							   Eigen::Vector2f(CENTER, CENTER));
 
 	start->onClick([div] {
 		div->getGame()->setPause(false);
-		// div->getGame()->removeUI(div);
 		div->getGame()->getRenderer()->setWindowRelativeMouseMode(SDL_TRUE);
 		div->setState(UIScreen::DEAD);
 	});

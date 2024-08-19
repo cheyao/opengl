@@ -10,7 +10,7 @@
 
 // TODO: Size change
 TextComponent::TextComponent(class UIScreen* owner, const std::string& id, Eigen::Vector2f position)
-	: UIComponent(owner), mTextID(id), mPosition(position) {}
+	: UIComponent(owner, position), mTextID(id), mPosition(position) {}
 
 #if defined(__clang__)
 #pragma clang diagnostic push

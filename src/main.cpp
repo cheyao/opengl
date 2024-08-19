@@ -14,13 +14,13 @@
 #include <stdexcept>
 
 // The main class is in charge of sdl
-int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
+SDL_AppResult SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 	SDL_Log("Initializing cyao engine v3.0\n");
 
 	std::srand(std::time(nullptr));
 
 	SDL_SetAppMetadata("Cyao", "1.0", "com.cyao.opengl");
-	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, "OpengGL Game Engine");
+	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, "Cyao's opengl Game Engine");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_URL_STRING, "https://github.com/cheyao/opengl");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_TYPE_STRING, "game");
 
@@ -31,7 +31,7 @@ int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] cha
 #endif
 
 	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
-	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0"); // Translated in-engine
+	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0"); // Translated in-engine (See eventManager.cpp)
 	SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "0");
@@ -46,7 +46,7 @@ int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] cha
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD) != 0) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to init SDL: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to initialize SDL, there is something wrong with your system");
-		return 1;
+		return SDL_APP_FAILURE;
 	}
 
 	try {
@@ -54,27 +54,31 @@ int SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] cha
 	} catch (const std::runtime_error& error) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Main.cpp: Critical error: %s\n", error.what());
 
-		return 1;
+		return SDL_APP_FAILURE;
 	} catch (...) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Main.cpp: Uncaught error\n");
 
-		return 1;
+		return SDL_APP_FAILURE;
 	}
 
-	return 0;
+	return SDL_APP_CONTINUE;
 }
 
-int SDL_AppEvent(void* appstate, const SDL_Event* event) {
+SDL_AppResult SDL_AppEvent(void* appstate, const SDL_Event* event) {
+	assert(appstate != nullptr);
+
 	try {
 		return static_cast<Game*>(appstate)->event(*event);
 	} catch (...) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Main.cpp: Uncaught event error\n");
 
-		return 1;
+		return SDL_APP_FAILURE;
 	}
 }
 
-int SDL_AppIterate(void* appstate) {
+SDL_AppResult SDL_AppIterate(void* appstate) {
+	assert(appstate != nullptr);
+
 	try {
 		return static_cast<Game*>(appstate)->iterate();
 	} catch (const std::runtime_error& error) {
@@ -84,15 +88,17 @@ int SDL_AppIterate(void* appstate) {
 		static_cast<Game*>(appstate)->setPause(true);
 #endif
 
-		return 0;
+		return SDL_APP_CONTINUE;
 	} catch (...) {
 		SDL_Log("Main.cpp: Uncaught exception of unknown type");
 
-		return 0;
+		return SDL_APP_CONTINUE;
 	}
 }
 
 void SDL_AppQuit(void* appstate) {
+	assert(appstate != nullptr);
+
 	delete static_cast<Game*>(appstate);
 
 	SDL_Quit();

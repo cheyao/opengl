@@ -4,7 +4,7 @@
 
 class DivUI : public UIScreen {
       public:
-	explicit DivUI(class Game* owner, class UIScreen* parent);
+	explicit DivUI(class Game* game, class UIScreen* parent);
 	DivUI(DivUI&&) = delete;
 	DivUI(const DivUI&) = delete;
 	DivUI& operator=(DivUI&&) = delete;

@@ -19,8 +19,8 @@ class Game {
 	Game& operator=(const Game&) = delete;
 	~Game();
 
-	[[nodiscard]] int iterate();
-	[[nodiscard]] int event(const union SDL_Event& event);
+	[[nodiscard]] SDL_AppResult iterate();
+	[[nodiscard]] SDL_AppResult event(const union SDL_Event& event);
 
 	void addActor(class Actor* actor);
 	void removeActor(class Actor* actor);

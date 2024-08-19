@@ -17,22 +17,20 @@ EventManager::EventManager(class Game* game) : mGame(game) {
 
 EventManager::~EventManager() { delete[] mKeys; }
 
-int EventManager::manageEvent(const SDL_Event& event) {
+SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 	// NOTE: Returns in switch!
 	switch (event.type) {
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 		case SDL_EVENT_QUIT: {
-			// TODO: SDL_EVENT_LOW_MEMORY
-			return 1;
-
-			break;
+			return SDL_APP_SUCCESS;
 		}
 
 			// TODO: SDL_EVENT_LOW_MEMORY
 
 		case SDL_EVENT_KEY_DOWN: {
-			if (manageKeyboardEvent(event) != 0) {
-				return 1;
+			if (manageKeyboardEvent(event) != SDL_APP_CONTINUE) {
+				// FIXME: SDL_APP_SUCCESS
+				return SDL_APP_FAILURE;
 			}
 
 			mKeys[event.key.scancode] = true;
@@ -98,10 +96,10 @@ int EventManager::manageEvent(const SDL_Event& event) {
 			break;
 	}
 
-	return 0;
+	return SDL_APP_CONTINUE;
 }
 
-int EventManager::manageKeyboardEvent(const SDL_Event& event) {
+SDL_AppResult EventManager::manageKeyboardEvent(const SDL_Event& event) {
 	static bool rel = true;
 
 	switch (event.key.key) {
@@ -151,5 +149,5 @@ int EventManager::manageKeyboardEvent(const SDL_Event& event) {
 			break;
 	}
 
-	return 0;
+	return SDL_APP_CONTINUE;
 }

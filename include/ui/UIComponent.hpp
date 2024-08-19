@@ -4,6 +4,8 @@
 
 #include <SDL3/SDL.h>
 
+#define CENTER std::numeric_limits<float>::max()
+
 class UIComponent {
       public:
 	explicit UIComponent(class UIScreen* owner, Eigen::Vector2f position);
@@ -20,10 +22,14 @@ class UIComponent {
 	virtual void touch(const SDL_FingerID& finger, const float x, const float y, const bool lift);
 
 	Eigen::Vector2f getPosition() const { return mPosition; };
-	void setPosition(Eigen::Vector2f pos) { mPosition = pos; }
+	void setPosition(const Eigen::Vector2f pos) { mPosition = pos; }
+
+	Eigen::Vector2f getSize() const { return mSize; }
+	void setSize(const Eigen::Vector2f size) { mSize = size; }
 
       protected:
 	class UIScreen* mOwner;
 
 	Eigen::Vector2f mPosition;
+	Eigen::Vector2f mSize;
 };

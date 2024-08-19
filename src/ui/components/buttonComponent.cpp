@@ -3,6 +3,7 @@
 #include "game.hpp"
 #include "opengl/mesh.hpp"
 #include "opengl/texture.hpp"
+#include "third_party/Eigen/Core"
 #include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
 #include "ui/UIComponent.hpp"
@@ -46,7 +47,7 @@ ButtonComponent::ButtonComponent(UIScreen* owner, Texture* const texture, const 
 ButtonComponent::~ButtonComponent() { delete mMesh; }
 
 // This is usually not a good practice, but trust me, I need it
-// I defined a magic number for center, so I must comare to it
+// I defined a magic number for center, so I must use == to compare
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wfloat-equal"
@@ -56,6 +57,8 @@ ButtonComponent::~ButtonComponent() { delete mMesh; }
 #endif
 
 void ButtonComponent::draw(const Shader* shader) {
+	mSize = Eigen::Vector2f(mWidth * mOwner->getGame()->getScale(), mHeight * mOwner->getGame()->getScale());
+
 	shader->activate();
 
 	Eigen::Affine3f model = Eigen::Affine3f::Identity();
@@ -115,7 +118,7 @@ void ButtonComponent::touch(const SDL_FingerID& finger, const float x, const flo
 
 	if ((buttonX <= x && x < (buttonX + mWidth * mOwner->getGame()->getScale())) &&
 	    (buttonY <= y && y < (buttonY + mHeight * mOwner->getGame()->getScale()))) {
-		if (!lift) {
+		if (lift == false) {
 			if (mOnClick != nullptr) {
 				mOnClick();
 			}

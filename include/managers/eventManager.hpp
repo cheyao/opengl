@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SDL3/SDL.h>
 #include <cstddef>
 
 class EventManager {
@@ -11,14 +12,14 @@ class EventManager {
 	EventManager& operator=(const EventManager&) = delete;
 	~EventManager();
 
-	[[nodiscard]] int manageEvent(const union SDL_Event& event);
+	[[nodiscard]] SDL_AppResult manageEvent(const union SDL_Event& event);
 
 	[[nodiscard]] bool* getKeystate() { return mKeys; };
 
 	void setKey(const size_t key, const bool val) { mKeys[key] = val; }
 
       private:
-	[[nodiscard]] int manageKeyboardEvent(const union SDL_Event& event);
+	[[nodiscard]] SDL_AppResult manageKeyboardEvent(const union SDL_Event& event);
 
 	class Game* mGame;
 

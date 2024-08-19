@@ -3,7 +3,9 @@
 #include "game.hpp"
 #include "ui/UIComponent.hpp"
 
-UIScreen::UIScreen(Game* game) : mGame(game), mState(UIScreen::ACTIVE) { game->addUI(this); }
+UIScreen::UIScreen(Game* game, const std::string name) : mGame(game), mState(UIScreen::ACTIVE), mName(name) {
+	game->addUI(this);
+}
 
 UIScreen::~UIScreen() {
 	mGame->removeUI(this);

@@ -5,7 +5,7 @@
 
 #include <SDL3/SDL.h>
 
-UIComponent::UIComponent(UIScreen* owner, Eigen::Vector2f position) : mOwner(owner), mPosition(position) {
+UIComponent::UIComponent(UIScreen* owner, Eigen::Vector2f position) : mOwner(owner), mPosition(position), mSize(Eigen::Vector2f::Zero()) {
 	mOwner->addComponent(this);
 }
 
@@ -16,6 +16,7 @@ void UIComponent::update([[maybe_unused]] const float delta) {}
 void UIComponent::input([[maybe_unused]] const bool* keystate) {}
 
 void UIComponent::draw([[maybe_unused]] const Shader* shader) {}
+
 void UIComponent::drawText([[maybe_unused]] const Shader* shader) {}
 
 void UIComponent::touch([[maybe_unused]] const SDL_FingerID& finger, [[maybe_unused]] const float x,

@@ -8,7 +8,7 @@
 
 #include <SDL3/SDL.h>
 
-ControlUI::ControlUI(Game* game) : UIScreen(game) {
+ControlUI::ControlUI(Game* game) : UIScreen(game, "ControlUI") {
 #ifdef __EMSCRIPTEN__
 	if (false) {
 #elif defined(__ANDROID__)

@@ -6,7 +6,7 @@
 #include "ui/UIScreen.hpp"
 
 BackgroundComponent::BackgroundComponent(class UIScreen* owner, const Eigen::Vector3f color)
-	: UIComponent(owner), mColor(color) {}
+	: UIComponent(owner, Eigen::Vector2f::Zero()), mColor(color) {}
 
 // PERF: Stop cleaning when multiple backgrounds
 void BackgroundComponent::draw([[maybe_unused]] const class Shader* shader) {

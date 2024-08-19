@@ -150,14 +150,14 @@ int Game::initWorld(void* gameptr) {
 }
 */
 
-int Game::iterate() {
+SDL_AppResult Game::iterate() {
 	gui();
 	input();
 	update();
 	draw();
 
 #ifdef DEBUG
-	GLenum err;
+	GLenum err = 0;
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		switch (err) {
 			case GL_INVALID_ENUM:
@@ -179,7 +179,7 @@ int Game::iterate() {
 	}
 #endif
 
-	return 0;
+	return SDL_APP_CONTINUE;
 }
 
 void Game::input() {
@@ -245,7 +245,8 @@ void Game::update() {
 #endif
 	for (const auto& ui : mUI) {
 #ifdef IMGUI
-		ImGui::Text("Component: %lx state: %d", reinterpret_cast<uintptr_t>(ui), ui->getState());
+		ImGui::Text("Component: %s %lx state: %d", ui->getName().data(), reinterpret_cast<uintptr_t>(ui),
+			    ui->getState());
 #endif
 
 		if (ui->getState() == UIScreen::ACTIVE) {
@@ -261,7 +262,7 @@ void Game::update() {
 	std::copy_if(mUI.begin(), mUI.end(), std::back_inserter(deadUIs),
 		     [](const auto* const ui) { return (ui->getState() == UIScreen::DEAD); });
 
-	// Delete all the dead actors
+	// Delete all the dead uis
 	for (const auto& ui : deadUIs) {
 		delete ui;
 	}
@@ -330,7 +331,7 @@ void Game::gui() {
 
 void Game::draw() { mRenderer->draw(); }
 
-int Game::event(const SDL_Event& event) {
+SDL_AppResult Game::event(const SDL_Event& event) {
 #ifdef IMGUI
 	ImGui_ImplSDL3_ProcessEvent(&event);
 
@@ -342,14 +343,14 @@ int Game::event(const SDL_Event& event) {
 		case SDL_EVENT_MOUSE_MOTION:
 		case SDL_EVENT_MOUSE_WHEEL:
 			if (io.WantCaptureMouse) {
-				return 0;
+				return SDL_APP_CONTINUE;
 			}
 
 			break;
 
 		case SDL_EVENT_TEXT_INPUT:
 			if (io.WantTextInput) {
-				return 0;
+				return SDL_APP_CONTINUE;
 			}
 
 			break;
@@ -363,7 +364,7 @@ int Game::event(const SDL_Event& event) {
 		case SDL_EVENT_GAMEPAD_ADDED:
 		case SDL_EVENT_GAMEPAD_REMOVED:
 			if (io.WantCaptureKeyboard) {
-				return 0;
+				return SDL_APP_CONTINUE;
 			}
 
 			break;

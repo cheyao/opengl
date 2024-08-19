@@ -6,8 +6,6 @@
 #include <functional>
 #include <SDL3/SDL.h>
 
-#define CENTER std::numeric_limits<float>::max()
-
 class ButtonComponent : public UIComponent {
       public:
 	// TODO: Resizable padding

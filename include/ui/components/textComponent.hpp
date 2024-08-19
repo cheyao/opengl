@@ -5,8 +5,6 @@
 
 #include <string>
 
-#define CENTER std::numeric_limits<float>::max()
-
 class TextComponent : public UIComponent {
       public:
 	explicit TextComponent(class UIScreen* owner, const std::string& id,
