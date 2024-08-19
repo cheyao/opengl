@@ -15,7 +15,7 @@ class TextComponent : public UIComponent {
 	TextComponent& operator=(const TextComponent&) = delete;
 	~TextComponent() = default;
 
-	void drawText([[maybe_unused]] const class Shader* shader) override;
+	void drawText([[maybe_unused]] class Shader* shader) override;
 
       private:
 	const std::string mTextID;

@@ -35,7 +35,7 @@ class Renderer {
 
       private:
 	void setLights(class Shader* shader) const;
-	void setUIMatrix() const;
+	void setUIMatrix();
 
 	class Game* mGame;
 

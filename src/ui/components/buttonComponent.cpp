@@ -56,7 +56,7 @@ ButtonComponent::~ButtonComponent() { delete mMesh; }
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #endif
 
-void ButtonComponent::draw(const Shader* shader) {
+void ButtonComponent::draw(Shader* shader) {
 	mSize = Eigen::Vector2f(mWidth * mOwner->getGame()->getScale(), mHeight * mOwner->getGame()->getScale());
 
 	shader->activate();

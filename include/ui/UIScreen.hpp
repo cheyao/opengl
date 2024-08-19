@@ -20,8 +20,8 @@ class UIScreen {
 	void update(const float delta);
 	virtual void updateScreen(const float delta);
 	void processInput(const bool* keys);
-	void draw(const class Shader* shader);
-	void drawText(const class Shader* shader);
+	void draw(class Shader* shader);
+	void drawText(class Shader* shader);
 	void touch(const SDL_FingerID& finger, const float x, const float y, const bool lift);
 
 	// TODO: Paused

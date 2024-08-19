@@ -68,7 +68,7 @@ Cube::Cube(class Game* owner) : Actor(owner) {
 
 	delete[] modelMatrices;
 
-	meteorites->addUniform([](const Shader* shader) {
+	meteorites->addUniform([](Shader* shader) {
 		const float time = static_cast<float>(SDL_GetTicks()) / 1000.0f;
 
 		shader->set("rotation", Eigen::Affine3f(Eigen::AngleAxisf(time / 3, Eigen::Vector3f::UnitY())));

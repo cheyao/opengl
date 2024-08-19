@@ -12,7 +12,8 @@
 #include <unordered_map>
 
 Shader::Shader(const std::string_view& vertName, const std::string_view& fragName, const std::string_view& geomName)
-	: mShaderProgram(glCreateProgram()) {
+	: mName(std::string(vertName) + ":" + std::string(fragName) + ":" + std::string(geomName)),
+	  mShaderProgram(glCreateProgram()) {
 	GLuint mVertexShader = compile(vertName, GL_VERTEX_SHADER);
 	assert(glIsShader(mVertexShader) && "Shader.cpp: Vert shader not loaded correctly");
 
@@ -81,76 +82,72 @@ Shader::~Shader() { glDeleteProgram(mShaderProgram); }
 
 void Shader::activate() const { glUseProgram(mShaderProgram); }
 
-void Shader::setUniform(const std::string_view& name, std::function<void(GLint)> toCall) const {
+void Shader::setUniform(const std::string& name, std::function<void(GLint)> toCall) {
 	// Safety checks
 #ifdef __cpp_lib_string_contains
 	assert(!name.contains(' '));
 #endif
 	assert(!(name[0] == 'g' && name[1] == 'l' && name[2] == '_'));
 
-	int location = glGetUniformLocation(mShaderProgram, name.data());
+	if (!mPositions.contains(name)) {
+		mPositions[name] = glGetUniformLocation(mShaderProgram, name.data());
 
-	static std::unordered_map<std::string, bool> errored;
+		if (mPositions[name] == -1) {
+			SDL_Log("Shader.cpp: Failed find uniform location \"%s\" for shader %s\n", name.data(),
+				mName.data());
 
-	[[unlikely]] if (location == -1) {
-#ifdef DEBUG
-#ifdef __cpp_lib_string_contains
-		if (!errored.contains(std::string(name))) {
-			SDL_Log("Shader.cpp: Failed find uniform location \"%s\"\n", name.data());
-
-			errored[std::string(name)] = true;
+			return;
 		}
-		// TODO: Error?
-#endif
-#endif
+	}
+
+	if (mPositions[name] == -1) {
 		return;
 	}
 
-	toCall(location);
+	toCall(mPositions[name]);
 }
 
-void Shader::set(const std::string_view& name, const GLboolean val) const {
+void Shader::set(const std::string& name, const GLboolean val) {
 	setUniform(name, std::bind(glUniform1i, std::placeholders::_1, static_cast<GLint>(val)));
 }
-void Shader::set(const std::string_view& name, const GLint val) const {
+void Shader::set(const std::string& name, const GLint val) {
 	setUniform(name, std::bind(glUniform1i, std::placeholders::_1, val));
 }
-void Shader::set(const std::string_view& name, const GLuint val) const {
+void Shader::set(const std::string& name, const GLuint val) {
 	setUniform(name, std::bind(glUniform1ui, std::placeholders::_1, val));
 }
-void Shader::set(const std::string_view& name, const GLfloat val) const {
+void Shader::set(const std::string& name, const GLfloat val) {
 	setUniform(name, std::bind(glUniform1f, std::placeholders::_1, val));
 }
-void Shader::set(const std::string_view& name, const GLdouble val) const {
+void Shader::set(const std::string& name, const GLdouble val) {
 	setUniform(name, std::bind(glUniform1f, std::placeholders::_1, static_cast<GLfloat>(val)));
 }
-void Shader::set(const std::string_view& name, const GLfloat val, const GLfloat val2) const {
+void Shader::set(const std::string& name, const GLfloat val, const GLfloat val2) {
 	setUniform(name, std::bind(glUniform2f, std::placeholders::_1, val, val2));
 }
-void Shader::set(const std::string_view& name, const GLfloat val, const GLfloat val2, const GLfloat val3) const {
+void Shader::set(const std::string& name, const GLfloat val, const GLfloat val2, const GLfloat val3) {
 	setUniform(name, std::bind(glUniform3f, std::placeholders::_1, val, val2, val3));
 }
-void Shader::set(const std::string_view& name, const Eigen::Vector2f val) const {
+void Shader::set(const std::string& name, const Eigen::Vector2f val) {
 	setUniform(name, std::bind(glUniform2f, std::placeholders::_1, val.x(), val.y()));
 }
-void Shader::set(const std::string_view& name, const Eigen::Vector3f val) const {
+void Shader::set(const std::string& name, const Eigen::Vector3f val) {
 	setUniform(name, std::bind(glUniform3f, std::placeholders::_1, val.x(), val.y(), val.z()));
 }
-void Shader::set(const std::string_view& name, const Eigen::Vector3f val, const GLfloat val2) const {
+void Shader::set(const std::string& name, const Eigen::Vector3f val, const GLfloat val2) {
 	setUniform(name, std::bind(glUniform4f, std::placeholders::_1, val.x(), val.y(), val.z(), val2));
 }
-void Shader::set(const std::string_view& name, const Eigen::Vector4f val) const {
+void Shader::set(const std::string& name, const Eigen::Vector4f val) {
 	setUniform(name, std::bind(glUniform4f, std::placeholders::_1, val.x(), val.y(), val.z(), val.w()));
 }
-void Shader::set(const std::string_view& name, const Eigen::Affine3f& mat, const GLboolean transpose) const {
+void Shader::set(const std::string& name, const Eigen::Affine3f& mat, const GLboolean transpose) {
 	setUniform(name, std::bind(glUniformMatrix4fv, std::placeholders::_1, 1, transpose, mat.data()));
 }
 
-void Shader::bind(std::string_view name, GLuint index) const {
-	GLuint blockIndex = glGetUniformBlockIndex(mShaderProgram, name.data());
+void Shader::bind(const std::string_view& name, const GLuint index) const {
+	const GLuint blockIndex = glGetUniformBlockIndex(mShaderProgram, name.data());
 
 	if (blockIndex == GL_INVALID_INDEX) {
-		// TODO: Warn once
 		SDL_Log("Shader.cpp: Invalid block: %s", name.data());
 
 		return;

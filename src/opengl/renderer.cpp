@@ -328,7 +328,7 @@ void Renderer::setWindowRelativeMouseMode(SDL_bool mode) const {
 	}
 }
 
-void Renderer::setUIMatrix() const {
+void Renderer::setUIMatrix() {
 	Eigen::Affine3f ortho = Eigen::Affine3f::Identity();
 
 	constexpr const static float left = 0.0f;
@@ -348,10 +348,11 @@ void Renderer::setUIMatrix() const {
 	ortho(1, 3) = -(top + bottom) / (top - bottom);
 	ortho(2, 3) = -(far + near) / (far - near);
 
-	const Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
+	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
 	UIshader->activate();
 	UIshader->set("proj", ortho);
-	const Shader* const textshader = mGame->getShader("text.vert", "text.frag");
+
+	Shader* const textshader = mGame->getShader("text.vert", "text.frag");
 	textshader->activate();
 	textshader->set("proj", ortho);
 }

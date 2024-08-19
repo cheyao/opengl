@@ -21,7 +21,7 @@ class ModelComponent : public DrawComponent {
 
 	void setDrawFunc(const std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)>& func);
 	void addTexture(std::pair<class Texture*, TextureType> texture);
-	void addUniform(const std::function<void(const class Shader* shader)> func);
+	void addUniform(const std::function<void(class Shader* shader)> func);
 
 	void addAttribArray(const GLsizeiptr size, const GLvoid* const data, const std::function<void()>& bind);
 	void addAttribArray(const GLuint VBO, const std::function<void()>& bind);

@@ -182,7 +182,7 @@ void FontManager::setFontSize(const unsigned int size) {
 	mGlyphMap.clear();
 }
 
-void FontManager::drawGlyph(const char32_t character, const Shader* shader, const Eigen::Vector2f offset) {
+void FontManager::drawGlyph(const char32_t character, Shader* shader, const Eigen::Vector2f offset) {
 	if (!mGlyphMap.contains(character)) {
 		// TODO: try catch and sub char
 		mGlyphMap[character] = loadGlyph(character);

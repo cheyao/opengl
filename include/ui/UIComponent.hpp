@@ -19,8 +19,8 @@ class UIComponent {
 
 	virtual void update([[maybe_unused]] const float delta);
 	virtual void input([[maybe_unused]] const bool* keystate);
-	virtual void draw([[maybe_unused]] const class Shader* shader);
-	virtual void drawText([[maybe_unused]] const class Shader* shader);
+	virtual void draw([[maybe_unused]] class Shader* shader);
+	virtual void drawText([[maybe_unused]] class Shader* shader);
 	virtual void touch(const SDL_FingerID& finger, const float x, const float y, const bool lift);
 
 	[[nodiscard]] Eigen::Vector2f getPosition() const { return mPosition; };

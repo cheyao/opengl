@@ -17,7 +17,7 @@ void DivUI::updateScreen([[maybe_unused]] const float delta) {
 
 	for (const auto& component : mComponents) {
 		size.x() += std::max(size.x(), component->getSize().x());
-		size.y() += component->getSize().y();
+		size.y() += component->getSize().y() + 10;
 	}
 
 	float yOffset = (getGame()->getHeight() - size.y()) / 2;
@@ -30,6 +30,6 @@ void DivUI::updateScreen([[maybe_unused]] const float delta) {
 
 		mComponents[i]->setPosition(position);
 
-		yOffset += mComponents[i]->getSize().y();
+		yOffset += mComponents[i]->getSize().y() + 10;
 	}
 }

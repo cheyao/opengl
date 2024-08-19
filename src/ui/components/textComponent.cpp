@@ -32,7 +32,7 @@ TextComponent::TextComponent(class UIScreen* owner, class UIComponent* parent, c
 
 // FIXME: Newlines
 // TODO: Scaling
-void TextComponent::drawText([[maybe_unused]] const Shader* shader) {
+void TextComponent::drawText([[maybe_unused]] Shader* shader) {
 	FontManager* manager = mOwner->getGame()->getFontManager();
 	Eigen::Vector2f offset = mOffset;
 

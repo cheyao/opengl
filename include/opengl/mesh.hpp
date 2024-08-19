@@ -26,7 +26,7 @@ class Mesh {
 	Mesh& operator=(const Mesh&) = delete;
 	~Mesh();
 
-	void draw(const class Shader* shader) const;
+	void draw(class Shader* shader);
 
 	size_t indices() const { return mIndicesCount; }
 
@@ -37,7 +37,7 @@ class Mesh {
 	setDrawFunc(const std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)>& func) {
 		mDrawFunc = func;
 	}
-	void addUniform(const std::function<void(const class Shader* shader)> func) {
+	void addUniform(const std::function<void(class Shader* shader)> func) {
 		mUniformFuncs.emplace_back(func);
 	};
 	void addAttribArray(const GLsizeiptr size, const GLvoid* const data, const std::function<void()>& bind);
@@ -52,7 +52,7 @@ class Mesh {
 	std::vector<std::pair<class Texture* const, TextureType>> mTextures;
 
 	std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)> mDrawFunc;
-	std::vector<std::function<void(const Shader* shader)>> mUniformFuncs;
+	std::vector<std::function<void(Shader* shader)>> mUniformFuncs;
 
 	std::vector<GLuint> mAttribs;
 };

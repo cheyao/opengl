@@ -36,13 +36,13 @@ void UIScreen::update(const float delta) {
 
 void UIScreen::updateScreen([[maybe_unused]] const float delta) {}
 
-void UIScreen::draw(const Shader* shader) {
+void UIScreen::draw(Shader* shader) {
 	for (const auto& component : mComponents) {
 		component->draw(shader);
 	}
 }
 
-void UIScreen::drawText(const Shader* shader) {
+void UIScreen::drawText(Shader* shader) {
 	for (const auto& component : mComponents) {
 		component->drawText(shader);
 	}

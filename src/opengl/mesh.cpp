@@ -182,7 +182,7 @@ void Mesh::addAttribArray(const GLuint VBO, const std::function<void()>& bind) {
 	mAttribs.emplace_back(VBO);
 }
 
-void Mesh::draw(const Shader* shader) const {
+void Mesh::draw(Shader* shader) {
 	unsigned int diffuse = 0;
 	unsigned int specular = 0;
 	unsigned int height = 0;
@@ -217,7 +217,7 @@ void Mesh::draw(const Shader* shader) const {
 		mTextures[i].first->activate(i);
 	}
 
-	for (const std::function<void(const Shader*)>& func : mUniformFuncs) {
+	for (const std::function<void(Shader*)>& func : mUniformFuncs) {
 		func(shader);
 	}
 

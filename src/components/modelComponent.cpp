@@ -152,7 +152,7 @@ void ModelComponent::setDrawFunc(
 	}
 }
 
-void ModelComponent::addUniform(const std::function<void(const Shader* shader)> func) {
+void ModelComponent::addUniform(const std::function<void(Shader* shader)> func) {
 	for (const auto& mesh : mMeshes) {
 		mesh->addUniform(func);
 	}
