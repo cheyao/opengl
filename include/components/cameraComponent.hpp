@@ -4,8 +4,8 @@
 #include "third_party/Eigen/Geometry"
 
 class CameraComponent : public Component {
-  public:
-	explicit CameraComponent(class Actor* owner, int priority = 200);
+      public:
+	explicit CameraComponent(class Actor* owner, bool ortho = false, int priority = 200);
 	CameraComponent(CameraComponent&&) = delete;
 	CameraComponent(const CameraComponent&) = delete;
 	CameraComponent& operator=(CameraComponent&&) = delete;
@@ -16,15 +16,26 @@ class CameraComponent : public Component {
 
 	void setFOV(float fov) { mFOV = fov; }
 
+	class Actor* getOwner() { return mOwner; }
+
+	Eigen::Affine3f getViewMatrix() {
+		view();
+		return mViewMatrix;
+	};
+	Eigen::Affine3f getProjectionMatrix() {
+		project();
+		return mProjectionMatrix;
+	};
+
+      private:
 	void project();
 	void view();
 
-	class Actor* getOwner() { return mOwner; }
+	void ortho();
+	void persp();
 
-	Eigen::Affine3f getViewMatrix() { return mViewMatrix; };
-	Eigen::Affine3f getProjectionMatrix() { return mProjectionMatrix; };
+	bool mOrtho;
 
-  private:
 	float mFOV;
 
 	Eigen::Affine3f mViewMatrix;

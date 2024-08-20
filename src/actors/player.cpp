@@ -7,7 +7,7 @@
 #include <SDL3/SDL.h>
 
 Player::Player(class Game* owner) : Actor(owner), up(0) {
-	new CameraComponent(this);
+	new CameraComponent(this, true);
 	mMoveComp = new MovementComponent(this);
 
 	setPosition(Eigen::Vector3f(0.0f, 6.0f, 10.0f));

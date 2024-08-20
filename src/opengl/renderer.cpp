@@ -180,7 +180,6 @@ void Renderer::setDemensions(int width, int height) {
 	glViewport(0, 0, w, h);
 	mFramebuffer->setDemensions(w, h);
 
-	mCamera->project();
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
 
 	setUIMatrix();

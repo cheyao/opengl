@@ -17,7 +17,7 @@ class ShaderManager {
 	void reload();
 
   private:
-	std::unordered_map<std::string, class Shader*> mTextures;
+	std::unordered_map<std::string, class Shader*> mShaders;
 
 	std::string mPath;
 };

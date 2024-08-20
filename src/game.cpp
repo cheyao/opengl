@@ -119,9 +119,9 @@ void Game::setup() {
 
 	SDL_Log("Setting up game");
 
-	new World(this);
-	new Cube(this);
-	new Sun(this);
+	// new World(this);
+	// new Cube(this);
+	// new Sun(this);
 	new Player(this);
 
 	SDL_Log("Successfully initialized Game World");
@@ -192,9 +192,7 @@ void Game::gui() {
 	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
 
-#ifndef GLES
 	static bool wireframe = false;
-#endif
 	static bool vsync = true;
 	static bool demo = false;
 
@@ -204,7 +202,7 @@ void Game::gui() {
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::Text("%.3f ms %.1f FPS", (1000.f / io.Framerate), io.Framerate);
 
-		const char* locales[] = {"en", "fr", "zh-CN"};
+		const char* locales[] = {"en", "fr", "zh-CN", "es"};
 		static int current = 0;
 		if (ImGui::Combo("language", &current, locales, IM_ARRAYSIZE(locales))) {
 			mLocaleManager->changeLocale(locales[current]);
