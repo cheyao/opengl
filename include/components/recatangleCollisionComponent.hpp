@@ -12,6 +12,8 @@ class RectangleCollisionComponent : public CollisionComponent {
 	RectangleCollisionComponent& operator=(const RectangleCollisionComponent&) = delete;
 	~RectangleCollisionComponent() = default;
 
+	Eigen::Vector2f getSize() const { return mSize; }
+
       private:
 	Eigen::Vector2f mSize;
 };

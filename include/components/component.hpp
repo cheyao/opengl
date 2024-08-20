@@ -11,6 +11,8 @@ class Component {
 
 	virtual void update([[maybe_unused]] float delta);
 	virtual void input([[maybe_unused]] const bool* keystate);
+	
+	class Actor* getOwner() const { return mOwner; }
 
 	int getUpdatePriority() const { return mUpdatePriority; }
 

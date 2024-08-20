@@ -1,7 +1,9 @@
 #include "managers/physicsManager.hpp"
 
+#include "actors/actor.hpp"
 #include "components/collisionComponent.hpp"
 #include "components/recatangleCollisionComponent.hpp"
+#include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
 
@@ -52,9 +54,14 @@ void PhysicsManager::collide() {
 	}
 }
 
+// TODO: https://noonat.github.io/intersect/#aabb-vs-swept-aabb
 bool PhysicsManager::collideRectRect(class RectangleCollisionComponent* a, class RectangleCollisionComponent* b) {
-	return false;
-	// TODO: do the checks
-	(void)a;
-	(void)b;
+	Eigen::Vector2f aa = a->getOwner()->getPosition().cast<Eigen::Vector2f>();
+	Eigen::Vector2f ba = b->getOwner()->getPosition().cast<Eigen::Vector2f>();
+	Eigen::Vector2f ab = aa + a->getSize();
+	Eigen::Vector2f bb = ba + a->getSize();
+
+	bool no = ab.x() < ba.x() || ab.y() < ba.y() || bb.x() < aa.x() || bb.y() < aa.y();
+
+	return !no;
 }
