@@ -8,8 +8,6 @@
 #include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
 
-#include <iostream>
-
 Sprite2DComponent::Sprite2DComponent(Actor* owner, Texture* texture, int drawOrder)
 	: DrawComponent(owner, drawOrder) {
 	const float vertices[] = {
@@ -37,7 +35,7 @@ void Sprite2DComponent::draw() {
 
 	model.scale(mOwner->getScale());
 	model.translate(mOwner->getPosition());
-	std::cout << model.matrix() << std::endl;
+	// FIXME: Rotation
 	// model.rotate(mOwner->getRotation());
 
 	this->getShader()->set("model", model);

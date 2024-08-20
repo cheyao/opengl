@@ -1,7 +1,7 @@
 #pragma once
 
 class Component {
-  public:
+      public:
 	explicit Component(class Actor* owner, int priority = 100);
 	Component(Component&&) = delete;
 	Component(const Component&) = delete;
@@ -14,8 +14,7 @@ class Component {
 
 	int getUpdatePriority() const { return mUpdatePriority; }
 
-  protected:
+      protected:
 	class Actor* mOwner;
-
-	int mUpdatePriority;
+	const int mUpdatePriority;
 };

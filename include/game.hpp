@@ -39,6 +39,7 @@ class Game {
 	[[nodiscard]] class Renderer* getRenderer() const { return mRenderer; }
 	[[nodiscard]] class FontManager* getFontManager() const { return mFontManager; }
 	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager; }
+	[[nodiscard]] class PhysicsManager* getPhysicsManager() const  { return mPhysicsManager; }
 
 	[[nodiscard]] inline std::string fullPath(const std::string& path) const {
 		return (mBasePath + "assets" SEPARATOR + path);
@@ -64,10 +65,11 @@ class Game {
 	std::unique_ptr<class TextureManager> mTextures;
 	std::unique_ptr<class ShaderManager> mShaders;
 	std::unique_ptr<class EventManager> mEventManager;
-
+	
 	class Renderer* mRenderer;
 	class FontManager* mFontManager;
 	class LocaleManager* mLocaleManager;
+	class PhysicsManager* mPhysicsManager;
 
 	std::vector<class Actor*> mActors;
 	std::vector<class Actor*> mPendingActors;

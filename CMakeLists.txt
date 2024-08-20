@@ -37,6 +37,7 @@ src/components/movementComponent.cpp
 src/components/inputComponent.cpp
 src/components/sprite2DComponent.cpp
 src/components/physicsComponent.cpp
+src/components/collisionComponent.cpp
 
 src/opengl/cubemap.cpp
 src/opengl/mesh.cpp
@@ -53,6 +54,7 @@ src/managers/eventManager.cpp
 src/managers/IOManager.cpp
 src/managers/fontManager.cpp
 src/managers/localeManager.cpp
+src/managers/physicsManager.cpp
 
 src/actors/actor.cpp
 src/actors/player.cpp
@@ -84,6 +86,7 @@ include/components/movementComponent.hpp
 include/components/inputComponent.hpp
 include/components/sprite2DComponent.hpp
 include/components/physicsComponent.hpp
+include/components/collisionComponent.hpp
 
 include/opengl/cubemap.hpp
 include/opengl/mesh.hpp
@@ -101,6 +104,7 @@ include/managers/eventManager.hpp
 include/managers/localeManager.hpp
 include/managers/IOManager.hpp
 include/managers/fontManager.hpp
+include/managers/physicsManager.hpp
 
 include/actors/actor.hpp
 include/actors/player.hpp

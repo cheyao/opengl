@@ -8,6 +8,7 @@
 #include "managers/eventManager.hpp"
 #include "managers/fontManager.hpp"
 #include "managers/localeManager.hpp"
+#include "managers/physicsManager.hpp"
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
 #include "opengl/renderer.hpp"
@@ -71,7 +72,8 @@ Game::Game()
 	mFontManager->loadFont("NotoSans.ttf");
 
 	mLocaleManager = new LocaleManager(mBasePath);
-	// mFontManager->loadFont("NotoSansCJK.ttc");
+	
+	mPhysicsManager = new PhysicsManager();
 
 	// TODO: Icon
 	/*

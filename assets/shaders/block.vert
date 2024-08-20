@@ -12,6 +12,6 @@ layout(std140) uniform Matrices {
 uniform mat4 model;
 
 void main() {
-	gl_Position = proj * view * model * vec4(aPos, 1.0f);
+	gl_Position = proj * model * vec4(aPos, 1.0f);
 	vTexPos = aTexPos;
 }
