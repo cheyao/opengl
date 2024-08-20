@@ -1,20 +1,17 @@
 #include "actors/player.hpp"
 
 #include "components/cameraComponent.hpp"
-#include "components/movementComponent.hpp"
+#include "components/inputComponent.hpp"
+#include "components/sprite2DComponent.hpp"
 #include "game.hpp"
 
 #include <SDL3/SDL.h>
 
-Player::Player(class Game* owner) : Actor(owner), up(0) {
+Player::Player(class Game* game) : Actor(game) {
 	new CameraComponent(this, true);
-	mMoveComp = new MovementComponent(this);
 
-	setPosition(Eigen::Vector3f(0.0f, 6.0f, 10.0f));
-}
+	InputComponent* component = new InputComponent(this);
+	component->addCalback(SDL_SCANCODE_UP, [this] { this->setPosition(Eigen::Vector3f(1.0f, 1.0f, 1.0f)); });
 
-void Player::actorInput(const bool* keystate) {
-}
-
-void Player::updateActor(float delta) {
+	/*Sprite2DComponent* spriteComponent = */ new Sprite2DComponent(this, getGame()->getTexture("stone.png"));
 }

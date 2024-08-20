@@ -200,7 +200,7 @@ void Renderer::draw() {
 	for (const auto& sprite : mDrawables) {
 		Shader* const shader = sprite->getShader();
 		shader->activate();
-		shader->set("viewPos", mCamera->getOwner()->getPosition());
+		// shader->set("viewPos", mCamera->getOwner()->getPosition());
 
 		setLights(shader);
 		sprite->draw();
@@ -269,54 +269,7 @@ void Renderer::removeSprite(DrawComponent* sprite) {
 
 void Renderer::setLights(Shader* shader) const {
 	// TODO: Concat all these
-
-	// shader->set("dirLight.direction", -0.2f, -1.0f, -0.3f);
-	// shader->set("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-	// shader->set("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
-	// shader->set("dirLight.specular", 0.5f, 0.5f, 0.5f);
-
-	/*
-#ifdef __cpp_lib_ranges_enumerate
-	// Duh libc++ doesn't support enumerate
-	for (const auto& [place, value] : std::views::enumerate(mPointLights)) {
-#else
-	for (size_t place = 0; place < mPointLights.size(); ++place) {
-		const auto& value = mPointLights[place];
-#endif
-
-		std::string num = "pointLights[";
-		num.append(std::to_string(place));
-
-		constexpr float a = 0.7f;
-		constexpr float d = 2.8f;
-		constexpr float s = 1.0f;
-
-		shader->set(num + "].position", value->getPosition());
-		shader->set(num + "].ambient", a, a, a);
-		shader->set(num + "].diffuse", d, d, d);
-		shader->set(num + "].specular", s, s, s);
-		shader->set(num + "].constant", constant);
-		shader->set(num + "].linear", linear);
-		shader->set(num + "].quadratic", quadratic);
-	}
-	*/
-	const auto& value = mPointLights[0];
-
-	constexpr static const float a = 0.7f;
-	constexpr static const float d = 2.8f;
-	constexpr static const float s = 1.0f;
-	constexpr static const float constant = 1.0f;
-	constexpr static const float linear = 0.05f;
-	constexpr static const float quadratic = 0.032f;
-
-	// PERF: Only set once - redunant setters
-	shader->set("pointLight.position", value->getPosition());
-	shader->set("pointLight.ambient", a, a, a * 0.7);
-	shader->set("pointLight.diffuse", d, d, d * 0.7);
-	shader->set("pointLight.specular", s, s, s * 0.7);
-	shader->set("pointLight.constant", constant);
-	shader->set("pointLight.linear", linear);
-	shader->set("pointLight.quadratic", quadratic);
+	(void)shader;
 }
 
 void Renderer::setWindowRelativeMouseMode(SDL_bool mode) const {
@@ -355,6 +308,7 @@ void Renderer::setUIMatrix() {
 }
 
 [[nodiscard]] Eigen::Vector2f Renderer::getDPI() const {
+	/*
 	int winx, winy;
 	SDL_GetWindowSizeInPixels(mWindow, &winx, &winy);
 	float scale = SDL_GetWindowDisplayScale(mWindow);
@@ -364,6 +318,7 @@ void Renderer::setUIMatrix() {
 
 		scale = 1.0f;
 	}
+	*/
 
 	return Eigen::Vector2f::Zero();
 }
