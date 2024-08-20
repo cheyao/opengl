@@ -160,6 +160,7 @@ SDL_AppResult Game::iterate() {
 	gui();
 	input();
 	update();
+	mPhysicsManager->collide();
 	draw();
 
 #ifdef DEBUG

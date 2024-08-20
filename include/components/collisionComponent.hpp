@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components/component.hpp"
+#include <functional>
 
 class CollisionComponent : public Component {
       public:
@@ -11,10 +12,14 @@ class CollisionComponent : public Component {
 	CollisionComponent& operator=(const CollisionComponent&) = delete;
 	~CollisionComponent() override = default;
 
-	virtual void onColide(class CollisionComponent* that) = 0;
+	virtual void collide(class CollisionComponent* that) { mOnCollide(that); }
+
+	void onCollide(std::function<void(class CollisionComponent* that)> func) { mOnCollide = func; }
 
 	int getCollisionPriority() { return mCollisionPriority; }
 
       private:
 	const int mCollisionPriority;
+
+	std::function<void(class CollisionComponent* that)> mOnCollide;
 };

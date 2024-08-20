@@ -11,8 +11,12 @@ class PhysicsManager {
 	PhysicsManager& operator=(const PhysicsManager&) = delete;
 	~PhysicsManager() = default;
 
+	void collide();
 	void addCollisionComponent(class CollisionComponent* component);
 
       private:
+	// Collision tests
+	bool collideRectRect(class RectangleCollisionComponent* a, class RectangleCollisionComponent* b);
+
 	std::vector<class CollisionComponent*> mCollisionComponents;
 };

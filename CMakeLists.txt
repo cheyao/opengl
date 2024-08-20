@@ -38,6 +38,7 @@ src/components/inputComponent.cpp
 src/components/sprite2DComponent.cpp
 src/components/physicsComponent.cpp
 src/components/collisionComponent.cpp
+src/components/rectangleCollisionComponent.cpp
 
 src/opengl/cubemap.cpp
 src/opengl/mesh.cpp
@@ -87,6 +88,7 @@ include/components/inputComponent.hpp
 include/components/sprite2DComponent.hpp
 include/components/physicsComponent.hpp
 include/components/collisionComponent.hpp
+include/components/rectangleCollisionComponent.hpp
 
 include/opengl/cubemap.hpp
 include/opengl/mesh.hpp
