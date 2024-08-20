@@ -76,12 +76,13 @@ void CameraComponent::persp() {
 void CameraComponent::ortho() {
 	constexpr const static float left = 0.0f;
 	constexpr const static float bottom = 0.0f;
-	constexpr const static float near = 0.1f;
-	constexpr const static float far = 100.0f;
+	constexpr const static float near = 0.0f;
+	constexpr const static float far = 1000.0f;
 
 	const float right = static_cast<float>(mOwner->getGame()->getWidth());
 	const float top = static_cast<float>(mOwner->getGame()->getHeight());
 
+	mProjectionMatrix = Eigen::Affine3f::Identity();
 	mProjectionMatrix(0, 0) = 2.0f / (right - left);
 	mProjectionMatrix(1, 1) = 2.0f / (top - bottom);
 	mProjectionMatrix(2, 2) = -2.0f / (far - near);

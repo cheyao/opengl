@@ -273,9 +273,12 @@ void Renderer::setLights(Shader* shader) const {
 }
 
 void Renderer::setWindowRelativeMouseMode(SDL_bool mode) const {
+	(void) mode;
+	/*
 	if (SDL_SetWindowRelativeMouseMode(mWindow, mode) != 0) {
 		SDL_Log("Failed to set relative mouse mode: %s", SDL_GetError());
 	}
+	*/
 }
 
 void Renderer::setUIMatrix() {

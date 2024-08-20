@@ -5,7 +5,10 @@
 #include "opengl/mesh.hpp"
 #include "opengl/texture.hpp"
 #include "opengl/types.hpp"
+#include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
+
+#include <iostream>
 
 Sprite2DComponent::Sprite2DComponent(Actor* owner, Texture* texture, int drawOrder)
 	: DrawComponent(owner, drawOrder) {
@@ -30,5 +33,14 @@ Sprite2DComponent::Sprite2DComponent(Actor* owner, Texture* texture, int drawOrd
 }
 
 void Sprite2DComponent::draw() {
+	Eigen::Affine3f model = Eigen::Affine3f::Identity();
+
+	model.scale(mOwner->getScale());
+	model.translate(mOwner->getPosition());
+	std::cout << model.matrix() << std::endl;
+	// model.rotate(mOwner->getRotation());
+
+	this->getShader()->set("model", model);
+
 	mMesh->draw(this->getShader());
 }

@@ -14,6 +14,5 @@ class Sprite2DComponent : public DrawComponent {
 	void draw() override;
 
       private:
-	class Texture* mTexture;
 	class Mesh* mMesh;
 };

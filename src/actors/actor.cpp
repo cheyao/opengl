@@ -4,7 +4,6 @@
 #include "game.hpp"
 
 #include <algorithm>
-#include <cstdint>
 
 Actor::Actor(Game* game)
 	: mState(ALIVE), mPosition(Eigen::Vector3f::Zero()), mRotation(Eigen::Quaternionf::Identity()), mScale(1.0f),

@@ -36,6 +36,7 @@ src/components/modelComponent.cpp
 src/components/movementComponent.cpp
 src/components/inputComponent.cpp
 src/components/sprite2DComponent.cpp
+src/components/physicsComponent.cpp
 
 src/opengl/cubemap.cpp
 src/opengl/mesh.cpp
@@ -82,6 +83,7 @@ include/components/modelComponent.hpp
 include/components/movementComponent.hpp
 include/components/inputComponent.hpp
 include/components/sprite2DComponent.hpp
+include/components/physicsComponent.hpp
 
 include/opengl/cubemap.hpp
 include/opengl/mesh.hpp
