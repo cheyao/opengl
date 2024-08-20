@@ -34,6 +34,7 @@ src/components/drawComponent.cpp
 src/components/meshComponent.cpp
 src/components/modelComponent.cpp
 src/components/movementComponent.cpp
+src/components/inputComponent.cpp
 
 src/opengl/cubemap.cpp
 src/opengl/mesh.cpp
@@ -78,6 +79,7 @@ include/components/drawComponent.hpp
 include/components/meshComponent.hpp
 include/components/modelComponent.hpp
 include/components/movementComponent.hpp
+include/components/inputComponent.hpp
 
 include/opengl/cubemap.hpp
 include/opengl/mesh.hpp
