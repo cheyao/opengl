@@ -1,8 +1,5 @@
 #include "systems/renderSystem.hpp"
 
-#include "actors/actor.hpp"
-#include "components/cameraComponent.hpp"
-#include "components/drawComponent.hpp"
 #include "game.hpp"
 #include "managers/glManager.hpp"
 #include "opengl/framebuffer.hpp"
@@ -10,7 +7,6 @@
 #include "opengl/ubo.hpp"
 #include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
-#include "ui/UIScreen.hpp"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
@@ -273,7 +269,7 @@ void RenderSystem::setLights(Shader* shader) const {
 }
 
 void RenderSystem::setWindowRelativeMouseMode(SDL_bool mode) const {
-	(void) mode;
+	(void)mode;
 	/*
 	if (SDL_SetWindowRelativeMouseMode(mWindow, mode) != 0) {
 		SDL_Log("Failed to set relative mouse mode: %s", SDL_GetError());

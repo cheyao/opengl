@@ -1,5 +1,6 @@
 #pragma once
 
+#include "systems/system.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
 
@@ -9,7 +10,7 @@
 #include <unordered_map>
 #include <wchar.h>
 
-class TextSystem {
+class TextSystem : public System {
       public:
 	explicit TextSystem(const std::string& path, class Game* game, const unsigned int size = 48,
 			    bool final = false);
@@ -22,10 +23,9 @@ class TextSystem {
 	void loadFont(const std::string& name);
 	// Size in 1/64 of a pixel
 	void setFontSize(const unsigned int size);
-	void drawGlyph(const char32_t character, class Shader* shader, const Eigen::Vector2f offset);
 
-	[[nodiscard]] Eigen::Vector2f getOffset(const char32_t character);
-	[[nodiscard]] Eigen::Vector2f getSize(const char32_t character);
+	// [[nodiscard]] Eigen::Vector2f getOffset(const char32_t character);
+	// [[nodiscard]] Eigen::Vector2f getSize(const char32_t character);
 
       private:
 	struct Glyph {
@@ -36,6 +36,7 @@ class TextSystem {
 	};
 
 	Glyph loadGlyph(const char32_t character);
+	void drawGlyph(const char32_t character, class Shader* shader, const Eigen::Vector2f offset);
 
 	class Game* mGame;
 

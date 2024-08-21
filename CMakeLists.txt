@@ -58,6 +58,7 @@ src/systems/cameraSystem.cpp
 src/systems/textSystem.cpp
 src/systems/physicsSystem.cpp
 src/systems/renderSystem.cpp
+src/systems/system.cpp
 
 src/actors/actor.cpp
 src/actors/player.cpp
@@ -112,6 +113,7 @@ include/systems/cameraSystem.hpp
 include/systems/textSystem.hpp
 include/systems/physicsSystem.hpp
 include/systems/renderSystem.hpp
+include/systems/system.hpp
 
 include/actors/actor.hpp
 include/actors/player.hpp

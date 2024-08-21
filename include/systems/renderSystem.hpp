@@ -1,12 +1,13 @@
 #pragma once
 
+#include "systems/system.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
 
 #include <memory>
 #include <vector>
 
-class RenderSystem {
+class RenderSystem : public System {
       public:
 	explicit RenderSystem(class Game* game);
 	RenderSystem(RenderSystem&&) = delete;

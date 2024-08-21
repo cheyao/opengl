@@ -1,8 +1,10 @@
 #pragma once
 
+#include "systems/system.hpp"
+
 #include <vector>
 
-class PhysicsManager {
+class PhysicsManager : public System {
       public:
 	PhysicsManager() = default;
 	PhysicsManager(PhysicsManager&&) = delete;

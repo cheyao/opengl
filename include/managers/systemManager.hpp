@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 class SystemManager {
       public:
 	SystemManager();
@@ -9,5 +10,8 @@ class SystemManager {
 	SystemManager& operator=(const SystemManager&) = delete;
 	~SystemManager();
 
+	void update();
+
       private:
+	std::vector<class System*>
 };
