@@ -13,6 +13,7 @@ DivUI::~DivUI() {
 }
 
 void DivUI::updateScreen([[maybe_unused]] const float delta) {
+	/*
 	Eigen::Vector2f size = Eigen::Vector2f::Zero();
 
 	for (const auto& component : mComponents) {
@@ -32,4 +33,5 @@ void DivUI::updateScreen([[maybe_unused]] const float delta) {
 
 		yOffset += mComponents[i]->getSize().y() + 10;
 	}
+	*/
 }

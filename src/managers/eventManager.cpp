@@ -1,6 +1,7 @@
 #include "managers/eventManager.hpp"
 
 #include "game.hpp"
+#include "third_party/Eigen/Core"
 #include "ui/screens/mainUI.hpp"
 
 #include <SDL3/SDL.h>
@@ -51,36 +52,40 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 		}
 
 		case SDL_EVENT_FINGER_DOWN: {
+			const Eigen::Vector2f dimensions = mGame->getDemensions();
 			for (const auto& ui : mGame->getUIs()) {
-				ui->touch(event.tfinger.fingerID, event.tfinger.x * mGame->getWidth(),
-					  mGame->getHeight() - event.tfinger.y * mGame->getHeight(), false);
+				ui->touch(event.tfinger.fingerID, event.tfinger.x * dimensions.x(),
+					  dimensions.y() - event.tfinger.y * dimensions.y(), false);
 			}
 
 			break;
 		}
 
 		case SDL_EVENT_FINGER_UP: {
+			const Eigen::Vector2f dimensions = mGame->getDemensions();
 			for (const auto& ui : mGame->getUIs()) {
-				ui->touch(event.tfinger.fingerID, event.tfinger.x * mGame->getWidth(),
-					  mGame->getHeight() - event.tfinger.y * mGame->getHeight(), true);
+				ui->touch(event.tfinger.fingerID, event.tfinger.x * dimensions.x(),
+					  dimensions.y() - event.tfinger.y * dimensions.y(), true);
 			}
 
 			break;
 		}
 
 		case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+			const Eigen::Vector2f dimensions = mGame->getDemensions();
 			for (const auto& ui : mGame->getUIs()) {
 				ui->touch(static_cast<SDL_FingerID>(event.button.which), event.button.x,
-					  static_cast<float>(mGame->getHeight()) - event.button.y, false);
+					  static_cast<float>(dimensions.y()) - event.button.y, false);
 			}
 
 			break;
 		}
 
 		case SDL_EVENT_MOUSE_BUTTON_UP: {
+			const Eigen::Vector2f dimensions = mGame->getDemensions();
 			for (const auto& ui : mGame->getUIs()) {
 				ui->touch(static_cast<SDL_FingerID>(event.button.which), event.button.x,
-					  static_cast<float>(mGame->getHeight()) - event.button.y, true);
+					  static_cast<float>(dimensions.y()) - event.button.y, true);
 			}
 
 			break;

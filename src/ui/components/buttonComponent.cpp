@@ -61,6 +61,7 @@ void ButtonComponent::draw(Shader* shader) {
 
 	shader->activate();
 
+	/*
 	Eigen::Affine3f model = Eigen::Affine3f::Identity();
 	float x = mPosition.x();
 	float y = mPosition.y();
@@ -88,9 +89,15 @@ void ButtonComponent::draw(Shader* shader) {
 	shader->set("model", model);
 
 	mMesh->draw(shader);
+	*/
 }
 
 void ButtonComponent::touch(const SDL_FingerID& finger, const float x, const float y, const bool lift) {
+	(void)finger;
+	(void)x;
+	(void)y;
+	(void)lift;
+	/*
 	// TODO: Cleanup code
 	float buttonX = mPosition.x();
 	float buttonY = mPosition.y();
@@ -132,6 +139,7 @@ void ButtonComponent::touch(const SDL_FingerID& finger, const float x, const flo
 			mCapture = 0;
 		}
 	}
+	*/
 }
 
 #if defined(__clang__)

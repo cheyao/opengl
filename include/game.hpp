@@ -1,5 +1,8 @@
 #pragma once
 
+#include "managers/managerManager.hpp"
+#include "managers/systemManager.hpp"
+#include "third_party/Eigen/Core"
 #include "utils.hpp"
 
 #include <cstddef>
@@ -39,6 +42,7 @@ class Game {
 	[[nodiscard]] float getScale() const { return mUIScale; }
 
 	void setDemensions(const int width, const int height);
+	Eigen::Vector2f getDemensions() const { return mManagerManager->getSystemManager()->getDemensions(); }
 
 	void setKey(const size_t key, const bool val);
 

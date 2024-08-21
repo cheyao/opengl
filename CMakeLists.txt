@@ -28,6 +28,8 @@ set(SRC
 src/main.cpp
 src/game.cpp
 
+src/misc/sparse_set.cpp
+
 # src/components/drawComponent.cpp
 # src/components/meshComponent.cpp
 # src/components/modelComponent.cpp
@@ -74,6 +76,8 @@ src/ui/components/textComponent.cpp
 # Headers
 include/game.hpp
 include/utils.hpp
+
+include/misc/sparse_set.hpp
 
 # include/components/drawComponent.hpp
 # include/components/meshComponent.hpp

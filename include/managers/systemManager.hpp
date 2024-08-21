@@ -1,5 +1,6 @@
 #pragma once
 
+#include "third_party/Eigen/Core"
 #include <memory>
 
 class SystemManager {
@@ -14,6 +15,7 @@ class SystemManager {
 	void update(const float delta);
 
 	void setDemensions(const int width, const int height);
+	Eigen::Vector2f getDemensions() const;
 
       private:
 	class Game* mGame;

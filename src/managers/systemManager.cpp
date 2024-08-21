@@ -1,9 +1,9 @@
 #include "managers/systemManager.hpp"
 
 #include "game.hpp"
-#include "systems/physicsSystem.hpp"
 #include "systems/renderSystem.hpp"
 #include "systems/textSystem.hpp"
+#include "third_party/Eigen/Core"
 
 #include <memory>
 
@@ -17,8 +17,12 @@ SystemManager::~SystemManager() {}
 
 void SystemManager::setDemensions(const int width, const int height) { mRenderSystem->setDemensions(width, height); }
 
+Eigen::Vector2f SystemManager::getDemensions() const {
+	return Eigen::Vector2f(mRenderSystem->getWidth(), mRenderSystem->getHeight());
+}
+
 void SystemManager::update(const float delta) {
-	(void) delta;
+	(void)delta;
 	// TODO:
 	// mPhysicsSystem->update();
 	mRenderSystem->draw();

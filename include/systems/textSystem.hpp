@@ -23,9 +23,6 @@ class TextSystem {
 	void setFontSize(const unsigned int size);
 	void draw();
 
-	// [[nodiscard]] Eigen::Vector2f getOffset(const char32_t character);
-	// [[nodiscard]] Eigen::Vector2f getSize(const char32_t character);
-
       private:
 	struct Glyph {
 		class Texture* texture;
