@@ -10,7 +10,7 @@ class CollisionComponent : public Component {
 	CollisionComponent(const CollisionComponent&) = delete;
 	CollisionComponent& operator=(CollisionComponent&&) = delete;
 	CollisionComponent& operator=(const CollisionComponent&) = delete;
-	~CollisionComponent() override = default;
+	~CollisionComponent() override;
 
 	virtual void collide(class CollisionComponent* that) {
 		if (mOnCollide != nullptr) {

@@ -9,3 +9,7 @@ CollisionComponent::CollisionComponent(class Actor* owner, int updatePriority)
 	: Component(owner, 50), mCollisionPriority(updatePriority) {
 	mOwner->getGame()->getPhysicsManager()->addCollisionComponent(this);
 }
+
+CollisionComponent::~CollisionComponent() {
+	mOwner->getGame()->getPhysicsManager()->removeComponent(this);
+}
