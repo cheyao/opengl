@@ -12,7 +12,11 @@ class CollisionComponent : public Component {
 	CollisionComponent& operator=(const CollisionComponent&) = delete;
 	~CollisionComponent() override = default;
 
-	virtual void collide(class CollisionComponent* that) { mOnCollide(that); }
+	virtual void collide(class CollisionComponent* that) {
+		if (mOnCollide != nullptr) {
+			mOnCollide(that);
+		}
+	}
 
 	void onCollide(std::function<void(class CollisionComponent* that)> func) { mOnCollide = func; }
 

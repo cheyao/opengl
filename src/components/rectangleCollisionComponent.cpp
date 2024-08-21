@@ -1,4 +1,4 @@
-#include "components/recatangleCollisionComponent.hpp"
+#include "components/rectangleCollisionComponent.hpp"
 
 #include "actors/actor.hpp"
 #include "components/collisionComponent.hpp"

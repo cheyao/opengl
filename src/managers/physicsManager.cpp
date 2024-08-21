@@ -2,7 +2,7 @@
 
 #include "actors/actor.hpp"
 #include "components/collisionComponent.hpp"
-#include "components/recatangleCollisionComponent.hpp"
+#include "components/rectangleCollisionComponent.hpp"
 #include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
@@ -54,14 +54,35 @@ void PhysicsManager::collide() {
 	}
 }
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wfloat-equal"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+#endif
+
 // TODO: https://noonat.github.io/intersect/#aabb-vs-swept-aabb
 bool PhysicsManager::collideRectRect(class RectangleCollisionComponent* a, class RectangleCollisionComponent* b) {
-	Eigen::Vector2f aa = a->getOwner()->getPosition().cast<Eigen::Vector2f>();
-	Eigen::Vector2f ba = b->getOwner()->getPosition().cast<Eigen::Vector2f>();
+	assert(a->getOwner()->getPosition().z() == 0 && "Not 2D");
+	assert(a->getOwner()->getPosition().z() == 0 && "Not 2D");
+
+	Eigen::Vector2f aa = a->getOwner()->getPosition().head<2>();
+	Eigen::Vector2f ba = b->getOwner()->getPosition().head<2>();
 	Eigen::Vector2f ab = aa + a->getSize();
 	Eigen::Vector2f bb = ba + a->getSize();
 
-	bool no = ab.x() < ba.x() || ab.y() < ba.y() || bb.x() < aa.x() || bb.y() < aa.y();
+	// If one of these four are true, it means the cubes are not intersecting
+	bool notIntercecting = ab.x() < ba.x()	   // Amax to the left of Bmin
+			       || ab.y() < ba.y()  // Amax to the bottom of Bmin
+			       || bb.x() < aa.x()  // Bmax to the left of Amax
+			       || bb.y() < aa.y(); // Bmax to the bottom of Amin
 
-	return !no;
+	return !notIntercecting;
 }
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif

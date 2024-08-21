@@ -5,6 +5,8 @@
 #include "actors/player.hpp"
 #include "actors/sun.hpp"
 #include "actors/world.hpp"
+#include "components/rectangleCollisionComponent.hpp"
+#include "components/sprite2DComponent.hpp"
 #include "managers/eventManager.hpp"
 #include "managers/fontManager.hpp"
 #include "managers/localeManager.hpp"
@@ -125,6 +127,12 @@ void Game::setup() {
 	// new Cube(this);
 	// new Sun(this);
 	new Player(this);
+	Actor* cube = new Actor(this);
+
+	Sprite2DComponent* spriteComponent = new Sprite2DComponent(cube, this->getTexture("stone.png"));
+	spriteComponent->setShaders("block.vert", "block.frag");
+
+	new RectangleCollisionComponent(cube, spriteComponent->getSize());
 
 	SDL_Log("Successfully initialized Game World");
 

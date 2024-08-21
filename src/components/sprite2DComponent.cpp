@@ -9,7 +9,7 @@
 #include "third_party/glad/glad.h"
 
 Sprite2DComponent::Sprite2DComponent(Actor* owner, Texture* texture, int drawOrder)
-	: DrawComponent(owner, drawOrder) {
+	: DrawComponent(owner, drawOrder), mSize(texture->getWidth(), texture->getHeight()) {
 	const float vertices[] = {
 		0.0f * texture->getWidth(), 0.0f * texture->getHeight(), 0.0f, // TL
 		0.0f * texture->getWidth(), 1.0f * texture->getHeight(), 0.0f, // BR
