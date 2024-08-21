@@ -28,8 +28,6 @@ set(SRC
 src/main.cpp
 src/game.cpp
 
-src/components/cameraComponent.cpp
-src/components/component.cpp
 src/components/drawComponent.cpp
 src/components/meshComponent.cpp
 src/components/modelComponent.cpp
@@ -42,7 +40,6 @@ src/components/rectangleCollisionComponent.cpp
 
 src/opengl/cubemap.cpp
 src/opengl/mesh.cpp
-src/opengl/renderer.cpp
 src/opengl/shader.cpp
 src/opengl/texture.cpp
 src/opengl/framebuffer.cpp
@@ -53,9 +50,14 @@ src/managers/shaderManager.cpp
 src/managers/textureManager.cpp
 src/managers/eventManager.cpp
 src/managers/IOManager.cpp
-src/managers/fontManager.cpp
 src/managers/localeManager.cpp
-src/managers/physicsManager.cpp
+src/managers/entityManager.cpp
+src/managers/systemManager.cpp
+
+src/systems/cameraSystem.cpp
+src/systems/textSystem.cpp
+src/systems/physicsSystem.cpp
+src/systems/renderSystem.cpp
 
 src/actors/actor.cpp
 src/actors/player.cpp
@@ -79,7 +81,6 @@ include/game.hpp
 include/utils.hpp
 
 include/components/cameraComponent.hpp
-include/components/component.hpp
 include/components/drawComponent.hpp
 include/components/meshComponent.hpp
 include/components/modelComponent.hpp
@@ -92,7 +93,6 @@ include/components/rectangleCollisionComponent.hpp
 
 include/opengl/cubemap.hpp
 include/opengl/mesh.hpp
-include/opengl/renderer.hpp
 include/opengl/shader.hpp
 include/opengl/texture.hpp
 include/opengl/types.hpp
@@ -105,8 +105,13 @@ include/managers/textureManager.hpp
 include/managers/eventManager.hpp
 include/managers/localeManager.hpp
 include/managers/IOManager.hpp
-include/managers/fontManager.hpp
-include/managers/physicsManager.hpp
+include/managers/entityManager.hpp
+include/managers/systemManager.hpp
+
+include/systems/cameraSystem.hpp
+include/systems/textSystem.hpp
+include/systems/physicsSystem.hpp
+include/systems/renderSystem.hpp
 
 include/actors/actor.hpp
 include/actors/player.hpp
@@ -156,11 +161,11 @@ if(ANDROID STREQUAL ON)
 	message("-- Building android apk - experimental")
 	message("-- Progress bar doesn't work, please wait till the end")
 	message("-- If this doesn't work, go to android folder and run ./gradlew installDebug")
-	# FIXME: No installRelease?
 
 	set(NAMESPACE com.cyao.opengl)
 	set(BUILD_NAME OpenGL)
 
+	# FIXME: No installRelease?
 	add_subdirectory(android)
 
 	return()

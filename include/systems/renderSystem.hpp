@@ -6,14 +6,14 @@
 #include <memory>
 #include <vector>
 
-class Renderer {
+class RenderSystem {
       public:
-	explicit Renderer(class Game* game);
-	Renderer(Renderer&&) = delete;
-	Renderer(const Renderer&) = delete;
-	Renderer& operator=(Renderer&&) = delete;
-	Renderer& operator=(const Renderer&) = delete;
-	~Renderer();
+	explicit RenderSystem(class Game* game);
+	RenderSystem(RenderSystem&&) = delete;
+	RenderSystem(const RenderSystem&) = delete;
+	RenderSystem& operator=(RenderSystem&&) = delete;
+	RenderSystem& operator=(const RenderSystem&) = delete;
+	~RenderSystem();
 
 	[[nodiscard]] inline int getWidth() const { return mWidth; }
 	[[nodiscard]] inline int getHeight() const { return mHeight; }
@@ -39,7 +39,7 @@ class Renderer {
 
 	class Game* mGame;
 
-	// These are pointers managed by renderer
+	// These are pointers managed by RenderSystem
 	struct SDL_Window* mWindow; // RAII?
 	std::unique_ptr<class GLManager> mGL;
 	std::unique_ptr<class Framebuffer> mFramebuffer;

@@ -1,14 +1,9 @@
 #include "game.hpp"
 
-#include "actors/actor.hpp"
-#include "actors/cube.hpp"
 #include "actors/player.hpp"
-#include "actors/sun.hpp"
-#include "actors/world.hpp"
 #include "components/rectangleCollisionComponent.hpp"
 #include "components/sprite2DComponent.hpp"
 #include "managers/eventManager.hpp"
-#include "managers/fontManager.hpp"
 #include "managers/localeManager.hpp"
 #include "managers/physicsManager.hpp"
 #include "managers/shaderManager.hpp"
@@ -108,6 +103,8 @@ Game::~Game() {
 	delete mRenderer;
 	delete mLocaleManager;
 	delete mFontManager;
+	delete mSystemManager;
+	delete mEntityManager;
 
 	SDL_DestroyMutex(mActorMutex);
 }
@@ -115,7 +112,6 @@ Game::~Game() {
 void Game::setup() {
 	SDL_Log("Setting up UIs");
 
-	// Maybe HUD?
 	new ControlUI(this);
 	new MainUI(this);
 
@@ -123,9 +119,6 @@ void Game::setup() {
 
 	SDL_Log("Setting up game");
 
-	// new World(this);
-	// new Cube(this);
-	// new Sun(this);
 	new Player(this);
 	Actor* cube = new Actor(this);
 
@@ -136,29 +129,10 @@ void Game::setup() {
 
 	SDL_Log("Successfully initialized Game World");
 
-	// SDL_CreateThread(initWorld, "Game setup", this);
-
 	mTicks = SDL_GetTicks();
 
 	mRenderer->setDemensions(getWidth(), getHeight());
 }
-
-/*
-int Game::initWorld(void* gameptr) {
-	SDL_Log("Setting up game");
-
-	Game* game = static_cast<Game*>(gameptr);
-
-	new World(game);
-	new Cube(game);
-	new Sun(game);
-	new Player(game);
-
-	SDL_Log("Successfully initialized Game World");
-
-	return 0;
-}
-*/
 
 SDL_AppResult Game::iterate() {
 	if (mQuit) {
@@ -168,7 +142,6 @@ SDL_AppResult Game::iterate() {
 	gui();
 	input();
 	update();
-	mPhysicsManager->collide();
 	draw();
 
 #ifdef DEBUG
@@ -218,21 +191,6 @@ void Game::gui() {
 		if (ImGui::Combo("language", &current, locales, IM_ARRAYSIZE(locales))) {
 			mLocaleManager->changeLocale(locales[current]);
 		}
-
-		/*
-		Player* p = nullptr;
-		for (const auto& actor : mActors) {
-			if (dynamic_cast<Player*>(actor) != nullptr) {
-				p = dynamic_cast<Player*>(actor);
-				break;
-			}
-		}
-		if (p != nullptr) {
-			auto pos = p->getPosition();
-			ImGui::Text("Player position: %dx%dx%d", static_cast<int>(pos.x()),
-		static_cast<int>(pos.y()), static_cast<int>(pos.z()));
-		}
-		*/
 
 		if (ImGui::Checkbox("VSync", &vsync)) {
 			SDL_GL_SetSwapInterval(static_cast<int>(vsync));

@@ -1,4 +1,4 @@
-#include "managers/fontManager.hpp"
+#include "systems/textSystem.hpp"
 
 #include "game.hpp"
 #include "opengl/shader.hpp"
@@ -18,7 +18,7 @@
 // FIXME: Maybe add support for emojis
 // FIXME: Better unicode support
 // FIXME: Verical text https://freetype.org/freetype2/docs/tutorial/step2.html
-FontManager::FontManager(const std::string& path, Game* game, const unsigned int size, bool final)
+TextSystem::TextSystem(const std::string& path, Game* game, const unsigned int size, bool final)
 	: mGame(game), mPath(path + "assets" SEPARATOR "fonts" SEPARATOR), mSize(size), mLibrary(nullptr),
 	  mFace(nullptr), mFontData(nullptr), mChild(nullptr) {
 	if (FT_Init_FreeType(&mLibrary)) {
@@ -78,12 +78,12 @@ FontManager::FontManager(const std::string& path, Game* game, const unsigned int
 
 	// TODO: Dyn load
 	if (!final) {
-		mChild = new FontManager(path, game, size, true);
+		mChild = new TextSystem(path, game, size, true);
 		mChild->loadFont("NotoSansCJK.ttc");
 	}
 }
 
-FontManager::~FontManager() {
+TextSystem::~TextSystem() {
 	if (mFontData != nullptr) {
 		SDL_free(static_cast<void*>(mFontData));
 	}
@@ -105,7 +105,7 @@ FontManager::~FontManager() {
 	delete mChild;
 }
 
-void FontManager::loadFont(const std::string& name) {
+void TextSystem::loadFont(const std::string& name) {
 	assert(mLibrary != nullptr);
 
 	size_t size = 0;
@@ -169,7 +169,7 @@ void FontManager::loadFont(const std::string& name) {
 	mGlyphMap.clear();
 }
 
-void FontManager::setFontSize(const unsigned int size) {
+void TextSystem::setFontSize(const unsigned int size) {
 	mSize = size;
 
 	if (mFace != nullptr) {
@@ -182,7 +182,7 @@ void FontManager::setFontSize(const unsigned int size) {
 	mGlyphMap.clear();
 }
 
-void FontManager::drawGlyph(const char32_t character, Shader* shader, const Eigen::Vector2f offset) {
+void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen::Vector2f offset) {
 	if (!mGlyphMap.contains(character)) {
 		// TODO: try catch and sub char
 		mGlyphMap[character] = loadGlyph(character);
@@ -210,7 +210,7 @@ void FontManager::drawGlyph(const char32_t character, Shader* shader, const Eige
 	glBindVertexArray(0);
 }
 
-Eigen::Vector2f FontManager::getOffset(const char32_t character) {
+Eigen::Vector2f TextSystem::getOffset(const char32_t character) {
 	if (!mGlyphMap.contains(character)) {
 		mGlyphMap[character] = loadGlyph(character);
 	}
@@ -218,7 +218,7 @@ Eigen::Vector2f FontManager::getOffset(const char32_t character) {
 	return mGlyphMap[character].advance;
 }
 
-Eigen::Vector2f FontManager::getSize(const char32_t character) {
+Eigen::Vector2f TextSystem::getSize(const char32_t character) {
 	if (!mGlyphMap.contains(character)) {
 		mGlyphMap[character] = loadGlyph(character);
 	}
@@ -227,7 +227,7 @@ Eigen::Vector2f FontManager::getSize(const char32_t character) {
 }
 
 // FIXME: Loading two times
-Glyph FontManager::loadGlyph(const char32_t character) {
+Glyph TextSystem::loadGlyph(const char32_t character) {
 	assert(mFace != nullptr);
 
 	const FT_UInt index = FT_Get_Char_Index(mFace, character);

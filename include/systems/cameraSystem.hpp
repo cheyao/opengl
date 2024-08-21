@@ -3,14 +3,14 @@
 #include "components/component.hpp"
 #include "third_party/Eigen/Geometry"
 
-class CameraComponent : public Component {
+class CameraSystem : public Component {
       public:
-	explicit CameraComponent(class Actor* owner, bool ortho = false, int priority = 200);
-	CameraComponent(CameraComponent&&) = delete;
-	CameraComponent(const CameraComponent&) = delete;
-	CameraComponent& operator=(CameraComponent&&) = delete;
-	CameraComponent& operator=(const CameraComponent&) = delete;
-	~CameraComponent() override = default;
+	explicit CameraSystem(class Actor* owner, bool ortho = false, int priority = 200);
+	CameraSystem(CameraSystem&&) = delete;
+	CameraSystem(const CameraSystem&) = delete;
+	CameraSystem& operator=(CameraSystem&&) = delete;
+	CameraSystem& operator=(const CameraSystem&) = delete;
+	~CameraSystem() override = default;
 
 	void update(float delta) override;
 

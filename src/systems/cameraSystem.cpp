@@ -1,16 +1,16 @@
-#include "components/cameraComponent.hpp"
+#include "systems/cameraSystem.hpp"
 
 #include "actors/actor.hpp"
 #include "components/component.hpp"
 #include "game.hpp"
-#include "opengl/renderer.hpp"
+#include "systems/renderSystem.hpp"
 #include "third_party/Eigen/Geometry"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
 #include <cmath>
 
-CameraComponent::CameraComponent(Actor* owner, bool ortho, int priority)
+CameraSystem::CameraSystem(Actor* owner, bool ortho, int priority)
 	: Component(owner, priority), mFOV(45), mViewMatrix(Eigen::Affine3f::Identity()),
 	  mProjectionMatrix(Eigen::Affine3f::Identity()) {
 
@@ -23,20 +23,7 @@ CameraComponent::CameraComponent(Actor* owner, bool ortho, int priority)
 	mOwner->getGame()->getRenderer()->setCamera(this);
 };
 
-void CameraComponent::update([[maybe_unused]] float delta) {
-	/*
-	float x = 0;
-	float y = 0;
-	SDL_GetRelativeMouseState(&x, &y);
-
-	const Eigen::Quaternionf dir = mOwner->getRotation();
-	const Eigen::AngleAxisf rot(-(x / 50) * delta, Eigen::Vector3f::UnitY());
-	const Eigen::AngleAxisf yaw(-(y / 50) * delta, Eigen::Vector3f::UnitZ());
-	mOwner->setRotation(dir * rot * yaw);
-	*/
-}
-
-void CameraComponent::view() {
+void CameraSystem::view() {
 	Eigen::Matrix3f R;
 	const Eigen::Vector3f up(0.0f, 1.0f, 0.0f);
 	R.col(2) = (-mOwner->getForward() * 100.f).normalized();
@@ -47,7 +34,7 @@ void CameraComponent::view() {
 	mViewMatrix(3, 3) = 1.0f;
 }
 
-void CameraComponent::project() {
+void CameraSystem::project() {
 	if (mOrtho) {
 		ortho();
 	} else {
@@ -55,7 +42,7 @@ void CameraComponent::project() {
 	}
 }
 
-void CameraComponent::persp() {
+void CameraSystem::persp() {
 	constexpr const float near = 0.1f;
 	constexpr const float far = 100.0f;
 	constexpr const float range = far - near;
@@ -73,7 +60,7 @@ void CameraComponent::persp() {
 	mProjectionMatrix(3, 3) = 0;
 }
 
-void CameraComponent::ortho() {
+void CameraSystem::ortho() {
 	constexpr const static float left = 0.0f;
 	constexpr const static float bottom = 0.0f;
 	constexpr const static float near = 0.0f;

@@ -34,12 +34,11 @@ class Game {
 	void setUIScale(const float scale) { mUIScale = scale; }
 
 	[[nodiscard]] class Texture* getTexture(const std::string& name, const bool srgb = false);
-	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
-					      const std::string& geom = "");
+	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag, const std::string& geom = "");
+
 	[[nodiscard]] class Renderer* getRenderer() const { return mRenderer; }
 	[[nodiscard]] class FontManager* getFontManager() const { return mFontManager; }
 	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager; }
-	[[nodiscard]] class PhysicsManager* getPhysicsManager() const  { return mPhysicsManager; }
 
 	[[nodiscard]] inline std::string fullPath(const std::string& path) const {
 		return (mBasePath + "assets" SEPARATOR + path);
@@ -56,7 +55,7 @@ class Game {
 
       private:
 	void setup();
-	
+
 	void gui();
 	void input();
 	void update();
@@ -65,11 +64,12 @@ class Game {
 	std::unique_ptr<class TextureManager> mTextures;
 	std::unique_ptr<class ShaderManager> mShaders;
 	std::unique_ptr<class EventManager> mEventManager;
-	
+
 	class Renderer* mRenderer;
 	class FontManager* mFontManager;
 	class LocaleManager* mLocaleManager;
-	class PhysicsManager* mPhysicsManager;
+	class SystemManager* mSystemManager;
+	class EntityManager* mEntityManager;
 
 	std::vector<class Actor*> mActors;
 	std::vector<class Actor*> mPendingActors;

@@ -9,21 +9,15 @@
 #include <unordered_map>
 #include <wchar.h>
 
-struct Glyph {
-	class Texture* texture;
-	Eigen::Vector2f size;
-	Eigen::Vector2f bearing;
-	Eigen::Vector2f advance;
-};
-
-class FontManager {
+class TextSystem {
       public:
-	explicit FontManager(const std::string& path, class Game* game, const unsigned int size = 48, bool final = false);
-	FontManager(FontManager&&) = delete;
-	FontManager(const FontManager&) = delete;
-	FontManager& operator=(FontManager&&) = delete;
-	FontManager& operator=(const FontManager&) = delete;
-	~FontManager();
+	explicit TextSystem(const std::string& path, class Game* game, const unsigned int size = 48,
+			    bool final = false);
+	TextSystem(TextSystem&&) = delete;
+	TextSystem(const TextSystem&) = delete;
+	TextSystem& operator=(TextSystem&&) = delete;
+	TextSystem& operator=(const TextSystem&) = delete;
+	~TextSystem();
 
 	void loadFont(const std::string& name);
 	// Size in 1/64 of a pixel
@@ -34,6 +28,13 @@ class FontManager {
 	[[nodiscard]] Eigen::Vector2f getSize(const char32_t character);
 
       private:
+	struct Glyph {
+		class Texture* texture;
+		Eigen::Vector2f size;
+		Eigen::Vector2f bearing;
+		Eigen::Vector2f advance;
+	};
+
 	Glyph loadGlyph(const char32_t character);
 
 	class Game* mGame;
@@ -54,5 +55,5 @@ class FontManager {
 	GLuint mEBO;
 	GLuint mVAO;
 
-	FontManager* mChild;
+	TextSystem* mChild;
 };

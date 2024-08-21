@@ -1,4 +1,4 @@
-#include "opengl/renderer.hpp"
+#include "systems/renderSystem.hpp"
 
 #include "actors/actor.hpp"
 #include "components/cameraComponent.hpp"
@@ -36,7 +36,7 @@ EM_JS(int, browserHeight, (), { return window.innerHeight; });
 EM_JS(int, browserWidth, (), { return window.innerWidth; });
 #endif
 
-Renderer::Renderer(Game* game)
+RenderSystem::RenderSystem(Game* game)
 	: mGame(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mWidth(0), mHeight(0), mCamera(nullptr) {
 	const SDL_DisplayMode* const DM = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
 
@@ -168,9 +168,9 @@ Renderer::Renderer(Game* game)
  * The view matrix is changed once at the start of every frame
  */
 
-Renderer::~Renderer() { SDL_DestroyWindow(mWindow); /* Other stuff are smart pointers */ }
+RenderSystem::~RenderSystem() { SDL_DestroyWindow(mWindow); /* Other stuff are smart pointers */ }
 
-void Renderer::setDemensions(int width, int height) {
+void RenderSystem::setDemensions(int width, int height) {
 	mWidth = width;
 	mHeight = height;
 
@@ -185,7 +185,7 @@ void Renderer::setDemensions(int width, int height) {
 	setUIMatrix();
 }
 
-void Renderer::draw() {
+void RenderSystem::draw() {
 #ifdef DEBUG
 	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -230,15 +230,15 @@ void Renderer::draw() {
 #endif
 }
 
-void Renderer::swapWindow() const { SDL_GL_SwapWindow(mWindow); }
+void RenderSystem::swapWindow() const { SDL_GL_SwapWindow(mWindow); }
 
-void Renderer::reload() const {
+void RenderSystem::reload() const {
 	for (const auto& sprite : mDrawables) {
 		sprite->reload();
 	}
 }
 
-void Renderer::setCamera(class CameraComponent* camera) {
+void RenderSystem::setCamera(class CameraComponent* camera) {
 	assert(camera != nullptr && "Forgot to init camera?");
 
 	mCamera = camera;
@@ -247,7 +247,7 @@ void Renderer::setCamera(class CameraComponent* camera) {
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
 }
 
-void Renderer::addSprite(DrawComponent* sprite) {
+void RenderSystem::addSprite(DrawComponent* sprite) {
 	sprite->getShader()->bind("Matrices", 0);
 
 	// Preserve order
@@ -262,17 +262,17 @@ void Renderer::addSprite(DrawComponent* sprite) {
 	mDrawables.insert(iter, sprite);
 }
 
-void Renderer::removeSprite(DrawComponent* sprite) {
+void RenderSystem::removeSprite(DrawComponent* sprite) {
 	auto iter = std::find(mDrawables.begin(), mDrawables.end(), sprite);
 	mDrawables.erase(iter);
 }
 
-void Renderer::setLights(Shader* shader) const {
+void RenderSystem::setLights(Shader* shader) const {
 	// TODO: Concat all these
 	(void)shader;
 }
 
-void Renderer::setWindowRelativeMouseMode(SDL_bool mode) const {
+void RenderSystem::setWindowRelativeMouseMode(SDL_bool mode) const {
 	(void) mode;
 	/*
 	if (SDL_SetWindowRelativeMouseMode(mWindow, mode) != 0) {
@@ -281,7 +281,7 @@ void Renderer::setWindowRelativeMouseMode(SDL_bool mode) const {
 	*/
 }
 
-void Renderer::setUIMatrix() {
+void RenderSystem::setUIMatrix() {
 	Eigen::Affine3f ortho = Eigen::Affine3f::Identity();
 
 	constexpr const static float left = 0.0f;
@@ -310,7 +310,7 @@ void Renderer::setUIMatrix() {
 	textshader->set("proj", ortho);
 }
 
-[[nodiscard]] Eigen::Vector2f Renderer::getDPI() const {
+[[nodiscard]] Eigen::Vector2f RenderSystem::getDPI() const {
 	/*
 	int winx, winy;
 	SDL_GetWindowSizeInPixels(mWindow, &winx, &winy);
@@ -326,7 +326,7 @@ void Renderer::setUIMatrix() {
 	return Eigen::Vector2f::Zero();
 }
 
-void Renderer::setDisplayScale() const {
+void RenderSystem::setDisplayScale() const {
 	assert(mWindow != nullptr);
 
 	float scale = SDL_GetWindowDisplayScale(mWindow);
