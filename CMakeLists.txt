@@ -28,15 +28,15 @@ set(SRC
 src/main.cpp
 src/game.cpp
 
-src/components/drawComponent.cpp
-src/components/meshComponent.cpp
-src/components/modelComponent.cpp
-src/components/movementComponent.cpp
-src/components/inputComponent.cpp
-src/components/sprite2DComponent.cpp
-src/components/physicsComponent.cpp
-src/components/collisionComponent.cpp
-src/components/rectangleCollisionComponent.cpp
+# src/components/drawComponent.cpp
+# src/components/meshComponent.cpp
+# src/components/modelComponent.cpp
+# src/components/movementComponent.cpp
+# src/components/inputComponent.cpp
+# src/components/sprite2DComponent.cpp
+# src/components/physicsComponent.cpp
+# src/components/collisionComponent.cpp
+# src/components/rectangleCollisionComponent.cpp
 
 src/opengl/cubemap.cpp
 src/opengl/mesh.cpp
@@ -61,12 +61,6 @@ src/systems/textSystem.cpp
 src/systems/physicsSystem.cpp
 src/systems/renderSystem.cpp
 
-src/actors/actor.cpp
-src/actors/player.cpp
-src/actors/world.cpp
-src/actors/sun.cpp
-src/actors/cube.cpp
-
 src/ui/UIComponent.cpp
 src/ui/UIScreen.cpp
 
@@ -82,15 +76,15 @@ src/ui/components/textComponent.cpp
 include/game.hpp
 include/utils.hpp
 
-include/components/drawComponent.hpp
-include/components/meshComponent.hpp
-include/components/modelComponent.hpp
-include/components/movementComponent.hpp
-include/components/inputComponent.hpp
-include/components/sprite2DComponent.hpp
-include/components/physicsComponent.hpp
-include/components/collisionComponent.hpp
-include/components/rectangleCollisionComponent.hpp
+# include/components/drawComponent.hpp
+# include/components/meshComponent.hpp
+# include/components/modelComponent.hpp
+# include/components/movementComponent.hpp
+# include/components/inputComponent.hpp
+# include/components/sprite2DComponent.hpp
+# include/components/physicsComponent.hpp
+# include/components/collisionComponent.hpp
+# include/components/rectangleCollisionComponent.hpp
 
 include/opengl/cubemap.hpp
 include/opengl/mesh.hpp
@@ -115,12 +109,6 @@ include/systems/cameraSystem.hpp
 include/systems/textSystem.hpp
 include/systems/physicsSystem.hpp
 include/systems/renderSystem.hpp
-
-include/actors/actor.hpp
-include/actors/player.hpp
-include/actors/world.hpp
-include/actors/sun.hpp
-include/actors/cube.hpp
 
 include/ui/UIComponent.hpp
 include/ui/UIScreen.hpp

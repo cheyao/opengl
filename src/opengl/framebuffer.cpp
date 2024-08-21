@@ -2,9 +2,9 @@
 
 #include "game.hpp"
 #include "opengl/mesh.hpp"
-#include "opengl/renderer.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
+#include "systems/renderSystem.hpp"
 #include "third_party/glad/glad.h"
 #include "utils.hpp"
 
@@ -21,7 +21,7 @@
 #include <imgui.h>
 #endif
 
-Framebuffer::Framebuffer(Game* owner) : mOwner(owner), mRBO(0), mScreen(0), mScreenTexture(0) {
+Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mRBO(0), mScreen(0), mScreenTexture(0) {
 	SDL_Log("Framebuffer.cpp: Generating framebuffer");
 
 	assert(glGenFramebuffers != nullptr);
@@ -109,7 +109,7 @@ void Framebuffer::swap() {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 #endif
 
-	mOwner->getRenderer()->swapWindow();
+	mOwner->swapWindow();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 	glEnable(GL_DEPTH_TEST);

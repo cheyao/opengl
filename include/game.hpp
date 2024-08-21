@@ -29,15 +29,12 @@ class Game {
 
 	void setUIScale(const float scale) { mUIScale = scale; }
 
-	[[nodiscard]] class Texture* getTexture(const std::string& name, const bool srgb = false);
-	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
-					      const std::string& geom = "");
-
 	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager; }
 
 	[[nodiscard]] inline std::string fullPath(const std::string& path) const {
 		return (mBasePath + "assets" SEPARATOR + path);
 	}
+	[[nodiscard]] std::string getBasePath() const { return mBasePath; }
 
 	void addUI(class UIScreen* ui) { mUI.emplace_back(ui); }
 	void removeUI(class UIScreen* ui);
@@ -56,8 +53,6 @@ class Game {
 	void update();
 	void draw();
 
-	std::unique_ptr<class TextureManager> mTextures;
-	std::unique_ptr<class ShaderManager> mShaders;
 	std::unique_ptr<class EventManager> mEventManager;
 	std::unique_ptr<class ManagerManager> mManagerManager;
 

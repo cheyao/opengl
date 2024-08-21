@@ -2,6 +2,8 @@
 
 #include "game.hpp"
 #include "managers/glManager.hpp"
+#include "managers/shaderManager.hpp"
+#include "managers/textureManager.hpp"
 #include "opengl/framebuffer.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/ubo.hpp"
@@ -33,7 +35,9 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 #endif
 
 RenderSystem::RenderSystem(Game* game)
-	: mGame(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mWidth(0), mHeight(0), mCamera(nullptr) {
+	: mGame(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mMatricesUBO(nullptr),
+	  mTextures(std::make_unique<TextureManager>(mGame->getBasePath())),
+	  mShaders(std::make_unique<ShaderManager>(mGame->getBasePath())), mWidth(0), mHeight(0) {
 	const SDL_DisplayMode* const DM = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
 
 	SDL_Log("\n");
@@ -142,7 +146,7 @@ RenderSystem::RenderSystem(Game* game)
 
 	SDL_GetWindowSize(mWindow, &mWidth, &mHeight);
 
-	mFramebuffer = std::make_unique<Framebuffer>(mGame);
+	mFramebuffer = std::make_unique<Framebuffer>(this);
 	// NOTE: Uncomment if testing framebuffer module
 	// glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -156,13 +160,6 @@ RenderSystem::RenderSystem(Game* game)
 
 	assert(mGL->getContext() != nullptr);
 }
-
-/* NOTE:
- * The uniform matrix object is initialized as following:
- * The uniform is bind eveytime a drawable is added
- * The projection matrix is reset everytime the camera is changed and the window is changed
- * The view matrix is changed once at the start of every frame
- */
 
 RenderSystem::~RenderSystem() { SDL_DestroyWindow(mWindow); /* Other stuff are smart pointers */ }
 
@@ -204,8 +201,8 @@ void RenderSystem::draw() {
 
 	glDisable(GL_DEPTH_TEST);
 
-	Shader* UIshader = mGame->getShader("ui.vert", "ui.frag");
-	Shader* textShader = mGame->getShader("text.vert", "text.frag");
+	Shader* UIshader = this->getShader("ui.vert", "ui.frag");
+	Shader* textShader = this->getShader("text.vert", "text.frag");
 	for (const auto& ui : mGame->getUIs()) {
 		if (ui->getState() == UIScreen::ACTIVE) {
 			ui->draw(UIshader);
@@ -306,22 +303,6 @@ void RenderSystem::setUIMatrix() {
 	textshader->set("proj", ortho);
 }
 
-[[nodiscard]] Eigen::Vector2f RenderSystem::getDPI() const {
-	/*
-	int winx, winy;
-	SDL_GetWindowSizeInPixels(mWindow, &winx, &winy);
-	float scale = SDL_GetWindowDisplayScale(mWindow);
-	if (scale == 0.0f) {
-		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
-			     SDL_GetError());
-
-		scale = 1.0f;
-	}
-	*/
-
-	return Eigen::Vector2f::Zero();
-}
-
 void RenderSystem::setDisplayScale() const {
 	assert(mWindow != nullptr);
 
@@ -345,4 +326,9 @@ void RenderSystem::setDisplayScale() const {
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.ScaleAllSizes(scale);
 #endif
+}
+Texture* RenderSystem::getTexture(const std::string& name, const bool srgb) { return mTextures->get(name, srgb); }
+
+Shader* RenderSystem::getShader(const std::string& vert, const std::string& frag, const std::string& geom) {
+	return mShaders->get(vert, frag, geom);
 }

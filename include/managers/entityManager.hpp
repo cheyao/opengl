@@ -14,7 +14,7 @@ constexpr const static std::uint64_t MAX_COMPONENT_TYPES = 64;
 
 constexpr const static EntityID MAX_ENTITIES = std::numeric_limits<EntityID>::max();
 
-using ComponentMask = std::bitset<MAX_COMPONENTS>;
+using ComponentMask = std::bitset<MAX_COMPONENT_TYPES>;
 
 class EntityManager {
       public:
@@ -25,12 +25,13 @@ class EntityManager {
 	EntityManager& operator=(const EntityManager&) = delete;
 	~EntityManager() = default;
 
-	std::uint64_t getEntity();
-	std::uint64_t getEntityCount() const { return mNext - mReleased.size(); }
+	EntityID getEntity();
+	void releaseEntity(EntityID entity);
+	EntityID getEntityCount() const { return mNext - mReleased.size(); }
 
       private:
-	std::uint64_t mNext;
-	std::deque<std::uint64_t> mReleased;
+	EntityID mNext;
+	std::deque<EntityID> mReleased;
 
 	std::vector<ComponentMask> mEntities;
 };

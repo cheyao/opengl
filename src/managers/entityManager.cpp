@@ -2,12 +2,14 @@
 
 EntityManager::EntityManager() : mNext(0) {}
 
-std::uint64_t EntityManager::getEntity() {
+EntityID EntityManager::getEntity() {
 	if (!mReleased.empty()) {
-		std::uint64_t first = mReleased.front();
+		EntityID first = mReleased.front();
 		mReleased.pop_front();
 		return first;
 	}
 
 	return mNext++;
 }
+
+void EntityManager::releaseEntity(EntityID entity) { mReleased.emplace_back(entity); }

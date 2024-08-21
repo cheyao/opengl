@@ -49,8 +49,6 @@ Game::Game()
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get base path: %s\033[0m", SDL_GetError());
 	}
 
-	mTextures = std::make_unique<TextureManager>(mBasePath);
-	mShaders = std::make_unique<ShaderManager>(mBasePath);
 	mEventManager = std::make_unique<EventManager>(this);
 	mManagerManager = std::make_unique<ManagerManager>(this);
 
@@ -91,7 +89,6 @@ void Game::setup() {
 	SDL_Log("Setting up game");
 
 	new Player(this);
-	Actor* cube = new Actor(this);
 
 	Sprite2DComponent* spriteComponent = new Sprite2DComponent(cube, this->getTexture("stone.png"));
 	spriteComponent->setShaders("block.vert", "block.frag");
@@ -283,12 +280,6 @@ void Game::removeUI(UIScreen* ui) {
 		std::iter_swap(iter, mUI.end() - 1);
 		mUI.pop_back();
 	}
-}
-
-Texture* Game::getTexture(const std::string& name, const bool srgb) { return mTextures->get(name, srgb); }
-
-Shader* Game::getShader(const std::string& vert, const std::string& frag, const std::string& geom) {
-	return mShaders->get(vert, frag, geom);
 }
 
 void Game::setKey(const size_t key, const bool val) { mEventManager->setKey(key, val); }

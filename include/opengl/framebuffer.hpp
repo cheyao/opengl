@@ -6,7 +6,7 @@
 
 class Framebuffer {
   public:
-	explicit Framebuffer(class Game* owner);
+	explicit Framebuffer(class RenderSystem* owner);
 	Framebuffer(Framebuffer&&) = delete;
 	Framebuffer(const Framebuffer&) = delete;
 	Framebuffer& operator=(Framebuffer&&) = delete;
@@ -17,7 +17,7 @@ class Framebuffer {
 	void swap();
 
   private:
-	class Game* mOwner;
+	class RenderSystem* mOwner;
 
 	GLuint mRBO;
 	GLuint mScreen;

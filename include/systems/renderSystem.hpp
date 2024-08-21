@@ -1,6 +1,5 @@
 #pragma once
 
-#include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
 
 #include <memory>
@@ -17,10 +16,13 @@ class RenderSystem {
 
 	[[nodiscard]] inline int getWidth() const { return mWidth; }
 	[[nodiscard]] inline int getHeight() const { return mHeight; }
-	[[nodiscard]] Eigen::Vector2f getDPI() const;
+	// TODO: DPI
+
+	[[nodiscard]] class Texture* getTexture(const std::string& name, const bool srgb = false);
+	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
+					      const std::string& geom = "");
 
 	void setDemensions(int width, int height);
-	void setCamera(class CameraComponent* camera);
 	void setDisplayScale() const;
 
 	void addSprite(class DrawComponent* sprite);
@@ -41,15 +43,16 @@ class RenderSystem {
 
 	// These are pointers managed by RenderSystem
 	struct SDL_Window* mWindow; // RAII?
+
 	std::unique_ptr<class GLManager> mGL;
 	std::unique_ptr<class Framebuffer> mFramebuffer;
 	std::unique_ptr<class UBO> mMatricesUBO;
+	std::unique_ptr<class TextureManager> mTextures;
+	std::unique_ptr<class ShaderManager> mShaders;
 
 	std::vector<class DrawComponent*> mDrawables;
 	std::vector<class Cubemap*> mCubemaps;
 	std::vector<class Actor*> mPointLights;
 
 	int mWidth, mHeight;
-
-	class CameraComponent* mCamera;
 };
