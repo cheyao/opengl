@@ -1,18 +1,17 @@
 #pragma once
 
-#include "systems/system.hpp"
 #include "third_party/Eigen/Geometry"
 
-class CameraSystem : public System {
+class CameraSystem {
       public:
 	explicit CameraSystem(class Actor* owner, bool ortho = false, int priority = 200);
 	CameraSystem(CameraSystem&&) = delete;
 	CameraSystem(const CameraSystem&) = delete;
 	CameraSystem& operator=(CameraSystem&&) = delete;
 	CameraSystem& operator=(const CameraSystem&) = delete;
-	~CameraSystem() override = default;
+	~CameraSystem() = default;
 
-	void update(float delta) override;
+	void update();
 
 	void setFOV(float fov) { mFOV = fov; }
 

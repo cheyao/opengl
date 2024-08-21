@@ -22,9 +22,6 @@ class Game {
 	[[nodiscard]] SDL_AppResult iterate();
 	[[nodiscard]] SDL_AppResult event(const union SDL_Event& event);
 
-	void addActor(class Actor* actor);
-	void removeActor(class Actor* actor);
-
 	[[nodiscard]] int getWidth() const;
 	[[nodiscard]] int getHeight() const;
 
@@ -34,9 +31,9 @@ class Game {
 	void setUIScale(const float scale) { mUIScale = scale; }
 
 	[[nodiscard]] class Texture* getTexture(const std::string& name, const bool srgb = false);
-	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag, const std::string& geom = "");
+	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
+					      const std::string& geom = "");
 
-	[[nodiscard]] class Renderer* getRenderer() const { return mRenderer; }
 	[[nodiscard]] class FontManager* getFontManager() const { return mFontManager; }
 	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager; }
 
@@ -65,15 +62,11 @@ class Game {
 	std::unique_ptr<class ShaderManager> mShaders;
 	std::unique_ptr<class EventManager> mEventManager;
 
-	class Renderer* mRenderer;
-	class FontManager* mFontManager;
 	class LocaleManager* mLocaleManager;
 	class SystemManager* mSystemManager;
-	class EntityManager* mEntityManager;
 
 	std::vector<class Actor*> mActors;
 	std::vector<class Actor*> mPendingActors;
-	struct SDL_Mutex* mActorMutex;
 
 	std::vector<class UIScreen*> mUI;
 	float mUIScale;

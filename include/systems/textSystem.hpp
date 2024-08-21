@@ -1,6 +1,5 @@
 #pragma once
 
-#include "systems/system.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
 
@@ -10,10 +9,9 @@
 #include <unordered_map>
 #include <wchar.h>
 
-class TextSystem : public System {
+class TextSystem {
       public:
-	explicit TextSystem(const std::string& path, class Game* game, const unsigned int size = 48,
-			    bool final = false);
+	explicit TextSystem(class Game* game, const unsigned int size = 48, bool final = false);
 	TextSystem(TextSystem&&) = delete;
 	TextSystem(const TextSystem&) = delete;
 	TextSystem& operator=(TextSystem&&) = delete;
@@ -47,8 +45,6 @@ class TextSystem : public System {
 	FT_Face mFace;
 	FT_Byte* mFontData;
 
-	// TODO: Unicode support
-	// TODO: unordered map
 	std::unordered_map<char32_t, Glyph> mGlyphMap;
 
 	// OpenGL stuff

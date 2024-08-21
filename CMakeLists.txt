@@ -53,12 +53,12 @@ src/managers/IOManager.cpp
 src/managers/localeManager.cpp
 src/managers/entityManager.cpp
 src/managers/systemManager.cpp
+src/managers/managerManager.cpp
 
 src/systems/cameraSystem.cpp
 src/systems/textSystem.cpp
 src/systems/physicsSystem.cpp
 src/systems/renderSystem.cpp
-src/systems/system.cpp
 
 src/actors/actor.cpp
 src/actors/player.cpp
@@ -81,7 +81,6 @@ src/ui/components/textComponent.cpp
 include/game.hpp
 include/utils.hpp
 
-include/components/cameraComponent.hpp
 include/components/drawComponent.hpp
 include/components/meshComponent.hpp
 include/components/modelComponent.hpp
@@ -108,12 +107,12 @@ include/managers/localeManager.hpp
 include/managers/IOManager.hpp
 include/managers/entityManager.hpp
 include/managers/systemManager.hpp
+include/managers/managerManager.hpp
 
 include/systems/cameraSystem.hpp
 include/systems/textSystem.hpp
 include/systems/physicsSystem.hpp
 include/systems/renderSystem.hpp
-include/systems/system.hpp
 
 include/actors/actor.hpp
 include/actors/player.hpp

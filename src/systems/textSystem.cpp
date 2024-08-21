@@ -18,8 +18,8 @@
 // FIXME: Maybe add support for emojis
 // FIXME: Better unicode support
 // FIXME: Verical text https://freetype.org/freetype2/docs/tutorial/step2.html
-TextSystem::TextSystem(const std::string& path, Game* game, const unsigned int size, bool final)
-	: mGame(game), mPath(path + "assets" SEPARATOR "fonts" SEPARATOR), mSize(size), mLibrary(nullptr),
+TextSystem::TextSystem(Game* game, const unsigned int size, bool final)
+	: mGame(game), mPath(game->fullPath("assets" SEPARATOR "fonts" SEPARATOR)), mSize(size), mLibrary(nullptr),
 	  mFace(nullptr), mFontData(nullptr), mChild(nullptr) {
 	if (FT_Init_FreeType(&mLibrary)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to init freetype");
@@ -188,7 +188,7 @@ void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen
 		mGlyphMap[character] = loadGlyph(character);
 	}
 
-	const Glyph& glyph = mGlyphMap[character];
+	const TextSystem::Glyph& glyph = mGlyphMap[character];
 
 	if (glyph.size.x() <= 0 || glyph.size.y() <= 0) {
 		return;
@@ -210,6 +210,7 @@ void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen
 	glBindVertexArray(0);
 }
 
+/*
 Eigen::Vector2f TextSystem::getOffset(const char32_t character) {
 	if (!mGlyphMap.contains(character)) {
 		mGlyphMap[character] = loadGlyph(character);
@@ -225,9 +226,10 @@ Eigen::Vector2f TextSystem::getSize(const char32_t character) {
 
 	return mGlyphMap[character].size;
 }
+*/
 
 // FIXME: Loading two times
-Glyph TextSystem::loadGlyph(const char32_t character) {
+TextSystem::Glyph TextSystem::loadGlyph(const char32_t character) {
 	assert(mFace != nullptr);
 
 	const FT_UInt index = FT_Get_Char_Index(mFace, character);
@@ -244,7 +246,7 @@ Glyph TextSystem::loadGlyph(const char32_t character) {
 		throw std::runtime_error("Freetype.cpp: Failed to load character");
 	}
 
-	Glyph glyph = {(mFace->glyph->bitmap.rows > 0 && mFace->glyph->bitmap.width > 0)
+	TextSystem::Glyph glyph = {(mFace->glyph->bitmap.rows > 0 && mFace->glyph->bitmap.width > 0)
 			       ? new Texture(mFace->glyph->bitmap)
 			       : nullptr,
 		       Eigen::Vector2f(mFace->glyph->bitmap.width, mFace->glyph->bitmap.rows),

@@ -5,10 +5,9 @@
 #include "components/sprite2DComponent.hpp"
 #include "managers/eventManager.hpp"
 #include "managers/localeManager.hpp"
-#include "managers/physicsManager.hpp"
+#include "managers/systemManager.hpp"
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
-#include "opengl/renderer.hpp"
 #include "third_party/glad/glad.h"
 #include "ui/screens/controlUI.hpp"
 #include "ui/screens/mainUI.hpp"
@@ -32,16 +31,8 @@
 #endif
 
 Game::Game()
-	: mTextures(nullptr), mShaders(nullptr), mRenderer(nullptr), mFontManager(nullptr),
-	  mActorMutex(SDL_CreateMutex()), mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(false) {
-	if (mActorMutex == nullptr) {
-		SDL_Log("Failed to create actor mutex: %s", SDL_GetError());
-
-		ERROR_BOX("Failed to create mutex");
-
-		throw std::runtime_error("Failed to create mutex");
-	}
-
+	: mTextures(nullptr), mShaders(nullptr), mFontManager(nullptr), mUIScale(1.0f), mTicks(0), mBasePath(""),
+	  mPaused(false), mQuit(false) {
 	mUIScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 	if (mUIScale == 0.0f) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
@@ -63,14 +54,7 @@ Game::Game()
 	mShaders = std::make_unique<ShaderManager>(mBasePath);
 	mEventManager = std::make_unique<EventManager>(this);
 
-	mRenderer = new Renderer(this);
-
-	mFontManager = new FontManager(mBasePath, this);
-	mFontManager->loadFont("NotoSans.ttf");
-
 	mLocaleManager = new LocaleManager(mBasePath);
-	
-	mPhysicsManager = new PhysicsManager();
 
 	// TODO: Icon
 	/*
@@ -100,9 +84,7 @@ Game::~Game() {
 		delete mPendingActors.back();
 	}
 
-	delete mRenderer;
 	delete mLocaleManager;
-	delete mFontManager;
 	delete mSystemManager;
 	delete mEntityManager;
 
@@ -307,7 +289,7 @@ SDL_AppResult Game::event(const SDL_Event& event) {
 	ImGui_ImplSDL3_ProcessEvent(&event);
 
 	ImGuiIO& io = ImGui::GetIO();
-	(void) io;
+	(void)io;
 
 	/*
 	switch (event.type) {

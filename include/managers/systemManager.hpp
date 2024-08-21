@@ -1,9 +1,10 @@
 #pragma once
 
-#include <vector>
+#include <memory>
+
 class SystemManager {
       public:
-	SystemManager();
+	explicit SystemManager(class Game* game);
 	SystemManager(SystemManager&&) = delete;
 	SystemManager(const SystemManager&) = delete;
 	SystemManager& operator=(SystemManager&&) = delete;
@@ -13,5 +14,11 @@ class SystemManager {
 	void update();
 
       private:
-	std::vector<class System*>
+	class Game* mGame;
+
+	// The order of the systems shall be listed by the order they are updated
+	std::unique_ptr<class PhysicsSystem> mPhysicsSystem;
+	std::unique_ptr<class CameraSystem> mCameraSystem;
+	std::unique_ptr<class RenderSystem> mRenderSystem;
+	std::unique_ptr<class TextSystem> mTextSystem;
 };

@@ -1,17 +1,15 @@
 #pragma once
 
-#include "systems/system.hpp"
-
 #include <vector>
 
-class PhysicsManager : public System {
+class PhysicsSystem {
       public:
-	PhysicsManager() = default;
-	PhysicsManager(PhysicsManager&&) = delete;
-	PhysicsManager(const PhysicsManager&) = delete;
-	PhysicsManager& operator=(PhysicsManager&&) = delete;
-	PhysicsManager& operator=(const PhysicsManager&) = delete;
-	~PhysicsManager() = default;
+	PhysicsSystem();
+	PhysicsSystem(PhysicsSystem&&) = delete;
+	PhysicsSystem(const PhysicsSystem&) = delete;
+	PhysicsSystem& operator=(PhysicsSystem&&) = delete;
+	PhysicsSystem& operator=(const PhysicsSystem&) = delete;
+	~PhysicsSystem() = default;
 
 	void collide();
 	void addCollisionComponent(class CollisionComponent* component);
