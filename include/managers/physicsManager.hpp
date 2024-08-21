@@ -13,6 +13,7 @@ class PhysicsManager {
 
 	void collide();
 	void addCollisionComponent(class CollisionComponent* component);
+	void removeComponent(class CollisionComponent* component);
 
       private:
 	// Collision tests

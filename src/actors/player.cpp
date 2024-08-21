@@ -29,7 +29,5 @@ Player::Player(class Game* game) : Actor(game) {
 
 	RectangleCollisionComponent* collisionComponent =
 		new RectangleCollisionComponent(this, spriteComponent->getSize());
-	collisionComponent->onCollide([](CollisionComponent* that) {
-		(void)that;
-	});
+	collisionComponent->onCollide([this](CollisionComponent* that) {(void) that; this->setState(Actor::DEAD); });
 }

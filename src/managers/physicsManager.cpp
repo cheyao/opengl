@@ -37,7 +37,6 @@ void PhysicsManager::collide() {
 
 		for (size_t b = a + 1; b < mCollisionComponents.size(); ++b) {
 			// Test collision
-
 			if (aType == RECTANGLE &&
 			    dynamic_cast<RectangleCollisionComponent*>(mCollisionComponents[b]) != nullptr) {
 				if (collideRectRect(
@@ -86,3 +85,9 @@ bool PhysicsManager::collideRectRect(class RectangleCollisionComponent* a, class
 #elif defined(__GNUC__)
 #pragma GCC diagnostic pop
 #endif
+
+void PhysicsManager::removeComponent(CollisionComponent* component) {
+	const auto& iter = std::find(mCollisionComponents.begin(), mCollisionComponents.end(), component);
+
+	[[likely]] if (iter != mCollisionComponents.end()) { mCollisionComponents.erase(iter); }
+}
