@@ -1,7 +1,6 @@
 #include "ui/components/textComponent.hpp"
 
 #include "game.hpp"
-#include "managers/fontManager.hpp"
 #include "third_party/Eigen/Core"
 #include "ui/UIComponent.hpp"
 #include "ui/UIScreen.hpp"
@@ -12,15 +11,18 @@
 TextComponent::TextComponent(class UIScreen* owner, class UIComponent* parent, const std::string& id,
 			     const Eigen::Vector2f offset)
 	: UIComponent(owner, offset, "TextComponent " + id), mTextID(id), mParent(parent), mOffset(offset) {
-	assert(owner != nullptr);
+	(void) mParent;
+	/*
+		assert(owner != nullptr);
 
-	FontManager* manager = mOwner->getGame()->getFontManager();
-	Eigen::Vector2f size = Eigen::Vector2f::Zero();
-	for (const char32_t c : mOwner->getGame()->getLocaleManager()->get(mTextID)) {
-		size.x() += manager->getOffset(c).x();
-		size.y() = std::max(size.y(), manager->getSize(c).y());
-	}
-	mSize = size;
+		FontManager* manager = mOwner->getGame()->getFontManager();
+		Eigen::Vector2f size = Eigen::Vector2f::Zero();
+		for (const char32_t c : mOwner->getGame()->getLocaleManager()->get(mTextID)) {
+			size.x() += manager->getOffset(c).x();
+			size.y() = std::max(size.y(), manager->getSize(c).y());
+		}
+		mSize = size;
+		*/
 }
 
 #if defined(__clang__)
@@ -33,6 +35,7 @@ TextComponent::TextComponent(class UIScreen* owner, class UIComponent* parent, c
 // FIXME: Newlines
 // TODO: Scaling
 void TextComponent::drawText([[maybe_unused]] Shader* shader) {
+	/*
 	FontManager* manager = mOwner->getGame()->getFontManager();
 	Eigen::Vector2f offset = mOffset;
 
@@ -78,6 +81,7 @@ void TextComponent::drawText([[maybe_unused]] Shader* shader) {
 
 		offset += manager->getOffset(c);
 	}
+	*/
 }
 
 #if defined(__clang__)

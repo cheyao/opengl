@@ -1,7 +1,6 @@
 #include "ui/screens/mainUI.hpp"
 
 #include "game.hpp"
-#include "opengl/renderer.hpp"
 #include "third_party/Eigen/Core"
 #include "ui/UIScreen.hpp"
 #include "ui/components/backgroundComponent.hpp"
@@ -11,6 +10,7 @@
 #include "utils.hpp"
 
 MainUI::MainUI(class Game* const game) : UIScreen(game, "MainUI") {
+	/*
 	game->setPause(true);
 	game->getRenderer()->setWindowRelativeMouseMode(SDL_FALSE);
 
@@ -40,4 +40,5 @@ MainUI::MainUI(class Game* const game) : UIScreen(game, "MainUI") {
 	new TextComponent(div, quit, "quit_game", Eigen::Vector2f(CENTER, CENTER));
 	new TextComponent(div, start, "start_game", Eigen::Vector2f(CENTER, CENTER));
 	new TextComponent(div, settings, "settings", Eigen::Vector2f(CENTER, CENTER));
+	*/
 }

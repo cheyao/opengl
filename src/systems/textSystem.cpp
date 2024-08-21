@@ -78,7 +78,7 @@ TextSystem::TextSystem(Game* game, const unsigned int size, bool final)
 
 	// TODO: Dyn load
 	if (!final) {
-		mChild = new TextSystem(path, game, size, true);
+		mChild = new TextSystem(game, size, true);
 		mChild->loadFont("NotoSansCJK.ttc");
 	}
 }
@@ -254,4 +254,8 @@ TextSystem::Glyph TextSystem::loadGlyph(const char32_t character) {
 		       Eigen::Vector2f(mFace->glyph->advance.x >> 6, mFace->glyph->advance.y >> 6)};
 
 	return glyph;
+}
+
+void TextSystem::draw() {
+	// TODO:
 }

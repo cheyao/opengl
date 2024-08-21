@@ -21,6 +21,7 @@ class TextSystem {
 	void loadFont(const std::string& name);
 	// Size in 1/64 of a pixel
 	void setFontSize(const unsigned int size);
+	void draw();
 
 	// [[nodiscard]] Eigen::Vector2f getOffset(const char32_t character);
 	// [[nodiscard]] Eigen::Vector2f getSize(const char32_t character);

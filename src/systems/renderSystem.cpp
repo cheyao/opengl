@@ -111,6 +111,8 @@ RenderSystem::RenderSystem(Game* game)
 
 	mGL = std::make_unique<GLManager>(mWindow);
 
+	assert(mGL->getContext() != nullptr);
+
 #ifdef IMGUI
 	SDL_Log("Initializing ImGUI");
 
@@ -158,7 +160,7 @@ RenderSystem::RenderSystem(Game* game)
 	// Misc
 	mGL->printInfo();
 
-	assert(mGL->getContext() != nullptr);
+	setOrtho();
 }
 
 RenderSystem::~RenderSystem() { SDL_DestroyWindow(mWindow); /* Other stuff are smart pointers */ }
@@ -174,6 +176,8 @@ void RenderSystem::setDemensions(int width, int height) {
 	mFramebuffer->setDemensions(w, h);
 
 	setUIMatrix();
+
+	setOrtho();
 }
 
 void RenderSystem::draw() {
@@ -184,16 +188,15 @@ void RenderSystem::draw() {
 	glClear(GL_DEPTH_BUFFER_BIT);
 #endif
 
-	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
-	mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
+	/*
+		for (const auto& sprite : mDrawables) {
+			Shader* const shader = sprite->getShader();
+			shader->activate();
 
-	for (const auto& sprite : mDrawables) {
-		Shader* const shader = sprite->getShader();
-		shader->activate();
-
-		setLights(shader);
-		sprite->draw();
-	}
+			setLights(shader);
+			sprite->draw();
+		}
+		*/
 
 	glDisable(GL_DEPTH_TEST);
 
@@ -206,8 +209,6 @@ void RenderSystem::draw() {
 		}
 	}
 
-	mFramebuffer->swap();
-
 #ifdef __EMSCRIPTEN__
 	// Emscripten, SDL3 doesn't correctly report resize atm
 	if (browserWidth() != mWidth || browserHeight() != mHeight) {
@@ -218,6 +219,8 @@ void RenderSystem::draw() {
 	}
 #endif
 }
+
+void RenderSystem::present() { mFramebuffer->swap(); }
 
 void RenderSystem::swapWindow() const { SDL_GL_SwapWindow(mWindow); }
 
@@ -279,4 +282,63 @@ Texture* RenderSystem::getTexture(const std::string& name, const bool srgb) { re
 
 Shader* RenderSystem::getShader(const std::string& vert, const std::string& frag, const std::string& geom) {
 	return mShaders->get(vert, frag, geom);
+}
+
+/*
+NOTE: Not needed for our 2D game
+void RenderSystem::view() {
+	Eigen::Matrix3f R;
+	const Eigen::Vector3f up(0.0f, 1.0f, 0.0f);
+	R.col(2) = (-mOwner->getForward() * 100.f).normalized();
+	R.col(0) = up.cross(R.col(2)).normalized();
+	R.col(1) = R.col(2).cross(R.col(0));
+
+	Eigen::Affine3f mViewMatrix = Eigen::Affine3f::Identity();
+	mViewMatrix.matrix().topLeftCorner<3, 3>() = R.transpose();
+	mViewMatrix.matrix().topRightCorner<3, 1>() = -R.transpose(); // * mOwner->getPosition();
+	mViewMatrix(3, 3) = 1.0f;
+}
+*/
+
+void RenderSystem::setPersp() {
+	constexpr const static float near = 0.1f;
+	constexpr const static float far = 100.0f;
+	constexpr const static float range = far - near;
+	constexpr const static float fov = 45.0f;
+
+	const float aspect = static_cast<float>(mWidth) / mHeight;
+	const float theta = fov * 0.5;
+	const float invtan = 1.0f / tan(theta);
+
+	// https://www.songho.ca/opengl/gl_projectionmatrix.html
+	Eigen::Affine3f projectionMatrix = Eigen::Affine3f::Identity();
+	projectionMatrix(0, 0) = invtan / aspect;
+	projectionMatrix(1, 1) = invtan;
+	projectionMatrix(2, 2) = -(near + far) / range;
+	projectionMatrix(3, 2) = -1;
+	projectionMatrix(2, 3) = -2 * near * far / range;
+	projectionMatrix(3, 3) = 0;
+
+	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), projectionMatrix);
+}
+
+void RenderSystem::setOrtho() {
+	constexpr const static float left = 0.0f;
+	constexpr const static float bottom = 0.0f;
+	constexpr const static float near = 0.0f;
+	constexpr const static float far = 1000.0f;
+
+	const float right = static_cast<float>(mWidth);
+	const float top = static_cast<float>(mHeight);
+
+	Eigen::Affine3f projectionMatrix = Eigen::Affine3f::Identity();
+	projectionMatrix(0, 0) = 2.0f / (right - left);
+	projectionMatrix(1, 1) = 2.0f / (top - bottom);
+	projectionMatrix(2, 2) = -2.0f / (far - near);
+	projectionMatrix(3, 3) = 1;
+	projectionMatrix(0, 3) = -(right + left) / (right - left);
+	projectionMatrix(1, 3) = -(top + bottom) / (top - bottom);
+	projectionMatrix(2, 3) = -(far + near) / (far - near);
+
+	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), projectionMatrix);
 }

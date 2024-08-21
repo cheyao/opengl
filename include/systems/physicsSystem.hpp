@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 class PhysicsSystem {
       public:
 	PhysicsSystem();

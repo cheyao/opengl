@@ -21,9 +21,6 @@ class Game {
 	[[nodiscard]] SDL_AppResult iterate();
 	[[nodiscard]] SDL_AppResult event(const union SDL_Event& event);
 
-	[[nodiscard]] int getWidth() const;
-	[[nodiscard]] int getHeight() const;
-
 	void setPause(const bool val) { mPaused = val; }
 	[[nodiscard]] bool isPaused() const { return mPaused; }
 
@@ -52,8 +49,8 @@ class Game {
 
 	void gui();
 	void input();
-	void update();
-	void draw();
+	// void update();
+	// void draw();
 
 	std::unique_ptr<class EventManager> mEventManager;
 	std::unique_ptr<class ManagerManager> mManagerManager;

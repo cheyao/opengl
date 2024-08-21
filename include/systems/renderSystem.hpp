@@ -28,10 +28,13 @@ class RenderSystem {
 	void draw();
 	void reload() const;
 	void swapWindow() const;
+	void present();
 
       private:
 	void setLights(class Shader* shader) const;
 	void setUIMatrix();
+	void setOrtho();
+	void setPersp();
 
 	class Game* mGame;
 

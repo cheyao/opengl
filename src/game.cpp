@@ -75,8 +75,10 @@ Game::~Game() {
 void Game::setup() {
 	SDL_Log("Setting up UIs");
 
+	/*
 	new ControlUI(this);
 	new MainUI(this);
+	*/
 
 	SDL_Log("Successfully initialized OpenGL and UI\n");
 
@@ -96,10 +98,19 @@ SDL_AppResult Game::iterate() {
 		return SDL_APP_SUCCESS;
 	}
 
+	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
+	if (delta > 0.05f) {
+		delta = 0.05f;
+
+		SDL_Log("Delta > 0.5f, cutting frame short");
+	}
+	mTicks = SDL_GetTicks();
+
 	gui();
 	input();
-	update();
-	draw();
+	// update();
+	// draw();
+	mManagerManager->getSystemManager()->update(delta);
 
 #ifdef DEBUG
 	GLenum err = 0;
@@ -177,6 +188,7 @@ void Game::input() {
 	}
 }
 
+/*
 void Game::update() {
 	// Update the game
 	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
@@ -215,6 +227,7 @@ void Game::update() {
 		delete ui;
 	}
 }
+*/
 
 SDL_AppResult Game::event(const SDL_Event& event) {
 #ifdef IMGUI

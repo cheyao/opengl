@@ -56,7 +56,6 @@ src/managers/systemManager.cpp
 src/managers/managerManager.cpp
 src/managers/componentManager.cpp
 
-src/systems/cameraSystem.cpp
 src/systems/textSystem.cpp
 src/systems/physicsSystem.cpp
 src/systems/renderSystem.cpp
@@ -105,7 +104,6 @@ include/managers/systemManager.hpp
 include/managers/managerManager.hpp
 include/managers/componentManager.hpp
 
-include/systems/cameraSystem.hpp
 include/systems/textSystem.hpp
 include/systems/physicsSystem.hpp
 include/systems/renderSystem.hpp
