@@ -9,7 +9,5 @@ std::uint64_t EntityManager::getEntity() {
 		return first;
 	}
 
-	++mNext;
-
-	return mNext - 1;
+	return mNext++;
 }

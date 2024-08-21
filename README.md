@@ -188,6 +188,7 @@ assets
     - [ ] Formatter
 - [x] UI Scaling
 - [ ] Shadows
+- [ ] Combine localemanager and textmanager
 
 ## Notes
 

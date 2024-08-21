@@ -54,6 +54,7 @@ src/managers/localeManager.cpp
 src/managers/entityManager.cpp
 src/managers/systemManager.cpp
 src/managers/managerManager.cpp
+src/managers/componentManager.cpp
 
 src/systems/cameraSystem.cpp
 src/systems/textSystem.cpp
@@ -108,6 +109,7 @@ include/managers/IOManager.hpp
 include/managers/entityManager.hpp
 include/managers/systemManager.hpp
 include/managers/managerManager.hpp
+include/managers/componentManager.hpp
 
 include/systems/cameraSystem.hpp
 include/systems/textSystem.hpp

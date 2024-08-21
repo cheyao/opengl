@@ -5,7 +5,7 @@
 
 #define ERROR_BOX(msg) SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERROR", msg, nullptr)
 
-const float PI = 3.14159265358979323846;
+constexpr const static float PI = 3.14159265358979323846;
 
 inline float toRadians(float degrees) { return degrees * (PI / 180.f); }
 

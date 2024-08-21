@@ -1,4 +1,4 @@
-#include "managers/physicsManager.hpp"
+#include "systems/physicsSystem.hpp"
 
 #include "actors/actor.hpp"
 #include "components/collisionComponent.hpp"
@@ -7,7 +7,7 @@
 
 #include <SDL3/SDL.h>
 
-void PhysicsManager::addCollisionComponent(class CollisionComponent* component) {
+void PhysicsSystem::addCollisionComponent(class CollisionComponent* component) {
 	const int priority = component->getCollisionPriority();
 	auto iter = mCollisionComponents.begin();
 
@@ -20,7 +20,7 @@ void PhysicsManager::addCollisionComponent(class CollisionComponent* component) 
 	mCollisionComponents.insert(iter, component);
 }
 
-void PhysicsManager::collide() {
+void PhysicsSystem::collide() {
 	// PERF: There surely is a better way to do this
 
 	for (size_t a = 0; a < mCollisionComponents.size(); ++a) {
@@ -63,7 +63,7 @@ void PhysicsManager::collide() {
 #endif
 
 // TODO: https://noonat.github.io/intersect/#aabb-vs-swept-aabb
-bool PhysicsManager::collideRectRect(class RectangleCollisionComponent* a, class RectangleCollisionComponent* b) {
+bool PhysicsSystem::collideRectRect(class RectangleCollisionComponent* a, class RectangleCollisionComponent* b) {
 	assert(a->getOwner()->getPosition().z() == 0 && "Not 2D");
 	assert(a->getOwner()->getPosition().z() == 0 && "Not 2D");
 

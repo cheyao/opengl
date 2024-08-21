@@ -5,13 +5,12 @@
 #include "components/sprite2DComponent.hpp"
 #include "managers/eventManager.hpp"
 #include "managers/localeManager.hpp"
-#include "managers/systemManager.hpp"
+#include "managers/managerManager.hpp"
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
 #include "third_party/glad/glad.h"
 #include "ui/screens/controlUI.hpp"
 #include "ui/screens/mainUI.hpp"
-#include "utils.hpp"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
@@ -31,7 +30,7 @@
 #endif
 
 Game::Game()
-	: mTextures(nullptr), mShaders(nullptr), mFontManager(nullptr), mUIScale(1.0f), mTicks(0), mBasePath(""),
+	: mTextures(nullptr), mShaders(nullptr), mUIScale(1.0f), mTicks(0), mBasePath(""),
 	  mPaused(false), mQuit(false) {
 	mUIScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 	if (mUIScale == 0.0f) {
@@ -53,6 +52,7 @@ Game::Game()
 	mTextures = std::make_unique<TextureManager>(mBasePath);
 	mShaders = std::make_unique<ShaderManager>(mBasePath);
 	mEventManager = std::make_unique<EventManager>(this);
+	mManagerManager = std::make_unique<ManagerManager>(this);
 
 	mLocaleManager = new LocaleManager(mBasePath);
 
@@ -77,18 +77,7 @@ Game::~Game() {
 	ImGui::DestroyContext();
 #endif
 
-	while (!mActors.empty()) {
-		delete mActors.back();
-	}
-	while (!mPendingActors.empty()) {
-		delete mPendingActors.back();
-	}
-
 	delete mLocaleManager;
-	delete mSystemManager;
-	delete mEntityManager;
-
-	SDL_DestroyMutex(mActorMutex);
 }
 
 void Game::setup() {
@@ -112,8 +101,6 @@ void Game::setup() {
 	SDL_Log("Successfully initialized Game World");
 
 	mTicks = SDL_GetTicks();
-
-	mRenderer->setDemensions(getWidth(), getHeight());
 }
 
 SDL_AppResult Game::iterate() {
@@ -200,12 +187,6 @@ void Game::input() {
 	for (const auto& ui : mUI) {
 		ui->processInput(mEventManager->getKeystate());
 	}
-
-	if (!mPaused) {
-		for (const auto& actor : mActors) {
-			actor->input(mEventManager->getKeystate());
-		}
-	}
 }
 
 void Game::update() {
@@ -219,42 +200,7 @@ void Game::update() {
 	mTicks = SDL_GetTicks();
 
 #ifdef IMGUI
-	ImGui::Begin("Actors");
-	ImGui::Text("The current game state: %d", mPaused);
-#endif
-	if (!mPaused) {
-		// Update the Actors if not paused
-		for (const auto& actor : mActors) {
-#ifdef IMGUI
-			const auto& pos = actor->getPosition();
-			ImGui::Text("Actor: %lx state: %d position: %f %f %f", reinterpret_cast<uintptr_t>(actor),
-				    actor->getState(), pos.x(), pos.y(), pos.z());
-#endif
 
-			actor->update(delta);
-		}
-	}
-#ifdef IMGUI
-	ImGui::End();
-#endif
-
-	// Append the pending actors
-	SDL_LockMutex(mActorMutex);
-	std::copy(mPendingActors.begin(), mPendingActors.end(), std::back_inserter(mActors));
-	mPendingActors.clear();
-	SDL_UnlockMutex(mActorMutex);
-
-	// Remove the dead Actors
-	std::vector<const Actor*> deadActors;
-	std::copy_if(mActors.begin(), mActors.end(), std::back_inserter(deadActors),
-		     [](const auto* const actor) { return (actor->getState() == Actor::DEAD); });
-
-	// Delete all the dead actors
-	for (const auto& actor : deadActors) {
-		delete actor;
-	}
-
-#ifdef IMGUI
 	ImGui::Begin("UIs");
 #endif
 	for (const auto& ui : mUI) {
@@ -281,8 +227,6 @@ void Game::update() {
 		delete ui;
 	}
 }
-
-void Game::draw() { mRenderer->draw(); }
 
 SDL_AppResult Game::event(const SDL_Event& event) {
 #ifdef IMGUI
@@ -333,26 +277,6 @@ SDL_AppResult Game::event(const SDL_Event& event) {
 	return mEventManager->manageEvent(event);
 }
 
-void Game::addActor(Actor* actor) {
-	// Everything goes to pending
-	mPendingActors.emplace_back(actor);
-}
-
-void Game::removeActor(Actor* actor) {
-	// NOTE: the pending actors was first
-	auto iter = std::find(mActors.begin(), mActors.end(), actor);
-	[[likely]] if (iter != mActors.end()) {
-		std::iter_swap(iter, mActors.end() - 1);
-		mActors.pop_back();
-	}
-
-	iter = std::find(mPendingActors.begin(), mPendingActors.end(), actor);
-	[[likely]] if (iter != mPendingActors.end()) {
-		std::iter_swap(iter, mPendingActors.end() - 1);
-		mPendingActors.pop_back();
-	}
-}
-
 void Game::removeUI(UIScreen* ui) {
 	const auto iter = std::find(mUI.begin(), mUI.end(), ui);
 	[[likely]] if (iter != mUI.end()) {
@@ -366,8 +290,5 @@ Texture* Game::getTexture(const std::string& name, const bool srgb) { return mTe
 Shader* Game::getShader(const std::string& vert, const std::string& frag, const std::string& geom) {
 	return mShaders->get(vert, frag, geom);
 }
-
-[[nodiscard]] int Game::getWidth() const { return mRenderer->getWidth(); }
-[[nodiscard]] int Game::getHeight() const { return mRenderer->getHeight(); }
 
 void Game::setKey(const size_t key, const bool val) { mEventManager->setKey(key, val); }

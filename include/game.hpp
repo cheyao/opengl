@@ -1,6 +1,5 @@
 #pragma once
 
-#include "managers/localeManager.hpp"
 #include "utils.hpp"
 
 #include <cstddef>
@@ -34,7 +33,6 @@ class Game {
 	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
 					      const std::string& geom = "");
 
-	[[nodiscard]] class FontManager* getFontManager() const { return mFontManager; }
 	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager; }
 
 	[[nodiscard]] inline std::string fullPath(const std::string& path) const {
@@ -61,12 +59,9 @@ class Game {
 	std::unique_ptr<class TextureManager> mTextures;
 	std::unique_ptr<class ShaderManager> mShaders;
 	std::unique_ptr<class EventManager> mEventManager;
+	std::unique_ptr<class ManagerManager> mManagerManager;
 
 	class LocaleManager* mLocaleManager;
-	class SystemManager* mSystemManager;
-
-	std::vector<class Actor*> mActors;
-	std::vector<class Actor*> mPendingActors;
 
 	std::vector<class UIScreen*> mUI;
 	float mUIScale;
