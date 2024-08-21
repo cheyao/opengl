@@ -1,7 +1,6 @@
 #include "managers/eventManager.hpp"
 
 #include "game.hpp"
-#include "opengl/renderer.hpp"
 #include "ui/screens/mainUI.hpp"
 
 #include <SDL3/SDL.h>
@@ -46,7 +45,7 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 
 		case SDL_EVENT_WINDOW_RESIZED: {
 			//	case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: {
-			mGame->getRenderer()->setDemensions(event.window.data1, event.window.data2);
+			mGame->setDemensions(event.window.data1, event.window.data2);
 
 			break;
 		}
@@ -88,7 +87,9 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 		}
 
 		case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED: {
-			mGame->getRenderer()->setDisplayScale();
+			// mGame->getRenderer()->setDisplayScale();
+			// TODO:
+
 			break;
 		}
 
@@ -122,7 +123,7 @@ SDL_AppResult EventManager::manageKeyboardEvent(const SDL_Event& event) {
 
 		case SDLK_F1: {
 			rel = !rel;
-			mGame->getRenderer()->setWindowRelativeMouseMode(static_cast<int>(rel));
+			// mGame->getRenderer()->setWindowRelativeMouseMode(static_cast<int>(rel));
 
 			break;
 		}

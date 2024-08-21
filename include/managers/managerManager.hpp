@@ -10,6 +10,10 @@ class ManagerManager {
 	ManagerManager& operator=(const ManagerManager&) = default;
 	~ManagerManager();
 
+	class SystemManager* getSystemManager() const { return mSystemManager; };
+	class EntityManager* getEntityManager() const { return mEntityManager; };
+	class ComponentManager* getComponentManager() const { return mComponentManager; };
+
       private:
 	class Game* mGame;
 

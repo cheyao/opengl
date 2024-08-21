@@ -17,6 +17,8 @@ SystemManager::SystemManager(Game* game) : mGame(game) {
 
 SystemManager::~SystemManager() {}
 
+void SystemManager::setDemensions(const int width, const int height) { mRenderSystem->setDemensions(width, height); }
+
 void SystemManager::update() {
 	mPhysicsSystem->update();
 	mCameraSystem->update();

@@ -41,6 +41,8 @@ class Game {
 	[[nodiscard]] const std::vector<class UIScreen*>& getUIs() const { return mUI; }
 	[[nodiscard]] float getScale() const { return mUIScale; }
 
+	void setDemensions(const int width, const int height);
+
 	void setKey(const size_t key, const bool val);
 
 	void quit() { mQuit = true; }

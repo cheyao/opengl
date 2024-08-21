@@ -11,6 +11,7 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <cassert>
 #include <stdexcept>
 
 // The main class is in charge of sdl

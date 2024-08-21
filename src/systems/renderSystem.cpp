@@ -9,10 +9,10 @@
 #include "opengl/ubo.hpp"
 #include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
+#include "ui/UIScreen.hpp"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
-#include <algorithm>
 #include <cassert>
 #include <memory>
 
@@ -173,8 +173,6 @@ void RenderSystem::setDemensions(int width, int height) {
 	glViewport(0, 0, w, h);
 	mFramebuffer->setDemensions(w, h);
 
-	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
-
 	setUIMatrix();
 }
 
@@ -186,14 +184,12 @@ void RenderSystem::draw() {
 	glClear(GL_DEPTH_BUFFER_BIT);
 #endif
 
-	assert(mCamera != nullptr && "Did you forget to uncomment `new Player(this)`?");
-
+	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
 	mMatricesUBO->set(1 * sizeof(Eigen::Affine3f), mCamera->getViewMatrix());
 
 	for (const auto& sprite : mDrawables) {
 		Shader* const shader = sprite->getShader();
 		shader->activate();
-		// shader->set("viewPos", mCamera->getOwner()->getPosition());
 
 		setLights(shader);
 		sprite->draw();
@@ -225,55 +221,6 @@ void RenderSystem::draw() {
 
 void RenderSystem::swapWindow() const { SDL_GL_SwapWindow(mWindow); }
 
-void RenderSystem::reload() const {
-	for (const auto& sprite : mDrawables) {
-		sprite->reload();
-	}
-}
-
-void RenderSystem::setCamera(class CameraComponent* camera) {
-	assert(camera != nullptr && "Forgot to init camera?");
-
-	mCamera = camera;
-
-	// The projection matrix never gets updated except when the camera is set
-	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), mCamera->getProjectionMatrix());
-}
-
-void RenderSystem::addSprite(DrawComponent* sprite) {
-	sprite->getShader()->bind("Matrices", 0);
-
-	// Preserve order
-	int order = sprite->getDrawOrder();
-	auto iter = mDrawables.begin();
-	for (; iter != mDrawables.end(); ++iter) {
-		if (order < (*iter)->getDrawOrder()) {
-			break;
-		}
-	}
-
-	mDrawables.insert(iter, sprite);
-}
-
-void RenderSystem::removeSprite(DrawComponent* sprite) {
-	auto iter = std::find(mDrawables.begin(), mDrawables.end(), sprite);
-	mDrawables.erase(iter);
-}
-
-void RenderSystem::setLights(Shader* shader) const {
-	// TODO: Concat all these
-	(void)shader;
-}
-
-void RenderSystem::setWindowRelativeMouseMode(SDL_bool mode) const {
-	(void)mode;
-	/*
-	if (SDL_SetWindowRelativeMouseMode(mWindow, mode) != 0) {
-		SDL_Log("Failed to set relative mouse mode: %s", SDL_GetError());
-	}
-	*/
-}
-
 void RenderSystem::setUIMatrix() {
 	Eigen::Affine3f ortho = Eigen::Affine3f::Identity();
 
@@ -294,11 +241,11 @@ void RenderSystem::setUIMatrix() {
 	ortho(1, 3) = -(top + bottom) / (top - bottom);
 	ortho(2, 3) = -(far + near) / (far - near);
 
-	Shader* const UIshader = mGame->getShader("ui.vert", "ui.frag");
+	Shader* const UIshader = this->getShader("ui.vert", "ui.frag");
 	UIshader->activate();
 	UIshader->set("proj", ortho);
 
-	Shader* const textshader = mGame->getShader("text.vert", "text.frag");
+	Shader* const textshader = this->getShader("text.vert", "text.frag");
 	textshader->activate();
 	textshader->set("proj", ortho);
 }
@@ -327,6 +274,7 @@ void RenderSystem::setDisplayScale() const {
 	style.ScaleAllSizes(scale);
 #endif
 }
+
 Texture* RenderSystem::getTexture(const std::string& name, const bool srgb) { return mTextures->get(name, srgb); }
 
 Shader* RenderSystem::getShader(const std::string& vert, const std::string& frag, const std::string& geom) {

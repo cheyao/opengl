@@ -13,6 +13,8 @@ class SystemManager {
 
 	void update();
 
+	void setDemensions(const int width, const int height);
+
       private:
 	class Game* mGame;
 

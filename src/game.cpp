@@ -1,13 +1,9 @@
 #include "game.hpp"
 
-#include "actors/player.hpp"
-#include "components/rectangleCollisionComponent.hpp"
-#include "components/sprite2DComponent.hpp"
 #include "managers/eventManager.hpp"
 #include "managers/localeManager.hpp"
 #include "managers/managerManager.hpp"
-#include "managers/shaderManager.hpp"
-#include "managers/textureManager.hpp"
+#include "managers/systemManager.hpp"
 #include "third_party/glad/glad.h"
 #include "ui/screens/controlUI.hpp"
 #include "ui/screens/mainUI.hpp"
@@ -29,9 +25,7 @@
 #include <imgui.h>
 #endif
 
-Game::Game()
-	: mTextures(nullptr), mShaders(nullptr), mUIScale(1.0f), mTicks(0), mBasePath(""),
-	  mPaused(false), mQuit(false) {
+Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(false) {
 	mUIScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 	if (mUIScale == 0.0f) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
@@ -88,16 +82,13 @@ void Game::setup() {
 
 	SDL_Log("Setting up game");
 
-	new Player(this);
-
-	Sprite2DComponent* spriteComponent = new Sprite2DComponent(cube, this->getTexture("stone.png"));
-	spriteComponent->setShaders("block.vert", "block.frag");
-
-	new RectangleCollisionComponent(cube, spriteComponent->getSize());
-
 	SDL_Log("Successfully initialized Game World");
 
 	mTicks = SDL_GetTicks();
+}
+
+void Game::setDemensions(const int width, const int height) {
+	mManagerManager->getSystemManager()->setDemensions(width, height);
 }
 
 SDL_AppResult Game::iterate() {
