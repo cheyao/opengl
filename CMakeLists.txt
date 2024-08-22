@@ -27,18 +27,9 @@ set(SRC
 # Sources
 src/main.cpp
 src/game.cpp
+src/scene.cpp
 
 src/misc/sparse_set.cpp
-
-# src/components/drawComponent.cpp
-# src/components/meshComponent.cpp
-# src/components/modelComponent.cpp
-# src/components/movementComponent.cpp
-# src/components/inputComponent.cpp
-# src/components/sprite2DComponent.cpp
-# src/components/physicsComponent.cpp
-# src/components/collisionComponent.cpp
-# src/components/rectangleCollisionComponent.cpp
 
 src/opengl/cubemap.cpp
 src/opengl/mesh.cpp
@@ -76,18 +67,10 @@ src/ui/components/textComponent.cpp
 # Headers
 include/game.hpp
 include/utils.hpp
+include/components.hpp
+include/scene.hpp
 
 include/misc/sparse_set.hpp
-
-# include/components/drawComponent.hpp
-# include/components/meshComponent.hpp
-# include/components/modelComponent.hpp
-# include/components/movementComponent.hpp
-# include/components/inputComponent.hpp
-# include/components/sprite2DComponent.hpp
-# include/components/physicsComponent.hpp
-# include/components/collisionComponent.hpp
-# include/components/rectangleCollisionComponent.hpp
 
 include/opengl/cubemap.hpp
 include/opengl/mesh.hpp
