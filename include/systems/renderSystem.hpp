@@ -25,16 +25,16 @@ class RenderSystem {
 	void setDemensions(int width, int height);
 	void setDisplayScale() const;
 
-	void draw();
+	void draw(class Scene* scene);
 	void reload() const;
 	void swapWindow() const;
-	void present();
+	void present() const;
 
       private:
 	void setLights(class Shader* shader) const;
 	void setUIMatrix();
-	void setOrtho();
-	void setPersp();
+	void setOrtho() const;
+	void setPersp() const;
 
 	class Game* mGame;
 

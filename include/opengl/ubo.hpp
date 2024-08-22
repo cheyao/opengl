@@ -1,12 +1,10 @@
 #pragma once
 
-#include "third_party/glad/glad.h"
 #include "third_party/Eigen/Geometry"
-
-#include <string_view>
+#include "third_party/glad/glad.h"
 
 class UBO {
-  public:
+      public:
 	explicit UBO(GLsizeiptr size);
 	UBO(UBO&&);
 	UBO(const UBO&);
@@ -15,10 +13,10 @@ class UBO {
 	~UBO();
 
 	// TODO: More setters
-	void set(GLintptr name, Eigen::Affine3f matrix);
-	void bind(GLuint index);
+	void set(GLintptr name, Eigen::Affine3f matrix) const;
+	void bind(GLuint index) const;
 
-  private:
+      private:
 	GLuint mUBO;
 	GLsizeiptr mSize;
 };

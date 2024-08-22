@@ -157,7 +157,7 @@ RenderSystem::RenderSystem(Game* game)
 	mMatricesUBO->bind(0);
 	setUIMatrix();
 
-	// Misc
+	// Debug Info
 	mGL->printInfo();
 
 	setOrtho();
@@ -180,7 +180,7 @@ void RenderSystem::setDemensions(int width, int height) {
 	setOrtho();
 }
 
-void RenderSystem::draw() {
+void RenderSystem::draw(class Scene* scene) {
 #ifdef DEBUG
 	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -220,7 +220,7 @@ void RenderSystem::draw() {
 #endif
 }
 
-void RenderSystem::present() { mFramebuffer->swap(); }
+void RenderSystem::present() const { mFramebuffer->swap(); }
 
 void RenderSystem::swapWindow() const { SDL_GL_SwapWindow(mWindow); }
 
@@ -300,7 +300,7 @@ void RenderSystem::view() {
 }
 */
 
-void RenderSystem::setPersp() {
+void RenderSystem::setPersp() const {
 	constexpr const static float near = 0.1f;
 	constexpr const static float far = 100.0f;
 	constexpr const static float range = far - near;
@@ -322,7 +322,7 @@ void RenderSystem::setPersp() {
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), projectionMatrix);
 }
 
-void RenderSystem::setOrtho() {
+void RenderSystem::setOrtho() const {
 	constexpr const static float left = 0.0f;
 	constexpr const static float bottom = 0.0f;
 	constexpr const static float near = 0.0f;

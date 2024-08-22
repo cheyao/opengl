@@ -3,6 +3,7 @@
 #include "managers/eventManager.hpp"
 #include "managers/localeManager.hpp"
 #include "managers/systemManager.hpp"
+#include "scene.hpp"
 #include "third_party/glad/glad.h"
 #include "ui/screens/controlUI.hpp"
 #include "ui/screens/mainUI.hpp"
@@ -57,6 +58,9 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 	SDL_GL_SetSwapInterval(1);
 
 	setup();
+
+	mScene = new Scene();
+	EntityID entity = mScene->newEntity();
 }
 
 Game::~Game() {
@@ -88,10 +92,6 @@ void Game::setup() {
 	mTicks = SDL_GetTicks();
 }
 
-void Game::setDemensions(const int width, const int height) {
-	mManagerManager->getSystemManager()->setDemensions(width, height);
-}
-
 SDL_AppResult Game::iterate() {
 	if (mQuit) {
 		return SDL_APP_SUCCESS;
@@ -107,9 +107,7 @@ SDL_AppResult Game::iterate() {
 
 	gui();
 	input();
-	// update();
-	// draw();
-	mManagerManager->getSystemManager()->update(delta);
+	mSystemManager->update(mScene, delta);
 
 #ifdef DEBUG
 	GLenum err = 0;

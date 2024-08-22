@@ -40,7 +40,7 @@ class Game {
 	[[nodiscard]] const std::vector<class UIScreen*>& getUIs() const { return mUI; }
 	[[nodiscard]] float getScale() const { return mUIScale; }
 
-	void setDemensions(const int width, const int height);
+	void setDemensions(const int width, const int height) { mSystemManager->setDemensions(width, height); }
 	Eigen::Vector2f getDemensions() const { return mSystemManager->getDemensions(); }
 
 	void setKey(const size_t key, const bool val);
@@ -52,13 +52,12 @@ class Game {
 
 	void gui();
 	void input();
-	// void update();
-	// void draw();
 
 	std::unique_ptr<class EventManager> mEventManager;
 	std::unique_ptr<class SystemManager> mSystemManager;
 
 	class LocaleManager* mLocaleManager;
+	class Scene* mScene;
 
 	std::vector<class UIScreen*> mUI;
 	float mUIScale;
