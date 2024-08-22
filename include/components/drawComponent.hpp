@@ -11,7 +11,7 @@ class DrawComponent : public Component {
 	DrawComponent(const DrawComponent&) = delete;
 	DrawComponent& operator=(DrawComponent&&) = delete;
 	DrawComponent& operator=(const DrawComponent&) = delete;
-	~DrawComponent() override = default;
+	~DrawComponent() override;
 
 	virtual void draw() = 0;
 

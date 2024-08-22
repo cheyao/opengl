@@ -74,7 +74,7 @@ Game::Game()
 	mFontManager->loadFont("NotoSans.ttf");
 
 	mLocaleManager = new LocaleManager(mBasePath);
-	
+
 	mPhysicsManager = new PhysicsManager();
 
 	// TODO: Icon
@@ -127,16 +127,20 @@ void Game::setup() {
 	// new Cube(this);
 	// new Sun(this);
 	new Player(this);
-	Actor* cube = new Actor(this);
-	cube->setPosition(Eigen::Vector3f(600.0f, 400.0f, 0.0f));
-	Sprite2DComponent* spriteComponent = new Sprite2DComponent(cube, this->getTexture("stone.png"));
-	spriteComponent->setShaders("block.vert", "block.frag");
-	new RectangleCollisionComponent(cube, spriteComponent->getSize());
-	Actor* cube2 = new Actor(this);
-	cube2->setPosition(Eigen::Vector3f(200.0f, 300.0f, 0.0f));
-	Sprite2DComponent* spriteComponent2 = new Sprite2DComponent(cube2, this->getTexture("stone.png"));
-	spriteComponent2->setShaders("block.vert", "block.frag");
-	new RectangleCollisionComponent(cube, spriteComponent2->getSize());
+	{
+		Actor* cube = new Actor(this);
+		cube->setPosition(Eigen::Vector3f(600.0f, 400.0f, 0.0f));
+		Sprite2DComponent* spriteComponent = new Sprite2DComponent(cube, this->getTexture("stone.png"));
+		spriteComponent->setShaders("block.vert", "block.frag");
+		new RectangleCollisionComponent(cube, spriteComponent->getSize());
+	}
+	{
+		Actor* cube2 = new Actor(this);
+		cube2->setPosition(Eigen::Vector3f(200.0f, 300.0f, 0.0f));
+		Sprite2DComponent* spriteComponent2 = new Sprite2DComponent(cube2, this->getTexture("stone.png"));
+		spriteComponent2->setShaders("block.vert", "block.frag");
+		new RectangleCollisionComponent(cube2, spriteComponent2->getSize());
+	}
 
 	SDL_Log("Successfully initialized Game World");
 
@@ -353,7 +357,7 @@ SDL_AppResult Game::event(const SDL_Event& event) {
 	ImGui_ImplSDL3_ProcessEvent(&event);
 
 	ImGuiIO& io = ImGui::GetIO();
-	(void) io;
+	(void)io;
 
 	/*
 	switch (event.type) {

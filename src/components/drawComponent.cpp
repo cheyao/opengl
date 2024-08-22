@@ -12,6 +12,10 @@ DrawComponent::DrawComponent(class Actor* owner, int drawOrder)
 	mOwner->getGame()->getRenderer()->addSprite(this);
 }
 
+DrawComponent::~DrawComponent() {
+	mOwner->getGame()->getRenderer()->removeSprite(this);
+}
+
 void DrawComponent::reload() {
 	mShader = mOwner->getGame()->getShader(mVert, mFrag, mGeom);
 }
