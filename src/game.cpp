@@ -5,13 +5,10 @@
 #include "managers/systemManager.hpp"
 #include "scene.hpp"
 #include "third_party/glad/glad.h"
-#include "ui/screens/controlUI.hpp"
-#include "ui/screens/mainUI.hpp"
+#include "components.hpp"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
-#include <cstdint>
-#include <iterator>
 #include <memory>
 #include <string>
 #include <third_party/Eigen/Core>
@@ -61,6 +58,7 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 
 	mScene = new Scene();
 	EntityID entity = mScene->newEntity();
+	mScene->emplace<Components::position>(entity, Eigen::Vector2f(0.0f, 0.0f));
 }
 
 Game::~Game() {
@@ -180,9 +178,11 @@ void Game::gui() {
 }
 
 void Game::input() {
+	/*
 	for (const auto& ui : mUI) {
 		ui->processInput(mEventManager->getKeystate());
 	}
+	*/
 }
 
 /*

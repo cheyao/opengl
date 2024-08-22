@@ -27,7 +27,7 @@ void SystemManager::update(Scene* scene, const float delta) {
 	// TODO:
 	// mPhysicsSystem->update();
 	mRenderSystem->draw(scene);
-	mTextSystem->draw(scene);
+	// mTextSystem->draw(scene);
 
 	mRenderSystem->present();
 }

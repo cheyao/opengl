@@ -13,11 +13,6 @@ constexpr const static std::uint64_t MAX_COMPONENT_TYPES = 64;
 
 using ComponentMask = std::bitset<MAX_COMPONENT_TYPES>;
 
-struct Entity {
-	EntityID id;
-	ComponentMask mask;
-};
-
 class EntityManager {
       public:
 	EntityManager();
@@ -27,7 +22,7 @@ class EntityManager {
 	EntityManager& operator=(const EntityManager&) = delete;
 	~EntityManager() = default;
 
-	Entity getEntity();
+	EntityID getEntity();
 	void releaseEntity(EntityID entity);
 	size_t getEntityCount() const { return mNext - mReleased.size(); }
 

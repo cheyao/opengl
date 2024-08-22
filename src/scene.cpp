@@ -2,6 +2,7 @@
 
 #include "managers/componentManager.hpp"
 #include "managers/entityManager.hpp"
+#include "misc/sparse_set.hpp"
 
 #include <memory>
 
@@ -10,7 +11,4 @@ Scene::Scene()
 
 Scene::~Scene() {}
 
-EntityID Scene::newEntity() {
-	mEntities.emplace_back(mEntityManager->getEntity());
-	return mEntities.back().id;
-}
+EntityID Scene::newEntity() { return mEntities.back(); }

@@ -13,14 +13,20 @@ template <typename Component> class sparse_set {
       public:
 	constexpr const static size_t max_size = std::numeric_limits<std::uint64_t>::max();
 
-	sparse_set();
+	sparse_set() = default;
 	sparse_set(sparse_set&&) = delete;
 	sparse_set(const sparse_set&) = delete;
 	sparse_set& operator=(sparse_set&&) = delete;
 	sparse_set& operator=(const sparse_set&) = delete;
 	~sparse_set() = default; // TODO:
 
-	template <typename... Args> void emplace(const EntityID entity, Args&&... args);
+	template <typename... Args> void emplace(const EntityID entity, Args&&... args) {
+		mSparseContainer[entity] = mPackedContainer.size();
+		mPackedContainer.emplace_back(entity);
+		mComponents.emplace_back(args...);
+	}
+
+	Component& get(const EntityID entity) { return mComponents[mSparseContainer[entity]]; }
 
       private:
 	// Index is entity ID, value is ptr to packed container

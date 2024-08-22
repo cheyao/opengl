@@ -29,8 +29,6 @@ src/main.cpp
 src/game.cpp
 src/scene.cpp
 
-src/misc/sparse_set.cpp
-
 src/opengl/cubemap.cpp
 src/opengl/mesh.cpp
 src/opengl/shader.cpp

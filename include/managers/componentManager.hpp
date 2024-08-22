@@ -1,5 +1,6 @@
 #pragma once
 
+#include "misc/sparse_set.hpp"
 #include <cstdint>
 #include <limits>
 
@@ -16,8 +17,10 @@ class ComponentManager {
 	ComponentManager& operator=(const ComponentManager&) = delete;
 	~ComponentManager() = default;
 
-	template <typename T> [[nodiscard]] ComponentID getID();
+	template <typename Component> [[nodiscard]] ComponentID getID();
+	template <typename Component> [[nodiscard]] sparse_set<Component>* getPool();
 
       private:
-	int mComponentCount;
+	size_t mComponentCount;
+	std::vector<void*> mPools;
 };
