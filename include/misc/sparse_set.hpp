@@ -7,29 +7,47 @@
 #include <limits>
 #include <vector>
 
+// NOTE: Travers the thing from the end
 template <typename Container> struct sparse_set_iterator final {
-	sparse_set_iterator() {}
+	constexpr sparse_set_iterator() noexcept : packed(), offset() {}
+	constexpr sparse_set_iterator(const Container& ref, const size_t idx) noexcept : packed(&ref), offset(idx) {}
 
-	[[nodiscard]] EntityID& operator*() const {
-		// give back the entityID we're currently at
+	[[nodiscard]] constexpr sparse_set_iterator& operator++() noexcept {
+		--offset;
+		return *this;
 	}
 
-	[[nodiscard]] bool operator==(const Iterator& other) const {
-		// Compare two iterators
+	[[nodiscard]] constexpr sparse_set_iterator& operator--() noexcept {
+		++offset;
+		return *this;
 	}
 
-	[[nodiscar]] ool operator!=(const Iterator& other) const {
-		// Similar to above
+	[[nodiscard]] constexpr EntityID& operator[](const size_t value) const noexcept {
+		return (*packed)[index() - value];
 	}
 
-	[[nodiscar]] terator& operator++() {
-		// Move the iterator forward
-	}
+	[[nodiscard]] constexpr EntityID& operator*() const noexcept { return operator[](0); }
+
+	[[nodiscard]] constexpr size_t index() const noexcept { return offset - 1; }
 
       private:
 	const Container* packed;
 	size_t offset;
 };
+
+template <typename Container>
+[[nodiscard]] bool operator==(const sparse_set_iterator<Container>& lhs,
+			      const sparse_set_iterator<Container>& rhs) noexcept {
+	// Compare two iterators
+	return lhs.index() == rhs.index();
+}
+
+template <typename Container>
+[[nodiscard]] bool operator!=(const sparse_set_iterator<Container>& lhs,
+			      const sparse_set_iterator<Container>& rhs) noexcept {
+	// Similar to above
+	return !(lhs == rhs);
+}
 
 // PERF: https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf
 // FIXME: This is probably not the best implementation
@@ -57,6 +75,10 @@ template <typename Component> class sparse_set {
 	}
 
 	Component& get(const EntityID entity) { return mComponents[mSparseContainer[entity]]; }
+
+	[[nodiscard]] iterator begin() const noexcept { return iterator{mPackedContainer, mPackedContainer.size()}; }
+
+	[[nodiscard]] iterator end() const noexcept { return iterator{mPackedContainer, {}}; }
 
       private:
 	// Index is entity ID, value is ptr to packed container

@@ -1,11 +1,11 @@
 #include "game.hpp"
 
+#include "components.hpp"
 #include "managers/eventManager.hpp"
 #include "managers/localeManager.hpp"
 #include "managers/systemManager.hpp"
 #include "scene.hpp"
 #include "third_party/glad/glad.h"
-#include "components.hpp"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
@@ -59,6 +59,8 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 	mScene = new Scene();
 	EntityID entity = mScene->newEntity();
 	mScene->emplace<Components::position>(entity, Eigen::Vector2f(0.0f, 0.0f));
+	for (EntityID i : mScene->getView<Components::position>()) {
+	}
 }
 
 Game::~Game() {

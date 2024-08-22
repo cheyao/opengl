@@ -26,16 +26,14 @@ class ComponentManager {
 	ComponentManager& operator=(const ComponentManager&) = delete;
 	~ComponentManager() = default;
 
-	template <typename Component> [[nodiscard]] ComponentID getID() {
+	template <typename Component> [[nodiscard]] ComponentID getID() noexcept {
 		assert(mComponentCount < MAX_COMPONENTS);
 		static size_t componentID = mComponentCount++;
 
+		// Maybe getPool()?
 		if (mPools.size() <= componentID) {
 			mPools.emplace_back(new sparse_set<Component>());
-			LOG("New pool: %zu", (uintptr_t)mPools.back());
 		}
-
-		LOG("New comp: %zu", componentID);
 
 		return componentID;
 	}
