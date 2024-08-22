@@ -6,7 +6,7 @@
 #include <vector>
 
 // PERF: https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf
-template <typename T> class sparse_set {
+class sparse_set {
       public:
 	constexpr const static size_t max_size = std::numeric_limits<std::uint64_t>::max();
 

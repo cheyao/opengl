@@ -2,14 +2,14 @@
 
 EntityManager::EntityManager() : mNext(0) {}
 
-EntityID EntityManager::getEntity() {
+Entity EntityManager::getEntity() {
 	if (!mReleased.empty()) {
 		EntityID first = mReleased.front();
 		mReleased.pop_front();
-		return first;
+		return {first, {}};
 	}
 
-	return mNext++;
+	return {mNext++, {}};
 }
 
 void EntityManager::releaseEntity(EntityID entity) { mReleased.emplace_back(entity); }

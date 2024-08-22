@@ -1,6 +1,5 @@
 #pragma once
 
-#include "managers/managerManager.hpp"
 #include "managers/systemManager.hpp"
 #include "third_party/Eigen/Core"
 #include "utils.hpp"
@@ -42,7 +41,7 @@ class Game {
 	[[nodiscard]] float getScale() const { return mUIScale; }
 
 	void setDemensions(const int width, const int height);
-	Eigen::Vector2f getDemensions() const { return mManagerManager->getSystemManager()->getDemensions(); }
+	Eigen::Vector2f getDemensions() const { return mSystemManager->getDemensions(); }
 
 	void setKey(const size_t key, const bool val);
 
@@ -57,7 +56,7 @@ class Game {
 	// void draw();
 
 	std::unique_ptr<class EventManager> mEventManager;
-	std::unique_ptr<class ManagerManager> mManagerManager;
+	std::unique_ptr<class SystemManager> mSystemManager;
 
 	class LocaleManager* mLocaleManager;
 

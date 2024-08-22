@@ -2,7 +2,6 @@
 
 #include "managers/eventManager.hpp"
 #include "managers/localeManager.hpp"
-#include "managers/managerManager.hpp"
 #include "managers/systemManager.hpp"
 #include "third_party/glad/glad.h"
 #include "ui/screens/controlUI.hpp"
@@ -44,7 +43,7 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 	}
 
 	mEventManager = std::make_unique<EventManager>(this);
-	mManagerManager = std::make_unique<ManagerManager>(this);
+	mSystemManager = std::make_unique<SystemManager>(this);
 
 	mLocaleManager = new LocaleManager(mBasePath);
 

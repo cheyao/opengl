@@ -46,7 +46,6 @@ src/managers/IOManager.cpp
 src/managers/localeManager.cpp
 src/managers/entityManager.cpp
 src/managers/systemManager.cpp
-src/managers/managerManager.cpp
 src/managers/componentManager.cpp
 
 src/systems/textSystem.cpp
@@ -88,7 +87,6 @@ include/managers/localeManager.hpp
 include/managers/IOManager.hpp
 include/managers/entityManager.hpp
 include/managers/systemManager.hpp
-include/managers/managerManager.hpp
 include/managers/componentManager.hpp
 
 include/systems/textSystem.hpp

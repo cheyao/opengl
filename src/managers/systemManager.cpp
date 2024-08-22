@@ -1,6 +1,7 @@
 #include "managers/systemManager.hpp"
 
 #include "game.hpp"
+#include "scene.hpp"
 #include "systems/renderSystem.hpp"
 #include "systems/textSystem.hpp"
 #include "third_party/Eigen/Core"
@@ -21,7 +22,7 @@ Eigen::Vector2f SystemManager::getDemensions() const {
 	return Eigen::Vector2f(mRenderSystem->getWidth(), mRenderSystem->getHeight());
 }
 
-void SystemManager::update(const float delta) {
+void SystemManager::update(Scene* scene, const float delta) {
 	(void)delta;
 	// TODO:
 	// mPhysicsSystem->update();
