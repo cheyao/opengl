@@ -18,8 +18,7 @@ class Scene {
 
 	[[nodiscard]] EntityID newEntity();
 	template <typename Component, typename... Args> void emplace(const EntityID entity, Args&&... args) {
-		static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())
-			->emplace_back(entity, args...);
+		static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->emplace(entity, args...);
 	}
 
 	template <typename Component> Component& get(const EntityID entity) {

@@ -1,6 +1,6 @@
 #include "managers/entityManager.hpp"
 
-EntityManager::EntityManager() : mNext(0) {}
+EntityManager::EntityManager() : mNext(1) {}
 
 EntityID EntityManager::getEntity() {
 	if (!mReleased.empty()) {
