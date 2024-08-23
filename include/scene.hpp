@@ -5,7 +5,6 @@
 #include "misc/sparse_set.hpp"
 #include "misc/sparse_set_view.hpp"
 
-#include <memory>
 #include <vector>
 
 class Scene {
@@ -33,24 +32,8 @@ class Scene {
 		return static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->get(entity);
 	}
 
-	/*
-	template <typename Component> sparse_set<Component>& view() const {
-		return *static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>());
-	}
-	*/
-
 	// TODO: Exclude
 	template <typename... Components> [[nodiscard]] sparse_set_view<Components...> view() const {
-		// Make a tuple of all the pools of components passed into the vaargs
-		/*
-		const auto cpools = std::make_tuple(
-			static_cast<sparse_set<Components>*>(mComponentManager->getPool<Components>())...);
-
-		sparse_set_view<Components...> view{};
-
-		std::apply([&view](const auto*... curr) { ((curr ? view.storage(*curr) : void()), ...); }, cpools);
-		*/
-
 		return sparse_set_view<Components...>(mComponentManager);
 	}
 

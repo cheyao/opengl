@@ -56,6 +56,16 @@ $ mv OpenGL.app /Applications/
 $ open /Applications/OpenGL.app # Or just openg the app
 ```
 
+If you are getting this error:
+```
+Undefined symbols for architecture x86_64:
+  "Assimp::IOSystem::CurrentDirectory[abi:cxx11]() const", referenced from:
+      vtable for GameIOSystem in IOManager.cpp.o
+ld: symbol(s) not found for architecture x86_64
+collect2: error: ld returned 1 exit status
+```
+This means that you didn't use the same compiler to compile assimp and this engine (clang and gcc are somehow not compatable)
+
 ### Windows
 
 Best luck, my CMakeLists.txt theoretically can support msvc, but if it doesn't please submit a pr, if it doesn't work just use WSL (or go use liux).
@@ -194,7 +204,7 @@ assets
 
 Language tags are first looking up main tag, if matching, use it, otherwise find sumtag, and if still not present, use `en`.
 
-ISO-639 language specifier (such as "en" for English, "de" for German, etc). Country strings are in the format YY, where "YY" is an ISO-3166 country code
+Locales: First ISO-639 language specifier (such as "en" for English, "de" for German, etc). Then country strings in the format YY, where "YY" is an ISO-3166 country code
 
 Just use `git diff` to get the changes
 

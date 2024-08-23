@@ -24,7 +24,7 @@
 
 Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(false) {
 	mUIScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
-	if (mUIScale == 0.0f) {
+	if (mUIScale <= 0.0f) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
 			     SDL_GetError());
 
@@ -58,7 +58,8 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 
 	mScene = new Scene();
 	EntityID entity1 = mScene->newEntity();
-	mScene->emplace<Components::texture>(entity1, mSystemManager->getTexture("stone.png"), Eigen::Vector2f(0.0f, 0.0f));
+	mScene->emplace<Components::texture>(entity1, mSystemManager->getTexture("stone.png"),
+					     Eigen::Vector2f(0.0f, 0.0f));
 	EntityID entity2 = mScene->newEntity();
 	mScene->emplace<Components::velocity>(entity2, Eigen::Vector2f(0.0f, 0.0f));
 	EntityID entity3 = mScene->newEntity();

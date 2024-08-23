@@ -9,6 +9,11 @@
 #ifndef GLAD_IMPL_UTIL_C_
 #define GLAD_IMPL_UTIL_C_
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
+
 #ifdef _MSC_VER
 #define GLAD_IMPL_UTIL_SSCANF sscanf_s
 #else
@@ -4911,4 +4916,8 @@ int gladLoadGLES2( GLADloadfunc load) {
 
 #ifdef __cplusplus
 }
+#endif
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
 #endif

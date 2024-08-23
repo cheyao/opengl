@@ -198,12 +198,11 @@ void RenderSystem::draw(Scene* scene) {
 			setLights(shader);
 			sprite->draw();
 		}
-		*/
+	*/
 
-	/*for (const auto& i : */ (void)scene->view<Components::velocity, Components::position>().begin(); /*) {
-		 SDL_Log("Got entity %llu", i);
-	 }
-	 */
+	for (const auto& i : scene->view<Components::velocity, Components::position>()) {
+		SDL_Log("Got entity %llu", i);
+	}
 
 	glDisable(GL_DEPTH_TEST);
 
@@ -264,7 +263,7 @@ void RenderSystem::setDisplayScale() const {
 	assert(mWindow != nullptr);
 
 	float scale = SDL_GetWindowDisplayScale(mWindow);
-	if (scale == 0.0f) {
+	if (scale <= 0.0f) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
 			     SDL_GetError());
 

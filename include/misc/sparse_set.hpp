@@ -10,43 +10,41 @@
 
 // NOTE: Travers the thing from the end
 template <typename Container> struct sparse_set_iterator final {
-	constexpr sparse_set_iterator() noexcept : packed(), offset() {}
-	constexpr sparse_set_iterator(const Container& ref, const size_t idx) noexcept : packed(&ref), offset(idx) {}
+	constexpr sparse_set_iterator() noexcept : mPacked(), mOffset() {}
+	constexpr sparse_set_iterator(const Container& ref, const size_t idx) noexcept : mPacked(&ref), mOffset(idx) {}
 
 	[[nodiscard]] constexpr sparse_set_iterator& operator++() noexcept {
-		--offset;
+		--mOffset;
 		return *this;
 	}
 
 	[[nodiscard]] constexpr sparse_set_iterator& operator--() noexcept {
-		++offset;
+		++mOffset;
 		return *this;
 	}
 
 	[[nodiscard]] constexpr const EntityID& operator[](const size_t value) const noexcept {
-		return (*packed)[index() - value];
+		return (*mPacked)[index() - value];
 	}
 
 	[[nodiscard]] constexpr const EntityID& operator*() const noexcept { return operator[](0); }
 
-	[[nodiscard]] constexpr size_t index() const noexcept { return offset - 1; }
+	[[nodiscard]] constexpr size_t index() const noexcept { return mOffset - 1; }
 
       private:
-	const Container* packed;
-	size_t offset;
+	const Container* mPacked;
+	size_t mOffset;
 };
 
 template <typename Container>
 [[nodiscard]] bool operator==(const sparse_set_iterator<Container>& lhs,
 			      const sparse_set_iterator<Container>& rhs) noexcept {
-	// Compare two iterators
 	return lhs.index() == rhs.index();
 }
 
 template <typename Container>
 [[nodiscard]] bool operator!=(const sparse_set_iterator<Container>& lhs,
 			      const sparse_set_iterator<Container>& rhs) noexcept {
-	// Similar to above
 	return !(lhs == rhs);
 }
 
@@ -58,12 +56,13 @@ template <typename Component> class sparse_set {
       public:
 	constexpr const static size_t max_size = std::numeric_limits<std::uint64_t>::max();
 
+	// No need to clean up, everything is in a vector
 	sparse_set() = default;
 	sparse_set(sparse_set&&) = delete;
 	sparse_set(const sparse_set&) = delete;
 	sparse_set& operator=(sparse_set&&) = delete;
 	sparse_set& operator=(const sparse_set&) = delete;
-	~sparse_set() = default; // TODO:
+	~sparse_set() = default;
 
 	template <typename... Args> void emplace(const EntityID entity, Args&&... args) {
 		while (mSparseContainer.size() <= entity) {

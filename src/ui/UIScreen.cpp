@@ -1,8 +1,13 @@
 #include "ui/UIScreen.hpp"
 
 #include "game.hpp"
-#include "imgui.h"
 #include "ui/UIComponent.hpp"
+
+#include <string>
+
+#ifdef IMGUI
+#include <imgui.h>
+#endif
 
 UIScreen::UIScreen(Game* game, const std::string name) : mGame(game), mState(UIScreen::ACTIVE), mName(name) {
 	game->addUI(this);
