@@ -93,7 +93,7 @@ template <typename Component> class sparse_set {
 
 	[[nodiscard]] iterator end() const noexcept { return iterator{mPackedContainer, {}}; }
 
-	[[nodiscard]] const EntityID* data() const noexcept { return mPackedContainer.data(); }
+	[[nodiscard]] EntityID* data() noexcept { return mPackedContainer.data(); }
 
       private:
 	// Index is entity ID, value is ptr to packed container
