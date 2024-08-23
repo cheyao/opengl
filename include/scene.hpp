@@ -10,14 +10,15 @@
 
 class Scene {
       public:
-	Scene()
-		: mEntityManager(std::make_unique<EntityManager>()),
-		  mComponentManager(std::make_unique<ComponentManager>()) {}
+	Scene() : mEntityManager(new EntityManager()), mComponentManager(new ComponentManager()) {}
 	Scene(Scene&&) = delete;
 	Scene(const Scene&) = delete;
 	Scene& operator=(Scene&&) = delete;
 	Scene& operator=(const Scene&) = delete;
-	~Scene() {}
+	~Scene() {
+		delete mEntityManager;
+		delete mComponentManager;
+	}
 
 	[[nodiscard]] EntityID newEntity() {
 		mEntities.emplace_back(mEntityManager->getEntity());
@@ -39,20 +40,22 @@ class Scene {
 	*/
 
 	// TODO: Exclude
-	template <typename... Components> [[nodiscard]] sparse_set_view<sparse_set<const Components>...> view() const {
+	template <typename... Components> [[nodiscard]] sparse_set_view<Components...> view() const {
 		// Make a tuple of all the pools of components passed into the vaargs
 		/*
 		const auto cpools = std::make_tuple(
 			static_cast<sparse_set<Components>*>(mComponentManager->getPool<Components>())...);
-		*/
 
-		// std::apply([&elem](const auto*... curr) { ((curr ? elem.storage(*curr) : void()), ...); }, cpools);
+		sparse_set_view<Components...> view{};
+
+		std::apply([&view](const auto*... curr) { ((curr ? view.storage(*curr) : void()), ...); }, cpools);
+		*/
 
 		return sparse_set_view<Components...>(mComponentManager);
 	}
 
       private:
-	std::unique_ptr<class EntityManager> mEntityManager;
-	std::unique_ptr<class ComponentManager> mComponentManager;
+	class EntityManager* mEntityManager;
+	class ComponentManager* mComponentManager;
 	std::vector<EntityID> mEntities;
 };

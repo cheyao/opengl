@@ -1,22 +1,14 @@
 #pragma once
 
 #include "managers/componentManager.hpp"
+#include "managers/entityManager.hpp"
 
 #include <vector>
 
-template <typename... ComponentTypes> class sparse_set_view_iterator {
+class sparse_set_view_iterator {
       public:
 	sparse_set_view_iterator(ComponentManager* componentManager) : mComponentManager(componentManager) {
-		const std::vector<size_t> s = {mComponentManager->getPool<ComponentTypes>()->size()...};
-		size_t smallest = SIZE_T_MAX;
-		size_t smallestIndex = SIZE_T_MAX;
-		for (size_t i = 0; i < s.size(); ++i) {
-			if (s[i] < smallest) {
-				smallest = s[i];
-				smallestIndex = i;
-			}
-		}
-		SDL_Log("Smallest pool: %zu", smallestIndex);
+		(void)mComponentManager;
 	}
 
 	/*
@@ -32,15 +24,38 @@ template <typename... ComponentTypes> class sparse_set_view_iterator {
 };
 
 template <typename... ComponentTypes> class sparse_set_view {
-	using iterator = sparse_set_view_iterator<ComponentTypes...>;
+	template <int N, typename... Ts> using NthTypeOf = typename std::tuple_element<N, std::tuple<Ts...>>::type;
+	using iterator = sparse_set_view_iterator;
 
       public:
-	explicit sparse_set_view(ComponentManager* componentManager) : mComponentManager(componentManager) {}
+	sparse_set_view(ComponentManager* componentManager) : mComponentManager(componentManager) {
+		const std::vector<size_t> s = {mComponentManager->getPool<ComponentTypes>()->size()...};
+		const auto pools = std::make_tuple(mComponentManager->getPool<ComponentTypes>()...);
+		size_t smallest = SIZE_T_MAX;
+		size_t smallestIndex = 0;
+
+		for (size_t i = 0; i < s.size(); ++i) {
+			if (s[i] <= smallest) {
+				smallest = s[i];
+				smallestIndex = i;
+			}
+		}
+
+		assert(smallest == s[smallestIndex]);
+
+		// Now to create the pool?
+		// Make a list of common entities
+		for (const auto& entity : mComponentManager->getPool<ComponentTypes>) {
+			SDL_Log("Contains: %llu", entity);
+		}
+		mEntities.emplace_back();
+	}
+
 	sparse_set_view(sparse_set_view&&) = delete;
 	sparse_set_view(const sparse_set_view&) = delete;
 	sparse_set_view& operator=(sparse_set_view&&) = delete;
 	sparse_set_view& operator=(const sparse_set_view&) = delete;
-	~sparse_set_view();
+	~sparse_set_view() {}
 
 	[[nodiscard]] iterator begin() const noexcept { return iterator{mComponentManager}; }
 
@@ -48,4 +63,5 @@ template <typename... ComponentTypes> class sparse_set_view {
 
       private:
 	class ComponentManager* mComponentManager;
+	std::vector<EntityID> mEntities;
 };

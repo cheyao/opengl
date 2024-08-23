@@ -200,7 +200,7 @@ void RenderSystem::draw(Scene* scene) {
 		}
 		*/
 
-	/*for (const auto& i : */ (void)scene->view<Components::texture>().begin(); /*) {
+	/*for (const auto& i : */ (void)scene->view<Components::velocity, Components::position>().begin(); /*) {
 		 SDL_Log("Got entity %llu", i);
 	 }
 	 */
