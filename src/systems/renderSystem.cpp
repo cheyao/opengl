@@ -182,7 +182,7 @@ void RenderSystem::setDemensions(int width, int height) {
 	setOrtho();
 }
 
-void RenderSystem::draw(class Scene* scene) {
+void RenderSystem::draw(Scene* scene) {
 #ifdef DEBUG
 	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

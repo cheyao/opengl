@@ -9,8 +9,6 @@
 #include <vector>
 
 class Scene {
-	template <typename... ComponentTypes> friend class sparse_set_view;
-
       public:
 	Scene()
 		: mEntityManager(std::make_unique<EntityManager>()),
@@ -34,24 +32,26 @@ class Scene {
 		return static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->get(entity);
 	}
 
+	/*
 	template <typename Component> sparse_set<Component>& view() const {
 		return *static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>());
 	}
+	*/
 
-	/*
 	// TODO: Exclude
 	template <typename... Components> [[nodiscard]] sparse_set_view<sparse_set<const Components>...> view() const {
 		// Make a tuple of all the pools of components passed into the vaargs
+		/*
 		const auto cpools = std::make_tuple(
 			static_cast<sparse_set<Components>*>(mComponentManager->getPool<Components>())...);
+		*/
 
 		// std::apply([&elem](const auto*... curr) { ((curr ? elem.storage(*curr) : void()), ...); }, cpools);
 
-		sparse_set_view<sparse_set<Components>...> elem{};
+		sparse_set_view<Components...> elem;
 
 		return elem;
 	}
-	*/
 
       private:
 	std::unique_ptr<class EntityManager> mEntityManager;
