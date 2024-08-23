@@ -78,7 +78,7 @@ template <typename Component> class sparse_set {
 		mComponents.emplace_back(args...);
 	}
 
-	[[nodiscard]] Component& get(const EntityID entity) const noexcept {
+	[[nodiscard]] Component& get(const EntityID entity) noexcept {
 		return mComponents[mSparseContainer[entity]];
 	}
 

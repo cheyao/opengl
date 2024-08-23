@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <span>
+#include <tuple>
 #include <vector>
 
 template <typename... ComponentTypes> class sparse_set_view_iterator {
@@ -23,7 +24,7 @@ template <typename... ComponentTypes> class sparse_set_view_iterator {
 		return *this;
 	}
 
-	[[nodiscard]] const EntityID& operator[](const size_t value) const noexcept {
+	[[nodiscard]] virtual const EntityID& operator[](const size_t value) const noexcept {
 		return (*mEntities)[index() + value];
 	}
 
@@ -31,7 +32,7 @@ template <typename... ComponentTypes> class sparse_set_view_iterator {
 
 	[[nodiscard]] size_t index() const noexcept { return mOffset; }
 
-      private:
+      protected:
 	class ComponentManager* mComponentManager;
 	const std::vector<EntityID>* mEntities;
 	size_t mOffset;
@@ -51,8 +52,17 @@ template <typename... ComponentTypes>
 	return !(lhs == rhs);
 }
 
+template <typename... ComponentTypes>
+class sparse_set_view_tuple_iterator : private sparse_set_view_iterator<ComponentTypes...> {
+      public:
+	[[nodiscard]] const EntityID& operator[](const size_t value) const noexcept override {
+		return (*mEntities)[index() + value];
+	}
+};
+
 template <typename... ComponentTypes> class sparse_set_view {
 	using iterator = sparse_set_view_iterator<ComponentTypes...>;
+	using iterable = iterable_adaptor<ComponentTypes...>;
 
       public:
 	// Please don't touch this, took a long time to figure out
@@ -98,24 +108,20 @@ template <typename... ComponentTypes> class sparse_set_view {
 	~sparse_set_view() {}
 
 	[[nodiscard]] iterator begin() const noexcept { return iterator{mComponentManager, mEntities, 0}; }
+	[[nodiscard]] const iterator cbegin() const noexcept { return begin(); }
 
 	[[nodiscard]] iterator end() const noexcept { return iterator{mComponentManager, mEntities, mEntities.size()}; }
+	[[nodiscard]] const iterator cend() const noexcept { return end(); }
 
-	/*
-	template <typename Type, typename... Other> [[nodiscard]] decltype(auto) get(const entity_type entt) const {
-		return get<index_of<Type>, index_of<Other>...>(entt);
-	}
+	[[nodiscard]] iterable each() const noexcept { return iterable{}; }
 
-	template <std::size_t... Index> [[nodiscard]] decltype(auto) get(const entity_type entt) const {
-		if constexpr (sizeof...(Index) == 0) {
-			return get(entt, std::index_sequence_for<Get...>{});
-		} else if constexpr (sizeof...(Index) == 1) {
-			return (storage<Index>()->get(entt), ...);
+	template <typename... Components> [[nodiscard]] decltype(auto) get(const EntityID entt) const {
+		if constexpr (sizeof...(Components) == 1) {
+			return (mComponentManager->getPool<Components>()->get(entt), ...);
 		} else {
-			return std::tuple_cat(storage<Index>()->get_as_tuple(entt)...);
+			return std::make_tuple(mComponentManager->getPool<Components>()->get(entt)...);
 		}
 	}
-	*/
 
       private:
 	class ComponentManager* mComponentManager;

@@ -59,15 +59,15 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 	mScene = new Scene();
 	EntityID entity1 = mScene->newEntity();
 	mScene->emplace<Components::texture>(entity1, mSystemManager->getTexture("stone.png"),
-					     Eigen::Vector2f(0.0f, 0.0f));
+					     Eigen::Vector2f(1.11f, 1.12f));
 	EntityID entity2 = mScene->newEntity();
-	mScene->emplace<Components::velocity>(entity2, Eigen::Vector2f(0.0f, 0.0f));
+	mScene->emplace<Components::velocity>(entity2, Eigen::Vector2f(2.11f, 2.12f));
 	EntityID entity3 = mScene->newEntity();
-	mScene->emplace<Components::position>(entity3, Eigen::Vector2f(0.0f, 0.0f));
-	mScene->emplace<Components::velocity>(entity3, Eigen::Vector2f(0.0f, 0.0f));
+	mScene->emplace<Components::position>(entity3, Eigen::Vector2f(3.11f, 3.12f));
+	mScene->emplace<Components::velocity>(entity3, Eigen::Vector2f(3.21f, 3.22f));
 	EntityID entity4 = mScene->newEntity();
-	mScene->emplace<Components::position>(entity4, Eigen::Vector2f(0.0f, 0.0f));
-	mScene->emplace<Components::velocity>(entity4, Eigen::Vector2f(0.0f, 0.0f));
+	mScene->emplace<Components::position>(entity4, Eigen::Vector2f(4.11f, 4.12f));
+	mScene->emplace<Components::velocity>(entity4, Eigen::Vector2f(4.21f, 4.22f));
 }
 
 Game::~Game() {
