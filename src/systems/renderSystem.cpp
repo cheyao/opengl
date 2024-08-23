@@ -1,5 +1,6 @@
 #include "systems/renderSystem.hpp"
 
+#include "components.hpp"
 #include "game.hpp"
 #include "managers/glManager.hpp"
 #include "managers/shaderManager.hpp"
@@ -7,6 +8,7 @@
 #include "opengl/framebuffer.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/ubo.hpp"
+#include "scene.hpp"
 #include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
 #include "ui/UIScreen.hpp"
@@ -181,7 +183,10 @@ void RenderSystem::setDemensions(int width, int height) {
 }
 
 void RenderSystem::draw(class Scene* scene) {
-	(void) scene;
+	for (const auto& i : scene->view<Components::position>()) {
+		SDL_Log("Got entity %llu", i);
+	}
+
 #ifdef DEBUG
 	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

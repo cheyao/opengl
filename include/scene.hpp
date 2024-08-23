@@ -25,23 +25,29 @@ view(exclude_t<Exclude...> = exclude_t{}) const {
 
 class Scene {
       public:
-	Scene();
+	Scene()
+		: mEntityManager(std::make_unique<EntityManager>()),
+		  mComponentManager(std::make_unique<ComponentManager>()) {}
 	Scene(Scene&&) = delete;
 	Scene(const Scene&) = delete;
 	Scene& operator=(Scene&&) = delete;
 	Scene& operator=(const Scene&) = delete;
-	~Scene();
+	~Scene() {}
 
-	[[nodiscard]] EntityID newEntity();
+	[[nodiscard]] EntityID newEntity() {
+		mEntities.emplace_back(mEntityManager->getEntity());
+		return mEntities.back();
+	}
+
 	template <typename Component, typename... Args> void emplace(const EntityID entity, Args&&... args) {
 		static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->emplace(entity, args...);
 	}
 
-	template <typename Component> Component& get(const EntityID entity) {
+	template <typename Component> Component& get(const EntityID entity) const {
 		return static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->get(entity);
 	}
 
-	template <typename Component> sparse_set<Component>& getView() {
+	template <typename Component> sparse_set<Component>& view() const {
 		return *static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>());
 	}
 

@@ -2,6 +2,7 @@
 
 #include "managers/entityManager.hpp"
 
+#include <SDL3/SDL.h>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -22,11 +23,11 @@ template <typename Container> struct sparse_set_iterator final {
 		return *this;
 	}
 
-	[[nodiscard]] constexpr EntityID& operator[](const size_t value) const noexcept {
+	[[nodiscard]] constexpr const EntityID& operator[](const size_t value) const noexcept {
 		return (*packed)[index() - value];
 	}
 
-	[[nodiscard]] constexpr EntityID& operator*() const noexcept { return operator[](0); }
+	[[nodiscard]] constexpr const EntityID& operator*() const noexcept { return operator[](0); }
 
 	[[nodiscard]] constexpr size_t index() const noexcept { return offset - 1; }
 
@@ -69,12 +70,24 @@ template <typename Component> class sparse_set {
 			mSparseContainer.emplace_back(0);
 		}
 
+		if (mSparseContainer[entity] != 0) {
+			SDL_Log("\033[93mSparse_set.cpp: Container already contains entity %llu!\033[0m", entity);
+		}
+
 		mSparseContainer[entity] = mPackedContainer.size();
 		mPackedContainer.emplace_back(entity);
 		mComponents.emplace_back(args...);
 	}
 
-	Component& get(const EntityID entity) { return mComponents[mSparseContainer[entity]]; }
+	[[nodiscard]] Component& get(const EntityID entity) const noexcept {
+		return mComponents[mSparseContainer[entity]];
+	}
+
+	[[nodiscard]] bool contains(const EntityID entity) const noexcept {
+		return mPackedContainer[mSparseContainer[entity]] == entity;
+	}
+
+	[[nodiscard]] size_t size() const noexcept { return mPackedContainer.size(); }
 
 	[[nodiscard]] iterator begin() const noexcept { return iterator{mPackedContainer, mPackedContainer.size()}; }
 

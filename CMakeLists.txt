@@ -27,7 +27,6 @@ set(SRC
 # Sources
 src/main.cpp
 src/game.cpp
-src/scene.cpp
 
 src/opengl/cubemap.cpp
 src/opengl/mesh.cpp
@@ -68,6 +67,7 @@ include/components.hpp
 include/scene.hpp
 
 include/misc/sparse_set.hpp
+include/misc/sparse_set_view.hpp
 
 include/opengl/cubemap.hpp
 include/opengl/mesh.hpp
