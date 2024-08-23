@@ -15,7 +15,8 @@ class SystemManager {
 	void update(class Scene* scene, const float delta);
 
 	void setDemensions(const int width, const int height);
-	Eigen::Vector2f getDemensions() const;
+	[[nodiscard]] Eigen::Vector2f getDemensions() const;
+	[[nodiscard]] class Texture* getTexture(const std::string& name, const bool srgb = false);
 
       private:
 	class Game* mGame;

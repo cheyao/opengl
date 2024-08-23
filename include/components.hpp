@@ -10,4 +10,9 @@ struct position {
 struct velocity {
 	Eigen::Vector2f vel;
 };
+
+struct texture {
+	class Texture* texture;
+	Eigen::Vector2f pos;
+};
 } // namespace Components

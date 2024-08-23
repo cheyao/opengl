@@ -3,27 +3,14 @@
 #include "managers/componentManager.hpp"
 #include "managers/entityManager.hpp"
 #include "misc/sparse_set.hpp"
+#include "misc/sparse_set_view.hpp"
 
 #include <memory>
 #include <vector>
 
-/*
-template <typename Type, typename... Other, typename... Exclude>
-[[nodiscard]] basic_view<get_t<storage_for_type<const Type>, storage_for_type<const Other>...>,
-			 exclude_t<storage_for_type<const Exclude>...>>
-view(exclude_t<Exclude...> = exclude_t{}) const {
-	const auto cpools =
-		std::make_tuple(assure<std::remove_const_t<Type>>(), assure<std::remove_const_t<Other>>()...,
-				assure<std::remove_const_t<Exclude>>()...);
-	basic_view<get_t<storage_for_type<const Type>, storage_for_type<const Other>...>,
-		   exclude_t<storage_for_type<const Exclude>...>>
-		elem{};
-	std::apply([&elem](const auto*... curr) { ((curr ? elem.storage(*curr) : void()), ...); }, cpools);
-	return elem;
-}
-*/
-
 class Scene {
+	template <typename... ComponentTypes> friend class sparse_set_view;
+
       public:
 	Scene()
 		: mEntityManager(std::make_unique<EntityManager>()),
@@ -50,6 +37,21 @@ class Scene {
 	template <typename Component> sparse_set<Component>& view() const {
 		return *static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>());
 	}
+
+	/*
+	// TODO: Exclude
+	template <typename... Components> [[nodiscard]] sparse_set_view<sparse_set<const Components>...> view() const {
+		// Make a tuple of all the pools of components passed into the vaargs
+		const auto cpools = std::make_tuple(
+			static_cast<sparse_set<Components>*>(mComponentManager->getPool<Components>())...);
+
+		// std::apply([&elem](const auto*... curr) { ((curr ? elem.storage(*curr) : void()), ...); }, cpools);
+
+		sparse_set_view<sparse_set<Components>...> elem{};
+
+		return elem;
+	}
+	*/
 
       private:
 	std::unique_ptr<class EntityManager> mEntityManager;

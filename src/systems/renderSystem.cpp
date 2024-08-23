@@ -183,10 +183,6 @@ void RenderSystem::setDemensions(int width, int height) {
 }
 
 void RenderSystem::draw(class Scene* scene) {
-	for (const auto& i : scene->view<Components::position>()) {
-		SDL_Log("Got entity %llu", i);
-	}
-
 #ifdef DEBUG
 	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -203,6 +199,10 @@ void RenderSystem::draw(class Scene* scene) {
 			sprite->draw();
 		}
 		*/
+
+	for (const auto& i : scene->view<Components::texture>()) {
+		SDL_Log("Got entity %llu", i);
+	}
 
 	glDisable(GL_DEPTH_TEST);
 

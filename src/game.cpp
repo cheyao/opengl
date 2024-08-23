@@ -58,7 +58,8 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 
 	mScene = new Scene();
 	EntityID entity = mScene->newEntity();
-	mScene->emplace<Components::position>(entity, Eigen::Vector2f(0.0f, 0.0f));
+	mScene->emplace<Components::texture>(entity, mSystemManager->getTexture("stone.png"), Eigen::Vector2f(0.0f, 0.0f));
+	/*
 	EntityID entity1 = mScene->newEntity();
 	mScene->emplace<Components::velocity>(entity1, Eigen::Vector2f(0.0f, 0.0f));
 	EntityID entity2 = mScene->newEntity();
@@ -66,6 +67,7 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 	mScene->emplace<Components::velocity>(entity2, Eigen::Vector2f(0.0f, 0.0f));
 	EntityID entity3 = mScene->newEntity();
 	mScene->emplace<Components::position>(entity3, Eigen::Vector2f(0.0f, 0.0f));
+	*/
 }
 
 Game::~Game() {

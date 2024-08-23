@@ -22,6 +22,10 @@ Eigen::Vector2f SystemManager::getDemensions() const {
 	return Eigen::Vector2f(mRenderSystem->getWidth(), mRenderSystem->getHeight());
 }
 
+Texture* SystemManager::getTexture(const std::string& name, const bool srgb) {
+	return mRenderSystem->getTexture(name, srgb);
+}
+
 void SystemManager::update(Scene* scene, const float delta) {
 	(void)delta;
 	// TODO:
