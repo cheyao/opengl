@@ -7,7 +7,16 @@
 template <typename... ComponentTypes> class sparse_set_view_iterator {
       public:
 	sparse_set_view_iterator(ComponentManager* componentManager) : mComponentManager(componentManager) {
-		std::vector<size_t> s = {mComponentManager->getPool<ComponentTypes>()->size()...};
+		const std::vector<size_t> s = {mComponentManager->getPool<ComponentTypes>()->size()...};
+		size_t smallest = SIZE_T_MAX;
+		size_t smallestIndex = SIZE_T_MAX;
+		for (size_t i = 0; i < s.size(); ++i) {
+			if (s[i] < smallest) {
+				smallest = s[i];
+				smallestIndex = i;
+			}
+		}
+		SDL_Log("Smallest pool: %zu", smallestIndex);
 	}
 
 	/*

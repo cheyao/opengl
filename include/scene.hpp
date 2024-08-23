@@ -48,9 +48,7 @@ class Scene {
 
 		// std::apply([&elem](const auto*... curr) { ((curr ? elem.storage(*curr) : void()), ...); }, cpools);
 
-		sparse_set_view<Components...> elem;
-
-		return elem;
+		return sparse_set_view<Components...>(mComponentManager);
 	}
 
       private:
