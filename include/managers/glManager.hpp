@@ -3,19 +3,18 @@
 #include <SDL3/SDL.h>
 
 class GLManager {
-public:
+      public:
 	GLManager(SDL_Window* window);
-	GLManager(GLManager &&) = delete;
-	GLManager(const GLManager &) = delete;
-	GLManager &operator=(GLManager &&) = delete;
-	GLManager &operator=(const GLManager &) = delete;
+	GLManager(GLManager&&) = delete;
+	GLManager(const GLManager&) = delete;
+	GLManager& operator=(GLManager&&) = delete;
+	GLManager& operator=(const GLManager&) = delete;
 	~GLManager();
 
 	void printInfo() const;
 
 	SDL_GLContext getContext() const { return mContext; }
 
-private:
+      private:
 	SDL_GLContext mContext;
 };
-

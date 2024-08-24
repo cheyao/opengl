@@ -11,7 +11,10 @@ layout(std140) uniform Matrices {
 };
 uniform mat4 model;
 
+uniform float width;
+uniform float height;
+
 void main() {
-	gl_Position = proj * model * vec4(aPos, 1.0f);
+	gl_Position = proj * model * vec4(aPos.x * width, aPos.y * height, aPos.z, 1.0f);
 	vTexPos = aTexPos;
 }

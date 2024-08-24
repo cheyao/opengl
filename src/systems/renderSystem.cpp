@@ -8,8 +8,10 @@
 #include "opengl/framebuffer.hpp"
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
+#include "opengl/texture.hpp"
 #include "opengl/ubo.hpp"
 #include "scene.hpp"
+#include "third_party/Eigen/Core"
 #include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
 #include "ui/UIScreen.hpp"
@@ -209,19 +211,25 @@ void RenderSystem::draw(Scene* scene) {
 	glClear(GL_DEPTH_BUFFER_BIT);
 #endif
 
-	/*
-		for (const auto& sprite : mDrawables) {
-			Shader* const shader = sprite->getShader();
-			shader->activate();
-
-			setLights(shader);
-			sprite->draw();
-		}
-	*/
-
+	Shader* defaultShader = this->getShader("block.vert", "block.frag");
 	for (const auto& [entity, texture, position] :
 	     scene->view<Components::texture, Components::position>().each()) {
-		(void)entity;
+		assert(texture.texture != nullptr);
+
+		Shader* shader = texture.shader == nullptr ? defaultShader : texture.shader;
+
+		Eigen::Affine3f model = Eigen::Affine3f::Identity();
+		model.translate((Eigen::Vector3f() << position.pos, 0.0f).finished());
+		model.scale(texture.scale);
+
+		shader->activate();
+		shader->set("model", model);
+		shader->set("width", static_cast<float>(texture.texture->getWidth()));
+		shader->set("height", static_cast<float>(texture.texture->getHeight()));
+		shader->set("texture_diffuse", 0);
+		texture.texture->activate(0);
+
+		mMesh->draw(shader);
 	}
 
 	glDisable(GL_DEPTH_TEST);
