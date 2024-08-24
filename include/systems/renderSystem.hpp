@@ -47,5 +47,7 @@ class RenderSystem {
 	std::unique_ptr<class TextureManager> mTextures;
 	std::unique_ptr<class ShaderManager> mShaders;
 
+	std::unique_ptr<class Mesh> mMesh;
+
 	int mWidth, mHeight;
 };

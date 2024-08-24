@@ -13,6 +13,5 @@ struct velocity {
 
 struct texture {
 	class Texture* texture;
-	Eigen::Vector2f pos;
 };
 } // namespace Components

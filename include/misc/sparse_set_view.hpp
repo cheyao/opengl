@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <span>
 #include <tuple>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 template <typename Iterator> struct iterable_adaptor final {
@@ -175,6 +177,18 @@ template <typename... ComponentTypes> class sparse_set_view {
 			return (mComponentManager->getPool<Components>()->get(entt), ...);
 		} else {
 			return std::make_tuple(mComponentManager->getPool<Components>()->get(entt)...);
+		}
+	}
+
+	template <typename Func> void each(Func func) const {
+		if constexpr (std::is_invocable_v<Func, EntityID, ComponentTypes&...>) {
+			for (const auto entity : mEntities) {
+				func(entity, mComponentManager->getPool<ComponentTypes>()->get(entity)...);
+			}
+		} else {
+			for (const auto entity : mEntities) {
+				func(mComponentManager->getPool<ComponentTypes>()->get(entity)...);
+			}
 		}
 	}
 

@@ -57,13 +57,14 @@ class Game {
 	std::unique_ptr<class SystemManager> mSystemManager;
 
 	class LocaleManager* mLocaleManager;
-	class Scene* mScene;
 
 	std::vector<class UIScreen*> mUI;
 	float mUIScale;
 
 	uint64_t mTicks;
 	std::string mBasePath;
+
+	class Scene* mScene;
 
 	bool mPaused;
 	bool mQuit;

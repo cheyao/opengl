@@ -6,6 +6,7 @@
 #include "managers/shaderManager.hpp"
 #include "managers/textureManager.hpp"
 #include "opengl/framebuffer.hpp"
+#include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/ubo.hpp"
 #include "scene.hpp"
@@ -71,8 +72,7 @@ RenderSystem::RenderSystem(Game* game)
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	// Used to force hardware accell:
-	// SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
 	// NOTE: Don't set emscripten here, it breakes stuff, idk why
 #ifdef ANDROID
@@ -163,6 +163,25 @@ RenderSystem::RenderSystem(Game* game)
 	mGL->printInfo();
 
 	setOrtho();
+
+	constexpr const static float vertices[] = {
+		0.0f, 0.0f, 0.0f, // TL
+		0.0f, 1.0f, 0.0f, // BR
+		1.0f, 0.0f, 0.0f, // TR
+		1.0f, 1.0f, 0.0f  // BL
+	};
+
+	constexpr const static float texturePos[] = {
+		0.0f, 1.0f, // TR
+		0.0f, 0.0f, // BR
+		1.0f, 1.0f, // TL
+		1.0f, 0.0f  // BL
+	};
+
+	const static GLuint indices[] = {2, 1, 0,  // a
+					 1, 2, 3}; // b
+
+	mMesh = std::unique_ptr<Mesh>(new Mesh(vertices, {}, texturePos, indices, {}));
 }
 
 RenderSystem::~RenderSystem() { SDL_DestroyWindow(mWindow); /* Other stuff are smart pointers */ }
@@ -200,9 +219,9 @@ void RenderSystem::draw(Scene* scene) {
 		}
 	*/
 
-	const auto& theView = scene->view<Components::velocity>();
-	for (const auto& [entity, velocity] : theView.each()) {
-		SDL_Log("Entity %llu with %f %f", entity, velocity.vel.x(), velocity.vel.y());
+	for (const auto& [entity, texture, position] :
+	     scene->view<Components::texture, Components::position>().each()) {
+		(void)entity;
 	}
 
 	glDisable(GL_DEPTH_TEST);
@@ -278,7 +297,7 @@ void RenderSystem::setDisplayScale() const {
 
 	ImFont* font =
 		io.Fonts->AddFontFromFileTTF(mGame->fullPath("fonts" SEPARATOR "NotoSans.ttf").data(), 16.0f * scale);
-	IM_ASSERT(font != NULL);
+	assert(font != NULL);
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.ScaleAllSizes(scale);
@@ -291,21 +310,22 @@ Shader* RenderSystem::getShader(const std::string& vert, const std::string& frag
 	return mShaders->get(vert, frag, geom);
 }
 
-/*
-NOTE: Not needed for our 2D game
-void RenderSystem::view() {
-	Eigen::Matrix3f R;
-	const Eigen::Vector3f up(0.0f, 1.0f, 0.0f);
-	R.col(2) = (-mOwner->getForward() * 100.f).normalized();
-	R.col(0) = up.cross(R.col(2)).normalized();
-	R.col(1) = R.col(2).cross(R.col(0));
+// NOTE: Not needed for our 2D game
 
-	Eigen::Affine3f mViewMatrix = Eigen::Affine3f::Identity();
-	mViewMatrix.matrix().topLeftCorner<3, 3>() = R.transpose();
-	mViewMatrix.matrix().topRightCorner<3, 1>() = -R.transpose(); // * mOwner->getPosition();
-	mViewMatrix(3, 3) = 1.0f;
-}
-*/
+/*
+ * void RenderSystem::view() {
+ * 	Eigen::Matrix3f R;
+ * 	const Eigen::Vector3f up(0.0f, 1.0f, 0.0f);
+ * 	R.col(2) = (-mOwner->getForward() * 100.f).normalized();
+ * 	R.col(0) = up.cross(R.col(2)).normalized();
+ * 	R.col(1) = R.col(2).cross(R.col(0));
+ *
+ * 	Eigen::Affine3f mViewMatrix = Eigen::Affine3f::Identity();
+ * 	mViewMatrix.matrix().topLeftCorner<3, 3>() = R.transpose();
+ * 	mViewMatrix.matrix().topRightCorner<3, 1>() = -R.transpose(); // * mOwner->getPosition();
+ * 	mViewMatrix(3, 3) = 1.0f;
+ * }
+ */
 
 void RenderSystem::setPersp() const {
 	constexpr const static float near = 0.1f;
