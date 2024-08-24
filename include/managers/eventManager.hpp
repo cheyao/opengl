@@ -14,9 +14,8 @@ class EventManager {
 
 	[[nodiscard]] SDL_AppResult manageEvent(const union SDL_Event& event);
 
-	[[nodiscard]] bool* getKeystate() { return mKeys; };
-
 	void setKey(const size_t key, const bool val) { mKeys[key] = val; }
+	[[nodiscard]] bool* getKeystate() { return mKeys; };
 
       private:
 	[[nodiscard]] SDL_AppResult manageKeyboardEvent(const union SDL_Event& event);

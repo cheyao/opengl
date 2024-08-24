@@ -55,11 +55,6 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 	SDL_GL_SetSwapInterval(1);
 
 	setup();
-
-	mScene = new Scene();
-	EntityID block = mScene->newEntity();
-	mScene->emplace<Components::texture>(block, mSystemManager->getTexture("stone.png"));
-	mScene->emplace<Components::position>(block, Eigen::Vector2f(10, 10));
 }
 
 Game::~Game() {
@@ -78,10 +73,29 @@ Game::~Game() {
 void Game::setup() {
 	SDL_Log("Setting up UIs");
 
-	/*
-	new ControlUI(this);
-	new MainUI(this);
-	*/
+	mScene = new Scene();
+	EntityID block = mScene->newEntity();
+	mScene->emplace<Components::texture>(block, mSystemManager->getTexture("stone.png"));
+	mScene->emplace<Components::position>(block, Eigen::Vector2f(10, 10));
+	mScene->emplace<Components::input>(
+		block, [](class Scene* scene, EntityID entity, const bool* scancodes, const float delta) {
+			if (scancodes[SDL_SCANCODE_UP] == true) {
+				scene->get<Components::position>(entity).pos += Eigen::Vector2f(0.0f, 200.0f) * delta;
+			}
+			if (scancodes[SDL_SCANCODE_DOWN] == true) {
+				scene->get<Components::position>(entity).pos += Eigen::Vector2f(0.0f, -200.0f) * delta;
+			}
+			if (scancodes[SDL_SCANCODE_LEFT] == true) {
+				scene->get<Components::position>(entity).pos += Eigen::Vector2f(-200.0f, 0.0f) * delta;
+			}
+			if (scancodes[SDL_SCANCODE_RIGHT] == true) {
+				scene->get<Components::position>(entity).pos += Eigen::Vector2f(200.0f, 0.0f) * delta;
+			}
+		});
+
+	EntityID block2 = mScene->newEntity();
+	mScene->emplace<Components::texture>(block2, mSystemManager->getTexture("stone.png"));
+	mScene->emplace<Components::position>(block2, Eigen::Vector2f(400, 400));
 
 	SDL_Log("Successfully initialized OpenGL and UI\n");
 
@@ -106,7 +120,6 @@ SDL_AppResult Game::iterate() {
 	mTicks = SDL_GetTicks();
 
 	gui();
-	input();
 	mSystemManager->update(mScene, delta);
 
 #ifdef DEBUG
@@ -179,55 +192,6 @@ void Game::gui() {
 #endif
 }
 
-void Game::input() {
-	/*
-	for (const auto& ui : mUI) {
-		ui->processInput(mEventManager->getKeystate());
-	}
-	*/
-}
-
-/*
-void Game::update() {
-	// Update the game
-	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
-	if (delta > 0.05f) {
-		delta = 0.05f;
-
-		SDL_Log("Delta > 0.5f, cutting frame short");
-	}
-	mTicks = SDL_GetTicks();
-
-#ifdef IMGUI
-
-	ImGui::Begin("UIs");
-#endif
-	for (const auto& ui : mUI) {
-#ifdef IMGUI
-		ImGui::Text("UI: %s %lx state: %d", ui->getName().data(), reinterpret_cast<uintptr_t>(ui),
-			    ui->getState());
-#endif
-
-		if (ui->getState() == UIScreen::ACTIVE) {
-			ui->update(delta);
-		}
-	}
-#ifdef IMGUI
-	ImGui::End();
-#endif
-
-	// Remove the dead UIs
-	std::vector<const UIScreen*> deadUIs;
-	std::copy_if(mUI.begin(), mUI.end(), std::back_inserter(deadUIs),
-		     [](const auto* const ui) { return (ui->getState() == UIScreen::DEAD); });
-
-	// Delete all the dead uis
-	for (const auto& ui : deadUIs) {
-		delete ui;
-	}
-}
-*/
-
 SDL_AppResult Game::event(const SDL_Event& event) {
 #ifdef IMGUI
 	ImGui_ImplSDL3_ProcessEvent(&event);
@@ -286,3 +250,4 @@ void Game::removeUI(UIScreen* ui) {
 }
 
 void Game::setKey(const size_t key, const bool val) { mEventManager->setKey(key, val); }
+[[nodiscard]] bool* Game::getKeystate() { return mEventManager->getKeystate(); };

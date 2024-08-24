@@ -2,6 +2,7 @@
 
 #include "game.hpp"
 #include "scene.hpp"
+#include "systems/inputSystem.hpp"
 #include "systems/renderSystem.hpp"
 #include "systems/textSystem.hpp"
 #include "third_party/Eigen/Core"
@@ -12,6 +13,7 @@ SystemManager::SystemManager(Game* game) : mGame(game) {
 	// mPhysicsSystem = std::make_unique<PhysicsSystem>();
 	mRenderSystem = std::make_unique<RenderSystem>(mGame);
 	mTextSystem = std::make_unique<TextSystem>(mGame);
+	mInputSystem = std::make_unique<InputSystem>(mGame);
 }
 
 SystemManager::~SystemManager() {}
@@ -27,9 +29,9 @@ Texture* SystemManager::getTexture(const std::string& name, const bool srgb) {
 }
 
 void SystemManager::update(Scene* scene, const float delta) {
-	(void)delta;
-	// TODO:
+	mInputSystem->update(scene, delta);
 	// mPhysicsSystem->update();
+	
 	mRenderSystem->draw(scene);
 	// mTextSystem->draw(scene);
 

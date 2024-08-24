@@ -126,7 +126,7 @@ template <typename... ComponentTypes> class sparse_set_view {
 
 		// This second part loops over all the sizes of in the vector and picks out the smallest
 		size_t smallestSize = SIZE_T_MAX;
-		size_t smallestIndex = 0;
+		size_t smallestIndex = SIZE_T_MAX;
 
 		for (size_t i = 0; i < sizes.size(); ++i) {
 			if (sizes[i] <= smallestSize) {
@@ -134,6 +134,9 @@ template <typename... ComponentTypes> class sparse_set_view {
 				smallestIndex = i;
 			}
 		}
+
+		assert(smallestSize != SIZE_T_MAX);
+		assert(smallestIndex != SIZE_T_MAX);
 
 		// This should be the same
 		assert(smallestSize == sizes[smallestIndex]);

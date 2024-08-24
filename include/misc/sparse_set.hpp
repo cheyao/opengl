@@ -3,9 +3,11 @@
 #include "managers/entityManager.hpp"
 
 #include <SDL3/SDL.h>
+#include <csignal>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <stdexcept>
 #include <vector>
 
 // NOTE: Travers the thing from the end
@@ -82,7 +84,11 @@ template <typename Component> class sparse_set {
 		return mComponents[mSparseContainer[entity]];
 	}
 
-	[[nodiscard]] bool contains(const EntityID entity) const noexcept {
+	[[nodiscard]] bool contains(const EntityID entity) const {
+		if (entity >= mSparseContainer.size() || mSparseContainer[entity] >= mPackedContainer.size()) {
+			return false;
+		}
+
 		return mPackedContainer[mSparseContainer[entity]] == entity;
 	}
 

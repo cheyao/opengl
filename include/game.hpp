@@ -44,6 +44,7 @@ class Game {
 	Eigen::Vector2f getDemensions() const { return mSystemManager->getDemensions(); }
 
 	void setKey(const size_t key, const bool val);
+	[[nodiscard]] bool* getKeystate();
 
 	void quit() { mQuit = true; }
 
@@ -51,7 +52,6 @@ class Game {
 	void setup();
 
 	void gui();
-	void input();
 
 	std::unique_ptr<class EventManager> mEventManager;
 	std::unique_ptr<class SystemManager> mSystemManager;
