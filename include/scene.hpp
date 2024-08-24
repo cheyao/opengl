@@ -19,20 +19,26 @@ class Scene {
 		delete mComponentManager;
 	}
 
+	// This returns a UUID for a new entity
 	[[nodiscard]] EntityID newEntity() {
 		mEntities.emplace_back(mEntityManager->getEntity());
 		return mEntities.back();
 	}
 
+	// Adds a component to an entity
 	template <typename Component, typename... Args> void emplace(const EntityID entity, Args&&... args) {
 		static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->emplace(entity, args...);
 	}
 
-	template <typename Component> Component& get(const EntityID entity) const {
+	// TODO:
+	// void remove()
+
+	// Returns the component of the entity
+	template <typename Component> [[nodiscard]] Component& get(const EntityID entity) const {
 		return static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->get(entity);
 	}
 
-	// TODO: Exclude
+	// Returns a view of the components
 	template <typename... Components> [[nodiscard]] sparse_set_view<Components...> view() const {
 		return sparse_set_view<Components...>(mComponentManager);
 	}

@@ -8,7 +8,9 @@
 #include "third_party/glad/glad.h"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_timer.h>
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <third_party/Eigen/Core>
@@ -109,6 +111,15 @@ void Game::setup() {
 SDL_AppResult Game::iterate() {
 	if (mQuit) {
 		return SDL_APP_SUCCESS;
+	}
+
+	static uint64_t ticks = SDL_GetTicks();
+	static std::uint64_t frames = 0;
+	++frames;
+	if (frames % 400 == 0) {
+		SDL_Log("FPS: %f", static_cast<float>(frames) / ((static_cast<float>(SDL_GetTicks()) - ticks) / 1000));
+		frames = 0;
+		ticks = SDL_GetTicks();
 	}
 
 	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;

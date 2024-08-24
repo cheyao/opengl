@@ -163,13 +163,20 @@ assets
 
 ## TODO
 
+- [ ] Read books (By priority)
+    - [ ] [Effective Modern C++]()
+    - [ ] [Game maths](https://gamemath.com/book/intro.html)
+    - [ ] [Game engine architecture](https://www.amazon.com/dp/1568814135)
+    - [ ] [Game programming gems](https://www.satori.org/game-programming-gems/)
+    - [ ] [Real time rendering](https://www.amazon.com/dp/1568814240)
+    - [ ] [Real time collision detection](https://www.amazon.com/dp/1558607323)
+
 - [ ] Preload
 - [ ] Add functional hot reload
 - [x] Game pause + resume things
 - [ ] Save state
-- [ ] Read gpu gems
 - [x] Debug menu with ImGUI and item names
-- [ ] Better component and actors
+- [x] Better component and actors
 - [x] Android build
     - [x] Android controls
 - [x] Emscripten build

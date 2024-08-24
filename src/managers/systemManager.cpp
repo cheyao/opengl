@@ -29,9 +29,11 @@ Texture* SystemManager::getTexture(const std::string& name, const bool srgb) {
 }
 
 void SystemManager::update(Scene* scene, const float delta) {
+	assert(scene != nullptr);
+
 	mInputSystem->update(scene, delta);
 	// mPhysicsSystem->update();
-	
+
 	mRenderSystem->draw(scene);
 	// mTextSystem->draw(scene);
 

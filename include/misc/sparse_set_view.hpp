@@ -28,7 +28,7 @@ template <typename... ComponentTypes> class sparse_set_view_iterator {
       public:
 	sparse_set_view_iterator(ComponentManager* componentManager, const std::vector<EntityID>& entities,
 				 size_t offset) noexcept
-		: mComponentManager(componentManager), mEntities(&entities), mOffset(offset) {}
+		: mComponentManager(componentManager), mEntities(entities), mOffset(offset) {}
 
 	sparse_set_view_iterator& operator++() noexcept {
 		++mOffset;
@@ -41,7 +41,7 @@ template <typename... ComponentTypes> class sparse_set_view_iterator {
 	}
 
 	[[nodiscard]] const EntityID& operator[](const size_t value) const noexcept {
-		return (*mEntities)[index() + value];
+		return mEntities[index() + value];
 	}
 
 	[[nodiscard]] const EntityID& operator*() const noexcept { return operator[](0); }
@@ -50,29 +50,28 @@ template <typename... ComponentTypes> class sparse_set_view_iterator {
 
       protected:
 	class ComponentManager* mComponentManager;
-	const std::vector<EntityID>* mEntities;
+	const std::vector<EntityID> mEntities;
 	size_t mOffset;
 };
 
 template <typename... ComponentTypes>
 [[nodiscard]] bool operator==(const sparse_set_view_iterator<ComponentTypes...>& lhs,
 			      const sparse_set_view_iterator<ComponentTypes...>& rhs) noexcept {
-	// Compare two iterators
 	return lhs.index() == rhs.index();
 }
 
 template <typename... ComponentTypes>
 [[nodiscard]] bool operator!=(const sparse_set_view_iterator<ComponentTypes...>& lhs,
 			      const sparse_set_view_iterator<ComponentTypes...>& rhs) noexcept {
-	// Similar to above
 	return !(lhs == rhs);
 }
 
 template <typename... ComponentTypes> class sparse_set_view_tuple_iterator {
       public:
+	// mEntities is copied, but it shouldn't - bad for perf
 	sparse_set_view_tuple_iterator(ComponentManager* componentManager, const std::vector<EntityID>& entities,
 				       size_t offset) noexcept
-		: mComponentManager(componentManager), mEntities(&entities), mOffset(offset) {}
+		: mComponentManager(componentManager), mEntities(entities), mOffset(offset) {}
 
 	sparse_set_view_tuple_iterator& operator++() noexcept {
 		++mOffset;
@@ -85,8 +84,8 @@ template <typename... ComponentTypes> class sparse_set_view_tuple_iterator {
 	}
 
 	[[nodiscard]] decltype(auto) operator[](const size_t value) const noexcept {
-		return std::make_tuple((*mEntities)[index() + value], mComponentManager->getPool<ComponentTypes>()->get(
-									      (*mEntities)[index() + value])...);
+		return std::make_tuple(mEntities[index() + value], mComponentManager->getPool<ComponentTypes>()->get(
+									   mEntities[index() + value])...);
 	}
 
 	[[nodiscard]] decltype(auto) operator*() const noexcept { return operator[](0); }
@@ -95,21 +94,19 @@ template <typename... ComponentTypes> class sparse_set_view_tuple_iterator {
 
       protected:
 	class ComponentManager* mComponentManager;
-	const std::vector<EntityID>* mEntities;
+	const std::vector<EntityID> mEntities;
 	size_t mOffset;
 };
 
 template <typename... ComponentTypes>
 [[nodiscard]] bool operator==(const sparse_set_view_tuple_iterator<ComponentTypes...>& lhs,
 			      const sparse_set_view_tuple_iterator<ComponentTypes...>& rhs) noexcept {
-	// Compare two iterators
 	return lhs.index() == rhs.index();
 }
 
 template <typename... ComponentTypes>
 [[nodiscard]] bool operator!=(const sparse_set_view_tuple_iterator<ComponentTypes...>& lhs,
 			      const sparse_set_view_tuple_iterator<ComponentTypes...>& rhs) noexcept {
-	// Similar to above
 	return !(lhs == rhs);
 }
 
