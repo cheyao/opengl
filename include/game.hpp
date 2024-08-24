@@ -29,11 +29,12 @@ class Game {
 	void setUIScale(const float scale) { mUIScale = scale; }
 
 	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager; }
+	[[nodiscard]] class SystemManager* getSystemManager() const { return mSystemManager; }
 
 	[[nodiscard]] inline std::string fullPath(const std::string& path) const {
 		return (mBasePath + "assets" SEPARATOR + path);
 	}
-	[[nodiscard]] std::string getBasePath() const { return mBasePath; }
+	[[nodiscard]] inline std::string getBasePath() const { return mBasePath; }
 
 	void addUI(class UIScreen* ui) { mUI.emplace_back(ui); }
 	void removeUI(class UIScreen* ui);
@@ -54,8 +55,8 @@ class Game {
 	void gui();
 
 	std::unique_ptr<class EventManager> mEventManager;
-	std::unique_ptr<class SystemManager> mSystemManager;
 
+	class SystemManager* mSystemManager;
 	class LocaleManager* mLocaleManager;
 
 	std::vector<class UIScreen*> mUI;

@@ -17,6 +17,8 @@ class SystemManager {
 	void setDemensions(const int width, const int height);
 	[[nodiscard]] Eigen::Vector2f getDemensions() const;
 	[[nodiscard]] class Texture* getTexture(const std::string& name, const bool srgb = false);
+	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
+					      const std::string& geom = "");
 
       private:
 	class Game* mGame;

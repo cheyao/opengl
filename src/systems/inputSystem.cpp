@@ -3,6 +3,7 @@
 #include "components.hpp"
 #include "game.hpp"
 #include "scene.hpp"
+
 #include <cassert>
 
 InputSystem::InputSystem(class Game* game) : mGame(game) {}

@@ -1,8 +1,11 @@
 #include "systems/textSystem.hpp"
 
+#include "components.hpp"
 #include "game.hpp"
+#include "managers/localeManager.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
+#include "scene.hpp"
 #include "third_party/Eigen/Core"
 #include "utils.hpp"
 
@@ -19,8 +22,8 @@
 // FIXME: Better unicode support
 // FIXME: Verical text https://freetype.org/freetype2/docs/tutorial/step2.html
 TextSystem::TextSystem(Game* game, const unsigned int size, bool final)
-	: mGame(game), mPath(game->fullPath("fonts" SEPARATOR)), mSize(size), mLibrary(nullptr),
-	  mFace(nullptr), mFontData(nullptr), mChild(nullptr) {
+	: mGame(game), mPath(game->fullPath("fonts" SEPARATOR)), mSize(size), mLibrary(nullptr), mFace(nullptr),
+	  mFontData(nullptr), mChild(nullptr) {
 	if (FT_Init_FreeType(&mLibrary)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to init freetype");
 		ERROR_BOX("Failed to init freetype, please reinstall your freetype library");
@@ -111,8 +114,8 @@ void TextSystem::loadFont(const std::string& name) {
 	size_t size = 0;
 	FT_Byte* newFontData = static_cast<FT_Byte*>(SDL_LoadFile((mPath + name).data(), &size));
 	if (newFontData == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: SDL failed to load file %s: %s", (mPath + name).data(),
-				SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: SDL failed to load file %s: %s",
+				(mPath + name).data(), SDL_GetError());
 		ERROR_BOX("Failed load font, unknown file format, assets are probably corrupted");
 
 		throw std::runtime_error("Freetype.cpp: Failed to load font unable to open file");
@@ -126,7 +129,8 @@ void TextSystem::loadFont(const std::string& name) {
 	FT_Face newFace;
 	int status = FT_New_Memory_Face(mLibrary, mFontData, size, 0, &newFace);
 	if (status == FT_Err_Unknown_File_Format) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: Failed to load font, unknown file format: %s\033[0m",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
+				"\x1B[31mFreetype.cpp: Failed to load font, unknown file format: %s\033[0m",
 				name.data());
 		ERROR_BOX("Failed load font, unknown file format, please reinstall assets and the freetype library");
 
@@ -145,7 +149,8 @@ void TextSystem::loadFont(const std::string& name) {
 	// TODO: https://freetype.org/freetype2/docs/tutorial/step1.html#section-1
 	// TODO: Fractions with `FT_Set_Char_Size`
 	if (FT_Set_Pixel_Sizes(newFace, 0, 24)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: Failed to set font size: %s\033[0m", name.data());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: Failed to set font size: %s\033[0m",
+				name.data());
 		ERROR_BOX("Failed set font size, please reinstall assets and the freetype library");
 
 		throw std::runtime_error("Freetype.cpp: Failed to set font size");
@@ -157,7 +162,8 @@ void TextSystem::loadFont(const std::string& name) {
 	mFace = newFace;
 
 	if (FT_Select_Charmap(mFace, FT_ENCODING_UNICODE)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: Failed to select unicode: %s\033[0m", name.data());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: Failed to select unicode: %s\033[0m",
+				name.data());
 		ERROR_BOX("Failed select unicode, please reinstall assets and the freetype library");
 
 		throw std::runtime_error("Freetype.cpp: Failed to select unicode");
@@ -183,19 +189,12 @@ void TextSystem::setFontSize(const unsigned int size) {
 }
 
 void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen::Vector2f offset) {
-	if (!mGlyphMap.contains(character)) {
-		// TODO: try catch and sub char
-		mGlyphMap[character] = loadGlyph(character);
-	}
-
 	const TextSystem::Glyph& glyph = mGlyphMap[character];
 
 	if (glyph.size.x() <= 0 || glyph.size.y() <= 0) {
 		return;
 	}
 
-	shader->activate();
-	shader->set("letter", 0);
 	shader->set("size", glyph.size);
 
 	// TODO: Scale
@@ -210,34 +209,51 @@ void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen
 	glBindVertexArray(0);
 }
 
-// FIXME: Loading two times
-TextSystem::Glyph TextSystem::loadGlyph(const char32_t character) {
+TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
+	if (mGlyphMap.contains(character)) {
+		return mGlyphMap[character];
+	}
+
 	assert(mFace != nullptr);
 
 	const FT_UInt index = FT_Get_Char_Index(mFace, character);
 
 	if (index == 0 && mChild != nullptr) {
 		SDL_Log("Loading 0x%x fron fallback font", character);
-		return mChild->loadGlyph(character);
+		return mChild->getGlyph(character);
 	}
 
 	if (FT_Load_Glyph(mFace, index, FT_LOAD_RENDER)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: Failed to load character: 0x%x\033[0m", character);
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: Failed to load character: 0x%x\033[0m",
+				character);
 		ERROR_BOX("Failed load character, please reinstall assets and the freetype library");
 
 		throw std::runtime_error("Freetype.cpp: Failed to load character");
 	}
 
-	TextSystem::Glyph glyph = {(mFace->glyph->bitmap.rows > 0 && mFace->glyph->bitmap.width > 0)
-			       ? new Texture(mFace->glyph->bitmap)
-			       : nullptr,
-		       Eigen::Vector2f(mFace->glyph->bitmap.width, mFace->glyph->bitmap.rows),
-		       Eigen::Vector2f(mFace->glyph->bitmap_left, mFace->glyph->bitmap_top),
-		       Eigen::Vector2f(mFace->glyph->advance.x >> 6, mFace->glyph->advance.y >> 6)};
+	mGlyphMap[character] = {(mFace->glyph->bitmap.rows > 0 && mFace->glyph->bitmap.width > 0)
+					? new Texture(mFace->glyph->bitmap)
+					: nullptr,
+				Eigen::Vector2f(mFace->glyph->bitmap.width, mFace->glyph->bitmap.rows),
+				Eigen::Vector2f(mFace->glyph->bitmap_left, mFace->glyph->bitmap_top),
+				Eigen::Vector2f(mFace->glyph->advance.x >> 6, mFace->glyph->advance.y >> 6)};
 
-	return glyph;
+	return mGlyphMap[character];
 }
 
-void TextSystem::draw() {
-	// TODO:
+void TextSystem::draw(Scene* scene) {
+	Shader* shader = mGame->getSystemManager()->getShader("text.vert", "text.frag");
+	shader->activate();
+	shader->set("letter", 0);
+
+	for (const auto& [_, text, position] : scene->view<Components::text, Components::position>().each()) {
+		SDL_Log("Text");
+		Eigen::Vector2f offset = position.pos;
+
+		for (const char32_t c : mGame->getLocaleManager()->get(text.id)) {
+			drawGlyph(c, shader, offset);
+
+			offset += getGlyph(c).advance;
+		}
+	}
 }

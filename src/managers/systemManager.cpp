@@ -28,6 +28,10 @@ Texture* SystemManager::getTexture(const std::string& name, const bool srgb) {
 	return mRenderSystem->getTexture(name, srgb);
 }
 
+Shader* SystemManager::getShader(const std::string& vert, const std::string& frag, const std::string& geom) {
+	return mRenderSystem->getShader(vert, frag, geom);
+}
+
 void SystemManager::update(Scene* scene, const float delta) {
 	assert(scene != nullptr);
 

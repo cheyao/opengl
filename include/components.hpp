@@ -19,4 +19,9 @@ struct texture {
 struct input {
 	std::function<void(class Scene* scene, EntityID entity, const bool* scancodes, const float delta)> function;
 };
+
+struct text {
+	std::string id;
+	// Maybe offset
+};
 } // namespace Components

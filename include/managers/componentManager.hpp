@@ -19,12 +19,12 @@ constexpr const static ComponentID MAX_COMPONENTS = std::numeric_limits<Componen
 
 class ComponentManager {
       public:
-	ComponentManager();
+	ComponentManager() : mComponentCount(0) {}
 	ComponentManager(ComponentManager&&) = delete;
 	ComponentManager(const ComponentManager&) = delete;
 	ComponentManager& operator=(ComponentManager&&) = delete;
 	ComponentManager& operator=(const ComponentManager&) = delete;
-	~ComponentManager() = default;
+	~ComponentManager() = default; // TODO: Mem leaks
 
 	template <typename Component> [[nodiscard]] ComponentID getID() noexcept {
 		assert(mComponentCount < MAX_COMPONENTS);

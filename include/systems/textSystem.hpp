@@ -21,7 +21,7 @@ class TextSystem {
 	void loadFont(const std::string& name);
 	// Size in 1/64 of a pixel
 	void setFontSize(const unsigned int size);
-	void draw();
+	void draw(class Scene* scene);
 
       private:
 	struct Glyph {
@@ -31,8 +31,8 @@ class TextSystem {
 		Eigen::Vector2f advance;
 	};
 
-	Glyph loadGlyph(const char32_t character);
 	void drawGlyph(const char32_t character, class Shader* shader, const Eigen::Vector2f offset);
+	Glyph& getGlyph(const char32_t character);
 
 	class Game* mGame;
 

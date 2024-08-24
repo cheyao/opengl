@@ -8,10 +8,8 @@ Hello and welcome to the repo of my tiny game engine.
 
 The resources that I used are:
 - [Learn OpenGL](https://learnopengl.com)
-- [Game Programming in C++](https://github.com/gameprogcpp/code)
+- [Game Programming in C++](https://github.com/gameprogcpp/code) <- Do me a favour and don't read this book, it's a bad one
 - [OpenGL RedBook](https://www.opengl-redbook.com)
-
-But instead of their flat, multifile style of coding, I am integrating everything into a component-based game system.
 
 The UI part is compleatly thought up and created by me.
 
@@ -161,15 +159,17 @@ assets
 - `./assets/strings.csv` Source loc csv file (See [here](https://en.wikipedia.org/wiki/IETF_language_tag) for language codes)
 - `./assets/strings.json` Output loc file (to be generated) 
 
-## TODO
+## Explanation
 
-- [ ] Read books (By priority)
-    - [ ] [Effective Modern C++]()
-    - [ ] [Game maths](https://gamemath.com/book/intro.html)
-    - [ ] [Game engine architecture](https://www.amazon.com/dp/1568814135)
-    - [ ] [Game programming gems](https://www.satori.org/game-programming-gems/)
-    - [ ] [Real time rendering](https://www.amazon.com/dp/1568814240)
-    - [ ] [Real time collision detection](https://www.amazon.com/dp/1558607323)
+This game engine uses the Entity-Component-System architecture, implemented using `Scenes` and `sparse_sets`.
+
+Entities are just UUIDs
+
+Components are just plain old structs
+
+The systems manage all the logic and changes the components
+
+## TODO
 
 - [ ] Preload
 - [ ] Add functional hot reload
@@ -205,7 +205,16 @@ assets
     - [ ] Formatter
 - [x] UI Scaling
 - [ ] Shadows
+- [ ] Grid map
 - [ ] Combine localemanager and textmanager
+
+- [ ] Read books (By priority)
+    - [ ] [Effective Modern C++]()
+    - [ ] [Game maths](https://gamemath.com/book/intro.html)
+    - [ ] [Game engine architecture](https://www.amazon.com/dp/1568814135)
+    - [ ] [Game programming gems](https://www.satori.org/game-programming-gems/)
+    - [ ] [Real time rendering](https://www.amazon.com/dp/1568814240)
+    - [ ] [Real time collision detection](https://www.amazon.com/dp/1558607323)
 
 ## Notes
 

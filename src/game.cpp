@@ -43,8 +43,8 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 	}
 
 	mEventManager = std::make_unique<EventManager>(this);
-	mSystemManager = std::make_unique<SystemManager>(this);
 
+	mSystemManager = new SystemManager(this);
 	mLocaleManager = new LocaleManager(mBasePath);
 
 	// TODO: Icon
@@ -69,6 +69,7 @@ Game::~Game() {
 #endif
 
 	delete mLocaleManager;
+	delete mSystemManager;
 	delete mScene;
 }
 
@@ -97,7 +98,11 @@ void Game::setup() {
 
 	EntityID block2 = mScene->newEntity();
 	mScene->emplace<Components::texture>(block2, mSystemManager->getTexture("stone.png"));
-	mScene->emplace<Components::position>(block2, Eigen::Vector2f(400, 400));
+	mScene->emplace<Components::position>(block2, Eigen::Vector2f(400.0f, 400.0f));
+
+	EntityID text = mScene->newEntity();
+	mScene->emplace<Components::text>(text, "controls");
+	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
 
 	SDL_Log("Successfully initialized OpenGL and UI\n");
 
