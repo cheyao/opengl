@@ -200,8 +200,9 @@ void RenderSystem::draw(Scene* scene) {
 		}
 	*/
 
-	const auto& theView = scene->view<Components::texture>();
-	for (const auto& i : theView) {
+	const auto& theView = scene->view<Components::velocity>();
+	for (const auto& [entity, velocity] : theView.each()) {
+		SDL_Log("Entity %llu with %f %f", entity, velocity.vel.x(), velocity.vel.y());
 	}
 
 	glDisable(GL_DEPTH_TEST);

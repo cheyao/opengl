@@ -8,6 +8,20 @@
 #include <tuple>
 #include <vector>
 
+template <typename Iterator> struct iterable_adaptor final {
+	constexpr iterable_adaptor(Iterator from, Iterator to) noexcept : first{std::move(from)}, last{std::move(to)} {}
+
+	[[nodiscard]] constexpr Iterator begin() const noexcept { return first; }
+	[[nodiscard]] constexpr Iterator cbegin() const noexcept { return begin(); }
+
+	[[nodiscard]] constexpr Iterator end() const noexcept { return last; }
+	[[nodiscard]] constexpr Iterator cend() const noexcept { return end(); }
+
+      private:
+	Iterator first;
+	Iterator last;
+};
+
 template <typename... ComponentTypes> class sparse_set_view_iterator {
       public:
 	sparse_set_view_iterator(ComponentManager* componentManager, const std::vector<EntityID>& entities,
@@ -24,7 +38,7 @@ template <typename... ComponentTypes> class sparse_set_view_iterator {
 		return *this;
 	}
 
-	[[nodiscard]] virtual const EntityID& operator[](const size_t value) const noexcept {
+	[[nodiscard]] const EntityID& operator[](const size_t value) const noexcept {
 		return (*mEntities)[index() + value];
 	}
 
@@ -52,17 +66,55 @@ template <typename... ComponentTypes>
 	return !(lhs == rhs);
 }
 
-template <typename... ComponentTypes>
-class sparse_set_view_tuple_iterator : private sparse_set_view_iterator<ComponentTypes...> {
+template <typename... ComponentTypes> class sparse_set_view_tuple_iterator {
       public:
-	[[nodiscard]] const EntityID& operator[](const size_t value) const noexcept override {
-		return (*mEntities)[index() + value];
+	sparse_set_view_tuple_iterator(ComponentManager* componentManager, const std::vector<EntityID>& entities,
+				       size_t offset) noexcept
+		: mComponentManager(componentManager), mEntities(&entities), mOffset(offset) {}
+
+	sparse_set_view_tuple_iterator& operator++() noexcept {
+		++mOffset;
+		return *this;
 	}
+
+	sparse_set_view_tuple_iterator& operator--() noexcept {
+		--mOffset;
+		return *this;
+	}
+
+	[[nodiscard]] decltype(auto) operator[](const size_t value) const noexcept {
+		return std::make_tuple((*mEntities)[index() + value], mComponentManager->getPool<ComponentTypes>()->get(
+									      (*mEntities)[index() + value])...);
+	}
+
+	[[nodiscard]] decltype(auto) operator*() const noexcept { return operator[](0); }
+
+	[[nodiscard]] size_t index() const noexcept { return mOffset; }
+
+      protected:
+	class ComponentManager* mComponentManager;
+	const std::vector<EntityID>* mEntities;
+	size_t mOffset;
 };
+
+template <typename... ComponentTypes>
+[[nodiscard]] bool operator==(const sparse_set_view_tuple_iterator<ComponentTypes...>& lhs,
+			      const sparse_set_view_tuple_iterator<ComponentTypes...>& rhs) noexcept {
+	// Compare two iterators
+	return lhs.index() == rhs.index();
+}
+
+template <typename... ComponentTypes>
+[[nodiscard]] bool operator!=(const sparse_set_view_tuple_iterator<ComponentTypes...>& lhs,
+			      const sparse_set_view_tuple_iterator<ComponentTypes...>& rhs) noexcept {
+	// Similar to above
+	return !(lhs == rhs);
+}
 
 template <typename... ComponentTypes> class sparse_set_view {
 	using iterator = sparse_set_view_iterator<ComponentTypes...>;
-	using iterable = iterable_adaptor<ComponentTypes...>;
+	using tuple_iterator = sparse_set_view_tuple_iterator<ComponentTypes...>;
+	using iterable = iterable_adaptor<sparse_set_view_tuple_iterator<ComponentTypes...>>;
 
       public:
 	// Please don't touch this, took a long time to figure out
@@ -113,7 +165,10 @@ template <typename... ComponentTypes> class sparse_set_view {
 	[[nodiscard]] iterator end() const noexcept { return iterator{mComponentManager, mEntities, mEntities.size()}; }
 	[[nodiscard]] const iterator cend() const noexcept { return end(); }
 
-	[[nodiscard]] iterable each() const noexcept { return iterable{}; }
+	[[nodiscard]] iterable each() const noexcept {
+		return iterable{tuple_iterator{mComponentManager, mEntities, 0},
+				tuple_iterator{mComponentManager, mEntities, mEntities.size()}};
+	}
 
 	template <typename... Components> [[nodiscard]] decltype(auto) get(const EntityID entt) const {
 		if constexpr (sizeof...(Components) == 1) {
