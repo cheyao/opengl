@@ -6,13 +6,6 @@
 #include <cstdint>
 #include <limits>
 
-#ifdef DEBUG
-#include <SDL3/SDL.h>
-#define LOG SDL_Log
-#else
-#define LOG (void)
-#endif
-
 using ComponentID = std::uint64_t;
 
 constexpr const static ComponentID MAX_COMPONENTS = std::numeric_limits<ComponentID>::max();
@@ -24,7 +17,9 @@ class ComponentManager {
 	ComponentManager(const ComponentManager&) = delete;
 	ComponentManager& operator=(ComponentManager&&) = delete;
 	ComponentManager& operator=(const ComponentManager&) = delete;
-	~ComponentManager() = default; // TODO: Mem leaks
+	~ComponentManager() {
+		// std::apply([] {}, mComponentTypes);
+	}
 
 	template <typename Component> [[nodiscard]] ComponentID getID() noexcept {
 		assert(mComponentCount < MAX_COMPONENTS);
@@ -33,6 +28,7 @@ class ComponentManager {
 		// Maybe getPool()?
 		if (mPools.size() <= componentID) {
 			mPools.emplace_back(new sparse_set<Component>());
+			// mComponentTypes = std::tuple_cat(mComponentTypes, std::make_tuple<Component>());
 		}
 
 		return componentID;

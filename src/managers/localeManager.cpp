@@ -61,23 +61,24 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 	loadLocale();
 }
 
-std::u32string LocaleManager::utf8_to_utf32(const std::string_view& u8) {
+std::u32string LocaleManager::U8toU32(const std::string_view& u8) const {
 	std::u32string out;
 
-	int elem_len = 1;
-	for (size_t i = 0; i < u8.size(); i += elem_len) {
-		uint32_t tmp = (uint32_t)u8[i] & 0xff;
+	int word_size = 1;
+	for (size_t i = 0; i < u8.size(); i += word_size) {
+		uint32_t tmp = static_cast<uint32_t>(u8[i]) & 0xff;
+
 		if (tmp < 0x80UL) {
-			elem_len = 1;
+			word_size = 1;
 			out.push_back(u8[i]);
 		} else if (tmp < 0xe0UL) {
-			elem_len = 2;
+			word_size = 2;
 			out.push_back(((u8[i] & 0x1f) << 6) | (u8[i + 1] & 0x3f));
 		} else if (tmp < 0xf0UL) {
-			elem_len = 3;
+			word_size = 3;
 			out.push_back(((u8[i] & 0xf) << 12) | ((u8[i + 1] & 0x3f) << 6) | (u8[i + 2] & 0x3f));
 		} else if (tmp < 0xf8UL) {
-			elem_len = 4;
+			word_size = 4;
 			out.push_back(((u8[i] & 0x7) << 18) | ((u8[i + 1] & 0x3f) << 12) | ((u8[i + 2] & 0x3f) << 6) |
 				      (u8[i + 3] & 0x3f));
 		} else {
@@ -85,10 +86,10 @@ std::u32string LocaleManager::utf8_to_utf32(const std::string_view& u8) {
 		}
 	}
 
-	return true;
+	return out;
 }
 
-std::u32string LocaleManager::get(std::string_view id) {
+std::u32string LocaleManager::get(const std::string_view& id) const {
 	if (!mLocaleData.contains(id)) {
 		SDL_Log("\x1B[31mLocaleManager.cpp: Error! Unknown id %s\033[0m", id.data());
 
@@ -99,9 +100,7 @@ std::u32string LocaleManager::get(std::string_view id) {
 		return U"";
 	}
 
-	std::u32string result;
-	utf8to32(s.begin(), s.end(), std::back_inserter(result));
-	return result;
+	return U8toU32(mLocaleData[id].get<std::string>());
 }
 
 void LocaleManager::loadLocale() {
@@ -120,6 +119,7 @@ void LocaleManager::loadLocale() {
 		main = mLocale;
 	}
 
+	// Prefer specialized locale to generalized one
 	char* localeData = static_cast<char*>(SDL_LoadFile((mLocaleDir + mLocale + ".json").data(), nullptr));
 	if (localeData == nullptr) {
 		localeData = static_cast<char*>(SDL_LoadFile((mLocaleDir + main + ".json").data(), nullptr));
@@ -127,7 +127,7 @@ void LocaleManager::loadLocale() {
 		if (localeData == nullptr) {
 			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
 					"LocaleManager.cpp: Failed to find/read locale shource %s: %s\n",
-					(mLocaleDir + main + ".json").data(), SDL_GetError());
+					(mLocaleDir + mLocale + ".json").data(), SDL_GetError());
 
 			// ERROR_BOX("Failed to find/read locale");
 

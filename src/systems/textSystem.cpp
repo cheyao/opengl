@@ -27,10 +27,10 @@ TextSystem::TextSystem(Game* game, const unsigned int size, bool final)
 	: mGame(game), mPath(game->fullPath("fonts" SEPARATOR)), mSize(size), mLibrary(nullptr), mFace(nullptr),
 	  mFontData(nullptr), mChild(nullptr) {
 	if (FT_Init_FreeType(&mLibrary)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to init freetype");
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "TextSystem.cpp: Failed to init freetype");
 		ERROR_BOX("Failed to init freetype, please reinstall your freetype library");
 
-		throw std::runtime_error("Freetype.cpp: Failed to init library");
+		throw std::runtime_error("TextSystem.cpp: Failed to init library");
 	}
 
 	/*
@@ -91,11 +91,11 @@ void TextSystem::loadFont(const std::string& name) {
 	size_t size = 0;
 	FT_Byte* newFontData = static_cast<FT_Byte*>(SDL_LoadFile((mPath + name).data(), &size));
 	if (newFontData == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: SDL failed to load file %s: %s",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mTextSystem.cpp: SDL failed to load file %s: %s",
 				(mPath + name).data(), SDL_GetError());
 		ERROR_BOX("Failed load font, unknown file format, assets are probably corrupted");
 
-		throw std::runtime_error("Freetype.cpp: Failed to load font unable to open file");
+		throw std::runtime_error("TextSystem.cpp: Failed to load font unable to open file");
 	}
 
 	if (mFontData != nullptr) {
@@ -107,30 +107,30 @@ void TextSystem::loadFont(const std::string& name) {
 	int status = FT_New_Memory_Face(mLibrary, mFontData, size, 0, &newFace);
 	if (status == FT_Err_Unknown_File_Format) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
-				"\x1B[31mFreetype.cpp: Failed to load font, unknown file format: %s\033[0m",
+				"\x1B[31mTextSystem.cpp: Failed to load font, unknown file format: %s\033[0m",
 				name.data());
 		ERROR_BOX("Failed load font, unknown file format, please reinstall assets and the freetype library");
 
 		SDL_free(static_cast<void*>(mFontData));
 
-		throw std::runtime_error("Freetype.cpp: Failed to load font: unknown file format");
+		throw std::runtime_error("TextSystem.cpp: Failed to load font: unknown file format");
 	} else if (status) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Freetype.cpp: Failed to load font: %s", name.data());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "TextSystem.cpp: Failed to load font: %s", name.data());
 		ERROR_BOX("Failed load font, please reinstall assets and the freetype library");
 
 		SDL_free(static_cast<void*>(mFontData));
 
-		throw std::runtime_error("Freetype.cpp: Failed to load font");
+		throw std::runtime_error("TextSystem.cpp: Failed to load font");
 	}
 
 	// TODO: https://freetype.org/freetype2/docs/tutorial/step1.html#section-1
 	// TODO: Fractions with `FT_Set_Char_Size`
 	if (FT_Set_Pixel_Sizes(newFace, 0, 24)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: Failed to set font size: %s\033[0m",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mTextSystem.cpp: Failed to set font size: %s\033[0m",
 				name.data());
 		ERROR_BOX("Failed set font size, please reinstall assets and the freetype library");
 
-		throw std::runtime_error("Freetype.cpp: Failed to set font size");
+		throw std::runtime_error("TextSystem.cpp: Failed to set font size");
 	}
 
 	if (mFace != nullptr) {
@@ -139,11 +139,11 @@ void TextSystem::loadFont(const std::string& name) {
 	mFace = newFace;
 
 	if (FT_Select_Charmap(mFace, FT_ENCODING_UNICODE)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: Failed to select unicode: %s\033[0m",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mTextSystem.cpp: Failed to select unicode: %s\033[0m",
 				name.data());
 		ERROR_BOX("Failed select unicode, please reinstall assets and the freetype library");
 
-		throw std::runtime_error("Freetype.cpp: Failed to select unicode");
+		throw std::runtime_error("TextSystem.cpp: Failed to select unicode");
 	}
 
 	for (const auto& [_, texture] : mGlyphMap) {
@@ -194,19 +194,25 @@ TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
 
 	assert(mFace != nullptr);
 
+	// Maybe directly ask child?
 	const FT_UInt index = FT_Get_Char_Index(mFace, character);
 
-	if (index == 0 && mChild != nullptr) {
-		SDL_Log("Loading 0x%x fron fallback font", character);
-		return mChild->getGlyph(character);
+	if (index == 0) {
+		if (mChild != nullptr) {
+			// SDL_Log("Loading 0x%x from fallback font", character);
+			return mChild->getGlyph(character);
+		} else {
+			SDL_Log("\x1B[31mTextSystem.cpp: Failed to load character: 0x%x (No matching glyph)\033[0m",
+				character);
+		}
 	}
 
 	if (FT_Load_Glyph(mFace, index, FT_LOAD_RENDER)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFreetype.cpp: Failed to load character: 0x%x\033[0m",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mTextSystem.cpp: Failed to load character: 0x%x\033[0m",
 				character);
 		ERROR_BOX("Failed load character, please reinstall assets and the freetype library");
 
-		throw std::runtime_error("Freetype.cpp: Failed to load character");
+		throw std::runtime_error("TextSystem.cpp: Failed to load character");
 	}
 
 	mGlyphMap[character] = {(mFace->glyph->bitmap.rows > 0 && mFace->glyph->bitmap.width > 0)
