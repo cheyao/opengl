@@ -49,9 +49,7 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 
 	// TODO: Icon
 	/*
-	SDL_Surface *icon = IMG_Load("assets/icon.png");
 	SDL_SetWindowIcon(mWindow, icon);
-	SDL_backpackShaderroySurface(icon);
 	*/
 
 	SDL_GL_SetSwapInterval(1);
@@ -74,27 +72,31 @@ Game::~Game() {
 }
 
 void Game::setup() {
-	SDL_Log("Setting up UIs");
+	SDL_Log("Setting up game");
 
 	mScene = new Scene();
 	EntityID block = mScene->newEntity();
 	mScene->emplace<Components::texture>(block, mSystemManager->getTexture("stone.png"));
 	mScene->emplace<Components::position>(block, Eigen::Vector2f(10, 10));
-	mScene->emplace<Components::input>(
-		block, [](class Scene* scene, EntityID entity, const bool* scancodes, const float delta) {
-			if (scancodes[SDL_SCANCODE_UP] == true) {
-				scene->get<Components::position>(entity).pos += Eigen::Vector2f(0.0f, 200.0f) * delta;
-			}
-			if (scancodes[SDL_SCANCODE_DOWN] == true) {
-				scene->get<Components::position>(entity).pos += Eigen::Vector2f(0.0f, -200.0f) * delta;
-			}
-			if (scancodes[SDL_SCANCODE_LEFT] == true) {
-				scene->get<Components::position>(entity).pos += Eigen::Vector2f(-200.0f, 0.0f) * delta;
-			}
-			if (scancodes[SDL_SCANCODE_RIGHT] == true) {
-				scene->get<Components::position>(entity).pos += Eigen::Vector2f(200.0f, 0.0f) * delta;
-			}
-		});
+	mScene->emplace<Components::input>(block, [](class Scene* scene, EntityID entity, const bool* scancodes,
+						     [[maybe_unused]] const float delta) {
+		Eigen::Vector2f vel = Eigen::Vector2f::Zero();
+
+		if (scancodes[SDL_SCANCODE_UP] == true) {
+			vel += Eigen::Vector2f(0.0f, 200.0f);
+		}
+		if (scancodes[SDL_SCANCODE_DOWN] == true) {
+			vel += Eigen::Vector2f(0.0f, -200.0f);
+		}
+		if (scancodes[SDL_SCANCODE_LEFT] == true) {
+			vel += Eigen::Vector2f(-200.0f, 0.0f);
+		}
+		if (scancodes[SDL_SCANCODE_RIGHT] == true) {
+			vel += Eigen::Vector2f(200.0f, 0.0f);
+		}
+
+		scene->get<Components::velocity>(entity).vel = vel;
+	});
 
 	EntityID block2 = mScene->newEntity();
 	mScene->emplace<Components::texture>(block2, mSystemManager->getTexture("stone.png"));
@@ -103,10 +105,6 @@ void Game::setup() {
 	EntityID text = mScene->newEntity();
 	mScene->emplace<Components::text>(text, "controls");
 	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
-
-	SDL_Log("Successfully initialized OpenGL and UI\n");
-
-	SDL_Log("Setting up game");
 
 	SDL_Log("Successfully initialized Game World");
 
@@ -121,7 +119,7 @@ SDL_AppResult Game::iterate() {
 	static uint64_t ticks = SDL_GetTicks();
 	static std::uint64_t frames = 0;
 	++frames;
-	if (frames % 400 == 0) {
+	if (frames % 60 == 0) {
 		SDL_Log("FPS: %f", static_cast<float>(frames) / ((static_cast<float>(SDL_GetTicks()) - ticks) / 1000));
 		frames = 0;
 		ticks = SDL_GetTicks();
@@ -190,8 +188,8 @@ void Game::gui() {
 			SDL_GL_SetSwapInterval(static_cast<int>(vsync));
 		}
 
+		// GLES doesn't have polygon mode
 		if (glPolygonMode != nullptr) {
-			// GLES doesn't have polygon mode
 			if (ImGui::Checkbox("Wireframe", &wireframe)) {
 				glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 			}
@@ -213,9 +211,7 @@ SDL_AppResult Game::event(const SDL_Event& event) {
 	ImGui_ImplSDL3_ProcessEvent(&event);
 
 	ImGuiIO& io = ImGui::GetIO();
-	(void)io;
 
-	/*
 	switch (event.type) {
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		case SDL_EVENT_MOUSE_BUTTON_UP:
@@ -251,7 +247,6 @@ SDL_AppResult Game::event(const SDL_Event& event) {
 		default:
 			break;
 	}
-	*/
 #endif
 
 	return mEventManager->manageEvent(event);

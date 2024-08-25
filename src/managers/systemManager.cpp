@@ -3,6 +3,7 @@
 #include "game.hpp"
 #include "scene.hpp"
 #include "systems/inputSystem.hpp"
+#include "systems/physicsSystem.hpp"
 #include "systems/renderSystem.hpp"
 #include "systems/textSystem.hpp"
 #include "third_party/Eigen/Core"
@@ -10,7 +11,7 @@
 #include <memory>
 
 SystemManager::SystemManager(Game* game) : mGame(game) {
-	// mPhysicsSystem = std::make_unique<PhysicsSystem>();
+	mPhysicsSystem = std::make_unique<PhysicsSystem>(mGame);
 	mRenderSystem = std::make_unique<RenderSystem>(mGame);
 	mTextSystem = std::make_unique<TextSystem>(mGame);
 	mInputSystem = std::make_unique<InputSystem>(mGame);

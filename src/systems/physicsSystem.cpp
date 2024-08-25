@@ -1,13 +1,23 @@
 #include "systems/physicsSystem.hpp"
 
-#include "third_party/Eigen/Core"
+#include "components.hpp"
+#include "game.hpp"
+#include "scene.hpp"
 
 #include <SDL3/SDL.h>
 
-void PhysicsSystem::collide() {
-	return;
+void PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
+
+void PhysicsSystem::update(Scene* scene, float delta) {
+	for (const auto& [_, position, velocity] : scene->view<Components::position, Components::velocity>().each()) {
+		position.pos += velocity.vel * delta;
+	}
 }
 
+void PhysicsSystem::collide() { return; }
+
+/*
+bool PhysicsSystem::collideRectRect(class RectangleCollisionComponent* a, class RectangleCollisionComponent* b) {
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wfloat-equal"
@@ -16,11 +26,14 @@ void PhysicsSystem::collide() {
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #endif
 
-/*
-// TODO: https://noonat.github.io/intersect/#aabb-vs-swept-aabb
-bool PhysicsSystem::collideRectRect(class RectangleCollisionComponent* a, class RectangleCollisionComponent* b) {
 	assert(a->getOwner()->getPosition().z() == 0 && "Not 2D");
 	assert(a->getOwner()->getPosition().z() == 0 && "Not 2D");
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 
 	Eigen::Vector2f aa = a->getOwner()->getPosition().head<2>();
 	Eigen::Vector2f ba = b->getOwner()->getPosition().head<2>();
@@ -36,9 +49,3 @@ bool PhysicsSystem::collideRectRect(class RectangleCollisionComponent* a, class 
 	return !notIntercecting;
 }
 */
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif

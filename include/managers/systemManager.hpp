@@ -24,7 +24,7 @@ class SystemManager {
 	class Game* mGame;
 
 	// The order of the systems shall be listed by the order they are updated
-	// std::unique_ptr<class PhysicsSystem> mPhysicsSystem;
+	std::unique_ptr<class PhysicsSystem> mPhysicsSystem;
 	std::unique_ptr<class RenderSystem> mRenderSystem;
 	std::unique_ptr<class TextSystem> mTextSystem;
 	std::unique_ptr<class InputSystem> mInputSystem;

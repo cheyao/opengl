@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <functional>
 #include <limits>
 
 using ComponentID = std::uint64_t;
@@ -18,7 +19,9 @@ class ComponentManager {
 	ComponentManager& operator=(ComponentManager&&) = delete;
 	ComponentManager& operator=(const ComponentManager&) = delete;
 	~ComponentManager() {
-		// std::apply([] {}, mComponentTypes);
+		for (const auto& destructor : mDestructors) {
+			destructor();
+		}
 	}
 
 	template <typename Component> [[nodiscard]] ComponentID getID() noexcept {
@@ -28,7 +31,8 @@ class ComponentManager {
 		// Maybe getPool()?
 		if (mPools.size() <= componentID) {
 			mPools.emplace_back(new sparse_set<Component>());
-			// mComponentTypes = std::tuple_cat(mComponentTypes, std::make_tuple<Component>());
+			mDestructors.emplace_back(std::bind(&sparse_set<Component>::destroy,
+							    static_cast<sparse_set<Component>*>(mPools.back())));
 		}
 
 		return componentID;
@@ -41,4 +45,6 @@ class ComponentManager {
       private:
 	size_t mComponentCount;
 	std::vector<void*> mPools;
+	// References to destructors of the pools
+	std::vector<std::function<void()>> mDestructors;
 };

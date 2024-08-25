@@ -65,6 +65,11 @@ template <typename Component> class sparse_set {
 	sparse_set& operator=(const sparse_set&) = delete;
 	~sparse_set() = default;
 
+	void destroy() {
+		delete this;
+	}
+
+	// See https://stackoverflow.com/questions/1198260/how-can-you-iterate-over-the-elements-of-an-stdtuple
 	template <typename... Args> void emplace(const EntityID entity, Args&&... args) {
 		while (mSparseContainer.size() <= entity) {
 			mSparseContainer.emplace_back(0);
