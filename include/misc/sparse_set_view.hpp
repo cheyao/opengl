@@ -181,7 +181,11 @@ template <typename... ComponentTypes> class sparse_set_view {
 	}
 
 	template <typename Func> void each(Func func) const {
-		if constexpr (std::is_invocable_v<Func, EntityID, ComponentTypes&...>) {
+		if constexpr (std::is_invocable_v<Func, EntityID>) {
+			for (const auto entity : mEntities) {
+				func(entity);
+			}
+		} else if constexpr (std::is_invocable_v<Func, EntityID, ComponentTypes&...>) {
 			for (const auto entity : mEntities) {
 				func(entity, mComponentManager->getPool<ComponentTypes>()->get(entity)...);
 			}

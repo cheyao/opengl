@@ -8,7 +8,6 @@
 #include "third_party/glad/glad.h"
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_timer.h>
 #include <algorithm>
 #include <cstdint>
 #include <memory>
@@ -98,6 +97,7 @@ void Game::setup() {
 
 		scene->get<Components::velocity>(entity).vel = vel;
 	});
+	mScene->emplace<Components::collision>(block, Eigen::Vector2f(1.0f, 1.0f));
 
 	EntityID block2 = mScene->newEntity();
 	mScene->emplace<Components::texture>(block2, mSystemManager->getTexture("stone.png"));
@@ -142,19 +142,19 @@ SDL_AppResult Game::iterate() {
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		switch (err) {
 			case GL_INVALID_ENUM:
-				SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mGLError: Invalid enum\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mGLError: Invalid enum\033[0m");
 				break;
 			case GL_INVALID_VALUE:
-				SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mGLError: Invalid value\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mGLError: Invalid value\033[0m");
 				break;
 			case GL_INVALID_OPERATION:
-				SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mGLError: Invalid operation\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mGLError: Invalid operation\033[0m");
 				break;
 			case GL_INVALID_FRAMEBUFFER_OPERATION:
-				SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mGLError: Invalid framebuffer op\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mGLError: Invalid framebuffer op\033[0m");
 				break;
 			case GL_OUT_OF_MEMORY:
-				SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mGLError: Out of memory\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mGLError: Out of memory\033[0m");
 				break;
 		}
 	}

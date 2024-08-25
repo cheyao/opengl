@@ -171,42 +171,39 @@ The systems manage all the logic and changes the components
 
 ## TODO
 
-- [ ] Preload
-- [ ] Add functional hot reload
 - [x] Game pause + resume things
-- [ ] Save state
 - [x] Debug menu with ImGUI and item names
 - [x] Better component and actors
+- [x] UI Scaling
+- [x] Multitouch
 - [x] Android build
     - [x] Android controls
+- [x] UI
+    - [x] Divs
+    - [x] Embed text in buttons
+- [x] Pause menu etc
+    - [x] Text
+    - [ ] Settings
+- [x] Localization
+    - [x] Fallback fonts.
+    - [ ] Maybe [ICU?](https://icu.unicode.org/)
 - [x] Emscripten build
     - [ ] Web detect android
     - [ ] Progress bar
     - [ ] White text
-- [ ] Windows build
-- [x] Pause menu etc
-    - [ ] Settings
-    - [x] Text
-- [x] Multitouch
-- [x] UI
-    - [x] Divs
-    - [x] Embed text in buttons
-- [ ] Multithreading
 - [x] TTF
     - [ ] Button auto scale + text
     - [ ] Generate texturemap
     - [ ] Signed distance field fonts https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf
-- [x] Localization
-    - [ ] Maybe [ICU?](https://icu.unicode.org/)
-    - [ ] Vertial text
-    - [ ] Ligatures???
-    - [x] Fallback fonts.
-    - [ ] Compress loc files
-    - [ ] Formatter
-- [x] UI Scaling
+- [ ] Windows build
+- [ ] Multithreading
 - [ ] Shadows
+- [ ] Save state
+- [ ] Preload
+- [ ] Add functional hot reload
 - [ ] Grid map
 - [ ] Combine localemanager and textmanager
+- [ ] Move scenes to `src/scenes`
 
 - [ ] Read books (By priority)
     - [ ] [Effective Modern C++]()

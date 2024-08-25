@@ -65,9 +65,7 @@ template <typename Component> class sparse_set {
 	sparse_set& operator=(const sparse_set&) = delete;
 	~sparse_set() = default;
 
-	void destroy() {
-		delete this;
-	}
+	void destroy() { delete this; }
 
 	// See https://stackoverflow.com/questions/1198260/how-can-you-iterate-over-the-elements-of-an-stdtuple
 	template <typename... Args> void emplace(const EntityID entity, Args&&... args) {
@@ -85,6 +83,17 @@ template <typename Component> class sparse_set {
 	}
 
 	[[nodiscard]] Component& get(const EntityID entity) noexcept {
+#ifdef DEBUG
+		if (!contains(entity)) {
+			SDL_LogCritical(
+				SDL_LOG_CATEGORY_VIDEO,
+				"\x1B[31msparse_set.hpp: Error! Accessing invalid component %s for entity %llu\033[0m",
+				typeid(Component).name(), entity);
+
+			assert(contains(entity) && "Hey! You don't have this entity");
+		}
+#endif
+
 		return mComponents[mSparseContainer[entity]];
 	}
 

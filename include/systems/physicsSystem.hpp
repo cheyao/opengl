@@ -1,5 +1,7 @@
 #pragma once
 
+#include "managers/entityManager.hpp"
+
 class PhysicsSystem {
       public:
 	explicit PhysicsSystem(class Game* game);
@@ -10,11 +12,11 @@ class PhysicsSystem {
 	~PhysicsSystem() = default;
 
 	void update(class Scene* scene, const float delta);
-	void collide();
+	void collide(class Scene* scene);
 
       private:
 	// Collision tests
-	bool collideRectRect(class RectangleCollisionComponent* a, class RectangleCollisionComponent* b);
+	bool AABBxAABB(class Scene* scene, const EntityID a, const EntityID b);
 
 	class Game* mGame;
 };

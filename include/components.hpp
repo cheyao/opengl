@@ -14,6 +14,10 @@ struct velocity {
 	Eigen::Vector2f vel;
 };
 
+struct collision {
+	Eigen::Vector2f size;
+};
+
 struct texture {
 	class Texture* texture;
 	class Shader* shader = nullptr;

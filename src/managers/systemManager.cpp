@@ -36,6 +36,8 @@ Shader* SystemManager::getShader(const std::string& vert, const std::string& fra
 void SystemManager::update(Scene* scene, const float delta) {
 	assert(scene != nullptr);
 
+	mPhysicsSystem->collide(scene);
+
 	mInputSystem->update(scene, delta);
 	mPhysicsSystem->update(scene, delta);
 

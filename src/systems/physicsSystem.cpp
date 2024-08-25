@@ -2,6 +2,8 @@
 
 #include "components.hpp"
 #include "game.hpp"
+#include "imgui.h"
+#include "managers/entityManager.hpp"
 #include "scene.hpp"
 
 #include <SDL3/SDL.h>
@@ -10,37 +12,51 @@ PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
 
 void PhysicsSystem::update(Scene* scene, float delta) {
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
-		scene->get<Components::position>() += velocity.vel * delta;
-
-		SDL_Log("vel %f %f", position.pos.x(), velocity.vel.y());
+		scene->get<Components::position>(entity).pos += scene->get<Components::velocity>(entity).vel * delta;
 	}
 }
 
-void PhysicsSystem::collide() { return; }
+// FIXME: Use some nice trees https://gamedev.stackexchange.com/questions/26501/how-does-a-collision-engine-work
+void PhysicsSystem::collide(Scene* scene) {
+	// Get a list of all the entities we need to check
+	auto entities = std::vector<EntityID>();
+	scene->view<Components::collision, Components::position>().each(
+		[&entities](const EntityID& entity) { entities.emplace_back(entity); });
 
-/*
-bool PhysicsSystem::collideRectRect(class RectangleCollisionComponent* a, class RectangleCollisionComponent* b) {
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wfloat-equal"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
+	// Debug editor
+#if defined(IMGUI) && defined(DEBUG)
+	static bool editor = false;
+	ImGui::Begin("Main menu");
+	ImGui::Checkbox("Collision box editor", &editor);
+	ImGui::End();
+
+	if (editor) {
+		ImGui::Begin("Collision editor");
+		ImGui::End();
+	}
+
+	for (const auto& entity : entities) {
+		(void)entity;
+		// TODO: editor
+	}
 #endif
 
-	assert(a->getOwner()->getPosition().z() == 0 && "Not 2D");
-	assert(a->getOwner()->getPosition().z() == 0 && "Not 2D");
+	for (size_t i = 0; i < entities.size(); ++i) {
+		for (size_t j = i + 1; j < entities.size(); ++j) {
+			if (AABBxAABB(scene, entities[i], entities[j]) {
+				SDL_Log("Collide");
+			}
+		}
+	}
 
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
+	return;
+}
 
-	Eigen::Vector2f aa = a->getOwner()->getPosition().head<2>();
-	Eigen::Vector2f ba = b->getOwner()->getPosition().head<2>();
-	Eigen::Vector2f ab = aa + a->getSize();
-	Eigen::Vector2f bb = ba + a->getSize();
+bool PhysicsSystem::AABBxAABB(Scene* scene, const EntityID a, const EntityID b) {
+	const Eigen::Vector2f& aa = scene->get<Components::position>(a).pos;
+	const Eigen::Vector2f& ba = scene->get<Components::position>(b).pos;
+	const Eigen::Vector2f ab = aa + scene->get<Components::collision>(a).size;
+	const Eigen::Vector2f bb = ba + scene->get<Components::collision>(b).size;
 
 	// If one of these four are true, it means the cubes are not intersecting
 	bool notIntercecting = ab.x() < ba.x()	   // Amax to the left of Bmin
@@ -50,4 +66,3 @@ bool PhysicsSystem::collideRectRect(class RectangleCollisionComponent* a, class 
 
 	return !notIntercecting;
 }
-*/
