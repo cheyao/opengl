@@ -78,6 +78,7 @@ void Game::setup() {
 	EntityID block = mScene->newEntity();
 	mScene->emplace<Components::texture>(block, mSystemManager->getTexture("stone.png"));
 	mScene->emplace<Components::position>(block, Eigen::Vector2f(10, 10));
+	mScene->emplace<Components::velocity>(block, Eigen::Vector2f(0.0f, 0.0f));
 	mScene->emplace<Components::input>(block, [](class Scene* scene, EntityID entity, const bool* scancodes,
 						     [[maybe_unused]] const float delta) {
 		Eigen::Vector2f vel = Eigen::Vector2f::Zero();

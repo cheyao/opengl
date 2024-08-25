@@ -6,11 +6,13 @@
 
 #include <SDL3/SDL.h>
 
-void PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
+PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
 
 void PhysicsSystem::update(Scene* scene, float delta) {
-	for (const auto& [_, position, velocity] : scene->view<Components::position, Components::velocity>().each()) {
-		position.pos += velocity.vel * delta;
+	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
+		scene->get<Components::position>() += velocity.vel * delta;
+
+		SDL_Log("vel %f %f", position.pos.x(), velocity.vel.y());
 	}
 }
 

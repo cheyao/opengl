@@ -37,7 +37,7 @@ void SystemManager::update(Scene* scene, const float delta) {
 	assert(scene != nullptr);
 
 	mInputSystem->update(scene, delta);
-	// mPhysicsSystem->update();
+	mPhysicsSystem->update(scene, delta);
 
 	mRenderSystem->draw(scene);
 	mTextSystem->draw(scene);
