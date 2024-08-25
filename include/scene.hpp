@@ -5,6 +5,8 @@
 #include "misc/sparse_set.hpp"
 #include "misc/sparse_set_view.hpp"
 
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 class Scene {
@@ -38,13 +40,28 @@ class Scene {
 		return static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->get(entity);
 	}
 
+	// Returns weather a entity contains a component
+	template <typename Component> [[nodiscard]] bool contains(const EntityID entity) const {
+		return static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->contains(entity);
+	}
+
 	// Returns a view of the components
 	template <typename... Components> [[nodiscard]] sparse_set_view<Components...> view() const {
 		return sparse_set_view<Components...>(mComponentManager);
 	}
 
+	bool& getSignal(const std::string& signal) {
+		if (!mSignals.contains(signal)) {
+			mSignals[signal] = false;
+		}
+
+		return mSignals[signal];
+	}
+	void clearSignals() { mSignals.clear(); }
+
       private:
 	class EntityManager* mEntityManager;
 	class ComponentManager* mComponentManager;
 	std::vector<EntityID> mEntities;
+	std::unordered_map<std::string, bool> mSignals;
 };

@@ -16,6 +16,7 @@ struct velocity {
 
 struct collision {
 	Eigen::Vector2f size;
+	bool stationary = false;
 };
 
 struct texture {

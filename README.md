@@ -195,6 +195,10 @@ The systems manage all the logic and changes the components
     - [ ] Button auto scale + text
     - [ ] Generate texturemap
     - [ ] Signed distance field fonts https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf
+- [x] Debug menu 
+    - [ ] Collision area editor
+    - [ ] Signal list
+- [ ] Entity name saved
 - [ ] Windows build
 - [ ] Multithreading
 - [ ] Shadows

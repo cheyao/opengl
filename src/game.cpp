@@ -4,6 +4,7 @@
 #include "managers/eventManager.hpp"
 #include "managers/localeManager.hpp"
 #include "managers/systemManager.hpp"
+#include "opengl/texture.hpp"
 #include "scene.hpp"
 #include "third_party/glad/glad.h"
 
@@ -97,11 +98,17 @@ void Game::setup() {
 
 		scene->get<Components::velocity>(entity).vel = vel;
 	});
-	mScene->emplace<Components::collision>(block, Eigen::Vector2f(1.0f, 1.0f));
+	mScene->emplace<Components::collision>(block,
+					       Eigen::Vector2f(mSystemManager->getTexture("stone.png")->getWidth(),
+							       mSystemManager->getTexture("stone.png")->getHeight()));
 
 	EntityID block2 = mScene->newEntity();
 	mScene->emplace<Components::texture>(block2, mSystemManager->getTexture("stone.png"));
 	mScene->emplace<Components::position>(block2, Eigen::Vector2f(400.0f, 400.0f));
+	mScene->emplace<Components::collision>(block2,
+					       Eigen::Vector2f(mSystemManager->getTexture("stone.png")->getWidth(),
+							       mSystemManager->getTexture("stone.png")->getHeight()),
+					       true);
 
 	EntityID text = mScene->newEntity();
 	mScene->emplace<Components::text>(text, "controls");
