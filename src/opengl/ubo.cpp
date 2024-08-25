@@ -3,8 +3,6 @@
 #include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
 
-#include <string_view>
-
 UBO::UBO(GLsizeiptr size) : mSize(size) {
 	glGenBuffers(1, &mUBO);
 

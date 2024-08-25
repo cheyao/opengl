@@ -61,6 +61,8 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 	assert(glIsProgram(mShaderProgram) &&
 	       "Shader.cpp: Error compiling program, something wrong with code: should have been catched");
 
+	bind("Matrices", 0);
+
 #ifdef DEBUG
 	GLint len = 0;
 	glGetProgramiv(mShaderProgram, GL_INFO_LOG_LENGTH, &len);
@@ -173,7 +175,6 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 
 #ifdef GLES
 	// #version 410 core
-	// to
 	// #version 300 es
 	shaderSource[9] = '3';
 	shaderSource[10] = '0';

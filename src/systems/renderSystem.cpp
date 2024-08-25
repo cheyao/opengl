@@ -214,7 +214,7 @@ void RenderSystem::draw(Scene* scene) {
 	glEnable(GL_DEPTH_TEST);
 
 	Shader* defaultShader = this->getShader("block.vert", "block.frag");
-	for (const auto& [entity, texture, position] :
+	for (const auto& [_, texture, position] :
 	     scene->view<Components::texture, Components::position>().each()) {
 		assert(texture.texture != nullptr);
 

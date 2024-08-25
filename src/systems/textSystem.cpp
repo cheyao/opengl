@@ -63,6 +63,7 @@ TextSystem::TextSystem(Game* game, const unsigned int size, bool final)
 	if (!final) {
 		mChild = new TextSystem(game, size, true);
 		mChild->loadFont("NotoSansCJK.ttc");
+		loadFont("NotoSans.ttf");
 	}
 }
 
@@ -165,7 +166,9 @@ void TextSystem::setFontSize(const unsigned int size) {
 }
 
 void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen::Vector2f offset) {
-	const TextSystem::Glyph& glyph = mGlyphMap[character];
+	assert(mFace != nullptr);
+
+	const TextSystem::Glyph& glyph = getGlyph(character);
 
 	if (glyph.size.x() <= 0 || glyph.size.y() <= 0) {
 		return;
@@ -178,6 +181,7 @@ void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen
 	shader->set("model", model);
 	shader->set("size", glyph.size);
 
+	assert(glyph.texture != nullptr);
 	glyph.texture->activate(0);
 
 	mMesh->draw(shader);

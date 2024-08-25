@@ -3,8 +3,10 @@
 #include "third_party/json.hpp"
 #include "utils.hpp"
 
+#include <__format/format_functions.h>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 // TODO: SDL_EVENT_LOCALE_CHANGED
 
@@ -59,17 +61,33 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 	loadLocale();
 }
 
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
+std::u32string LocaleManager::utf8_to_utf32(const std::string_view& u8) {
+	std::u32string out;
 
-#include <codecvt>
+	int elem_len = 1;
+	for (size_t i = 0; i < u8.size(); i += elem_len) {
+		uint32_t tmp = (uint32_t)u8[i] & 0xff;
+		if (tmp < 0x80UL) {
+			elem_len = 1;
+			out.push_back(u8[i]);
+		} else if (tmp < 0xe0UL) {
+			elem_len = 2;
+			out.push_back(((u8[i] & 0x1f) << 6) | (u8[i + 1] & 0x3f));
+		} else if (tmp < 0xf0UL) {
+			elem_len = 3;
+			out.push_back(((u8[i] & 0xf) << 12) | ((u8[i + 1] & 0x3f) << 6) | (u8[i + 2] & 0x3f));
+		} else if (tmp < 0xf8UL) {
+			elem_len = 4;
+			out.push_back(((u8[i] & 0x7) << 18) | ((u8[i + 1] & 0x3f) << 12) | ((u8[i + 2] & 0x3f) << 6) |
+				      (u8[i + 3] & 0x3f));
+		} else {
+			throw std::runtime_error("LocaleManager.cpp: Error! couldn't convert utf8 to utf32");
+		}
+	}
 
-// FIXME: Decaprated utf8 to utf32
+	return true;
+}
+
 std::u32string LocaleManager::get(std::string_view id) {
 	if (!mLocaleData.contains(id)) {
 		SDL_Log("\x1B[31mLocaleManager.cpp: Error! Unknown id %s\033[0m", id.data());
@@ -81,25 +99,10 @@ std::u32string LocaleManager::get(std::string_view id) {
 		return U"";
 	}
 
-	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
-	try {
-		return conv.from_bytes(mLocaleData[id].get<std::string>());
-	} catch (const std::range_error& e) {
-		SDL_Log("\x1B[31mLocaleManager.cpp: Error! Unknown id %s\033[0m", id.data());
-
-#ifdef DEBUG
-		throw std::runtime_error("LocaleManager.cpp: Unable to convert to UTF32!");
-#endif
-
-		return conv.from_bytes(mLocaleData[id].get<std::string>().substr(0, conv.converted()));
-	}
+	std::u32string result;
+	utf8to32(s.begin(), s.end(), std::back_inserter(result));
+	return result;
 }
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
 
 void LocaleManager::loadLocale() {
 	SDL_Log("LocaleManager.cpp: Loading %s", mLocale.data());

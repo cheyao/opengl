@@ -20,6 +20,7 @@ class LocaleManager {
 	std::u32string get(std::string_view id);
 
       private:
+	static std::u32string utf8_to_utf32(const std::string_view& u8);
 	void loadLocale();
 
 	const std::string mLocaleDir;
