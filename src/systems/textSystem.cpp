@@ -3,15 +3,17 @@
 #include "components.hpp"
 #include "game.hpp"
 #include "managers/localeManager.hpp"
+#include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
-#include "third_party/Eigen/Core"
+#include "third_party/Eigen/Geometry"
 #include "utils.hpp"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <SDL3/SDL.h>
+#include <memory>
 #include <stdexcept>
 #include <wchar.h>
 
@@ -52,32 +54,10 @@ TextSystem::TextSystem(Game* game, const unsigned int size, bool final)
 
 	const static GLuint indices[] = {2, 1, 0,  // a
 					 1, 2, 3}; // b
+
 	static_assert(sizeof(indices) == 6 * sizeof(GLuint) && "Just a square, why not 6 indices?");
 
-	glGenBuffers(1, &mVBO);
-	glGenBuffers(1, &mEBO);
-
-	glGenVertexArrays(1, &mVAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) + sizeof(texturePos), nullptr, GL_STATIC_DRAW);
-
-	glBindVertexArray(mVAO);
-
-	// Vertices
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(0));
-	glEnableVertexAttribArray(0);
-
-	// TexPos
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices), sizeof(texturePos), texturePos);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<GLvoid*>(sizeof(vertices)));
-	glEnableVertexAttribArray(2);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
+	mMesh = std::unique_ptr<Mesh>(new Mesh(vertices, {}, texturePos, indices, {}));
 
 	// TODO: Dyn load
 	if (!final) {
@@ -100,10 +80,6 @@ TextSystem::~TextSystem() {
 	for (const auto& [_, texture] : mGlyphMap) {
 		delete texture.texture;
 	}
-
-	glDeleteVertexArrays(1, &mVAO);
-	glDeleteBuffers(1, &mVBO);
-	glDeleteBuffers(1, &mEBO);
 
 	delete mChild;
 }
@@ -195,18 +171,16 @@ void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen
 		return;
 	}
 
-	shader->set("size", glyph.size);
-
 	// TODO: Scale
-	float x = offset.x() + glyph.bearing.x();
-	float y = offset.y() - (glyph.size.y() - glyph.bearing.y());
-	shader->set("offset", x, y);
+	Eigen::Affine3f model = Eigen::Affine3f::Identity();
+	model.translate(Eigen::Vector3f(offset.x() + glyph.bearing.x(),
+					offset.y() - (glyph.size.y() - glyph.bearing.y()), 0.0f));
+	shader->set("model", model);
+	shader->set("size", glyph.size);
 
 	glyph.texture->activate(0);
 
-	glBindVertexArray(mVAO);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-	glBindVertexArray(0);
+	mMesh->draw(shader);
 }
 
 TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
@@ -242,12 +216,14 @@ TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
 }
 
 void TextSystem::draw(Scene* scene) {
-	Shader* shader = mGame->getSystemManager()->getShader("text.vert", "text.frag");
+	glDisable(GL_DEPTH_TEST);
+
+	Shader* shader = mGame->getSystemManager()->getShader("block.vert", "text.frag");
 	shader->activate();
 	shader->set("letter", 0);
+	shader->set("textColor", 1.0f, 1.0f, 1.0f);
 
 	for (const auto& [_, text, position] : scene->view<Components::text, Components::position>().each()) {
-		SDL_Log("Text");
 		Eigen::Vector2f offset = position.pos;
 
 		for (const char32_t c : mGame->getLocaleManager()->get(text.id)) {

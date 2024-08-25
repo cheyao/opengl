@@ -159,7 +159,6 @@ RenderSystem::RenderSystem(Game* game)
 	// Matrix uniform
 	mMatricesUBO = std::make_unique<UBO>(2 * sizeof(Eigen::Affine3f));
 	mMatricesUBO->bind(0);
-	setUIMatrix();
 
 	// Debug Info
 	mGL->printInfo();
@@ -183,6 +182,8 @@ RenderSystem::RenderSystem(Game* game)
 	const static GLuint indices[] = {2, 1, 0,  // a
 					 1, 2, 3}; // b
 
+	static_assert(sizeof(indices) == 6 * sizeof(GLuint) && "Just a square, why not 6 indices?");
+
 	mMesh = std::unique_ptr<Mesh>(new Mesh(vertices, {}, texturePos, indices, {}));
 }
 
@@ -198,7 +199,7 @@ void RenderSystem::setDemensions(int width, int height) {
 	glViewport(0, 0, w, h);
 	mFramebuffer->setDemensions(w, h);
 
-	setUIMatrix();
+	// setUIMatrix();
 
 	setOrtho();
 }
@@ -210,6 +211,7 @@ void RenderSystem::draw(Scene* scene) {
 #else
 	glClear(GL_DEPTH_BUFFER_BIT);
 #endif
+	glEnable(GL_DEPTH_TEST);
 
 	Shader* defaultShader = this->getShader("block.vert", "block.frag");
 	for (const auto& [entity, texture, position] :
@@ -224,23 +226,12 @@ void RenderSystem::draw(Scene* scene) {
 
 		shader->activate();
 		shader->set("model", model);
-		shader->set("width", static_cast<float>(texture.texture->getWidth()));
-		shader->set("height", static_cast<float>(texture.texture->getHeight()));
+		shader->set("size", static_cast<float>(texture.texture->getWidth()),
+			    static_cast<float>(texture.texture->getHeight()));
 		shader->set("texture_diffuse", 0);
 		texture.texture->activate(0);
 
 		mMesh->draw(shader);
-	}
-
-	glDisable(GL_DEPTH_TEST);
-
-	Shader* UIshader = this->getShader("ui.vert", "ui.frag");
-	Shader* textShader = this->getShader("text.vert", "text.frag");
-	for (const auto& ui : mGame->getUIs()) {
-		if (ui->getState() == UIScreen::ACTIVE) {
-			ui->draw(UIshader);
-			ui->drawText(textShader);
-		}
 	}
 
 #ifdef __EMSCRIPTEN__

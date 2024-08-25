@@ -5,6 +5,7 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <wchar.h>
@@ -45,10 +46,7 @@ class TextSystem {
 
 	std::unordered_map<char32_t, Glyph> mGlyphMap;
 
-	// OpenGL stuff
-	GLuint mVBO;
-	GLuint mEBO;
-	GLuint mVAO;
+	std::unique_ptr<class Mesh> mMesh;
 
 	TextSystem* mChild;
 };
