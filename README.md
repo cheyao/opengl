@@ -178,6 +178,9 @@ The systems manage all the logic and changes the components
 - [x] Multitouch
 - [x] Android build
     - [x] Android controls
+- [x] Debug menu 
+    - [x] Collision area editor
+    - [x] Signal list
 - [x] UI
     - [x] Divs
     - [x] Embed text in buttons
@@ -195,11 +198,8 @@ The systems manage all the logic and changes the components
     - [ ] Button auto scale + text
     - [ ] Generate texturemap
     - [ ] Signed distance field fonts https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf
-- [x] Debug menu 
-    - [x] Collision area editor
-    - [ ] Signal list
+- [ ] Collision resolver
 - [ ] Entity name saved
-- [ ] Windows build
 - [ ] Multithreading
 - [ ] Shadows
 - [ ] Save state
@@ -208,6 +208,7 @@ The systems manage all the logic and changes the components
 - [ ] Grid map
 - [ ] Combine localemanager and textmanager
 - [ ] Move scenes to `src/scenes`
+- [ ] Windows build
 
 - [ ] Read books (By priority)
     - [ ] [Effective Modern C++]()

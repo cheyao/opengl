@@ -41,10 +41,10 @@ void SystemManager::update(Scene* scene, const float delta) {
 	assert(scene != nullptr);
 	scene->clearSignals();
 
-	mPhysicsSystem->collide(scene);
-
 	mInputSystem->update(scene, delta);
 	mPhysicsSystem->update(scene, delta);
+
+	mPhysicsSystem->collide(scene);
 
 	mRenderSystem->draw(scene);
 	mTextSystem->draw(scene);

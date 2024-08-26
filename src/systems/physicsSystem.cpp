@@ -80,13 +80,13 @@ void PhysicsSystem::collide(Scene* scene) {
 bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const EntityID b) const {
 	assert(a != b);
 
-	const Eigen::Vector2f& al =
+	const Eigen::Vector2f& leftA =
 		scene->get<Components::position>(a).pos + scene->get<Components::collision>(a).offset;
-	const Eigen::Vector2f& ar = al + scene->get<Components::collision>(a).size;
+	const Eigen::Vector2f& rightA = leftA + scene->get<Components::collision>(a).size;
 
-	const Eigen::Vector2f& bl =
+	const Eigen::Vector2f& leftB =
 		scene->get<Components::position>(b).pos + scene->get<Components::collision>(b).offset;
-	const Eigen::Vector2f& br = bl + scene->get<Components::collision>(b).size;
+	const Eigen::Vector2f& rightB = leftB + scene->get<Components::collision>(b).size;
 
 	// assert(!std::isnan(aa.x()) && !std::isinf(aa.x()) && aa.x() >= 0);
 	// assert(!std::isnan(ab.x()) && !std::isinf(ab.x()) && ab.x() >= 0);
@@ -94,41 +94,55 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 	// assert(!std::isnan(bb.x()) && !std::isinf(bb.x()) && bb.x() >= 0);
 
 	// If one of these four are true, it means the cubes are not intersecting
-	const bool notIntercecting = ar.x() < bl.x()	 // Amax to the left of Bmin
-				     || ar.y() < bl.y()	 // Amax to the bottom of Bmin
-				     || br.x() < al.x()	 // Bmax to the left of Amax
-				     || br.y() < al.y(); // Bmax to the bottom of Amin
+	const bool notIntercecting = rightA.x() < leftB.x()	// Amax to the left of Bmin
+				     || rightA.y() < leftB.y()	// Amax to the bottom of Bmin
+				     || rightB.x() < leftA.x()	// Bmax to the left of Amax
+				     || rightB.y() < leftA.y(); // Bmax to the bottom of Amin
 
 	return !notIntercecting;
 }
 
-// TODO: Read https://gamedev.stackexchange.com/questions/38891/making-an-efficient-collision-detection-system/38893#38893
-// TODO: Read https://gamedev.stackexchange.com/questions/38613/how-do-i-detect-collision-between-movie-clips/38635#38635
+// TODO: Read
+// https://gamedev.stackexchange.com/questions/38891/making-an-efficient-collision-detection-system/38893#38893
+// TODO: Read
+// https://gamedev.stackexchange.com/questions/38613/how-do-i-detect-collision-between-movie-clips/38635#38635
 void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	assert(a != b);
 	// Two components cannot be stationary at the same time
-	assert(!scene->get<Components::collision>(a).stationary || !scene->get<Components::collision>(a).stationary);
+	assert((!scene->get<Components::collision>(a).stationary || !scene->get<Components::collision>(a).stationary) &&
+	       "Hey! I can't resolve the collision of two stationary objects!");
 
-	const Eigen::Vector2f& al =
+	// Thx stack https://gamedev.stackexchange.com/questions/18302/2d-platformer-collisions
+	// See https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/Player.cs
+	// To
+	// https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/RectangleExtensions.cs#L30
+
+	const Eigen::Vector2f& leftA =
 		scene->get<Components::position>(a).pos + scene->get<Components::collision>(a).offset;
-	const Eigen::Vector2f& ar = al + scene->get<Components::collision>(a).size;
+	const Eigen::Vector2f& centerA = leftA + scene->get<Components::collision>(a).size / 2;
 
-	const Eigen::Vector2f& bl =
+	const Eigen::Vector2f& leftB =
 		scene->get<Components::position>(b).pos + scene->get<Components::collision>(b).offset;
-	const Eigen::Vector2f& br = bl + scene->get<Components::collision>(b).size;
+	const Eigen::Vector2f& centerB = leftB + scene->get<Components::collision>(b).size / 2;
 
-	const Eigen::Vector2f acenter = al + (ar - al) / 2;
-	const Eigen::Vector2f bcenter = bl + (br - bl) / 2;
+	const Eigen::Vector2f& distance = centerA - centerB;
+	const Eigen::Vector2f& minDistance =
+		(scene->get<Components::collision>(a).size + scene->get<Components::collision>(b).size) / 2;
 
-	const Eigen::Vector2f distance = (acenter - bcenter) / 2;
+	assert(!(std::abs(distance.x()) > minDistance.x() || std::abs(distance.y()) > minDistance.y()) &&
+	       "The objects are not colliding?");
 
-	scene->get<Components::position>(a).pos += distance;
-	scene->get<Components::position>(b).pos += -distance;
+	const Eigen::Vector2f& depth = minDistance - distance;
 
-	if (scene->contains<Components::velocity>(a)) {
-		scene->get<Components::velocity>(a).vel.setZero();
+	if (depth.x() < depth.y()) {
+		scene->get<Components::position>(a).pos.x() += (depth / 2).x();
+		scene->get<Components::position>(b).pos.x() += (-depth / 2).x();
+	} else {
+		scene->get<Components::position>(a).pos.y() += (depth / 2).y();
+		scene->get<Components::position>(b).pos.y() += (-depth / 2).y();
 	}
-	if (scene->contains<Components::velocity>(b)) {
-		scene->get<Components::velocity>(b).vel.setZero();
-	}
+	/*
+	float depthX = distance.x() > 0 ? minDistanceX - distanceX : -minDistanceX - distanceX;
+	float depthY = distance.y() > 0 ? minDistanceY - distanceY : -minDistanceY - distanceY;
+	*/
 }
