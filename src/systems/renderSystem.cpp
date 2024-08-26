@@ -14,7 +14,6 @@
 #include "third_party/Eigen/Core"
 #include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
-#include "ui/UIScreen.hpp"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
@@ -135,6 +134,9 @@ RenderSystem::RenderSystem(Game* game)
 #ifdef __ANDROID__
 	io.ConfigFlags |= ImGuiConfigFlags_IsTouchScreen;
 #endif
+#ifdef DEBUG
+	io.ConfigDebugIsDebuggerPresent = true;
+#endif
 
 	ImGui::StyleColorsDark();
 
@@ -233,11 +235,26 @@ void RenderSystem::draw(Scene* scene) {
 		mMesh->draw(shader);
 	}
 
-#ifdef DEBUG
+#ifdef IMGUI
+	ImGui::Begin("Main menu");
+	static bool hitbox = false;
+	ImGui::Checkbox("Show hitboxes", &hitbox);
+	ImGui::End();
+
 	// Debug layer rendering
-	if (scene->getSignal("collisionEditor")) {
+	if (hitbox || scene->getSignal("collisionEditor")) {
+		GLint mode[2];
+		if (hitbox && glPolygonMode != nullptr) {
+			glGetIntegerv(GL_POLYGON_MODE, mode);
+
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		}
+
 		Shader* editorShader = mGame->getSystemManager()->getShader("block.vert", "editor.frag");
+
 		editorShader->activate();
+		editorShader->set("wireframe", hitbox);
+
 		for (const auto& [_, collision, position] :
 		     scene->view<Components::collision, Components::position>().each()) {
 			Eigen::Affine3f model = Eigen::Affine3f::Identity();
@@ -248,6 +265,10 @@ void RenderSystem::draw(Scene* scene) {
 			editorShader->set("size", collision.size);
 
 			mMesh->draw(editorShader);
+		}
+
+		if (hitbox && glPolygonMode != nullptr) {
+			glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
 		}
 	}
 #endif

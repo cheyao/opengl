@@ -10,6 +10,11 @@
 #include <vector>
 
 class Scene {
+#ifdef IMGUI
+	// Needed for signal list menu
+	friend class SystemManager;
+#endif
+
       public:
 	Scene() : mEntityManager(new EntityManager()), mComponentManager(new ComponentManager()) {}
 	Scene(Scene&&) = delete;
@@ -62,6 +67,7 @@ class Scene {
       private:
 	class EntityManager* mEntityManager;
 	class ComponentManager* mComponentManager;
+
 	std::vector<EntityID> mEntities;
 	std::unordered_map<std::string, bool> mSignals;
 };

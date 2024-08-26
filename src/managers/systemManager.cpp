@@ -10,6 +10,10 @@
 
 #include <memory>
 
+#ifdef IMGUI
+#include "imgui.h"
+#endif
+
 SystemManager::SystemManager(Game* game) : mGame(game) {
 	mPhysicsSystem = std::make_unique<PhysicsSystem>(mGame);
 	mRenderSystem = std::make_unique<RenderSystem>(mGame);
@@ -44,6 +48,24 @@ void SystemManager::update(Scene* scene, const float delta) {
 
 	mRenderSystem->draw(scene);
 	mTextSystem->draw(scene);
+
+#ifdef IMGUI
+	// Print out signals
+	static bool signal = false;
+	ImGui::Begin("Main menu");
+	ImGui::Checkbox("List of signals", &signal);
+	ImGui::End();
+
+	if (signal) {
+		ImGui::Begin("Signal list");
+
+		for (const auto& [name, value] : scene->mSignals) {
+			ImGui::BulletText("%s", std::format("{}: {}", name, value).data());
+		}
+
+		ImGui::End();
+	}
+#endif
 
 	mRenderSystem->present();
 }

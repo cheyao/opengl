@@ -2,14 +2,17 @@
 
 #include "components.hpp"
 #include "game.hpp"
-#include "imgui.h"
 #include "managers/entityManager.hpp"
-#include "opengl/shader.hpp"
 #include "scene.hpp"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
+#include <cassert>
 #include <format>
+
+#ifdef IMGUI
+#include "imgui.h"
+#endif
 
 // The physicsSystem is in charge of the collision and mouvements
 PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
@@ -66,7 +69,7 @@ void PhysicsSystem::collide(Scene* scene) {
 	for (size_t i = 0; i < entities.size(); ++i) {
 		for (size_t j = i + 1; j < entities.size(); ++j) {
 			if (AABBxAABB(scene, entities[i], entities[j])) {
-				SDL_Log("Collide");
+				pushBack(scene, entities[i], entities[j]);
 			}
 		}
 	}
@@ -74,7 +77,9 @@ void PhysicsSystem::collide(Scene* scene) {
 	return;
 }
 
-bool PhysicsSystem::AABBxAABB(Scene* scene, const EntityID a, const EntityID b) const {
+bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const EntityID b) const {
+	assert(a != b);
+
 	const Eigen::Vector2f& al =
 		scene->get<Components::position>(a).pos + scene->get<Components::collision>(a).offset;
 	const Eigen::Vector2f& ar = al + scene->get<Components::collision>(a).size;
@@ -95,4 +100,13 @@ bool PhysicsSystem::AABBxAABB(Scene* scene, const EntityID a, const EntityID b) 
 				     || br.y() < al.y(); // Bmax to the bottom of Amin
 
 	return !notIntercecting;
+}
+
+void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
+	assert(a != b);
+
+	// Push the stuff back
+	(void)scene;
+	(void)a;
+	(void)b;
 }

@@ -2,4 +2,4 @@ id,comment,en,fr,zh-CN,cs,es
 start_game,Button to start the game in the main menu,Start the game!,Commencer le jeux!,开始游戏！,Zacit hru,Comenzar el juego
 settings,Button to open settings,Settings,Parametres,设置,Nastaveni,Configuración
 quit_game,Button to quit game in main menu,Quit,Quitter,退出游戏,Ukončit hru,Terminar el juego
-controls,Game control HUD text,ESC for menu F1 to release mouse F3 pause,ESC pour la menu F3 pause,ESC 打开菜单 F1 释放鼠标 F3 暂停,ESC menu F1 uvolnění myši F3 pauze,ESC menú F1 soltar el ratón F3 pausa
+controls,Game control HUD text,ESC for menu F3 pause,ESC pour la menu F3 pause,ESC 打开菜单 F3 暂停,ESC menu F3 pauze,ESC menú F3 pausa

@@ -3,7 +3,6 @@
 #include "third_party/json.hpp"
 #include "utils.hpp"
 
-#include <__format/format_functions.h>
 #include <stdexcept>
 #include <string>
 #include <string_view>
