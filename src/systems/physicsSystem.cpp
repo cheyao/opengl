@@ -89,16 +89,20 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 		scene->get<Components::position>(b).pos + scene->get<Components::collision>(b).offset;
 	const Eigen::Vector2f& rightB = leftB + scene->get<Components::collision>(b).size;
 
-	// assert(!std::isnan(aa.x()) && !std::isinf(aa.x()) && aa.x() >= 0);
-	// assert(!std::isnan(ab.x()) && !std::isinf(ab.x()) && ab.x() >= 0);
-	// assert(!std::isnan(ba.x()) && !std::isinf(ba.x()) && ba.x() >= 0);
-	// assert(!std::isnan(bb.x()) && !std::isinf(bb.x()) && bb.x() >= 0);
+	assert(!std::isnan(leftA.x()) && !std::isinf(leftA.x()));
+	assert(!std::isnan(rightA.x()) && !std::isinf(rightA.x()));
+	assert(!std::isnan(leftB.x()) && !std::isinf(leftB.x()));
+	assert(!std::isnan(rightB.x()) && !std::isinf(rightB.x()));
+	assert(!std::isnan(leftA.y()) && !std::isinf(leftA.y()));
+	assert(!std::isnan(rightA.y()) && !std::isinf(rightA.y()));
+	assert(!std::isnan(leftB.y()) && !std::isinf(leftB.y()));
+	assert(!std::isnan(rightB.y()) && !std::isinf(rightB.y()));
 
 	// If one of these four are true, it means the cubes are not intersecting
-	const bool notIntercecting = rightA.x() < leftB.x()	// Amax to the left of Bmin
-				     || rightA.y() < leftB.y()	// Amax to the bottom of Bmin
-				     || rightB.x() < leftA.x()	// Bmax to the left of Amax
-				     || rightB.y() < leftA.y(); // Bmax to the bottom of Amin
+	const bool notIntercecting = rightA.x() <= leftB.x()	// Amax to the left of Bmin
+				     || rightA.y() <= leftB.y()	// Amax to the bottom of Bmin
+				     || rightB.x() <= leftA.x()	// Bmax to the left of Amax
+				     || rightB.y() <= leftA.y(); // Bmax to the bottom of Amin
 
 	return !notIntercecting;
 }
@@ -142,11 +146,24 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 
 	const Eigen::Vector2f& depth = Eigen::Vector2f(depthX, depthY);
 
-	if (std::abs(depth.x()) <= std::abs(depth.y())) {
-		scene->get<Components::position>(a).pos.x() += (depth / 2).x();
-		scene->get<Components::position>(b).pos.x() += (-depth / 2).x();
+	if (scene->get<Components::collision>(a).stationary || scene->get<Components::collision>(b).stationary) {
+		const EntityID movable = scene->get<Components::collision>(a).stationary ? b : a;
+
+		// The + and - are relative to the two, so when moving a gotta add, moving b gotta subtract
+		// Why a + and b -? IDFK. Just tried out a bunch of possible solutions and got this
+		// It works, don't touch (if it's not broken)
+		if (std::abs(depth.x()) <= std::abs(depth.y())) {
+			scene->get<Components::position>(movable).pos.x() += (movable == b ? -1 : 1) * depth.x();
+		} else {
+			scene->get<Components::position>(movable).pos.y() += (movable == b ? -1 : 1) * depth.y();
+		}
 	} else {
-		scene->get<Components::position>(a).pos.y() += (depth / 2).y();
-		scene->get<Components::position>(b).pos.y() += (-depth / 2).y();
+		if (std::abs(depth.x()) <= std::abs(depth.y())) {
+			scene->get<Components::position>(a).pos.x() += (depth / 2).x();
+			scene->get<Components::position>(b).pos.x() += (-depth / 2).x();
+		} else {
+			scene->get<Components::position>(a).pos.y() += (depth / 2).y();
+			scene->get<Components::position>(b).pos.y() += (-depth / 2).y();
+		}
 	}
 }

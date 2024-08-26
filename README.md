@@ -181,6 +181,7 @@ The systems manage all the logic and changes the components
 - [x] Debug menu 
     - [x] Collision area editor
     - [x] Signal list
+    - [ ] Velocity arrows
 - [x] UI
     - [x] Divs
     - [x] Embed text in buttons

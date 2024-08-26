@@ -67,7 +67,6 @@ template <typename Component> class sparse_set {
 
 	void destroy() { delete this; }
 
-	// See https://stackoverflow.com/questions/1198260/how-can-you-iterate-over-the-elements-of-an-stdtuple
 	template <typename... Args> void emplace(const EntityID entity, Args&&... args) {
 		while (mSparseContainer.size() <= entity) {
 			mSparseContainer.emplace_back(0);
@@ -90,7 +89,7 @@ template <typename Component> class sparse_set {
 				"\x1B[31msparse_set.hpp: Error! Accessing invalid component %s for entity %llu\033[0m",
 				typeid(Component).name(), entity);
 
-			assert(contains(entity) && "Hey! You don't have this entity");
+			assert(contains(entity) && "Hey! This sparse set doesn't contain this entity");
 		}
 #endif
 
