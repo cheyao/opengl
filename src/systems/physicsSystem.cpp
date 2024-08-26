@@ -4,6 +4,7 @@
 #include "game.hpp"
 #include "managers/entityManager.hpp"
 #include "scene.hpp"
+#include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
@@ -109,13 +110,14 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	assert(a != b);
 	// Two components cannot be stationary at the same time
-	assert((!scene->get<Components::collision>(a).stationary || !scene->get<Components::collision>(a).stationary) &&
+	assert(!(scene->get<Components::collision>(a).stationary && scene->get<Components::collision>(b).stationary) &&
 	       "Hey! I can't resolve the collision of two stationary objects!");
 
-	// Thx stack https://gamedev.stackexchange.com/questions/18302/2d-platformer-collisions
-	// See https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/Player.cs
-	// To
-	// https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/RectangleExtensions.cs#L30
+	/* Thx stack https://gamedev.stackexchange.com/questions/18302/2d-platformer-collisions
+	 * See https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/Player.cs
+	 * To
+	 * https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/RectangleExtensions.cs#L30
+	 */
 
 	const Eigen::Vector2f& leftA =
 		scene->get<Components::position>(a).pos + scene->get<Components::collision>(a).offset;
@@ -129,20 +131,22 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	const Eigen::Vector2f& minDistance =
 		(scene->get<Components::collision>(a).size + scene->get<Components::collision>(b).size) / 2;
 
-	assert(!(std::abs(distance.x()) > minDistance.x() || std::abs(distance.y()) > minDistance.y()) &&
-	       "The objects are not colliding?");
+	/*
+	 * FIXME:
+	 * assert(!(std::abs(distance.x()) >= minDistance.x() || std::abs(distance.y()) >= minDistance.y()) &&
+	 *       "The objects are not colliding?");
+	 */
 
-	const Eigen::Vector2f& depth = minDistance - distance;
+	const float& depthX = (distance.x() > 0 ? minDistance.x() : -minDistance.x()) - distance.x();
+	const float& depthY = (distance.y() > 0 ? minDistance.y() : -minDistance.y()) - distance.y();
 
-	if (depth.x() < depth.y()) {
+	const Eigen::Vector2f& depth = Eigen::Vector2f(depthX, depthY);
+
+	if (std::abs(depth.x()) <= std::abs(depth.y())) {
 		scene->get<Components::position>(a).pos.x() += (depth / 2).x();
 		scene->get<Components::position>(b).pos.x() += (-depth / 2).x();
 	} else {
 		scene->get<Components::position>(a).pos.y() += (depth / 2).y();
 		scene->get<Components::position>(b).pos.y() += (-depth / 2).y();
 	}
-	/*
-	float depthX = distance.x() > 0 ? minDistanceX - distanceX : -minDistanceX - distanceX;
-	float depthY = distance.y() > 0 ? minDistanceY - distanceY : -minDistanceY - distanceY;
-	*/
 }
