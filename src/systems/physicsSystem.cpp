@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <format>
 
+// The physicsSystem is in charge of the collision and mouvements
 PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
 
 void PhysicsSystem::update(Scene* scene, float delta) {
@@ -33,17 +34,19 @@ void PhysicsSystem::collide(Scene* scene) {
 	ImGui::End();
 
 	if (editor) {
-		scene->getSignal("collisionEditor");
+		scene->getSignal("collisionEditor") = true;
 
 		ImGui::Begin("Collision editor");
 
-		// TODO: Tmr add separate pos
-		Shader* editorShader = mGame->getSystemManager()->getShader("block.vert", "editor.frag");
 		for (const auto& entity : entities) {
 			if (ImGui::TreeNode(std::format("Entity {}", entity).data())) {
 				ImGui::SliderFloat2(std::format("Position for entity {}", entity).data(),
 						    scene->get<Components::position>(entity).pos.data(), 0.0f,
 						    std::max(mGame->getDemensions().x(), mGame->getDemensions().y()));
+
+				ImGui::SliderFloat2(std::format("Offset for entity {}", entity).data(),
+						    scene->get<Components::collision>(entity).offset.data(), -500,
+						    +500);
 
 				ImGui::SliderFloat2(std::format("Size for entity {}", entity).data(),
 						    scene->get<Components::collision>(entity).size.data(), 0.0f,
@@ -51,8 +54,6 @@ void PhysicsSystem::collide(Scene* scene) {
 
 				ImGui::TreePop();
 			}
-
-			(void)editorShader;
 			// TODO: editor
 		}
 
@@ -73,18 +74,25 @@ void PhysicsSystem::collide(Scene* scene) {
 	return;
 }
 
-bool PhysicsSystem::AABBxAABB(Scene* scene, const EntityID a, const EntityID b) {
-	const Eigen::Vector2f& aa = scene->get<Components::position>(a).pos;
-	const Eigen::Vector2f ab = aa + scene->get<Components::collision>(a).size;
+bool PhysicsSystem::AABBxAABB(Scene* scene, const EntityID a, const EntityID b) const {
+	const Eigen::Vector2f& al =
+		scene->get<Components::position>(a).pos + scene->get<Components::collision>(a).offset;
+	const Eigen::Vector2f& ar = al + scene->get<Components::collision>(a).size;
 
-	const Eigen::Vector2f& ba = scene->get<Components::position>(b).pos;
-	const Eigen::Vector2f bb = ba + scene->get<Components::collision>(b).size;
+	const Eigen::Vector2f& bl =
+		scene->get<Components::position>(b).pos + scene->get<Components::collision>(b).offset;
+	const Eigen::Vector2f& br = bl + scene->get<Components::collision>(b).size;
+
+	// assert(!std::isnan(aa.x()) && !std::isinf(aa.x()) && aa.x() >= 0);
+	// assert(!std::isnan(ab.x()) && !std::isinf(ab.x()) && ab.x() >= 0);
+	// assert(!std::isnan(ba.x()) && !std::isinf(ba.x()) && ba.x() >= 0);
+	// assert(!std::isnan(bb.x()) && !std::isinf(bb.x()) && bb.x() >= 0);
 
 	// If one of these four are true, it means the cubes are not intersecting
-	const bool notIntercecting = ab.x() < ba.x()	 // Amax to the left of Bmin
-				     || ab.y() < ba.y()	 // Amax to the bottom of Bmin
-				     || bb.x() < aa.x()	 // Bmax to the left of Amax
-				     || bb.y() < aa.y(); // Bmax to the bottom of Amin
+	const bool notIntercecting = ar.x() < bl.x()	 // Amax to the left of Bmin
+				     || ar.y() < bl.y()	 // Amax to the bottom of Bmin
+				     || br.x() < al.x()	 // Bmax to the left of Amax
+				     || br.y() < al.y(); // Bmax to the bottom of Amin
 
 	return !notIntercecting;
 }

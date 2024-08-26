@@ -16,7 +16,7 @@ class PhysicsSystem {
 
       private:
 	// Collision tests
-	bool AABBxAABB(class Scene* scene, const EntityID a, const EntityID b);
+	bool AABBxAABB(class Scene* scene, const EntityID a, const EntityID b) const;
 
 	class Game* mGame;
 };

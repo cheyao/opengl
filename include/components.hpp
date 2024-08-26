@@ -15,6 +15,7 @@ struct velocity {
 };
 
 struct collision {
+	Eigen::Vector2f offset;
 	Eigen::Vector2f size;
 	bool stationary = false;
 };

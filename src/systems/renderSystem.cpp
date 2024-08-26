@@ -214,8 +214,7 @@ void RenderSystem::draw(Scene* scene) {
 	glEnable(GL_DEPTH_TEST);
 
 	Shader* defaultShader = this->getShader("block.vert", "block.frag");
-	for (const auto& [_, texture, position] :
-	     scene->view<Components::texture, Components::position>().each()) {
+	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
 		assert(texture.texture != nullptr);
 
 		Shader* shader = texture.shader == nullptr ? defaultShader : texture.shader;
@@ -233,6 +232,25 @@ void RenderSystem::draw(Scene* scene) {
 
 		mMesh->draw(shader);
 	}
+
+#ifdef DEBUG
+	// Debug layer rendering
+	if (scene->getSignal("collisionEditor")) {
+		Shader* editorShader = mGame->getSystemManager()->getShader("block.vert", "editor.frag");
+		editorShader->activate();
+		for (const auto& [_, collision, position] :
+		     scene->view<Components::collision, Components::position>().each()) {
+			Eigen::Affine3f model = Eigen::Affine3f::Identity();
+
+			model.translate((Eigen::Vector3f() << (position.pos + collision.offset), 0.0f).finished());
+
+			editorShader->set("model", model);
+			editorShader->set("size", collision.size);
+
+			mMesh->draw(editorShader);
+		}
+	}
+#endif
 
 #ifdef __EMSCRIPTEN__
 	// Emscripten, SDL3 doesn't correctly report resize atm
