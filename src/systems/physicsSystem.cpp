@@ -102,11 +102,33 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 	return !notIntercecting;
 }
 
+// TODO: Read https://gamedev.stackexchange.com/questions/38891/making-an-efficient-collision-detection-system/38893#38893
+// TODO: Read https://gamedev.stackexchange.com/questions/38613/how-do-i-detect-collision-between-movie-clips/38635#38635
 void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	assert(a != b);
+	// Two components cannot be stationary at the same time
+	assert(!scene->get<Components::collision>(a).stationary || !scene->get<Components::collision>(a).stationary);
 
-	// Push the stuff back
-	(void)scene;
-	(void)a;
-	(void)b;
+	const Eigen::Vector2f& al =
+		scene->get<Components::position>(a).pos + scene->get<Components::collision>(a).offset;
+	const Eigen::Vector2f& ar = al + scene->get<Components::collision>(a).size;
+
+	const Eigen::Vector2f& bl =
+		scene->get<Components::position>(b).pos + scene->get<Components::collision>(b).offset;
+	const Eigen::Vector2f& br = bl + scene->get<Components::collision>(b).size;
+
+	const Eigen::Vector2f acenter = al + (ar - al) / 2;
+	const Eigen::Vector2f bcenter = bl + (br - bl) / 2;
+
+	const Eigen::Vector2f distance = (acenter - bcenter) / 2;
+
+	scene->get<Components::position>(a).pos += distance;
+	scene->get<Components::position>(b).pos += -distance;
+
+	if (scene->contains<Components::velocity>(a)) {
+		scene->get<Components::velocity>(a).vel.setZero();
+	}
+	if (scene->contains<Components::velocity>(b)) {
+		scene->get<Components::velocity>(b).vel.setZero();
+	}
 }

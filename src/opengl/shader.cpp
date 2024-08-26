@@ -90,13 +90,14 @@ void Shader::setUniform(const std::string& name, std::function<void(GLint)> toCa
 	assert(!name.contains(' '));
 #endif
 	assert(!(name[0] == 'g' && name[1] == 'l' && name[2] == '_'));
+	assert(glIsProgram(mShaderProgram));
 
 	if (!mPositions.contains(name)) {
 		mPositions[name] = glGetUniformLocation(mShaderProgram, name.data());
 
 		if (mPositions[name] == -1) {
-			SDL_Log("\033[93mShader.cpp: Failed find uniform location \"%s\" for shader %s\033[0m", name.data(),
-				mName.data());
+			SDL_Log("\033[93mShader.cpp: Failed find uniform location \"%s\" for shader %s\033[0m",
+				name.data(), mName.data());
 
 			return;
 		}
