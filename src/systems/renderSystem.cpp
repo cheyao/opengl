@@ -236,9 +236,12 @@ void RenderSystem::draw(Scene* scene) {
 	}
 
 #ifdef IMGUI
-	ImGui::Begin("Main menu");
 	static bool hitbox = false;
+	static bool vector = false;
+
+	ImGui::Begin("Main menu");
 	ImGui::Checkbox("Show hitboxes", &hitbox);
+	ImGui::Checkbox("Show velocity vectors", &vector);
 	ImGui::End();
 
 	// Debug layer rendering
@@ -269,6 +272,28 @@ void RenderSystem::draw(Scene* scene) {
 
 		if (hitbox && glPolygonMode != nullptr) {
 			glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
+		}
+	}
+
+	if (vector) {
+		Shader* vectorShader =
+			mGame->getSystemManager()->getShader("vector.vert", "vector.frag", "vector.geom");
+
+		vectorShader->activate();
+
+		for (const auto& [_, velocity, position, texture] :
+		     scene->view<Components::velocity, Components::position, Components::texture>().each()) {
+			Eigen::Affine3f model = Eigen::Affine3f::Identity();
+
+			model.translate((Eigen::Vector3f() << (position.pos), 0.0f).finished());
+
+			vectorShader->set("model", model);
+			vectorShader->set("size",
+					  Eigen::Vector2f(texture.texture->getWidth(), texture.texture->getHeight()));
+			vectorShader->set("position", position.pos);
+			vectorShader->set("velocity", velocity.vel);
+
+			mMesh->draw(vectorShader);
 		}
 	}
 #endif

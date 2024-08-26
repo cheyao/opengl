@@ -85,6 +85,14 @@ Shader::~Shader() { glDeleteProgram(mShaderProgram); }
 void Shader::activate() const { glUseProgram(mShaderProgram); }
 
 void Shader::setUniform(const std::string& name, std::function<void(GLint)> toCall) {
+	// Bad for performance, but I need this
+	assert([] {
+		GLint prog = 0;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
+		return static_cast<GLuint>(prog);
+	}() == mShaderProgram &&
+	       "The shader isn't activated!");
+
 	// Safety checks
 #ifdef __cpp_lib_string_contains
 	assert(!name.contains(' '));

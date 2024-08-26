@@ -79,7 +79,7 @@ void PhysicsSystem::collide(Scene* scene) {
 }
 
 bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const EntityID b) const {
-	assert(a != b);
+	assert(a != b && "Hey! Why are the same objects colliding into each other");
 
 	const Eigen::Vector2f& leftA =
 		scene->get<Components::position>(a).pos + scene->get<Components::collision>(a).offset;
@@ -99,11 +99,12 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 	assert(!std::isnan(rightB.y()) && !std::isinf(rightB.y()));
 
 	// If one of these four are true, it means the cubes are not intersecting
-	const bool notIntercecting = rightA.x() <= leftB.x()	// Amax to the left of Bmin
-				     || rightA.y() <= leftB.y()	// Amax to the bottom of Bmin
-				     || rightB.x() <= leftA.x()	// Bmax to the left of Amax
+	const bool notIntercecting = rightA.x() <= leftB.x()	 // Amax to the left of Bmin
+				     || rightA.y() <= leftB.y()	 // Amax to the bottom of Bmin
+				     || rightB.x() <= leftA.x()	 // Bmax to the left of Amax
 				     || rightB.y() <= leftA.y(); // Bmax to the bottom of Amin
 
+	// So return the inverse of not intersecting
 	return !notIntercecting;
 }
 
@@ -111,6 +112,8 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 // https://gamedev.stackexchange.com/questions/38891/making-an-efficient-collision-detection-system/38893#38893
 // TODO: Read
 // https://gamedev.stackexchange.com/questions/38613/how-do-i-detect-collision-between-movie-clips/38635#38635
+// Corners: https://gamedev.stackexchange.com/questions/17502/how-to-deal-with-corner-collisions-in-2d?noredirect=1&lq=1
+// https://gamedev.stackexchange.com/questions/29371/how-do-i-prevent-my-platformers-character-from-clipping-on-wall-tiles?noredirect=1&lq=1
 void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	assert(a != b);
 	// Two components cannot be stationary at the same time
@@ -119,7 +122,6 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 
 	/* Thx stack https://gamedev.stackexchange.com/questions/18302/2d-platformer-collisions
 	 * See https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/Player.cs
-	 * To
 	 * https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/RectangleExtensions.cs#L30
 	 */
 
@@ -135,11 +137,8 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	const Eigen::Vector2f& minDistance =
 		(scene->get<Components::collision>(a).size + scene->get<Components::collision>(b).size) / 2;
 
-	/*
-	 * FIXME:
-	 * assert(!(std::abs(distance.x()) >= minDistance.x() || std::abs(distance.y()) >= minDistance.y()) &&
-	 *       "The objects are not colliding?");
-	 */
+	assert(!(std::abs(distance.x()) > minDistance.x() || std::abs(distance.y()) > minDistance.y()) &&
+	       "The objects are not colliding?");
 
 	const float& depthX = (distance.x() > 0 ? minDistance.x() : -minDistance.x()) - distance.x();
 	const float& depthY = (distance.y() > 0 ? minDistance.y() : -minDistance.y()) - distance.y();

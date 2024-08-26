@@ -207,6 +207,7 @@ The systems manage all the logic and changes the components
 - [ ] Preload
 - [ ] Add functional hot reload
 - [ ] Grid map
+- [ ] Level map
 - [ ] Combine localemanager and textmanager
 - [ ] Move scenes to `src/scenes`
 - [ ] Windows build
