@@ -34,4 +34,11 @@ struct text {
 	std::string id;
 	// Maybe offset
 };
+
+// Misc stuff like jumping
+struct misc {
+	enum {
+		JUMP,
+	} what;
+};
 } // namespace Components

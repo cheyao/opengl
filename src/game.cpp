@@ -75,26 +75,27 @@ void Game::setup() {
 	SDL_Log("Setting up game");
 
 	mScene = new Scene();
-	EntityID block = mScene->newEntity();
-	mScene->emplace<Components::texture>(block, mSystemManager->getTexture("stone.png", true));
-	mScene->emplace<Components::position>(block, Eigen::Vector2f(400.0f, 400.0f));
-	mScene->emplace<Components::velocity>(block, Eigen::Vector2f(0.0f, 0.0f));
-	mScene->emplace<Components::input>(block, [](class Scene* scene, EntityID entity, const bool* scancodes,
-						     [[maybe_unused]] const float delta) {
+	EntityID player = mScene->newEntity();
+	mScene->emplace<Components::texture>(player, mSystemManager->getTexture("stone.png", true));
+	mScene->emplace<Components::position>(player, Eigen::Vector2f(400.0f, 400.0f));
+	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
+	mScene->emplace<Components::input>(player, [](class Scene* scene, EntityID entity, const bool* scancodes,
+						      [[maybe_unused]] const float delta) {
 		Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).vel;
 
 		if (scancodes[SDL_SCANCODE_RIGHT] == true && vel.x() < 220) {
-			vel.x() += 50;
+			vel.x() += 70;
 		}
 
 		if (scancodes[SDL_SCANCODE_LEFT] == true && vel.x() > -220) {
-			vel.x() -= 50;
+			vel.x() -= 70;
 		}
 	});
 	mScene->emplace<Components::collision>(
-		block, Eigen::Vector2f(0.0f, 0.0f),
+		player, Eigen::Vector2f(0.0f, 0.0f),
 		Eigen::Vector2f(mSystemManager->getTexture("stone.png", true)->getWidth(),
 				mSystemManager->getTexture("stone.png", true)->getHeight()));
+	mScene->emplace<Components::misc>(player, Components::misc::JUMP);
 
 	EntityID block2 = mScene->newEntity();
 	mScene->emplace<Components::texture>(block2, mSystemManager->getTexture("stone.png"));

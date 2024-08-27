@@ -19,28 +19,42 @@
 PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
 
 void PhysicsSystem::update(Scene* scene, float delta) {
-	// constexpr const static float G = 10.0f;
-	static float G = 10.0f;
-	ImGui::Begin("P");
-	ImGui::SliderFloat("G", &G, 0, 10.0f);
-	ImGui::End();
+	constexpr const static float G = 15.0f;
+	constexpr const static float jumpForce = 500.0f;
 
 	auto entities = std::vector<EntityID>();
 	scene->view<Components::collision, Components::position>().each(
 		[&entities](const EntityID& entity) { entities.emplace_back(entity); });
 
+	// FIXME: This is messed up when the framerate isn't constant
+	// https://gamedev.stackexchange.com/questions/15708/how-can-i-implement-gravity
+	// To fix it we need to add a acceleration vector (Wow school knowladge has usages)
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
+		bool onGround = false;
 		for (size_t i = 0; i < entities.size(); ++i) {
 			if (entity != entities[i] && collidingBellow(scene, entity, entities[i])) {
-				// We are hitting ground
-				// // We are hitting ground
-				scene->get<Components::velocity>(entity).vel.y() = 0.0f;
-			} else {
-				scene->get<Components::velocity>(entity).vel.y() -= G;
+				onGround = true;
+
+				break;
 			}
 		}
 
+		if (onGround) {
+			if (scene->contains<Components::misc>(entity) &&
+			    scene->get<Components::misc>(entity).what == Components::misc::JUMP &&
+			    (mGame->getKeystate()[SDL_SCANCODE_UP] == true ||
+			     mGame->getKeystate()[SDL_SCANCODE_SPACE] == true)) {
+				scene->get<Components::velocity>(entity).vel.y() = jumpForce;
+			} else {
+				scene->get<Components::velocity>(entity).vel.y() = 0.0f;
+			}
+		} else {
+			scene->get<Components::velocity>(entity).vel.y() -= G;
+		}
+
 		scene->get<Components::position>(entity).pos += scene->get<Components::velocity>(entity).vel * delta;
+		scene->get<Components::velocity>(entity).vel.x() =
+			scene->get<Components::velocity>(entity).vel.x() * 0.7;
 	}
 }
 
@@ -147,7 +161,8 @@ bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID mai
 		return false;
 	}
 
-	if ((leftA.y() - 1) < rightB.y()) {
+	// Remove one dot five to be more precise
+	if ((leftA.y() - 1.5f) < rightB.y()) {
 		return true;
 	}
 
@@ -160,6 +175,19 @@ bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID mai
 // https://gamedev.stackexchange.com/questions/38613/how-do-i-detect-collision-between-movie-clips/38635#38635
 // Corners: https://gamedev.stackexchange.com/questions/17502/how-to-deal-with-corner-collisions-in-2d?noredirect=1&lq=1
 // https://gamedev.stackexchange.com/questions/29371/how-do-i-prevent-my-platformers-character-from-clipping-on-wall-tiles?noredirect=1&lq=1
+/*
+ * Here we first calculate the positions of the squares
+ * Then we calculate the center of the cubes from the positions
+ * After that we calculate the distance between the two center of cubes
+ * We then assert that the objects are collising, if not that means `AABBxAABB` has problems
+ * Right after we get the depth of the X axis and Y axis that are overlapping
+ * Thus we can determine which side we are colliding on by running `std::min(X, Y)`
+ * From this info, we will be able to calculate the ammount we need to push back
+ * Which has two scenarios:
+ * 1. One object is static, so find the one that isn't calculate neg or pos, and push
+ * 2. Both aren't static, thus push back both by half the overlap
+ * (If the objects are both stationary, pass)
+ */
 void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	assert(a != b);
 	// Two components cannot be stationary at the same time

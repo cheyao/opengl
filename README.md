@@ -19,13 +19,14 @@ Dependencies:
 
 - Assimp 
 - SDL3 
+- Freetype 2
 - Eigen (Included in the repo)
 
 ## Building
 
 ### MacOS and Linux
 
-Install `assimp` with your package manager
+Install `assimp` and `freetype` with your package manager
 
 Compile SDL3 (Yeah, it's experimental so no binaries atm):
 ```
@@ -210,6 +211,8 @@ The systems manage all the logic and changes the components
 - [ ] Add functional hot reload
 - [ ] Grid map
 - [ ] Level map
+    - [ ] Level generator
+    - [ ] Thing
 - [ ] Combine localemanager and textmanager
 - [ ] Move scenes to `src/scenes`
 - [ ] Windows build
