@@ -58,7 +58,6 @@ void PhysicsSystem::collide(Scene* scene) {
 
 				ImGui::TreePop();
 			}
-			// TODO: editor
 		}
 
 		ImGui::End();

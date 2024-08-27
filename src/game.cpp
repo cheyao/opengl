@@ -76,7 +76,7 @@ void Game::setup() {
 
 	mScene = new Scene();
 	EntityID block = mScene->newEntity();
-	mScene->emplace<Components::texture>(block, mSystemManager->getTexture("stone.png"));
+	mScene->emplace<Components::texture>(block, mSystemManager->getTexture("stone.png", true));
 	mScene->emplace<Components::position>(block, Eigen::Vector2f(10, 10));
 	mScene->emplace<Components::velocity>(block, Eigen::Vector2f(0.0f, 0.0f));
 	mScene->emplace<Components::input>(block, [](class Scene* scene, EntityID entity, const bool* scancodes,
@@ -98,17 +98,19 @@ void Game::setup() {
 
 		scene->get<Components::velocity>(entity).vel = vel;
 	});
-	mScene->emplace<Components::collision>(block, Eigen::Vector2f(0.0f, 0.0f),
-					       Eigen::Vector2f(mSystemManager->getTexture("stone.png")->getWidth(),
-							       mSystemManager->getTexture("stone.png")->getHeight()));
+	mScene->emplace<Components::collision>(
+		block, Eigen::Vector2f(0.0f, 0.0f),
+		Eigen::Vector2f(mSystemManager->getTexture("stone.png", true)->getWidth(),
+				mSystemManager->getTexture("stone.png", true)->getHeight()));
 
 	EntityID block2 = mScene->newEntity();
 	mScene->emplace<Components::texture>(block2, mSystemManager->getTexture("stone.png"));
 	mScene->emplace<Components::position>(block2, Eigen::Vector2f(400.0f, 400.0f));
-	mScene->emplace<Components::collision>(block2, Eigen::Vector2f(0.0f, 0.0f),
-					       Eigen::Vector2f(mSystemManager->getTexture("stone.png")->getWidth(),
-							       mSystemManager->getTexture("stone.png")->getHeight()),
-					       true);
+	mScene->emplace<Components::collision>(
+		block2, Eigen::Vector2f(0.0f, 0.0f),
+		Eigen::Vector2f(mSystemManager->getTexture("stone.png", true)->getWidth(),
+				mSystemManager->getTexture("stone.png", true)->getHeight()),
+		true);
 
 	EntityID text = mScene->newEntity();
 	mScene->emplace<Components::text>(text, "controls");

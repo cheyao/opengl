@@ -1,6 +1,7 @@
 #pragma once
 
 #include "third_party/Eigen/Core"
+
 #include <memory>
 
 class SystemManager {
@@ -21,6 +22,8 @@ class SystemManager {
 					      const std::string& geom = "");
 
       private:
+	void printDebug(class Scene* scene);
+
 	class Game* mGame;
 
 	// The order of the systems shall be listed by the order they are updated

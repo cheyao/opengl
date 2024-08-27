@@ -195,7 +195,6 @@ The systems manage all the logic and changes the components
     - [x] Fallback fonts.
     - [ ] Maybe [ICU?](https://icu.unicode.org/)
 - [x] Emscripten build
-    - [ ] Web detect android
     - [ ] Progress bar
     - [ ] White text
 - [x] TTF

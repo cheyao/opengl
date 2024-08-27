@@ -272,10 +272,17 @@ void RenderSystem::draw(Scene* scene) {
 	}
 
 	if (vector) {
+		// See https://stackoverflow.com/questions/3484260/opengl-line-width
+		static float magnitude = 1.0f;
+		ImGui::Begin("Main menu");
+		ImGui::SliderFloat("magnitude", &magnitude, 0, 3.0f);
+		ImGui::End();
+
 		Shader* vectorShader =
 			mGame->getSystemManager()->getShader("vector.vert", "vector.frag", "vector.geom");
 
 		vectorShader->activate();
+		vectorShader->set("magnitude", magnitude);
 
 		for (const auto& [_, velocity, position, texture] :
 		     scene->view<Components::velocity, Components::position, Components::texture>().each()) {
