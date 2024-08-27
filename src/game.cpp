@@ -77,26 +77,19 @@ void Game::setup() {
 	mScene = new Scene();
 	EntityID block = mScene->newEntity();
 	mScene->emplace<Components::texture>(block, mSystemManager->getTexture("stone.png", true));
-	mScene->emplace<Components::position>(block, Eigen::Vector2f(10, 400));
+	mScene->emplace<Components::position>(block, Eigen::Vector2f(400.0f, 400.0f));
 	mScene->emplace<Components::velocity>(block, Eigen::Vector2f(0.0f, 0.0f));
 	mScene->emplace<Components::input>(block, [](class Scene* scene, EntityID entity, const bool* scancodes,
 						     [[maybe_unused]] const float delta) {
-		Eigen::Vector2f vel = Eigen::Vector2f::Zero();
+		Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).vel;
 
-		if (scancodes[SDL_SCANCODE_UP] == true) {
-			vel += Eigen::Vector2f(0.0f, 200.0f);
-		}
-		if (scancodes[SDL_SCANCODE_DOWN] == true) {
-			vel += Eigen::Vector2f(0.0f, -200.0f);
-		}
-		if (scancodes[SDL_SCANCODE_LEFT] == true) {
-			vel += Eigen::Vector2f(-200.0f, 0.0f);
-		}
-		if (scancodes[SDL_SCANCODE_RIGHT] == true) {
-			vel += Eigen::Vector2f(200.0f, 0.0f);
+		if (scancodes[SDL_SCANCODE_RIGHT] == true && vel.x() < 220) {
+			vel.x() += 50;
 		}
 
-		scene->get<Components::velocity>(entity).vel = vel;
+		if (scancodes[SDL_SCANCODE_LEFT] == true && vel.x() > -220) {
+			vel.x() -= 50;
+		}
 	});
 	mScene->emplace<Components::collision>(
 		block, Eigen::Vector2f(0.0f, 0.0f),
@@ -105,7 +98,7 @@ void Game::setup() {
 
 	EntityID block2 = mScene->newEntity();
 	mScene->emplace<Components::texture>(block2, mSystemManager->getTexture("stone.png"));
-	mScene->emplace<Components::position>(block2, Eigen::Vector2f(10.0f, 10.0f));
+	mScene->emplace<Components::position>(block2, Eigen::Vector2f(400.0f, 10.0f));
 	mScene->emplace<Components::collision>(
 		block2, Eigen::Vector2f(0.0f, 0.0f),
 		Eigen::Vector2f(mSystemManager->getTexture("stone.png", true)->getWidth(),

@@ -85,13 +85,13 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 				if (scene->contains<Components::position>(entity)) {
 					ImGui::BulletText(
 						"Components::position %s",
-						std::format("{}", scene->get<Components::position>(entity).pos).data());
+						std::format("pos {}", scene->get<Components::position>(entity).pos).data());
 				}
 
 				if (scene->contains<Components::velocity>(entity)) {
 					ImGui::BulletText(
 						"Components::velocity %s",
-						std::format("pos {}", scene->get<Components::velocity>(entity).vel)
+						std::format("vel {}", scene->get<Components::velocity>(entity).vel)
 							.data());
 				}
 

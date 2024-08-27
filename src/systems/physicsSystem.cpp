@@ -19,6 +19,12 @@
 PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
 
 void PhysicsSystem::update(Scene* scene, float delta) {
+	// constexpr const static float G = 10.0f;
+	static float G = 10.0f;
+	ImGui::Begin("P");
+	ImGui::SliderFloat("G", &G, 0, 10.0f);
+	ImGui::End();
+
 	auto entities = std::vector<EntityID>();
 	scene->view<Components::collision, Components::position>().each(
 		[&entities](const EntityID& entity) { entities.emplace_back(entity); });
@@ -26,7 +32,11 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		for (size_t i = 0; i < entities.size(); ++i) {
 			if (entity != entities[i] && collidingBellow(scene, entity, entities[i])) {
-				SDL_Log("Yes");
+				// We are hitting ground
+				// // We are hitting ground
+				scene->get<Components::velocity>(entity).vel.y() = 0.0f;
+			} else {
+				scene->get<Components::velocity>(entity).vel.y() -= G;
 			}
 		}
 
