@@ -1,7 +1,7 @@
 #!/bin/bash
 install_name_tool -change @rpath/libSDL3.0.dylib @executable_path/libSDL3.0.dylib *.app/Contents/MacOS/OpenGL
 install_name_tool -change @rpath/libassimp.5.dylib @executable_path/libassimp.5.dylib *.app/Contents/MacOS/OpenGL
-install_name_tool -change @rpath/../Frameworks/freetype.framework/Versions/A/freetype @executable_path/libassimp.5.dylib *.app/Contents/MacOS/OpenGL
+# install_name_tool -change @rpath/../Frameworks/freetype.framework/Versions/A/freetype @executable_path/libassimp.5.dylib *.app/Contents/MacOS/OpenGL
 
 cp /usr/local/lib/libSDL3.0.dylib *.app/Contents/MacOS
 cp /usr/local/lib/libassimp.5.dylib *.app/Contents/MacOS
