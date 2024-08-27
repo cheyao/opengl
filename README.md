@@ -176,6 +176,7 @@ The systems manage all the logic and changes the components
 - [x] Better component and actors
 - [x] UI Scaling
 - [x] Multitouch
+- [ ] Collision resolver
 - [x] Android build
     - [x] Android controls
 - [x] Debug menu 
@@ -201,7 +202,6 @@ The systems manage all the logic and changes the components
     - [ ] Button auto scale + text
     - [ ] Generate texturemap
     - [ ] Signed distance field fonts https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf
-- [ ] Collision resolver
 - [ ] Entity name saved
 - [ ] Multithreading
 - [ ] Shadows

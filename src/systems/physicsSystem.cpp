@@ -19,7 +19,17 @@
 PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
 
 void PhysicsSystem::update(Scene* scene, float delta) {
+	auto entities = std::vector<EntityID>();
+	scene->view<Components::collision, Components::position>().each(
+		[&entities](const EntityID& entity) { entities.emplace_back(entity); });
+
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
+		for (size_t i = 0; i < entities.size(); ++i) {
+			if (entity != entities[i] && collidingBellow(scene, entity, entities[i])) {
+				SDL_Log("Yes");
+			}
+		}
+
 		scene->get<Components::position>(entity).pos += scene->get<Components::velocity>(entity).vel * delta;
 	}
 }
@@ -107,6 +117,33 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 	return !notIntercecting;
 }
 
+bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID main, const EntityID b) const {
+	assert(main != b && "Hey! Why are the same objects colliding into each other");
+
+	const Eigen::Vector2f& leftA =
+		scene->get<Components::position>(main).pos + scene->get<Components::collision>(main).offset;
+	const Eigen::Vector2f& rightA = leftA + scene->get<Components::collision>(main).size;
+
+	const Eigen::Vector2f& leftB =
+		scene->get<Components::position>(b).pos + scene->get<Components::collision>(b).offset;
+	const Eigen::Vector2f& rightB = leftB + scene->get<Components::collision>(b).size;
+
+	// on a x level
+	const bool notIntercecting = rightA.x() <= leftB.x()	// Amax to the left of Bmin
+				     || rightB.x() <= leftA.x() // Bmax to the left of Amax
+				     || rightA.y() <= leftB.y();
+
+	if (notIntercecting) {
+		return false;
+	}
+
+	if ((leftA.y() - 1) < rightB.y()) {
+		return true;
+	}
+
+	return false;
+}
+
 // TODO: Read
 // https://gamedev.stackexchange.com/questions/38891/making-an-efficient-collision-detection-system/38893#38893
 // TODO: Read
@@ -116,8 +153,9 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	assert(a != b);
 	// Two components cannot be stationary at the same time
-	assert(!(scene->get<Components::collision>(a).stationary && scene->get<Components::collision>(b).stationary) &&
-	       "Hey! I can't resolve the collision of two stationary objects!");
+	if (scene->get<Components::collision>(a).stationary && scene->get<Components::collision>(b).stationary) {
+		return;
+	}
 
 	/* Thx stack https://gamedev.stackexchange.com/questions/18302/2d-platformer-collisions
 	 * See https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/Player.cs
