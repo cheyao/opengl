@@ -14,8 +14,8 @@
 #endif
 
 GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
-	assert(window != nullptr && "Forgot to init window?");
-	assert(mContext == nullptr);
+	SDL_assert(window != nullptr && "Forgot to init window?");
+	SDL_assert(mContext == nullptr);
 
 	mContext = SDL_GL_CreateContext(window);
 	if (mContext == nullptr) {
@@ -66,7 +66,7 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 GLManager::~GLManager() { SDL_GL_DestroyContext(mContext); }
 
 void GLManager::printInfo() const {
-	assert(mContext != nullptr);
+	SDL_assert(mContext != nullptr);
 
 	SDL_Log("Debugging information:");
 	SDL_Log("Video driver: %s\n", SDL_GetCurrentVideoDriver());

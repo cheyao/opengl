@@ -86,7 +86,7 @@ TextSystem::~TextSystem() {
 }
 
 void TextSystem::loadFont(const std::string& name) {
-	assert(mLibrary != nullptr);
+	SDL_assert(mLibrary != nullptr);
 
 	size_t size = 0;
 	FT_Byte* newFontData = static_cast<FT_Byte*>(SDL_LoadFile((mPath + name).data(), &size));
@@ -166,7 +166,7 @@ void TextSystem::setFontSize(const unsigned int size) {
 }
 
 void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen::Vector2f offset) {
-	assert(mFace != nullptr);
+	SDL_assert(mFace != nullptr);
 
 	const TextSystem::Glyph& glyph = getGlyph(character);
 
@@ -181,7 +181,7 @@ void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen
 	shader->set("model", model);
 	shader->set("size", glyph.size);
 
-	assert(glyph.texture != nullptr);
+	SDL_assert(glyph.texture != nullptr);
 	glyph.texture->activate(0);
 
 	mMesh->draw(shader);
@@ -192,7 +192,7 @@ TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
 		return mGlyphMap[character];
 	}
 
-	assert(mFace != nullptr);
+	SDL_assert(mFace != nullptr);
 
 	// Maybe directly ask child?
 	const FT_UInt index = FT_Get_Char_Index(mFace, character);

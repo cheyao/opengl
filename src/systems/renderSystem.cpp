@@ -17,7 +17,6 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
-#include <cassert>
 #include <memory>
 
 #ifdef IMGUI
@@ -114,7 +113,7 @@ RenderSystem::RenderSystem(Game* game)
 
 	mGL = std::make_unique<GLManager>(mWindow);
 
-	assert(mGL->getContext() != nullptr);
+	SDL_assert(mGL->getContext() != nullptr);
 
 #ifdef IMGUI
 	SDL_Log("Initializing ImGUI");
@@ -138,7 +137,21 @@ RenderSystem::RenderSystem(Game* game)
 	io.ConfigDebugIsDebuggerPresent = true;
 #endif
 
-	ImGui::StyleColorsDark();
+	// Only give users light mode when their system are light
+	// Why would anyone use light mode?
+	switch (SDL_GetSystemTheme()) {
+		case SDL_SYSTEM_THEME_LIGHT:
+			ImGui::StyleColorsLight();
+
+			break;
+
+		case SDL_SYSTEM_THEME_UNKNOWN:
+		case SDL_SYSTEM_THEME_DARK:
+		default:
+			ImGui::StyleColorsDark();
+
+			break;
+	}
 
 	ImGui_ImplSDL3_InitForOpenGL(mWindow, mGL->getContext());
 #ifndef GLES
@@ -213,7 +226,7 @@ void RenderSystem::draw(Scene* scene) {
 
 	Shader* defaultShader = this->getShader("block.vert", "block.frag");
 	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
-		assert(texture.texture != nullptr);
+		SDL_assert(texture.texture != nullptr);
 
 		Shader* shader = texture.shader == nullptr ? defaultShader : texture.shader;
 
@@ -349,7 +362,7 @@ void RenderSystem::setUIMatrix() {
 }
 
 void RenderSystem::setDisplayScale() const {
-	assert(mWindow != nullptr);
+	SDL_assert(mWindow != nullptr);
 
 	float scale = SDL_GetWindowDisplayScale(mWindow);
 	if (scale <= 0.0f) {
@@ -366,7 +379,7 @@ void RenderSystem::setDisplayScale() const {
 
 	ImFont* font =
 		io.Fonts->AddFontFromFileTTF(mGame->fullPath("fonts" SEPARATOR "NotoSans.ttf").data(), 16.0f * scale);
-	assert(font != NULL);
+	SDL_assert(font != NULL);
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.ScaleAllSizes(scale);

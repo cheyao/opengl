@@ -16,7 +16,7 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 	for (int i = 0; i < c; ++i) {
 		locList += loc[i]->language;
 
-		if (loc[i]->language != 0) {
+		if (loc[i]->language != nullptr) {
 			locList += '-';
 			locList += loc[i]->country;
 		}
@@ -29,7 +29,7 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 	for (int i = 0; i < c; ++i) {
 		std::string l;
 		l += loc[i]->language;
-		if (loc[i]->country != 0) {
+		if (loc[i]->country != nullptr) {
 			l += '-';
 			l += loc[i]->country;
 		}
@@ -99,6 +99,7 @@ std::u32string LocaleManager::get(const std::string_view& id) const {
 		return U"";
 	}
 
+	// Maybe https://wiki.libsdl.org/SDL3/SDL_iconv
 	return U8toU32(mLocaleData[id].get<std::string>());
 }
 
@@ -127,8 +128,6 @@ void LocaleManager::loadLocale() {
 			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
 					"LocaleManager.cpp: Failed to find/read locale shource %s: %s\n",
 					(mLocaleDir + mLocale + ".json").data(), SDL_GetError());
-
-			// ERROR_BOX("Failed to find/read locale");
 
 			throw std::runtime_error("LocaleManager.cpp: Failed to find/read locale");
 		}

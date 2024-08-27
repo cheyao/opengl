@@ -9,7 +9,6 @@
 #include "third_party/glad/glad.h"
 
 #include <SDL3/SDL.h>
-#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -254,14 +253,6 @@ SDL_AppResult Game::event(const SDL_Event& event) {
 #endif
 
 	return mEventManager->manageEvent(event);
-}
-
-void Game::removeUI(UIScreen* ui) {
-	const auto iter = std::find(mUI.begin(), mUI.end(), ui);
-	[[likely]] if (iter != mUI.end()) {
-		std::iter_swap(iter, mUI.end() - 1);
-		mUI.pop_back();
-	}
 }
 
 void Game::setKey(const size_t key, const bool val) { mEventManager->setKey(key, val); }

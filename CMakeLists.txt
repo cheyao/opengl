@@ -49,16 +49,16 @@ src/systems/physicsSystem.cpp
 src/systems/renderSystem.cpp
 src/systems/inputSystem.cpp
 
-src/ui/UIComponent.cpp
-src/ui/UIScreen.cpp
+# src/ui/UIComponent.cpp
+# src/ui/UIScreen.cpp
 
-src/ui/screens/controlUI.cpp
-src/ui/screens/mainUI.cpp
-src/ui/screens/divUI.cpp
+# src/ui/screens/controlUI.cpp
+# src/ui/screens/mainUI.cpp
+# src/ui/screens/divUI.cpp
 
-src/ui/components/buttonComponent.cpp
-src/ui/components/backgroundComponent.cpp
-src/ui/components/textComponent.cpp
+# src/ui/components/buttonComponent.cpp
+# src/ui/components/backgroundComponent.cpp
+# src/ui/components/textComponent.cpp
 
 # Headers
 include/game.hpp
@@ -92,16 +92,16 @@ include/systems/physicsSystem.hpp
 include/systems/renderSystem.hpp
 include/systems/inputSystem.hpp
 
-include/ui/UIComponent.hpp
-include/ui/UIScreen.hpp
+# include/ui/UIComponent.hpp
+# include/ui/UIScreen.hpp
 
-include/ui/screens/controlUI.hpp
-include/ui/screens/mainUI.hpp
-include/ui/screens/divUI.hpp
+# include/ui/screens/controlUI.hpp
+# include/ui/screens/mainUI.hpp
+# include/ui/screens/divUI.hpp
 
-include/ui/components/buttonComponent.hpp
-include/ui/components/backgroundComponent.hpp
-include/ui/components/textComponent.hpp
+# include/ui/components/buttonComponent.hpp
+# include/ui/components/backgroundComponent.hpp
+# include/ui/components/textComponent.hpp
 
 # External
 src/third_party/stb_image.c
@@ -150,6 +150,13 @@ if(NOT CMAKE_BUILD_TYPE)
 		 Debug Release"
       	FORCE)
 endif()
+
+# if(NOT SDL_ASSERT)
+# set(SDL_ASSERT break CACHE STRING
+# "Choose the type of build, options are:
+# Debug Release"
+# FORCE)
+# endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
 	message("-- Debug enabled")

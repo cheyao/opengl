@@ -24,7 +24,7 @@
 Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mRBO(0), mScreen(0), mScreenTexture(0) {
 	SDL_Log("Framebuffer.cpp: Generating framebuffer");
 
-	assert(glGenFramebuffers != nullptr);
+	SDL_assert(glGenFramebuffers != nullptr);
 
 	glGenFramebuffers(1, &mScreen);
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);

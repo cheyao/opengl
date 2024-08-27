@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-#include <vector>
 
 // TODO: Cleanup this
 class Game {
@@ -36,11 +35,6 @@ class Game {
 	}
 	[[nodiscard]] inline std::string getBasePath() const { return mBasePath; }
 
-	void addUI(class UIScreen* ui) { mUI.emplace_back(ui); }
-	void removeUI(class UIScreen* ui);
-	[[nodiscard]] const std::vector<class UIScreen*>& getUIs() const { return mUI; }
-	[[nodiscard]] float getScale() const { return mUIScale; }
-
 	void setDemensions(const int width, const int height) { mSystemManager->setDemensions(width, height); }
 	Eigen::Vector2f getDemensions() const { return mSystemManager->getDemensions(); }
 
@@ -51,7 +45,6 @@ class Game {
 
       private:
 	void setup();
-
 	void gui();
 
 	std::unique_ptr<class EventManager> mEventManager;
@@ -59,9 +52,7 @@ class Game {
 	class SystemManager* mSystemManager;
 	class LocaleManager* mLocaleManager;
 
-	std::vector<class UIScreen*> mUI;
 	float mUIScale;
-
 	uint64_t mTicks;
 	std::string mBasePath;
 

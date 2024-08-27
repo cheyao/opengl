@@ -5,7 +5,6 @@
 #include "third_party/glad/glad.h"
 
 #include <SDL3/SDL.h>
-#include <cassert>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -15,15 +14,15 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 	: mName(std::string(vertName) + ":" + std::string(fragName) + ":" + std::string(geomName)),
 	  mShaderProgram(glCreateProgram()) {
 	GLuint mVertexShader = compile(vertName, GL_VERTEX_SHADER);
-	assert(glIsShader(mVertexShader) && "Shader.cpp: Vert shader not loaded correctly");
+	SDL_assert(glIsShader(mVertexShader) && "Shader.cpp: Vert shader not loaded correctly");
 
 	GLuint mFragmentShader = compile(fragName, GL_FRAGMENT_SHADER);
-	assert(glIsShader(mFragmentShader) && "Shader.cpp: Frag shader not loaded correctly");
+	SDL_assert(glIsShader(mFragmentShader) && "Shader.cpp: Frag shader not loaded correctly");
 
 	GLuint mGeometryShader = 0;
 	if (!geomName.empty()) {
 		mGeometryShader = compile(geomName, GL_GEOMETRY_SHADER);
-		assert(glIsShader(mGeometryShader) && "Shader.cpp: Geom shader not loaded correctly");
+		SDL_assert(glIsShader(mGeometryShader) && "Shader.cpp: Geom shader not loaded correctly");
 	}
 
 	glAttachShader(mShaderProgram, mVertexShader);
@@ -58,8 +57,8 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 		throw std::runtime_error("Shader.cpp: Failed to link shader");
 	}
 
-	assert(glIsProgram(mShaderProgram) &&
-	       "Shader.cpp: Error compiling program, something wrong with code: should have been catched");
+	SDL_assert(glIsProgram(mShaderProgram) &&
+		   "Shader.cpp: Error compiling program, something wrong with code: should have been catched");
 
 	bind("Matrices", 0);
 
@@ -86,19 +85,19 @@ void Shader::activate() const { glUseProgram(mShaderProgram); }
 
 void Shader::setUniform(const std::string& name, std::function<void(GLint)> toCall) {
 	// Bad for performance, but I need this
-	assert([] {
+	SDL_assert([] {
 		GLint prog = 0;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
 		return static_cast<GLuint>(prog);
 	}() == mShaderProgram &&
-	       "The shader isn't activated!");
+		   "The shader isn't activated!");
 
 	// Safety checks
 #ifdef __cpp_lib_string_contains
-	assert(!name.contains(' '));
+	SDL_assert(!name.contains(' '));
 #endif
-	assert(!(name[0] == 'g' && name[1] == 'l' && name[2] == '_'));
-	assert(glIsProgram(mShaderProgram));
+	SDL_assert(!(name[0] == 'g' && name[1] == 'l' && name[2] == '_'));
+	SDL_assert(glIsProgram(mShaderProgram));
 
 	if (!mPositions.contains(name)) {
 		mPositions[name] = glGetUniformLocation(mShaderProgram, name.data());
@@ -180,7 +179,7 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 	}
 	SDL_Log("Shader.cpp: Loading %s", fileName.data());
 
-	assert(shaderSource[0] == '#' && "Shader.cpp: Checking file version");
+	SDL_assert(shaderSource[0] == '#' && "Shader.cpp: Checking file version");
 
 #ifdef GLES
 	// #version 410 core
@@ -224,8 +223,8 @@ GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
 		throw std::runtime_error("Shader.cpp: Failed to compile shader");
 	}
 
-	assert(glIsShader(out) &&
-	       "Shader.cpp: Error compiling shader, something wrong with code: should have been catched");
+	SDL_assert(glIsShader(out) &&
+		   "Shader.cpp: Error compiling shader, something wrong with code: should have been catched");
 
 #ifdef DEBUG
 	GLint len = 0;

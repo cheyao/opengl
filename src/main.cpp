@@ -11,7 +11,6 @@
 
 #include <cstdlib>
 #include <ctime>
-#include <cassert>
 #include <stdexcept>
 
 // The main class is in charge of sdl
@@ -24,12 +23,6 @@ SDL_AppResult SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_un
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, "Cyao's opengl Game Engine");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_URL_STRING, "https://github.com/cheyao/opengl");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_TYPE_STRING, "game");
-
-#ifdef __ANDROID__
-	SDL_Log("Hello, android!");
-#elif defined(__EMSCRIPTEN__)
-	SDL_Log("Hello, web!");
-#endif
 
 	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0"); // Translated in-engine (See eventManager.cpp)
@@ -50,6 +43,13 @@ SDL_AppResult SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_un
 		return SDL_APP_FAILURE;
 	}
 
+	SDL_assert(SDL_WasInit(SDL_INIT_VIDEO) && "Why wasn't video initalized?");
+
+	SDL_Log("Hello! I am on %s", SDL_GetPlatform());
+#ifdef __ANDROID__
+	SDL_Log("I am on android %d!", SDL_GetAndroidSDKVersion());
+#endif
+
 	try {
 		*appstate = new Game();
 	} catch (const std::runtime_error& error) {
@@ -66,7 +66,7 @@ SDL_AppResult SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_un
 }
 
 SDL_AppResult SDL_AppEvent(void* appstate, const SDL_Event* event) {
-	assert(appstate != nullptr);
+	SDL_assert(appstate != nullptr);
 
 	try {
 		return static_cast<Game*>(appstate)->event(*event);
@@ -78,7 +78,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, const SDL_Event* event) {
 }
 
 SDL_AppResult SDL_AppIterate(void* appstate) {
-	assert(appstate != nullptr);
+	SDL_assert(appstate != nullptr);
 
 	try {
 		return static_cast<Game*>(appstate)->iterate();
@@ -98,7 +98,7 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 }
 
 void SDL_AppQuit(void* appstate) {
-	assert(appstate != nullptr);
+	SDL_assert(appstate != nullptr);
 
 	delete static_cast<Game*>(appstate);
 

@@ -4,7 +4,6 @@
 #include "third_party/stb_image.h"
 #include "utils.hpp"
 
-#include <cassert>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <SDL3/SDL.h>
@@ -43,7 +42,7 @@ Texture::~Texture() {
 }
 
 void Texture::activate(const unsigned int& num) const {
-	assert(num < 80);
+	SDL_assert(num < 80);
 	/*
 	[[unlikely]] if (!mLoaded) {
 		this->load();
@@ -102,7 +101,7 @@ void Texture::load(const bool srgb) {
 	glGenTextures(1, &mID);
 	glBindTexture(GL_TEXTURE_2D, mID);
 
-	assert(mWidth > 0 && mHeight > 0);
+	SDL_assert(mWidth > 0 && mHeight > 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, srgb ? intFormat : format, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 

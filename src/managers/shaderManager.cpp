@@ -4,7 +4,6 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
-#include <assert.h>
 #include <stddef.h>
 #include <stdexcept>
 #include <string>
@@ -17,7 +16,7 @@ ShaderManager::ShaderManager(const std::string& path) : mPath(path + "assets" SE
 Shader* ShaderManager::get(const std::string& vert, const std::string& frag, const std::string& geom) {
 #ifdef __cpp_lib_string_contains
 	// Ugh don't mind assering when the libc++ isn't up to date
-	assert(!vert.contains(':') && !frag.contains(':') && !geom.contains(':'));
+	SDL_assert(!vert.contains(':') && !frag.contains(':') && !geom.contains(':'));
 #endif
 
 	std::string concated = (vert + ':').append(frag).append(":").append(geom);

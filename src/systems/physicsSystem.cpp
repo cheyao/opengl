@@ -7,8 +7,6 @@
 #include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
-#include <algorithm>
-#include <cassert>
 #include <format>
 
 #ifdef IMGUI
@@ -80,7 +78,7 @@ void PhysicsSystem::collide(Scene* scene) {
 			if (ImGui::TreeNode(std::format("Entity {}", entity).data())) {
 				ImGui::SliderFloat2(std::format("Position for entity {}", entity).data(),
 						    scene->get<Components::position>(entity).pos.data(), 0.0f,
-						    std::max(mGame->getDemensions().x(), mGame->getDemensions().y()));
+						    SDL_max(mGame->getDemensions().x(), mGame->getDemensions().y()));
 
 				ImGui::SliderFloat2(std::format("Offset for entity {}", entity).data(),
 						    scene->get<Components::collision>(entity).offset.data(), -500,
@@ -88,7 +86,7 @@ void PhysicsSystem::collide(Scene* scene) {
 
 				ImGui::SliderFloat2(std::format("Size for entity {}", entity).data(),
 						    scene->get<Components::collision>(entity).size.data(), 0.0f,
-						    std::max(mGame->getDemensions().x(), mGame->getDemensions().y()));
+						    SDL_max(mGame->getDemensions().x(), mGame->getDemensions().y()));
 
 				ImGui::TreePop();
 			}
@@ -112,7 +110,7 @@ void PhysicsSystem::collide(Scene* scene) {
 }
 
 bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const EntityID b) const {
-	assert(a != b && "Hey! Why are the same objects colliding into each other");
+	SDL_assert(a != b && "Hey! Why are the same objects colliding into each other");
 
 	const Eigen::Vector2f& leftA =
 		scene->get<Components::position>(a).pos + scene->get<Components::collision>(a).offset;
@@ -122,14 +120,14 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 		scene->get<Components::position>(b).pos + scene->get<Components::collision>(b).offset;
 	const Eigen::Vector2f& rightB = leftB + scene->get<Components::collision>(b).size;
 
-	assert(!std::isnan(leftA.x()) && !std::isinf(leftA.x()));
-	assert(!std::isnan(rightA.x()) && !std::isinf(rightA.x()));
-	assert(!std::isnan(leftB.x()) && !std::isinf(leftB.x()));
-	assert(!std::isnan(rightB.x()) && !std::isinf(rightB.x()));
-	assert(!std::isnan(leftA.y()) && !std::isinf(leftA.y()));
-	assert(!std::isnan(rightA.y()) && !std::isinf(rightA.y()));
-	assert(!std::isnan(leftB.y()) && !std::isinf(leftB.y()));
-	assert(!std::isnan(rightB.y()) && !std::isinf(rightB.y()));
+	SDL_assert(!SDL_isnan(leftA.x()) && !SDL_isinf(leftA.x()));
+	SDL_assert(!SDL_isnan(rightA.x()) && !SDL_isinf(rightA.x()));
+	SDL_assert(!SDL_isnan(leftB.x()) && !SDL_isinf(leftB.x()));
+	SDL_assert(!SDL_isnan(rightB.x()) && !SDL_isinf(rightB.x()));
+	SDL_assert(!SDL_isnan(leftA.y()) && !SDL_isinf(leftA.y()));
+	SDL_assert(!SDL_isnan(rightA.y()) && !SDL_isinf(rightA.y()));
+	SDL_assert(!SDL_isnan(leftB.y()) && !SDL_isinf(leftB.y()));
+	SDL_assert(!SDL_isnan(rightB.y()) && !SDL_isinf(rightB.y()));
 
 	// If one of these four are true, it means the cubes are not intersecting
 	const bool notIntercecting = rightA.x() <= leftB.x()	 // Amax to the left of Bmin
@@ -142,7 +140,7 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 }
 
 bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID main, const EntityID b) const {
-	assert(main != b && "Hey! Why are the same objects colliding into each other");
+	SDL_assert(main != b && "Hey! Why are the same objects colliding into each other");
 
 	const Eigen::Vector2f& leftA =
 		scene->get<Components::position>(main).pos + scene->get<Components::collision>(main).offset;
@@ -179,7 +177,7 @@ bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID mai
  * Here we first calculate the positions of the squares
  * Then we calculate the center of the cubes from the positions
  * After that we calculate the distance between the two center of cubes
- * We then assert that the objects are collising, if not that means `AABBxAABB` has problems
+ * We then SDL_assert that the objects are collising, if not that means `AABBxAABB` has problems
  * Right after we get the depth of the X axis and Y axis that are overlapping
  * Thus we can determine which side we are colliding on by running `std::min(X, Y)`
  * From this info, we will be able to calculate the ammount we need to push back
@@ -189,13 +187,14 @@ bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID mai
  * (If the objects are both stationary, pass)
  */
 void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
-	assert(a != b);
+	SDL_assert(a != b);
 	// Two components cannot be stationary at the same time
 	if (scene->get<Components::collision>(a).stationary && scene->get<Components::collision>(b).stationary) {
 		return;
 	}
 
-	/* Thx stack https://gamedev.stackexchange.com/questions/18302/2d-platformer-collisions
+	/*
+	 * Thx stack https://gamedev.stackexchange.com/questions/18302/2d-platformer-collisions
 	 * See https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/Player.cs
 	 * https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/RectangleExtensions.cs#L30
 	 */
@@ -212,8 +211,8 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	const Eigen::Vector2f& minDistance =
 		(scene->get<Components::collision>(a).size + scene->get<Components::collision>(b).size) / 2;
 
-	assert(!(std::abs(distance.x()) > minDistance.x() || std::abs(distance.y()) > minDistance.y()) &&
-	       "The objects are not colliding?");
+	SDL_assert(!(SDL_abs(distance.x()) > minDistance.x() || SDL_abs(distance.y()) > minDistance.y()) &&
+		   "The objects are not colliding?");
 
 	const float& depthX = (distance.x() > 0 ? minDistance.x() : -minDistance.x()) - distance.x();
 	const float& depthY = (distance.y() > 0 ? minDistance.y() : -minDistance.y()) - distance.y();
@@ -226,13 +225,13 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 		// The + and - are relative to the two, so when moving a gotta add, moving b gotta subtract
 		// Why a + and b -? IDFK. Just tried out a bunch of possible solutions and got this
 		// It works, don't touch (if it's not broken)
-		if (std::abs(depth.x()) <= std::abs(depth.y())) {
+		if (SDL_abs(depth.x()) <= SDL_abs(depth.y())) {
 			scene->get<Components::position>(movable).pos.x() += (movable == b ? -1 : 1) * depth.x();
 		} else {
 			scene->get<Components::position>(movable).pos.y() += (movable == b ? -1 : 1) * depth.y();
 		}
 	} else {
-		if (std::abs(depth.x()) <= std::abs(depth.y())) {
+		if (SDL_abs(depth.x()) <= SDL_abs(depth.y())) {
 			scene->get<Components::position>(a).pos.x() += (depth / 2).x();
 			scene->get<Components::position>(b).pos.x() += (-depth / 2).x();
 		} else {

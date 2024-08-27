@@ -69,7 +69,7 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 	// TODO: Non-hardcoded attrib pointer strides
 	// TODO: Prettier
 	glBindVertexArray(mVAO);
-	assert(!positions.empty());
+	SDL_assert(!positions.empty());
 	{
 		glBufferSubData(GL_ARRAY_BUFFER, offset, positions.size() * sizeof(float), positions.data());
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
@@ -98,7 +98,7 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 		SDL_Log("Mesh.cpp: Texture pos empty, ignored");
 	}
 
-	assert((positions.size() + normals.size() + texturePos.size()) * sizeof(float) == offset && "Missing data");
+	SDL_assert((positions.size() + normals.size() + texturePos.size()) * sizeof(float) == offset && "Missing data");
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndicesCount * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
@@ -167,7 +167,7 @@ void Mesh::addAttribArray(const GLsizeiptr size, const GLvoid* const data, const
 }
 
 void Mesh::addAttribArray(const GLuint VBO, const std::function<void()>& bind) {
-	assert(glIsBuffer(VBO));
+	SDL_assert(glIsBuffer(VBO));
 
 	glBindVertexArray(mVAO); // Save it in vertex array
 

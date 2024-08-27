@@ -51,52 +51,47 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 			break;
 		}
 
-		case SDL_EVENT_FINGER_DOWN: {
-			const Eigen::Vector2f dimensions = mGame->getDemensions();
-			for (const auto& ui : mGame->getUIs()) {
-				ui->touch(event.tfinger.fingerID, event.tfinger.x * dimensions.x(),
-					  dimensions.y() - event.tfinger.y * dimensions.y(), false);
+			/*
+			case SDL_EVENT_FINGER_DOWN: {
+				const Eigen::Vector2f dimensions = mGame->getDemensions();
+				for (const auto& ui : mGame->getUIs()) {
+					ui->touch(event.tfinger.fingerID, event.tfinger.x * dimensions.x(),
+						  dimensions.y() - event.tfinger.y * dimensions.y(), false);
+				}
+
+				break;
 			}
 
-			break;
-		}
+			case SDL_EVENT_FINGER_UP: {
+				const Eigen::Vector2f dimensions = mGame->getDemensions();
+				for (const auto& ui : mGame->getUIs()) {
+					ui->touch(event.tfinger.fingerID, event.tfinger.x * dimensions.x(),
+						  dimensions.y() - event.tfinger.y * dimensions.y(), true);
+				}
 
-		case SDL_EVENT_FINGER_UP: {
-			const Eigen::Vector2f dimensions = mGame->getDemensions();
-			for (const auto& ui : mGame->getUIs()) {
-				ui->touch(event.tfinger.fingerID, event.tfinger.x * dimensions.x(),
-					  dimensions.y() - event.tfinger.y * dimensions.y(), true);
+				break;
 			}
 
-			break;
-		}
+			case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+				const Eigen::Vector2f dimensions = mGame->getDemensions();
+				for (const auto& ui : mGame->getUIs()) {
+					ui->touch(static_cast<SDL_FingerID>(event.button.which), event.button.x,
+						  static_cast<float>(dimensions.y()) - event.button.y, false);
+				}
 
-		case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-			const Eigen::Vector2f dimensions = mGame->getDemensions();
-			for (const auto& ui : mGame->getUIs()) {
-				ui->touch(static_cast<SDL_FingerID>(event.button.which), event.button.x,
-					  static_cast<float>(dimensions.y()) - event.button.y, false);
+				break;
 			}
 
-			break;
-		}
+			case SDL_EVENT_MOUSE_BUTTON_UP: {
+				const Eigen::Vector2f dimensions = mGame->getDemensions();
+				for (const auto& ui : mGame->getUIs()) {
+					ui->touch(static_cast<SDL_FingerID>(event.button.which), event.button.x,
+						  static_cast<float>(dimensions.y()) - event.button.y, true);
+				}
 
-		case SDL_EVENT_MOUSE_BUTTON_UP: {
-			const Eigen::Vector2f dimensions = mGame->getDemensions();
-			for (const auto& ui : mGame->getUIs()) {
-				ui->touch(static_cast<SDL_FingerID>(event.button.which), event.button.x,
-					  static_cast<float>(dimensions.y()) - event.button.y, true);
+				break;
 			}
-
-			break;
-		}
-
-		case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED: {
-			// mGame->getRenderer()->setDisplayScale();
-			// TODO:
-
-			break;
-		}
+			*/
 
 		[[likely]] default:
 			break;
@@ -106,45 +101,7 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 }
 
 SDL_AppResult EventManager::manageKeyboardEvent(const SDL_Event& event) {
-	static bool rel = true;
-
 	switch (event.key.key) {
-		case SDLK_ESCAPE: {
-			MainUI* menu = nullptr;
-			for (const auto& element : mGame->getUIs()) {
-				menu = dynamic_cast<MainUI*>(element);
-
-				if (menu != nullptr) {
-					break;
-				}
-			}
-
-			if (menu == nullptr) {
-				// No main menu present
-				new MainUI(mGame);
-			}
-			break;
-		}
-
-		case SDLK_F1: {
-			rel = !rel;
-			// mGame->getRenderer()->setWindowRelativeMouseMode(static_cast<int>(rel));
-
-			break;
-		}
-		/*
-		 * FIXME:
-		 *
-		case SDLK_F2: {
-			// TODO: Maybe reload textures
-
-			// mTextures->reload();
-			mShaders->reload();
-			mRenderer->reload();
-
-			break;
-		}
-		*/
 		case SDLK_F3: {
 			mGame->setPause(!mGame->isPaused());
 
