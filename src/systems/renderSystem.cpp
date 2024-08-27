@@ -207,12 +207,8 @@ void RenderSystem::setDemensions(int width, int height) {
 }
 
 void RenderSystem::draw(Scene* scene) {
-#ifdef DEBUG
 	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-#else
-	glClear(GL_DEPTH_BUFFER_BIT);
-#endif
 	glEnable(GL_DEPTH_TEST);
 
 	Shader* defaultShader = this->getShader("block.vert", "block.frag");
@@ -245,7 +241,7 @@ void RenderSystem::draw(Scene* scene) {
 	ImGui::End();
 
 	// Debug layer rendering
-	if (hitbox || scene->getSignal("collisionEditor")) {
+	if (scene->getSignal("collisionEditor") || hitbox) {
 		GLint mode[2];
 		if (hitbox && glPolygonMode != nullptr) {
 			glGetIntegerv(GL_POLYGON_MODE, mode);
@@ -290,7 +286,10 @@ void RenderSystem::draw(Scene* scene) {
 			vectorShader->set("model", model);
 			vectorShader->set("size",
 					  Eigen::Vector2f(texture.texture->getWidth(), texture.texture->getHeight()));
-			vectorShader->set("position", position.pos);
+			const Eigen::Vector2f& realPos =
+				position.pos +
+				Eigen::Vector2f(texture.texture->getWidth(), texture.texture->getHeight()) / 2;
+			vectorShader->set("position", realPos);
 			vectorShader->set("velocity", velocity.vel);
 
 			mMesh->draw(vectorShader);
@@ -374,7 +373,6 @@ Shader* RenderSystem::getShader(const std::string& vert, const std::string& frag
 }
 
 // NOTE: Not needed for our 2D game
-
 /*
  * void RenderSystem::view() {
  * 	Eigen::Matrix3f R;

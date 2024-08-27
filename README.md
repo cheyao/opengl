@@ -181,10 +181,13 @@ The systems manage all the logic and changes the components
 - [x] Debug menu 
     - [x] Collision area editor
     - [x] Signal list
-    - [ ] Velocity arrows
+    - [x] Velocity arrows
+    - [ ] Component and entity list
+        - [ ] Read time component, entity addition
 - [x] UI
     - [x] Divs
     - [x] Embed text in buttons
+    - [ ] MacOS: Link new freetype version
 - [x] Pause menu etc
     - [x] Text
     - [ ] Settings
