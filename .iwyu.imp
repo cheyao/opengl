@@ -1,5 +1,5 @@
 [
-  {"include": ["@<SDL3/.*>", "private", "<SDL3/SDL.h>", "public"]}
-  {"include": ["@\"third_party/Eigen/.*\"", "private", "\"third_party/Eigen/Dense\"", "public"]}
+  {"include": ["@<SDL3/.*>", "private", "<SDL3/SDL.h>", "public"]},
+  {"include": ["@\"third_party/Eigen/.*\"", "private", "\"third_party/Eigen/Dense\"", "public"]},
   {"include": ["@<assimp/.*>", "private", "<assimp/Importer.hpp>", "public"]}
 ]

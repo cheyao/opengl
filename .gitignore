@@ -12,6 +12,7 @@ webrel/
 nogui/
 gcc/
 and/
+iwyu/
 mem/
 assets/strings/*.json
 .compile_commands

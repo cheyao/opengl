@@ -47,7 +47,6 @@ class Game {
 	void quit() { mQuit = true; }
 
       private:
-	void setup();
 	void gui();
 
 	std::unique_ptr<class EventManager> mEventManager;
@@ -59,8 +58,6 @@ class Game {
 	float mUIScale;
 	uint64_t mTicks;
 	std::string mBasePath;
-
-	class Scene* mScene;
 
 	bool mPaused;
 	bool mQuit;

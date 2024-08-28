@@ -6,6 +6,7 @@
 #include "utils.hpp"
 
 #include <unordered_map>
+#include <version>
 
 TextureManager::TextureManager(const std::string& path) : mPath(path + "assets" SEPARATOR "textures" SEPARATOR) {
 	// OpenGL wants this

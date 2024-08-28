@@ -6,6 +6,7 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <cstddef>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
@@ -31,7 +32,7 @@ void StorageManager::restore() {
 		throw std::runtime_error("StorageManager.cpp: Failed to open storage");
 	}
 
-	size_t times = 0;
+	std::size_t times = 0;
 	while (!SDL_StorageReady(storage)) {
 		SDL_Delay(10);
 
@@ -72,7 +73,7 @@ StorageManager::~StorageManager() {
 		return;
 	}
 
-	size_t i = 0;
+	std::size_t i = 0;
 	while (!SDL_StorageReady(storage)) {
 		SDL_Delay(10);
 		++i;
@@ -177,8 +178,8 @@ void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& w
 	SDL_assert(level["version"] == 100);
 	SDL_assert(level["name"] == "Level"); // TODO: More option
 
-	mGame->mCurrentLevel = new Level("Level");
-	mGame->mCurrentLevel->load(level["data"], mGame);
+	mGame->mCurrentLevel = new Level(mGame);
+	mGame->mCurrentLevel->load(level["data"]);
 }
 
 void StorageManager::saveState(SDL_Storage* storage) {
@@ -236,5 +237,5 @@ void StorageManager::saveWorld(struct SDL_Storage* storage, const std::string& w
 
 	level["version"] = 100;
 	level["name"] = mGame->mCurrentLevel->getName(); // TODO: More option
-	level["data"] = mGame->mCurrentLevel->save(mGame);
+	level["data"] = mGame->mCurrentLevel->save();
 }

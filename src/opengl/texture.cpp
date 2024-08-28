@@ -7,6 +7,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <SDL3/SDL.h>
+#include <cstddef>
 #include <stdexcept>
 #include <string_view>
 
@@ -52,10 +53,11 @@ void Texture::activate(const unsigned int& num) const {
 void Texture::load(const bool srgb) {
 	SDL_Log("Loading texture %s", name.data());
 
-	size_t size = 0;
+	std::size_t size = 0;
 	unsigned char* source = static_cast<unsigned char*>(SDL_LoadFile(name.data(), &size));
 	[[unlikely]] if (source == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to read texture shource: %s\033[0m", name.data());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to read texture shource: %s\033[0m",
+				name.data());
 
 		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have enough memory");
 

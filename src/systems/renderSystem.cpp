@@ -4,6 +4,7 @@
 #include "game.hpp"
 #include "managers/glManager.hpp"
 #include "managers/shaderManager.hpp"
+#include "managers/systemManager.hpp"
 #include "managers/textureManager.hpp"
 #include "opengl/framebuffer.hpp"
 #include "opengl/mesh.hpp"
@@ -18,6 +19,10 @@
 
 #include <SDL3/SDL.h>
 #include <memory>
+#include <span>
+#include <stdexcept>
+#include <utility>
+#include <vector>
 
 #ifdef IMGUI
 #ifdef GLES
@@ -379,7 +384,7 @@ void RenderSystem::setDisplayScale() const {
 
 	ImFont* font =
 		io.Fonts->AddFontFromFileTTF(mGame->fullPath("fonts" SEPARATOR "NotoSans.ttf").data(), 16.0f * scale);
-	SDL_assert(font != NULL);
+	SDL_assert(font != nullptr);
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.ScaleAllSizes(scale);
@@ -416,7 +421,7 @@ void RenderSystem::setPersp() const {
 
 	const float aspect = static_cast<float>(mWidth) / mHeight;
 	const float theta = fov * 0.5;
-	const float invtan = 1.0f / tan(theta);
+	const float invtan = 1.0f / SDL_tan(theta);
 
 	// https://www.songho.ca/opengl/gl_projectionmatrix.html
 	Eigen::Affine3f projectionMatrix = Eigen::Affine3f::Identity();

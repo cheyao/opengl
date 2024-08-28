@@ -3,18 +3,24 @@
 #include "components.hpp"
 #include "game.hpp"
 #include "managers/localeManager.hpp"
+#include "managers/systemManager.hpp"
+#include "misc/sparse_set_view.hpp"
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Geometry"
+#include "third_party/glad/glad.h"
 #include "utils.hpp"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <SDL3/SDL.h>
 #include <memory>
+#include <span>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 #include <wchar.h>
 
 // PERF: Optimize with font atlas when using small fonts

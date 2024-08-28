@@ -1,12 +1,14 @@
 #include "opengl/cubemap.hpp"
 
 #include "third_party/stb_image.h"
+#include "third_party/glad/glad.h"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
 #include <stdexcept>
 #include <string_view>
 #include <vector>
+#include <cstddef>
 
 Cubemap::Cubemap(const std::string_view& path) : Texture(path) {}
 
@@ -53,7 +55,6 @@ void Cubemap::loadface(const std::string& face, const unsigned int i, const bool
 	int channels = 0;
 	unsigned char* data = stbi_load_from_memory(source, size, &width, &height, &channels, 0);
 	SDL_free(source);
-	// unsigned char* data = stbi_load((name + face).data(), &width, &height, &channels, 0);
 
 	[[unlikely]] if (data == nullptr) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to decrypt texture: %s\n", (name + face).data());

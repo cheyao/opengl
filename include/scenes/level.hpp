@@ -7,19 +7,23 @@
 // Something important
 class Level {
       public:
-	explicit Level(const std::string name);
-	Level(Level&&) = default;
-	Level(const Level&) = default;
-	Level& operator=(Level&&) = default;
-	Level& operator=(const Level&) = default;
-	~Level() = default;
+	explicit Level(class Game* game, const std::string& name = "Level");
+	Level(Level&&) = delete;
+	Level(const Level&) = delete;
+	Level& operator=(Level&&) = delete;
+	Level& operator=(const Level&) = delete;
+	virtual ~Level() = default;
 
 	virtual void create();
-	virtual void load(const nlohmann::json data, class Game* game);
-	virtual nlohmann::json save(class Game* game);
+	virtual void load(const nlohmann::json data);
+	virtual nlohmann::json save();
 
 	std::string getName() const { return mName; }
+	class Scene* getScene() const { return mScene; };
 
       private:
-	std::string mName;
+	const std::string mName;
+
+	class Game* mGame;
+	class Scene* mScene;
 };

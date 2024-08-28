@@ -1,12 +1,10 @@
 #include "game.hpp"
 
-#include "components.hpp"
 #include "managers/eventManager.hpp"
 #include "managers/localeManager.hpp"
 #include "managers/storageManager.hpp"
 #include "managers/systemManager.hpp"
 #include "opengl/texture.hpp"
-#include "scene.hpp"
 #include "scenes/level.hpp"
 #include "third_party/glad/glad.h"
 
@@ -18,9 +16,6 @@
 #include <third_party/Eigen/Core>
 
 #ifdef IMGUI
-#ifdef GLES
-#define IMGUI_IMPL_OPENGL_ES3
-#endif
 #include <backends/imgui_impl_opengl3.h>
 #include <backends/imgui_impl_sdl3.h>
 #include <imgui.h>
@@ -28,8 +23,7 @@
 
 Game::Game()
 	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mStorageManager(nullptr),
-	  mUIScale(1.0f), mTicks(0), mBasePath(""), mScene(nullptr), mPaused(false), mQuit(false),
-	  mCurrentLevel(nullptr) {
+	  mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(false), mCurrentLevel(nullptr) {
 	mUIScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 	if (mUIScale <= 0.0f) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
@@ -63,14 +57,11 @@ Game::Game()
 
 	try {
 		mStorageManager->restore();
-
-		setup();
-
 	} catch (const std::runtime_error& error) {
 		SDL_Log("Failed to read saved state with error %s, creating new state", error.what());
 
-		mCurrentLevel = new Level;
-		// setup();
+		mCurrentLevel = new Level(this);
+		mCurrentLevel->create();
 	}
 
 	SDL_assert(mCurrentLevel != nullptr);
@@ -92,49 +83,7 @@ Game::~Game() {
 
 	delete mLocaleManager;
 	delete mSystemManager;
-	delete mScene;
-}
-
-void Game::setup() {
-	SDL_Log("Setting up game");
-
-	mScene = new Scene();
-	EntityID player = mScene->newEntity();
-	mScene->emplace<Components::texture>(player, mSystemManager->getTexture("stone.png", true));
-	mScene->emplace<Components::position>(player, Eigen::Vector2f(400.0f, 400.0f));
-	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
-	mScene->emplace<Components::input>(player, [](class Scene* scene, EntityID entity, const bool* scancodes,
-						      [[maybe_unused]] const float delta) {
-		Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).vel;
-
-		if (scancodes[SDL_SCANCODE_RIGHT] == true && vel.x() < 220) {
-			vel.x() += 70;
-		}
-
-		if (scancodes[SDL_SCANCODE_LEFT] == true && vel.x() > -220) {
-			vel.x() -= 70;
-		}
-	});
-	mScene->emplace<Components::collision>(
-		player, Eigen::Vector2f(0.0f, 0.0f),
-		Eigen::Vector2f(mSystemManager->getTexture("stone.png", true)->getWidth(),
-				mSystemManager->getTexture("stone.png", true)->getHeight()));
-	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
-
-	EntityID block2 = mScene->newEntity();
-	mScene->emplace<Components::texture>(block2, mSystemManager->getTexture("stone.png"));
-	mScene->emplace<Components::position>(block2, Eigen::Vector2f(400.0f, 10.0f));
-	mScene->emplace<Components::collision>(
-		block2, Eigen::Vector2f(0.0f, 0.0f),
-		Eigen::Vector2f(mSystemManager->getTexture("stone.png", true)->getWidth(),
-				mSystemManager->getTexture("stone.png", true)->getHeight()),
-		true);
-
-	EntityID text = mScene->newEntity();
-	mScene->emplace<Components::text>(text, "controls");
-	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
-
-	SDL_Log("Successfully initialized Game World");
+	delete mCurrentLevel;
 }
 
 SDL_AppResult Game::iterate() {
@@ -160,7 +109,7 @@ SDL_AppResult Game::iterate() {
 	mTicks = SDL_GetTicks();
 
 	gui();
-	mSystemManager->update(mScene, delta);
+	mSystemManager->update(mCurrentLevel->getScene(), delta);
 
 #ifdef DEBUG
 	GLenum err = 0;

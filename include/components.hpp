@@ -3,6 +3,7 @@
 #include "managers/entityManager.hpp"
 #include "third_party/Eigen/Core"
 
+#include <cstdint>
 #include <functional>
 
 namespace Components {
@@ -40,6 +41,7 @@ struct misc {
 	enum {
 		JUMP = 0b1,
 		PLAYER = 0b10,
-	} what;
+	};
+	std::uint64_t what;
 };
 } // namespace Components

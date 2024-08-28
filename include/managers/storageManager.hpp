@@ -1,6 +1,5 @@
 #pragma once
 
-#include <SDL3/SDL.h>
 #include <string>
 
 // When object is destoryed, save state, when crated restor state
