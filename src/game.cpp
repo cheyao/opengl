@@ -12,6 +12,7 @@
 #include <SDL3/SDL.h>
 #include <cstdint>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <third_party/Eigen/Core>
 
@@ -24,7 +25,9 @@
 #include <imgui.h>
 #endif
 
-Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(false) {
+Game::Game()
+	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mStorageManager(nullptr),
+	  mUIScale(1.0f), mTicks(0), mBasePath(""), mScene(nullptr), mPaused(false), mQuit(false) {
 	mUIScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 	if (mUIScale <= 0.0f) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
@@ -47,8 +50,6 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 	mSystemManager = new SystemManager(this);
 	mLocaleManager = new LocaleManager(mBasePath);
 
-	mStorageManager = new StorageManager();
-
 	// TODO: Icon
 	/*
 	SDL_SetWindowIcon(mWindow, icon);
@@ -56,7 +57,18 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 
 	SDL_GL_SetSwapInterval(1);
 
-	setup();
+	try {
+		mStorageManager = new StorageManager(this);
+
+		setup();
+
+	} catch (const std::runtime_error& error) {
+		SDL_Log("Failed to read saved state with error %s, creating new state", error.what());
+
+		setup();
+	}
+
+	mTicks = SDL_GetTicks();
 }
 
 Game::~Game() {
@@ -116,8 +128,6 @@ void Game::setup() {
 	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
 
 	SDL_Log("Successfully initialized Game World");
-
-	mTicks = SDL_GetTicks();
 }
 
 SDL_AppResult Game::iterate() {

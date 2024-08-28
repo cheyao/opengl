@@ -21,9 +21,9 @@ Texture::Texture(const FT_Bitmap& bitmap) : name(""), mWidth(bitmap.width), mHei
 	glBindTexture(GL_TEXTURE_2D, mID);
 
 #ifdef GLES
+	// See https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, mWidth, mHeight, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
 #else
-	// See https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, mWidth, mHeight, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
 #endif
 
@@ -43,11 +43,6 @@ Texture::~Texture() {
 
 void Texture::activate(const unsigned int& num) const {
 	SDL_assert(num < 80);
-	/*
-	[[unlikely]] if (!mLoaded) {
-		this->load();
-	}
-	*/
 
 	glActiveTexture(GL_TEXTURE0 + num);
 	glBindTexture(GL_TEXTURE_2D, mID);
@@ -60,7 +55,7 @@ void Texture::load(const bool srgb) {
 	size_t size = 0;
 	unsigned char* source = static_cast<unsigned char*>(SDL_LoadFile(name.data(), &size));
 	[[unlikely]] if (source == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to read texture shource: %s\n", name.data());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to read texture shource: %s\033[0m", name.data());
 
 		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have enough memory");
 
@@ -72,7 +67,7 @@ void Texture::load(const bool srgb) {
 	SDL_free(source);
 
 	[[unlikely]] if (data == nullptr) {
-		SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Failed to decompress texture: %s\n", name.data());
+		SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to decompress texture: %s\033[0m", name.data());
 		ERROR_BOX("Failed to load textures, the assets is corrupted or you don't have enough memory");
 
 		throw std::runtime_error("Texture.cpp: Failed to load texture");
@@ -90,7 +85,7 @@ void Texture::load(const bool srgb) {
 			intFormat = GL_SRGB_ALPHA;
 			break;
 		[[unlikely]] default:
-			SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "%s:%d Unimplemented image format: %s: %d\n",
+			SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "\x1B[31m%s:%d Unimplemented image format: %s: %d\033[0m",
 				     __FILE__, __LINE__, name.data(), channels);
 			ERROR_BOX("Failed to recognise file color format, the assets is probably "
 				  "corrupted");

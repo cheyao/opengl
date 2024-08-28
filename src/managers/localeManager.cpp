@@ -133,7 +133,16 @@ void LocaleManager::loadLocale() {
 		}
 	}
 
-	mLocaleData = nlohmann::json::parse(localeData);
+	try {
+		mLocaleData = nlohmann::json::parse(localeData);
+	} catch (...) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
+				"\x1B[31mLocaleManager.cpp: Failed to parse json with unknown exception!");
+		
+		ERROR_BOX("Failed to read locale, reinstall assets");
+
+		throw std::runtime_error("LocaleManager.cpp: Failed to read locale");
+	}
 
 	SDL_free(localeData);
 

@@ -41,6 +41,7 @@ Shader* SystemManager::getShader(const std::string& vert, const std::string& fra
 
 void SystemManager::update(Scene* scene, const float delta) {
 	SDL_assert(scene != nullptr);
+
 	scene->clearSignals();
 
 	mInputSystem->update(scene, delta);

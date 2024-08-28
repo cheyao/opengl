@@ -16,7 +16,9 @@ class Scene {
 #endif
 
       public:
-	Scene() : mEntityManager(new EntityManager()), mComponentManager(new ComponentManager()) {}
+	Scene()
+		: mEntityManager(new EntityManager()), mComponentManager(new ComponentManager()), mEntities(),
+		  mSignals() {}
 	Scene(Scene&&) = delete;
 	Scene(const Scene&) = delete;
 	Scene& operator=(Scene&&) = delete;
