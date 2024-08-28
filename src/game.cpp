@@ -3,6 +3,7 @@
 #include "components.hpp"
 #include "managers/eventManager.hpp"
 #include "managers/localeManager.hpp"
+#include "managers/storageManager.hpp"
 #include "managers/systemManager.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
@@ -46,6 +47,8 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 	mSystemManager = new SystemManager(this);
 	mLocaleManager = new LocaleManager(mBasePath);
 
+	mStorageManager = new StorageManager();
+
 	// TODO: Icon
 	/*
 	SDL_SetWindowIcon(mWindow, icon);
@@ -57,6 +60,9 @@ Game::Game() : mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(f
 }
 
 Game::~Game() {
+	// Save state
+	delete mStorageManager;
+
 	SDL_Log("Quitting game\n");
 
 #ifdef IMGUI

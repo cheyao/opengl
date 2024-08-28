@@ -64,7 +64,7 @@ void Texture::load(const bool srgb) {
 
 		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have enough memory");
 
-		throw std::runtime_error("texture.cpp: Failed to read texture");
+		throw std::runtime_error("Texture.cpp: Failed to read texture");
 	}
 
 	int channels = 0;
@@ -72,10 +72,10 @@ void Texture::load(const bool srgb) {
 	SDL_free(source);
 
 	[[unlikely]] if (data == nullptr) {
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to decompress texture: %s\n", name.data());
+		SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "Failed to decompress texture: %s\n", name.data());
 		ERROR_BOX("Failed to load textures, the assets is corrupted or you don't have enough memory");
 
-		throw std::runtime_error("texture.cpp: Failed to load texture");
+		throw std::runtime_error("Texture.cpp: Failed to load texture");
 	}
 
 	GLenum format = GL_RGB;
@@ -90,12 +90,12 @@ void Texture::load(const bool srgb) {
 			intFormat = GL_SRGB_ALPHA;
 			break;
 		[[unlikely]] default:
-			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s:%d Unimplemented image format: %s: %d\n",
+			SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "%s:%d Unimplemented image format: %s: %d\n",
 				     __FILE__, __LINE__, name.data(), channels);
 			ERROR_BOX("Failed to recognise file color format, the assets is probably "
 				  "corrupted");
 
-			throw std::runtime_error("texture.cpp: Invalid enum");
+			throw std::runtime_error("Texture.cpp: Invalid enum");
 	}
 
 	glGenTextures(1, &mID);

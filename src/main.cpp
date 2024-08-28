@@ -29,15 +29,8 @@ SDL_AppResult SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_un
 	SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "0");
-	/*
-#ifdef GLES
-	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
-#else
-	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengl");
-#endif
-	*/
 
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD) != 0) {
+	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMEPAD)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to init SDL: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to initialize SDL, there is something wrong with your system");
 		return SDL_APP_FAILURE;
@@ -45,9 +38,9 @@ SDL_AppResult SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_un
 
 	SDL_assert(SDL_WasInit(SDL_INIT_VIDEO) && "Why wasn't video initalized?");
 
-	SDL_Log("Hello! I am on %s", SDL_GetPlatform());
+	SDL_Log("Hello! I am on %s!", SDL_GetPlatform());
 #ifdef __ANDROID__
-	SDL_Log("I am on android %d!", SDL_GetAndroidSDKVersion());
+	SDL_Log("I am on android %d.", SDL_GetAndroidSDKVersion());
 #endif
 
 	try {
@@ -98,9 +91,9 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 }
 
 void SDL_AppQuit(void* appstate) {
-	SDL_assert(appstate != nullptr);
-
-	delete static_cast<Game*>(appstate);
+	if (appstate != nullptr) {
+		delete static_cast<Game*>(appstate);
+	}
 
 	SDL_Quit();
 }

@@ -2,10 +2,8 @@
 
 #include "game.hpp"
 #include "third_party/Eigen/Core"
-#include "ui/screens/mainUI.hpp"
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_events.h>
 
 EventManager::EventManager(class Game* game) : mGame(game) {
 	mKeys = new bool[SDL_NUM_SCANCODES];

@@ -11,6 +11,9 @@
 
 // TODO: Cleanup this
 class Game {
+	// Our storage manager gotta restore state
+	friend class StorageManager;
+
       public:
 	Game();
 	Game(Game&&) = delete;
@@ -51,6 +54,7 @@ class Game {
 
 	class SystemManager* mSystemManager;
 	class LocaleManager* mLocaleManager;
+	class StorageManager* mStorageManager;
 
 	float mUIScale;
 	uint64_t mTicks;

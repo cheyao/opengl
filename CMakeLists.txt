@@ -43,22 +43,12 @@ src/managers/IOManager.cpp
 src/managers/localeManager.cpp
 src/managers/entityManager.cpp
 src/managers/systemManager.cpp
+src/managers/storageManager.cpp
 
 src/systems/textSystem.cpp
 src/systems/physicsSystem.cpp
 src/systems/renderSystem.cpp
 src/systems/inputSystem.cpp
-
-# src/ui/UIComponent.cpp
-# src/ui/UIScreen.cpp
-
-# src/ui/screens/controlUI.cpp
-# src/ui/screens/mainUI.cpp
-# src/ui/screens/divUI.cpp
-
-# src/ui/components/buttonComponent.cpp
-# src/ui/components/backgroundComponent.cpp
-# src/ui/components/textComponent.cpp
 
 # Headers
 include/game.hpp
@@ -86,22 +76,12 @@ include/managers/IOManager.hpp
 include/managers/entityManager.hpp
 include/managers/systemManager.hpp
 include/managers/componentManager.hpp
+include/managers/storageManager.hpp
 
 include/systems/textSystem.hpp
 include/systems/physicsSystem.hpp
 include/systems/renderSystem.hpp
 include/systems/inputSystem.hpp
-
-# include/ui/UIComponent.hpp
-# include/ui/UIScreen.hpp
-
-# include/ui/screens/controlUI.hpp
-# include/ui/screens/mainUI.hpp
-# include/ui/screens/divUI.hpp
-
-# include/ui/components/buttonComponent.hpp
-# include/ui/components/backgroundComponent.hpp
-# include/ui/components/textComponent.hpp
 
 # External
 src/third_party/stb_image.c
