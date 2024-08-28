@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+#include <string>
 
 // When object is destoryed, save state, when crated restor state
 class StorageManager {
@@ -12,9 +13,13 @@ class StorageManager {
 	StorageManager& operator=(const StorageManager&) = delete;
 	~StorageManager();
 
+	void restore();
+
       private:
 	void restoreState(struct SDL_Storage* storage);
+	void loadWorld(struct SDL_Storage* storage, const std::string& world);
 	void saveState(struct SDL_Storage* storage);
+	void saveWorld(struct SDL_Storage* storage, const std::string& world);
 
 	class Game* mGame;
 };

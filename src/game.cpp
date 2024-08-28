@@ -57,8 +57,10 @@ Game::Game()
 
 	SDL_GL_SetSwapInterval(1);
 
+	mStorageManager = new StorageManager(this);
+
 	try {
-		mStorageManager = new StorageManager(this);
+		mStorageManager->restore();
 
 		setup();
 

@@ -46,7 +46,11 @@ SDL_AppResult SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_un
 	try {
 		*appstate = new Game();
 	} catch (const std::runtime_error& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Main.cpp: Critical error: %s\n", error.what());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Main.cpp: Critical runtime error: %s\n", error.what());
+
+		return SDL_APP_FAILURE;
+	} catch (const std::exception& error) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Main.cpp: Critical exception: %s\n", error.what());
 
 		return SDL_APP_FAILURE;
 	} catch (...) {
@@ -76,6 +80,14 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 	try {
 		return static_cast<Game*>(appstate)->iterate();
 	} catch (const std::runtime_error& error) {
+		SDL_Log("Main.cpp: Uncaught runtime error: %s", error.what());
+
+#ifdef DEBUG
+		static_cast<Game*>(appstate)->setPause(true);
+#endif
+
+		return SDL_APP_CONTINUE;
+	} catch (const std::exception& error) {
 		SDL_Log("Main.cpp: Uncaught exception: %s", error.what());
 
 #ifdef DEBUG

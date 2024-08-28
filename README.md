@@ -177,7 +177,8 @@ The systems manage all the logic and changes the components
 - [x] Better component and actors
 - [x] UI Scaling
 - [x] Multitouch
-- [ ] Collision resolver
+- [x] Collision resolver
+- [ ] Scaling
 - [x] Android build
     - [x] Android controls
 - [x] Debug menu 
@@ -213,8 +214,9 @@ The systems manage all the logic and changes the components
 - [ ] Level map
     - [ ] Level generator
     - [ ] Thing
+    - [ ] Binary json (MessagePack)
+    - [ ] Move scenes to `src/scenes`
 - [ ] Combine localemanager and textmanager
-- [ ] Move scenes to `src/scenes`
 - [ ] Windows build
 
 - [ ] Read books (By priority)
