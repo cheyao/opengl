@@ -8,6 +8,13 @@
 #include <stdexcept>
 #include <string>
 
+/*
+ * A World shall consist of 3 fields:
+ * 1. "version"
+ * 2. "name"
+ * 3. "data"
+ */
+
 StorageManager::StorageManager(Game* game) : mGame(game) {}
 
 void StorageManager::restore() {
@@ -48,7 +55,7 @@ void StorageManager::restore() {
 
 	SDL_CloseStorage(storage);
 
-	SDL_Log("\x1B[32Successfully loaded state\033[0m");
+	SDL_Log("\x1B[32mSuccessfully loaded state\033[0m");
 }
 
 StorageManager::~StorageManager() {
@@ -88,7 +95,7 @@ StorageManager::~StorageManager() {
 
 	SDL_CloseStorage(storage);
 
-	SDL_Log("\x1B[32Successfully saved state\033[0m");
+	SDL_Log("\x1B[32mSuccessfully saved state\033[0m");
 }
 
 // TODO: Binary json https://json.nlohmann.me/features/binary_formats/
@@ -118,20 +125,35 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 	}
 
 	SDL_assert(worlds["version"] == 100);
-	for (const auto& world : worlds.get<std::vector<std::string>>()) {
-		SDL_Log("Found world %s", world.data());
+
+	if (worlds["worlds"].empty()) {
+		SDL_Log("\x1B[31mWorlds empty! Returning\033[0m");
+
+		return;
 	}
+
+	for (const auto& world : worlds["worlds"]) {
+		SDL_Log("Found world %s", world.get<std::string>().data());
+	}
+
+	loadWorld(storage, worlds["worlds"][0].get<std::string>());
 
 	delete[] buffer;
 }
 
 void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& world) {
+	/*
+	 * A World shall consist of 3 fields:
+	 * 1. "version"
+	 * 2. "name"
+	 * 3. "data"
+	 */
 	(void)storage;
 	(void)world;
 }
 
 void StorageManager::saveState(SDL_Storage* storage) {
-	nlohmann::json worlds; // TODO: Levels
+	nlohmann::json worlds; // TODO: worlds
 	bool oldWorlds = false;
 
 	// If there is already level data
@@ -159,8 +181,8 @@ void StorageManager::saveState(SDL_Storage* storage) {
 	constexpr const static char* worldName = "world";
 
 	// FIXME: Version
-	worlds["version"] = 100;
 	// TODO: Save some world info
+	worlds["version"] = 100;
 	worlds["worlds"] = {worldName};
 
 	if (oldWorlds && !SDL_RenameStoragePath(storage, "worlds.json", "worlds.json.old")) {

@@ -38,7 +38,8 @@ struct text {
 // Misc stuff like jumping
 struct misc {
 	enum {
-		JUMP,
+		JUMP = 0b1,
+		PLAYER = 0b10,
 	} what;
 };
 } // namespace Components

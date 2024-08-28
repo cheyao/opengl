@@ -16,6 +16,14 @@
 // The physicsSystem is in charge of the collision and mouvements
 PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
 
+/*
+ * FIXME:
+ * Currently we are checking the player by using a bitmask or smt
+ * But it should just be any entity with
+ * <Components::position, Components::velocity, Components::force(, Components::move?)>
+ * Like this we won't need to depend on a lot of checks and prayers
+ */
+
 void PhysicsSystem::update(Scene* scene, float delta) {
 	constexpr const static float G = 15.0f;
 	constexpr const static float jumpForce = 500.0f;
@@ -24,9 +32,11 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 	scene->view<Components::collision, Components::position>().each(
 		[&entities](const EntityID& entity) { entities.emplace_back(entity); });
 
-	// FIXME: This is messed up when the framerate isn't constant
-	// https://gamedev.stackexchange.com/questions/15708/how-can-i-implement-gravity
-	// To fix it we need to add a acceleration vector (Wow school knowladge has usages)
+	/*
+	 * FIXME: This is messed up when the framerate isn't constant
+	 * https://gamedev.stackexchange.com/questions/15708/how-can-i-implement-gravity
+	 * To fix it we need to add a acceleration vector(Wow school knowladge has usages)
+	 */
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
 		for (size_t i = 0; i < entities.size(); ++i) {
@@ -39,7 +49,7 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 
 		if (onGround) {
 			if (scene->contains<Components::misc>(entity) &&
-			    scene->get<Components::misc>(entity).what == Components::misc::JUMP &&
+			    scene->get<Components::misc>(entity).what & Components::misc::JUMP &&
 			    (mGame->getKeystate()[SDL_SCANCODE_UP] == true ||
 			     mGame->getKeystate()[SDL_SCANCODE_SPACE] == true)) {
 				scene->get<Components::velocity>(entity).vel.y() = jumpForce;

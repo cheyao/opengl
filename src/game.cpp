@@ -114,7 +114,7 @@ void Game::setup() {
 		player, Eigen::Vector2f(0.0f, 0.0f),
 		Eigen::Vector2f(mSystemManager->getTexture("stone.png", true)->getWidth(),
 				mSystemManager->getTexture("stone.png", true)->getHeight()));
-	mScene->emplace<Components::misc>(player, Components::misc::JUMP);
+	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
 
 	EntityID block2 = mScene->newEntity();
 	mScene->emplace<Components::texture>(block2, mSystemManager->getTexture("stone.png"));
