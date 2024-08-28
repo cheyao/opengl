@@ -7,6 +7,7 @@
 #include "managers/systemManager.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
+#include "scenes/level.hpp"
 #include "third_party/glad/glad.h"
 
 #include <SDL3/SDL.h>
@@ -27,7 +28,8 @@
 
 Game::Game()
 	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mStorageManager(nullptr),
-	  mUIScale(1.0f), mTicks(0), mBasePath(""), mScene(nullptr), mPaused(false), mQuit(false) {
+	  mUIScale(1.0f), mTicks(0), mBasePath(""), mScene(nullptr), mPaused(false), mQuit(false),
+	  mCurrentLevel(nullptr) {
 	mUIScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 	if (mUIScale <= 0.0f) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
@@ -67,8 +69,11 @@ Game::Game()
 	} catch (const std::runtime_error& error) {
 		SDL_Log("Failed to read saved state with error %s, creating new state", error.what());
 
-		setup();
+		mCurrentLevel = new Level;
+		// setup();
 	}
+
+	SDL_assert(mCurrentLevel != nullptr);
 
 	mTicks = SDL_GetTicks();
 }

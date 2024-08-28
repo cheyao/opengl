@@ -64,4 +64,6 @@ class Game {
 
 	bool mPaused;
 	bool mQuit;
+
+	class Level* mCurrentLevel;
 };

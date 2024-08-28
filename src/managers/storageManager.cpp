@@ -1,5 +1,7 @@
 #include "managers/storageManager.hpp"
 
+#include "game.hpp"
+#include "scenes/level.hpp"
 #include "third_party/json.hpp"
 #include "utils.hpp"
 
@@ -106,8 +108,6 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 		throw std::runtime_error("No save index file");
 	}
 
-	nlohmann::json worlds;
-
 	SDL_PathInfo info;
 	SDL_GetStoragePathInfo(storage, "worlds.json", &info);
 
@@ -115,11 +115,16 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 	SDL_ReadStorageFile(storage, "worlds.json", buffer, info.size);
 	buffer[info.size] = 0; // Ensure null terminasion
 
+	nlohmann::json worlds;
 	try {
 		worlds = nlohmann::json::parse(buffer);
+
+		delete[] buffer;
 	} catch (const nlohmann::json::parse_error& error) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to parse json: id %d %s at %zu\033[0m",
 				error.id, error.what(), error.byte);
+
+		delete[] buffer;
 
 		throw error;
 	}
@@ -134,26 +139,50 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 
 	for (const auto& world : worlds["worlds"]) {
 		SDL_Log("Found world %s", world.get<std::string>().data());
+		SDL_assert(world.get<std::string>() != "worlds");
 	}
 
 	loadWorld(storage, worlds["worlds"][0].get<std::string>());
-
-	delete[] buffer;
 }
 
 void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& world) {
-	/*
-	 * A World shall consist of 3 fields:
-	 * 1. "version"
-	 * 2. "name"
-	 * 3. "data"
-	 */
-	(void)storage;
-	(void)world;
+	if (!SDL_GetStoragePathInfo(storage, (world + ".json").data(), nullptr)) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mNo save file %s found! Loading new state\033[0m",
+				world.data());
+
+		throw std::runtime_error("No save index file");
+	}
+
+	SDL_PathInfo info;
+	SDL_GetStoragePathInfo(storage, (world + ".json").data(), &info);
+
+	std::uint8_t* buffer = new std::uint8_t[info.size + 1];
+	SDL_ReadStorageFile(storage, (world + ".json").data(), buffer, info.size);
+	buffer[info.size] = 0; // Ensure null terminasion
+
+	nlohmann::json level;
+	try {
+		level = nlohmann::json::parse(buffer);
+
+		delete[] buffer;
+	} catch (const nlohmann::json::parse_error& error) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to parse json %s: id %d %s at %zu\033[0m",
+				world.data(), error.id, error.what(), error.byte);
+
+		delete[] buffer;
+
+		throw error;
+	}
+
+	SDL_assert(level["version"] == 100);
+	SDL_assert(level["name"] == "Level"); // TODO: More option
+
+	mGame->mCurrentLevel = new Level("Level");
+	mGame->mCurrentLevel->load(level["data"], mGame);
 }
 
 void StorageManager::saveState(SDL_Storage* storage) {
-	nlohmann::json worlds; // TODO: worlds
+	nlohmann::json worlds;
 	bool oldWorlds = false;
 
 	// If there is already level data
@@ -191,6 +220,21 @@ void StorageManager::saveState(SDL_Storage* storage) {
 	}
 
 	SDL_WriteStorageFile(storage, "worlds.json", worlds.dump().data(), worlds.dump().size());
+
+	saveWorld(storage, worldName);
 }
 
-// void StorageManager::saveWorld(struct SDL_Storage* storage) {}
+void StorageManager::saveWorld(struct SDL_Storage* storage, const std::string& world) {
+	if (SDL_GetStoragePathInfo(storage, (world + ".json").data(), nullptr)) {
+		if (SDL_RenameStoragePath(storage, (world + ".json").data(), (world + ".json.old").data())) {
+			SDL_Log("\x1B[31mFailed to rename world.json to worlds.json.old %s, ignoring...\033[0m",
+				SDL_GetError());
+		}
+	}
+
+	nlohmann::json level;
+
+	level["version"] = 100;
+	level["name"] = mGame->mCurrentLevel->getName(); // TODO: More option
+	level["data"] = mGame->mCurrentLevel->save(mGame);
+}
