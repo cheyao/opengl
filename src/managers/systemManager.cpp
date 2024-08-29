@@ -1,7 +1,6 @@
 #include "managers/systemManager.hpp"
 
 #include "components.hpp"
-#include "game.hpp"
 #include "scene.hpp"
 #include "systems/inputSystem.hpp"
 #include "systems/physicsSystem.hpp"
@@ -11,6 +10,14 @@
 
 #include <format>
 #include <memory>
+#include <SDL3/SDL.h>
+#include <unordered_map>
+#include <vector>
+
+#ifdef IMGUI
+#include <cstdint>
+#include <functional>
+#endif
 
 #ifdef IMGUI
 #include "imgui.h"
@@ -111,9 +118,9 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 					ImGui::BulletText(
 						"Components::texture %s",
 						std::format("texture {} shader {} scale {}",
-							    reinterpret_cast<uintptr_t>(
+							    reinterpret_cast<std::uintptr_t>(
 								    scene->get<Components::texture>(entity).texture),
-							    reinterpret_cast<uintptr_t>(
+							    reinterpret_cast<std::uintptr_t>(
 								    scene->get<Components::texture>(entity).shader),
 							    scene->get<Components::texture>(entity).scale)
 							.data());

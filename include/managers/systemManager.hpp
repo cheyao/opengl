@@ -3,6 +3,7 @@
 #include "third_party/Eigen/Core"
 
 #include <memory>
+#include <string>
 
 class SystemManager {
       public:

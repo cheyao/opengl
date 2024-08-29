@@ -4,6 +4,7 @@
 #include "third_party/Eigen/Core"
 #include "utils.hpp"
 
+#include <SDL3/SDL.h>
 #include <cstddef>
 #include <cstdint>
 #include <memory>

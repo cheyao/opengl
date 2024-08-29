@@ -4,7 +4,6 @@
 #include "managers/localeManager.hpp"
 #include "managers/storageManager.hpp"
 #include "managers/systemManager.hpp"
-#include "opengl/texture.hpp"
 #include "scenes/level.hpp"
 #include "third_party/glad/glad.h"
 
@@ -13,7 +12,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include <third_party/Eigen/Core>
+#include <string_view>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>

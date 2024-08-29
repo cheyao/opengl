@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <stdexcept>
+#include <exception>
 
 // The main class is in charge of sdl
 SDL_AppResult SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] char** argv) {

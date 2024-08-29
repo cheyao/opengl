@@ -1,9 +1,9 @@
 #pragma once
 
-#include "opengl/shader.hpp"
 #include "opengl/types.hpp"
 #include "third_party/glad/glad.h"
 
+#include <cstddef>
 #include <functional>
 #include <span>
 #include <utility>
@@ -18,7 +18,7 @@ class Mesh {
 	// Vectors are 24 bytes (from cling) so by ref
 	explicit Mesh(const std::span<const float> positions, const std::span<const float> normals,
 		      const std::span<const float> texturePos, const std::span<const GLuint> indices,
-		      const std::vector<std::pair<Texture* const, TextureType>>& textures);
+		      const std::vector<std::pair<class Texture* const, TextureType>>& textures);
 
 	Mesh(Mesh&&) = delete;
 	Mesh(const Mesh&) = delete;
@@ -28,18 +28,14 @@ class Mesh {
 
 	void draw(class Shader* shader);
 
-	size_t indices() const { return mIndicesCount; }
+	std::size_t indices() const { return mIndicesCount; }
 
-	void addTexture(const std::pair<Texture* const, TextureType> texture) {
-		mTextures.emplace_back(texture);
-	}
+	void addTexture(const std::pair<Texture* const, TextureType> texture) { mTextures.emplace_back(texture); }
 	void
 	setDrawFunc(const std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)>& func) {
 		mDrawFunc = func;
 	}
-	void addUniform(const std::function<void(class Shader* shader)> func) {
-		mUniformFuncs.emplace_back(func);
-	};
+	void addUniform(const std::function<void(class Shader* shader)> func) { mUniformFuncs.emplace_back(func); };
 	void addAttribArray(const GLsizeiptr size, const GLvoid* const data, const std::function<void()>& bind);
 	void addAttribArray(const GLuint VBO, const std::function<void()>& bind);
 

@@ -1,7 +1,11 @@
 #include "scenes/level.hpp"
 
+class Texture;
+
 #include "components.hpp"
 #include "game.hpp"
+#include "managers/entityManager.hpp"
+#include "managers/systemManager.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"

@@ -9,6 +9,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <version>
 
 Shader::Shader(const std::string_view& vertName, const std::string_view& fragName, const std::string_view& geomName)
 	: mName(std::string(vertName) + ":" + std::string(fragName) + ":" + std::string(geomName)),

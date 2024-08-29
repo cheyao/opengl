@@ -3,6 +3,8 @@
 #include "third_party/Eigen/Dense"
 #include "third_party/glad/glad.h"
 
+#include <functional>
+#include <string>
 #include <string_view>
 #include <unordered_map>
 

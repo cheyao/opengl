@@ -3,6 +3,7 @@
 #include "third_party/json.hpp"
 
 #include <string>
+#include <string_view>
 
 class LocaleManager {
       public:
@@ -13,7 +14,7 @@ class LocaleManager {
 	LocaleManager& operator=(const LocaleManager&) = delete;
 	~LocaleManager() = default;
 
-	void changeLocale(std::string_view locale) {
+	void changeLocale(const std::string_view& locale) {
 		mLocale = locale;
 		loadLocale();
 	}

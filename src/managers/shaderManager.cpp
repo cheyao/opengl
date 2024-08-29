@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <version>
 
 ShaderManager::ShaderManager(const std::string& path) : mPath(path + "assets" SEPARATOR "shaders" SEPARATOR) {
 	mShaders["default.vert:default.frag"] = nullptr;

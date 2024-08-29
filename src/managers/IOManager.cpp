@@ -6,6 +6,7 @@
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
 #include <cstdint>
+#include <cstddef>
 #include <stdexcept>
 
 GameIOStream::GameIOStream(const char* pFile, const char* pMode) {
@@ -18,9 +19,9 @@ GameIOStream::GameIOStream(const char* pFile, const char* pMode) {
 
 GameIOStream::~GameIOStream() { SDL_CloseIO(mIO); }
 
-size_t GameIOStream::Read(void* pvBuffer, size_t pSize, size_t pCount) {
-	for (size_t i = 0; i < pCount; ++i) {
-		const size_t status = SDL_ReadIO(mIO, static_cast<char*>(pvBuffer) + i * pSize, pSize);
+size_t GameIOStream::Read(void* pvBuffer, std::size_t pSize, std::size_t pCount) {
+	for (std::size_t i = 0; i < pCount; ++i) {
+		const std::size_t status = SDL_ReadIO(mIO, static_cast<char*>(pvBuffer) + i * pSize, pSize);
 
 		if (status == 0) {
 			// SDL_Log("Read error: %s", SDL_GetError());
@@ -32,7 +33,7 @@ size_t GameIOStream::Read(void* pvBuffer, size_t pSize, size_t pCount) {
 	return pCount;
 }
 
-size_t GameIOStream::Write(const void* pvBuffer, size_t pSize, size_t pCount) {
+size_t GameIOStream::Write(const void* pvBuffer, std::size_t pSize, std::size_t pCount) {
 	for (size_t i = 0; i < pCount; ++i) {
 		const size_t status = SDL_WriteIO(mIO, static_cast<const char*>(pvBuffer) + i * pSize, pSize);
 
@@ -46,7 +47,7 @@ size_t GameIOStream::Write(const void* pvBuffer, size_t pSize, size_t pCount) {
 	return pCount;
 }
 
-aiReturn GameIOStream::Seek(size_t pOffset, aiOrigin pOrigin) {
+aiReturn GameIOStream::Seek(std::size_t pOffset, aiOrigin pOrigin) {
 	SDL_IOWhence whence;
 
 	switch (pOrigin) {
@@ -93,16 +94,12 @@ bool GameIOSystem::Exists(const char* pFile) const {
 	if (stat == 0) {
 		return true;
 	} else {
-		// SDL_Log("File %s doesn't exist: %s", pFile, SDL_GetError());
-
 		return false;
 	}
 #else
-	// TODO: Somehow make better
+	// PERF: Somehow make more efficient
 	SDL_IOStream* file = SDL_IOFromFile(pFile, "r+b");
 	if (file == nullptr) {
-		// SDL_Log("File %s doesn't exist: %s", pFile, SDL_GetError());
-
 		return false;
 	} else {
 		SDL_CloseIO(file);
@@ -118,8 +115,6 @@ Assimp::IOStream* GameIOSystem::Open(const char* pFile, const char* pMode) {
 	try {
 		return new GameIOStream(pFile, pMode);
 	} catch (const std::runtime_error& e) {
-		// SDL_Log("GameIO Error: %s: %s", e.what(), SDL_GetError());
-
 		return nullptr;
 	}
 }

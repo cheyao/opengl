@@ -1,23 +1,23 @@
 #include "opengl/framebuffer.hpp"
 
-#include "game.hpp"
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
+#include "opengl/types.hpp"
 #include "systems/renderSystem.hpp"
 #include "third_party/glad/glad.h"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
 #include <memory>
+#include <span>
 #include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
 #ifdef IMGUI
-#ifdef GLES
-#define IMGUI_IMPL_OPENGL_ES3
-#endif
 #include <backends/imgui_impl_opengl3.h>
-#include <backends/imgui_impl_sdl3.h>
 #include <imgui.h>
 #endif
 

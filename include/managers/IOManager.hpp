@@ -3,15 +3,16 @@
 #include <SDL3/SDL.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
+#include <cstddef>
 
 class GameIOStream : public Assimp::IOStream {
 	friend class GameIOSystem;
 
       public:
 	~GameIOStream();
-	size_t Read(void* pvBuffer, size_t pSize, size_t pCount) override;
-	size_t Write(const void* pvBuffer, size_t pSize, size_t pCount) override;
-	aiReturn Seek(size_t pOffset, aiOrigin pOrigin) override;
+	size_t Read(void* pvBuffer, std::size_t pSize, std::size_t pCount) override;
+	size_t Write(const void* pvBuffer, std::size_t pSize, std::size_t pCount) override;
+	aiReturn Seek(std::size_t pOffset, aiOrigin pOrigin) override;
 	size_t Tell() const override;
 	size_t FileSize() const override;
 	void Flush() override;

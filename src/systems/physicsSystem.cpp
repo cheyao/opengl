@@ -5,9 +5,13 @@
 #include "managers/entityManager.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
+#include "misc/sparse_set_view.hpp"
 
 #include <SDL3/SDL.h>
 #include <format>
+#include <cstddef>
+#include <string>
+#include <vector>
 
 #ifdef IMGUI
 #include "imgui.h"
@@ -39,7 +43,7 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 	 */
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
-		for (size_t i = 0; i < entities.size(); ++i) {
+		for (std::size_t i = 0; i < entities.size(); ++i) {
 			if (entity != entities[i] && collidingBellow(scene, entity, entities[i])) {
 				onGround = true;
 
@@ -108,8 +112,8 @@ void PhysicsSystem::collide(Scene* scene) {
 
 	// Iterate over all pairs of colliders
 	// PERF: Use some nice trees https://gamedev.stackexchange.com/questions/26501/how-does-a-collision-engine-work
-	for (size_t i = 0; i < entities.size(); ++i) {
-		for (size_t j = i + 1; j < entities.size(); ++j) {
+	for (std::size_t i = 0; i < entities.size(); ++i) {
+		for (std::size_t j = i + 1; j < entities.size(); ++j) {
 			if (AABBxAABB(scene, entities[i], entities[j])) {
 				pushBack(scene, entities[i], entities[j]);
 			}

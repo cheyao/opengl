@@ -1,7 +1,6 @@
 #include "managers/eventManager.hpp"
 
 #include "game.hpp"
-#include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
 
@@ -27,7 +26,6 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 
 		case SDL_EVENT_KEY_DOWN: {
 			if (manageKeyboardEvent(event) != SDL_APP_CONTINUE) {
-				// FIXME: SDL_APP_SUCCESS
 				return SDL_APP_FAILURE;
 			}
 

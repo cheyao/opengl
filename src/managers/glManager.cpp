@@ -4,7 +4,6 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
-#include <cassert>
 #include <stdexcept>
 #include <string>
 

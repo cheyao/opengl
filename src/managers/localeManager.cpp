@@ -3,9 +3,13 @@
 #include "third_party/json.hpp"
 #include "utils.hpp"
 
+#include <SDL3/SDL.h>
+#include <cstddef>
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <version>
 
 // TODO: SDL_EVENT_LOCALE_CHANGED
 
@@ -64,8 +68,8 @@ std::u32string LocaleManager::U8toU32(const std::string_view& u8) const {
 	std::u32string out;
 
 	int word_size = 1;
-	for (size_t i = 0; i < u8.size(); i += word_size) {
-		uint32_t tmp = static_cast<uint32_t>(u8[i]) & 0xff;
+	for (std::size_t i = 0; i < u8.size(); i += word_size) {
+		std::uint32_t tmp = static_cast<std::uint32_t>(u8[i]) & 0xff;
 
 		if (tmp < 0x80UL) {
 			word_size = 1;
@@ -113,7 +117,7 @@ void LocaleManager::loadLocale() {
 #else
 	if (mLocale.find('-') != std::string::npos) {
 #endif
-		const size_t pos = mLocale.find('-');
+		const std::size_t pos = mLocale.find('-');
 		main = mLocale.substr(0, pos);
 	} else {
 		main = mLocale;
@@ -138,7 +142,7 @@ void LocaleManager::loadLocale() {
 	} catch (...) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
 				"\x1B[31mLocaleManager.cpp: Failed to parse json with unknown exception!");
-		
+
 		ERROR_BOX("Failed to read locale, reinstall assets");
 
 		throw std::runtime_error("LocaleManager.cpp: Failed to read locale");

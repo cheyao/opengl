@@ -7,8 +7,10 @@
 
 #include <SDL3/SDL.h>
 #include <algorithm>
-#include <cassert>
 #include <functional>
+#include <cstddef>
+#include <type_traits>
+#include <version>
 #include <string>
 #include <utility>
 #include <vector>
@@ -64,7 +66,7 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 	static_assert(std::is_same_v<decltype(texturePos[0]), decltype(normals[0])>);
 	static_assert(std::is_same_v<decltype(texturePos[0]), const float&>);
 
-	size_t offset = 0;
+	std::size_t offset = 0;
 
 	// TODO: Non-hardcoded attrib pointer strides
 	// TODO: Prettier
