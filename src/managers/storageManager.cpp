@@ -227,8 +227,8 @@ void StorageManager::saveState(SDL_Storage* storage) {
 
 void StorageManager::saveWorld(struct SDL_Storage* storage, const std::string& world) {
 	if (SDL_GetStoragePathInfo(storage, (world + ".json").data(), nullptr)) {
-		if (SDL_RenameStoragePath(storage, (world + ".json").data(), (world + ".json.old").data())) {
-			SDL_Log("\x1B[31mFailed to rename world.json to worlds.json.old %s, ignoring...\033[0m",
+		if (!SDL_RenameStoragePath(storage, (world + ".json").data(), (world + ".json.old").data())) {
+			SDL_Log("\x1B[31mFailed to rename world.json to world.json.old %s, ignoring...\033[0m",
 				SDL_GetError());
 		}
 	}

@@ -49,6 +49,7 @@ src/systems/textSystem.cpp
 src/systems/physicsSystem.cpp
 src/systems/renderSystem.cpp
 src/systems/inputSystem.cpp
+src/systems/worldSystem.cpp
 
 src/scenes/level.cpp
 
@@ -84,6 +85,7 @@ include/systems/textSystem.hpp
 include/systems/physicsSystem.hpp
 include/systems/renderSystem.hpp
 include/systems/inputSystem.hpp
+include/systems/worldSystem.hpp
 
 include/scenes/level.hpp
 

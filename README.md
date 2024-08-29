@@ -179,14 +179,15 @@ The systems manage all the logic and changes the components
 - [x] Multitouch
 - [x] Collision resolver
 - [ ] Scaling
+- [x] Save state
 - [x] Android build
     - [x] Android controls
 - [x] Debug menu 
     - [x] Collision area editor
     - [x] Signal list
     - [x] Velocity arrows
-    - [ ] Component and entity list
-        - [ ] Read time component, entity addition
+    - [x] Component and entity list
+        - [ ] Real time component and entity addition
 - [x] UI
     - [x] Divs
     - [x] Embed text in buttons
@@ -196,7 +197,7 @@ The systems manage all the logic and changes the components
     - [ ] Settings
 - [x] Localization
     - [x] Fallback fonts.
-    - [ ] Maybe [ICU?](https://icu.unicode.org/)
+    - [ ] Maybe [ICU](https://icu.unicode.org/)?
 - [x] Emscripten build
     - [ ] Progress bar
     - [ ] White text
@@ -206,9 +207,8 @@ The systems manage all the logic and changes the components
     - [ ] Signed distance field fonts https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf
 - [ ] Entity name saved
 - [ ] Multithreading
+    - [ ] Preload
 - [ ] Shadows
-- [ ] Save state
-- [ ] Preload
 - [ ] Add functional hot reload
 - [ ] Grid map
 - [ ] Level map
