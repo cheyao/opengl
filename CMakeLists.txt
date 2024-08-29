@@ -52,6 +52,7 @@ src/systems/inputSystem.cpp
 src/systems/worldSystem.cpp
 
 src/scenes/level.cpp
+src/scenes/chunk.cpp
 
 # Headers
 include/game.hpp
@@ -88,6 +89,7 @@ include/systems/inputSystem.hpp
 include/systems/worldSystem.hpp
 
 include/scenes/level.hpp
+include/scenes/chunk.hpp
 
 # External
 src/third_party/stb_image.c

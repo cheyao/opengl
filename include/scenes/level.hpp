@@ -26,4 +26,6 @@ class Level {
 
 	class Game* mGame;
 	class Scene* mScene;
+
+	std::vector<class Chunk*> mChunks;
 };

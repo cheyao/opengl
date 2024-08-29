@@ -44,4 +44,13 @@ struct misc {
 	};
 	std::uint64_t what;
 };
+
+struct block {
+	enum {
+		AIR,
+		GRASS,
+		DIRT,
+		STONE,
+	} type;
+};
 } // namespace Components

@@ -8,6 +8,7 @@ class Texture;
 #include "managers/systemManager.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
+#include "scenes/chunk.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/json.hpp"
 
@@ -57,6 +58,7 @@ void Level::create() {
 				mGame->getSystemManager()->getTexture("stone.png", true)->getHeight()));
 	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
 
+	/*
 	EntityID block2 = mScene->newEntity();
 	mScene->emplace<Components::texture>(block2, mGame->getSystemManager()->getTexture("stone.png", true));
 	mScene->emplace<Components::position>(block2, Eigen::Vector2f(400.0f, 10.0f));
@@ -65,32 +67,35 @@ void Level::create() {
 		Eigen::Vector2f(mGame->getSystemManager()->getTexture("stone.png", true)->getWidth(),
 				mGame->getSystemManager()->getTexture("stone.png", true)->getHeight()),
 		true);
+	*/
 
 	EntityID text = mScene->newEntity();
 	mScene->emplace<Components::text>(text, "controls");
 	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
+
+	mChunks.emplace_back(new Chunk(mGame, mScene, 0));
 }
 
 void Level::load(const nlohmann::json data) {
-	SDL_assert(data.contains("position"));
+	SDL_assert(data.contains("player"));
 
 	mScene = new Scene();
 	EntityID player = mScene->newEntity();
 	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true));
-	mScene->emplace<Components::position>(player, data["position"].get<Eigen::Vector2f>());
-	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
-	mScene->emplace<Components::input>(player, [](class Scene* scene, EntityID entity, const bool* scancodes,
-						      const float) {
-		Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).vel;
+	mScene->emplace<Components::position>(player, data["player"]["position"].get<Eigen::Vector2f>());
+	mScene->emplace<Components::velocity>(player, data["player"]["velocity"]);
+	mScene->emplace<Components::input>(player,
+					   [](class Scene* scene, EntityID entity, const bool* scancodes, const float) {
+						   Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).vel;
 
-		if (scancodes[SDL_SCANCODE_RIGHT] == true && vel.x() < 220) {
-			vel.x() += 70;
-		}
+						   if (scancodes[SDL_SCANCODE_RIGHT] == true && vel.x() < 220) {
+							   vel.x() += 70;
+						   }
 
-		if (scancodes[SDL_SCANCODE_LEFT] == true && vel.x() > -220) {
-			vel.x() -= 70;
-		}
-	});
+						   if (scancodes[SDL_SCANCODE_LEFT] == true && vel.x() > -220) {
+							   vel.x() -= 70;
+						   }
+					   });
 	mScene->emplace<Components::collision>(
 		player, Eigen::Vector2f(0.0f, 0.0f),
 		Eigen::Vector2f(mGame->getSystemManager()->getTexture("stone.png", true)->getWidth(),
