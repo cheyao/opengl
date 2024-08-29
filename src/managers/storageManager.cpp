@@ -238,4 +238,6 @@ void StorageManager::saveWorld(struct SDL_Storage* storage, const std::string& w
 	level["version"] = 100;
 	level["name"] = mGame->mCurrentLevel->getName(); // TODO: More option
 	level["data"] = mGame->mCurrentLevel->save();
+
+	SDL_WriteStorageFile(storage, (world + ".json").data(), level.dump().data(), level.dump().size());
 }

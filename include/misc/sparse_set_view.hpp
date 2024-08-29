@@ -4,6 +4,7 @@
 #include "managers/entityManager.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <span>
 #include <tuple>
 #include <type_traits>
@@ -195,6 +196,8 @@ template <typename... ComponentTypes> class sparse_set_view {
 			}
 		}
 	}
+
+	std::size_t size() const noexcept { return mEntities.size(); }
 
       private:
 	class ComponentManager* mComponentManager;
