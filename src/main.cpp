@@ -9,16 +9,14 @@
 #include <emscripten.h>
 #endif
 
-#include <cstdlib>
-#include <ctime>
-#include <stdexcept>
 #include <exception>
+#include <stdexcept>
 
 // The main class is in charge of sdl
-SDL_AppResult SDL_AppInit(void** appstate, [[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
-	SDL_Log("Initializing cyao engine v3.0\n");
+SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
+	SDL_srand(0);
 
-	std::srand(std::time(nullptr));
+	SDL_Log("Initializing cyao engine v3.0\n");
 
 	SDL_SetAppMetadata("Cyao", "1.0", "com.cyao.opengl");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, "Cyao's opengl Game Engine");

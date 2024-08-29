@@ -10,7 +10,5 @@ class WorldSystem {
 	~WorldSystem() = default;
 
       private:
-	void newBlock();
-
 	class Game* mGame;
 };
