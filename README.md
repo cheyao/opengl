@@ -1,6 +1,7 @@
-<h1 align="center">Cyao Game Engine</h1>
+<h1 align="center" style="text-shadow: 2px 2px 5px red;">Cyao Game Engine</h1>
 
 <h2 align="center">Features</h2>
+
 - **Cross-Platorm** 💻📱: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported! (Potentially also consoles)
 - **Performant** 🏃: Uses C++, the game smoothly even on browsers. (**60**+ FPS on a **10 year old** laptop with **5000**+ entities!)
 - **Multilingual** 🌐: **Unicode** and Locale support build in. (No more �!)
