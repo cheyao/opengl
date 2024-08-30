@@ -1,21 +1,25 @@
-<p align="center">
-**Cyao Game Engine**
-</p>
+<h1 align="center">Cyao Game Engine</h1>
 
-## Features
+<h2 align="center">Features</h2>
 - **Cross-Platorm** 💻📱: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported! (Potentially also consoles)
 - **Performant** 🏃: Uses C++, the game smoothly even on browsers. (**60**+ FPS on a **10 year old** laptop with **5000**+ entities!)
 - **Multilingual** 🌐: **Unicode** and Locale support build in. (No more �!)
 - **Modern** ✨: Utilises **Modern** C++20 features and follows best practices. New SDL3 also used!
-- **ECS Arcitecture** 🧩: The Game Engine uses the **bleeding-edge** ECS arcitecture with the performant `sparse-sets`.
+- **ECS Arcitecture** 🧩: The Game Engine uses the **bleeding-edge** ECS arcitecture with the optimal sparse-sets.
 - **2D and 3D** ❤️: Make **2D** and **3D** Together!
 - **0 Memory Leaks!** 🚰: No memory leaks! Even **NASA is jealous**.
 - **Debuggable** 🔍: Custom asserts and [**ImGui**](https://github.com/ocornut/imgui) debug menu helps you identify any bugs 🐛!
 - **Custom Saves** 📝: Easily save **any** data on any platform you want in a json file, the game engine will manage it for you!
 
-### [Try out web version now!](https://cheyao.github.io/game)
+<h3><a href="https://cheyao.github.io/game">Try out web version now!</a></h3>
 
-## Building
+<h2 align="center">Building</h2>
+
+<div class="note">
+
+Some *emphasis* and <strong>strong</strong>!
+
+</div>
 
 Dependencies:
 
