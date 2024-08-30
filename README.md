@@ -2,6 +2,10 @@
 
 <h2 align="center">Features</h2>
 
+<div align="center">
+    <img src="example.svg" width="400" height="400" alt="css-in-readme">
+</div>
+
 - **Cross-Platorm** 💻📱: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported! (Potentially also consoles)
 - **Performant** 🏃: Uses C++, the game smoothly even on browsers. (**60**+ FPS on a **10 year old** laptop with **5000**+ entities!)
 - **Multilingual** 🌐: **Unicode** and Locale support build in. (No more �!)
