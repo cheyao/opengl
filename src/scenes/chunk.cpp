@@ -24,7 +24,11 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 		const EntityID& entity = mBlocks[i].back();
 		scene->emplace<Components::block>(entity, Components::block::STONE);
 		scene->emplace<Components::texture>(entity, game->getSystemManager()->getTexture("stone.png", true));
-		scene->emplace<Components::position>(entity, Eigen::Vector2f(400.0f + i * game->getSystemManager()->getTexture("stone.png", true)->getWidth(), 10.0f));
+		scene->emplace<Components::position>(
+			entity,
+			Eigen::Vector2f((i + mPosition * 32) *
+						game->getSystemManager()->getTexture("stone.png", true)->getWidth(),
+					0.0f));
 		scene->emplace<Components::collision>(
 			entity, Eigen::Vector2f(0.0f, 0.0f),
 			Eigen::Vector2f(game->getSystemManager()->getTexture("stone.png", true)->getWidth(),
@@ -43,4 +47,15 @@ Chunk::Chunk(Game* game, Scene* scene, nlohmann::json data) : mPosition(data["po
 	(void)scene;
 }
 
-Chunk::~Chunk() {}
+Chunk::~Chunk() { SDL_assert(mBlocks.empty() && "Didn't save?"); }
+
+nlohmann::json Chunk::save() {
+	nlohmann::json chunk;
+
+	chunk["position"] = mPosition;
+	for (size_t i = 0; i < 32; ++i) {
+		chunk["blocks"][i] = mBlocks[i];
+	}
+
+	return chunk;
+}

@@ -58,17 +58,6 @@ void Level::create() {
 				mGame->getSystemManager()->getTexture("stone.png", true)->getHeight()));
 	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
 
-	/*
-	EntityID block2 = mScene->newEntity();
-	mScene->emplace<Components::texture>(block2, mGame->getSystemManager()->getTexture("stone.png", true));
-	mScene->emplace<Components::position>(block2, Eigen::Vector2f(400.0f, 10.0f));
-	mScene->emplace<Components::collision>(
-		block2, Eigen::Vector2f(0.0f, 0.0f),
-		Eigen::Vector2f(mGame->getSystemManager()->getTexture("stone.png", true)->getWidth(),
-				mGame->getSystemManager()->getTexture("stone.png", true)->getHeight()),
-		true);
-	*/
-
 	EntityID text = mScene->newEntity();
 	mScene->emplace<Components::text>(text, "controls");
 	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
@@ -102,18 +91,11 @@ void Level::load(const nlohmann::json data) {
 				mGame->getSystemManager()->getTexture("stone.png", true)->getHeight()));
 	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
 
-	EntityID block2 = mScene->newEntity();
-	mScene->emplace<Components::texture>(block2, mGame->getSystemManager()->getTexture("stone.png", true));
-	mScene->emplace<Components::position>(block2, Eigen::Vector2f(400.0f, 10.0f));
-	mScene->emplace<Components::collision>(
-		block2, Eigen::Vector2f(0.0f, 0.0f),
-		Eigen::Vector2f(mGame->getSystemManager()->getTexture("stone.png", true)->getWidth(),
-				mGame->getSystemManager()->getTexture("stone.png", true)->getHeight()),
-		true);
-
 	EntityID text = mScene->newEntity();
 	mScene->emplace<Components::text>(text, "controls");
 	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
+
+	mChunks.emplace_back(new Chunk(mGame, mScene, data["chunks"].at(0)));
 }
 
 nlohmann::json Level::save() {
@@ -124,6 +106,8 @@ nlohmann::json Level::save() {
 
 	data["player"]["position"] = mScene->get<Components::position>(*view.begin()).pos;
 	data["player"]["velocity"] = mScene->get<Components::velocity>(*view.begin()).vel;
+
+	data["chunks"][0] = mChunks.back()->save();
 
 	return data;
 }

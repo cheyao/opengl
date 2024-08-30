@@ -16,8 +16,10 @@ class Chunk {
 	Chunk(const Chunk&) = delete;
 	Chunk& operator=(Chunk&&) = delete;
 	Chunk& operator=(const Chunk&) = delete;
-	// Delete all the block that we generated
+	// Delete all the blocks that we generated
 	~Chunk();
+
+	nlohmann::json save();
 
       private:
 	constexpr const static int maxHeight = 128;
