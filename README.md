@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://raw.githubusercontent.com/cheyao/opengl/main/misc/styles.svg" width="400" height="400" alt="css-in-readme">
+    <img src="https://raw.githubusercontent.com/cheyao/opengl/main/misc/styles.svg" width="100%" height="auto" alt="css-in-readme">
 </div>
 
 <h3><a href="https://cheyao.github.io/game">Try out web version now!</a></h3>
