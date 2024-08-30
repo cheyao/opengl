@@ -1,5 +1,5 @@
 <!-- Hello! If you are seeing this, it means hackclub patched the css injection :( -->
-<svg fill="none" viewBox="0 0 800 400" width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+<svg fill="none" viewBox="0 0 800 500" width="800" height="500" xmlns="http://www.w3.org/2000/svg">
 	<foreignObject width="100%" height="100%">
 		<div xmlns="http://www.w3.org/1999/xhtml">
 			<style>
@@ -10,43 +10,6 @@
 					100% {
 						transform: rotate(-3deg);
 					}
-				}
-
-				@keyframes gradientBackground {
-					0% {
-						background-position: 0% 50%;
-					}
-					50% {
-						background-position: 100% 50%;
-					}
-					100% {
-						background-position: 0% 50%;
-					}
-				}
-
-				.container {
-					font-family:
-						system-ui,
-						-apple-system,
-						'Segoe UI',
-						Roboto,
-						Helvetica,
-						Arial,
-						sans-serif,
-						'Apple Color Emoji',
-						'Segoe UI Emoji';
-					display: flex;
-					flex-direction: column;
-					align-items: center;
-					justify-content: center;
-					margin: 0;
-					width: 100%;
-					height: 100%;
-					background-size: 100% 100%;
-					animation: gradientBackground 10s ease infinite;
-					border-radius: 10px;
-					color: white;
-					text-align: center;
 				}
 
 				h1 {
@@ -62,44 +25,6 @@
 						0 12px 5px rgba(0, 0, 0, 0.1);
 					animation: rotate ease-in-out 1s infinite alternate;
 				}
-
-		.flip:hover {
-			animation: rotar 5s 1;
-			-moz-animation: rotar 5s 1;
-			-o-animation: rotar 5s 1;
-			-webkit-animation: rotar 5s 1;
-		}
-		@keyframes rotar{
-			from{
-				transform: rotateZ(0deg);
-			}
-			to{
-				transform: rotateZ(360deg);
-			}
-		}
-		@-moz-keyframes rotar{
-			from{
-				-moz-transform: rotateZ(0deg);
-			}
-			to{
-				-moz-transform: rotateZ(360deg);
-			}
-		}
-		@-o-keyframes rotar{
-			from{
-				-o-transform: rotateZ(0deg);
-			}
-			to{
-				-o-transform: rotateZ(360deg);
-			}
-		}
-		@-webkit-keyframes rotar{
-			from{
-				-webkit-transform: rotateZ(0deg);
-			}
-			to{
-				-webkit-transform: rotateZ(360deg);
-			}
 
 				p {
 					font-size: 20px;
