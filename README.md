@@ -5,7 +5,7 @@
 ## Features
 - **Cross-Platorm** 💻📱: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported! (Potentially also consoles)
 - **Performant** 🏃: Uses C++, the game smoothly even on browsers. (**60**+ FPS on a **10 year old** laptop with **5000**+ entities!)
-- **Multilingual** 🇺🇨🇯: **Unicode** 🌐 and Locale support build in. (No more �!)
+- **Multilingual** 🌐: **Unicode** and Locale support build in. (No more �!)
 - **Modern** ✨: Utilises **Modern** C++20 features and follows best practices. New SDL3 also used!
 - **ECS Arcitecture** 🧩: The Game Engine uses the **bleeding-edge** ECS arcitecture with the performant `sparse-sets`.
 - **2D and 3D** ❤️: Make **2D** and **3D** Together!
