@@ -95,7 +95,8 @@ void Level::load(const nlohmann::json data) {
 	mScene->emplace<Components::text>(text, "controls");
 	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
 
-	mChunks.emplace_back(new Chunk(mGame, mScene, data["chunks"].at(0)));
+	// SDL_assert(data["chunks"].contains(0));
+	mChunks.emplace_back(new Chunk(mGame, mScene, data["chunks"][0]));
 }
 
 nlohmann::json Level::save() {
@@ -107,7 +108,7 @@ nlohmann::json Level::save() {
 	data["player"]["position"] = mScene->get<Components::position>(*view.begin()).pos;
 	data["player"]["velocity"] = mScene->get<Components::velocity>(*view.begin()).vel;
 
-	data["chunks"][0] = mChunks.back()->save();
+	data["chunks"][0] = mChunks.back()->save(mScene);
 
 	return data;
 }

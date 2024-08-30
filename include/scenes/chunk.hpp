@@ -11,7 +11,7 @@ class Chunk {
 	// Generate
 	Chunk(class Game* game, class Scene* scene, const std::int64_t position);
 	// Load
-	Chunk(class Game* game, class Scene* scene, nlohmann::json data);
+	Chunk(class Game* game, class Scene* scene, const nlohmann::json& data);
 	Chunk(Chunk&&) = delete;
 	Chunk(const Chunk&) = delete;
 	Chunk& operator=(Chunk&&) = delete;
@@ -19,7 +19,7 @@ class Chunk {
 	// Delete all the blocks that we generated
 	~Chunk();
 
-	nlohmann::json save();
+	nlohmann::json save(class Scene* scene);
 
       private:
 	constexpr const static int maxHeight = 128;
