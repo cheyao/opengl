@@ -14,13 +14,13 @@ class Texture;
 #include <vector>
 
 Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(position) {
-	mBlocks.reserve(32);
-	for (size_t i = 0; i < 32; ++i) {
+	mBlocks.reserve(CHUNK_WIDTH);
+	for (size_t i = 0; i < CHUNK_WIDTH; ++i) {
 		mBlocks.emplace_back(std::vector<EntityID>());
 	}
 
 	// Spawn blocks
-	for (auto i = 0; i < 16; ++i) {
+	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		mBlocks[i].emplace_back(scene->newEntity());
 		const EntityID& entity = mBlocks[i].back();
 		scene->emplace<Components::block>(entity, Components::block::STONE);
@@ -39,8 +39,8 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 }
 
 Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(data["position"]) {
-	mBlocks.reserve(32);
-	for (size_t i = 0; i < 32; ++i) {
+	mBlocks.reserve(CHUNK_WIDTH);
+	for (size_t i = 0; i < CHUNK_WIDTH; ++i) {
 		mBlocks.emplace_back(std::vector<EntityID>());
 	}
 
@@ -49,7 +49,7 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 		{Components::block::STONE, [game] { return game->getSystemManager()->getTexture("stone.png", true); }},
 	};
 
-	for (std::uint_fast8_t i = 0; i < 32; ++i) {
+	for (std::uint_fast8_t i = 0; i < CHUNK_WIDTH; ++i) {
 		for (size_t j = 0; j < data["blocks"][i].size(); ++j) {
 			const auto& block = data["blocks"][i][j];
 
@@ -82,15 +82,12 @@ nlohmann::json Chunk::save(Scene* scene) {
 	nlohmann::json chunk;
 
 	chunk["position"] = mPosition;
-	for (std::uint_fast8_t i = 0; i < 32; ++i) {
-		SDL_Log("%d", i);
-		for (size_t j = 0; j < mBlocks[i].size(); ++j) {
+	for (std::uint_fast8_t i = 0; i < CHUNK_WIDTH; ++i) {
+		for (std::size_t j = 0; j < mBlocks[i].size(); ++j) {
 			chunk["blocks"][i][j] =
 				static_cast<std::uint64_t>(scene->get<Components::block>(mBlocks[i][j]).type);
 		}
 	}
-
-	SDL_Log("%s", chunk.dump().data());
 
 	return chunk;
 }

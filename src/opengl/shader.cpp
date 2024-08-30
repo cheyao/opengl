@@ -1,8 +1,8 @@
 #include "opengl/shader.hpp"
-#include "utils.hpp"
 
 #include "third_party/Eigen/Dense"
 #include "third_party/glad/glad.h"
+#include "utils.hpp"
 
 #include <SDL3/SDL.h>
 #include <stdexcept>
@@ -14,29 +14,32 @@
 Shader::Shader(const std::string_view& vertName, const std::string_view& fragName, const std::string_view& geomName)
 	: mName(std::string(vertName) + ":" + std::string(fragName) + ":" + std::string(geomName)),
 	  mShaderProgram(glCreateProgram()) {
-	GLuint mVertexShader = compile(vertName, GL_VERTEX_SHADER);
-	SDL_assert(glIsShader(mVertexShader) && "Shader.cpp: Vert shader not loaded correctly");
+	const GLuint vertShader = compile(vertName, GL_VERTEX_SHADER);
+	SDL_assert(glIsShader(vertShader) && "Shader.cpp: Vert shader not loaded correctly");
 
-	GLuint mFragmentShader = compile(fragName, GL_FRAGMENT_SHADER);
-	SDL_assert(glIsShader(mFragmentShader) && "Shader.cpp: Frag shader not loaded correctly");
+	const GLuint fragShader = compile(fragName, GL_FRAGMENT_SHADER);
+	SDL_assert(glIsShader(fragShader) && "Shader.cpp: Frag shader not loaded correctly");
 
-	GLuint mGeometryShader = 0;
+	GLuint geomShader = 0;
 	if (!geomName.empty()) {
-		mGeometryShader = compile(geomName, GL_GEOMETRY_SHADER);
-		SDL_assert(glIsShader(mGeometryShader) && "Shader.cpp: Geom shader not loaded correctly");
+		GLuint geom = compile(geomName, GL_GEOMETRY_SHADER);
+		SDL_assert(geom != 0);
+		geomShader = geom;
+		SDL_assert(glIsShader(geomShader) && "Shader.cpp: Geom shader not loaded correctly");
 	}
 
-	glAttachShader(mShaderProgram, mVertexShader);
-	glAttachShader(mShaderProgram, mFragmentShader);
+	glAttachShader(mShaderProgram, vertShader);
+	glAttachShader(mShaderProgram, fragShader);
 	if (!geomName.empty()) {
-		glAttachShader(mShaderProgram, mGeometryShader);
+		glAttachShader(mShaderProgram, geomShader);
 	}
 	glLinkProgram(mShaderProgram);
 
-	glDeleteShader(mVertexShader);
-	glDeleteShader(mFragmentShader);
+	// First delete this to avoid mem leaks
+	glDeleteShader(vertShader);
+	glDeleteShader(fragShader);
 	if (!geomName.empty()) {
-		glDeleteShader(mGeometryShader);
+		glDeleteShader(geomShader);
 	}
 
 	GLint success = 0;
@@ -82,7 +85,7 @@ Shader::Shader(const std::string_view& vertName, const std::string_view& fragNam
 
 Shader::~Shader() { glDeleteProgram(mShaderProgram); }
 
-void Shader::activate() const { glUseProgram(mShaderProgram); }
+void Shader::activate() const noexcept { glUseProgram(mShaderProgram); }
 
 void Shader::setUniform(const std::string& name, std::function<void(GLint)> toCall) {
 	// Bad for performance, but I need this

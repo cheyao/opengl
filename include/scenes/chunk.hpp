@@ -22,7 +22,8 @@ class Chunk {
 	nlohmann::json save(class Scene* scene);
 
       private:
-	constexpr const static int maxHeight = 128;
+	constexpr const static int MAX_HEIGHT = 128;
+	constexpr const static int CHUNK_WIDTH = 32;
 
 	const std::int64_t mPosition;
 	std::vector<std::vector<EntityID>> mBlocks;

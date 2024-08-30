@@ -18,7 +18,7 @@ class Shader {
 	Shader& operator=(const Shader&) = delete;
 	~Shader();
 
-	void activate() const;
+	void activate() const noexcept;
 
 	// set uniform
 	void set(const std::string& name, const GLboolean val);

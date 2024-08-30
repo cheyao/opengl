@@ -1,34 +1,33 @@
-# Tiny Game Engine
+<p align="center">
+# Cyao Game Engine
+</p>
 
-[See the Project on hackclub.com](https://hackclub.com/arcade/showcase/project/receEPjMZdAepNusN/)
+## Features
+- **Cross-Platorm** :computer::iphone:: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported! (Potentially also consoles)
+- **Performant** :running:: Uses C++, the game smoothly even on browsers. (**60**+ FPS on a **10 year old** laptop with **5000**+ entities!)
+- **Multilingual** :us::jp::cn:: **Unicode** :globe_with_meridians: and Locale support build in. (No more �!)
+- **Modern** :sparkles:: Utilises **Modern** C++20 features and follows best practices. New SDL3 also used!
+- **ECS Arcitecture** 🧩: The Game Engine uses the **bleeding-edge** ECS arcitecture with the performant `sparse-sets`.
+- **2D and 3D** :hearts:: Make **2D** and **3D** Together!
+- **0 Memory Leaks!** :potable_water:: No memory leaks! Even **NASA is jealous**.
+- **Debuggable** :mag:: Custom asserts and [**ImGui**](https://github.com/ocornut/imgui) debug menu helps you identify any bugs :bug:!
+- **Custom Saves** :memo:: Easily save **any** data on any platform you want in a json file, the game engine will manage it for you!
 
-[Web version](https://cheyao.github.io/game)
+### [Try out web version now!](https://cheyao.github.io/game)
 
-Hello and welcome to the repo of my tiny game engine.
-
-The resources that I used are:
-- [Learn OpenGL](https://learnopengl.com)
-- [Game Programming in C++](https://github.com/gameprogcpp/code) <- Do me a favour and don't read this book, it's a bad one
-- [OpenGL RedBook](https://www.opengl-redbook.com)
-
-The UI part is compleatly thought up and created by me.
-
-Hope everything works out!
+## Building
 
 Dependencies:
 
-- Assimp 
-- SDL3 
+- Assimp
+- SDL3
 - Freetype 2
-- Eigen (Included in the repo)
-
-## Building
 
 ### MacOS and Linux
 
 Install `assimp` and `freetype` with your package manager
 
-Compile SDL3 (Yeah, it's experimental so no binaries atm):
+Compile SDL3:
 ```
 $ git clone --depth 1 https://github.com/libsdl-org/SDL.git
 $ cd SDL 
@@ -36,6 +35,16 @@ $ mkdir build && cd build
 $ cmake ..
 $ cmake --build .
 $ sudo cmake --install .
+```
+
+Install dependencies:
+
+```
+# Install freetype 2
+# MacOS
+$ brew install freetype
+# Linux
+$ sudo pacman -S freetype2
 ```
 
 Compile project:
@@ -67,7 +76,7 @@ This means that you didn't use the same compiler to compile assimp and this engi
 
 ### Windows
 
-Best luck, my CMakeLists.txt theoretically can support msvc, but if it doesn't please submit a pr, if it doesn't work just use WSL (or go use liux).
+Same, use cmake to build project
 
 ### Android
 
@@ -80,10 +89,10 @@ $ brew install --cask temurin@17
 $ brew install ninja cmake
 ```
 
-Add these to your `.zshrc`:
+Add these to your `.zshrc` (Change it to the appropriate folders on linux):
 ```
 export ANDROID_NDK_HOME="/usr/local/share/android-ndk"
-export JAVA_HOME=`/usr/libexec/java_home -v 17`
+export JAVA_HOME=`/usr/libexec/java_home -v 17` # Yes, you __must__ use java 17, blame android
 export ANDROID_HOME="/usr/local/share/android-commandlinetools/"
 ```
 
@@ -91,11 +100,10 @@ For android you need to compile assimp by yourself:
 
 Change the `CMAKE_TOOLCHAIN_FILE` if you are not on MacOS:
 ```
-$ git clone --depth 1 https://github.com/assimp/assimp 
-$ cd assimp 
+$ git clone --depth 1 https://github.com/assimp/assimp.git
+$ cd assimp
 $ mkdir build && cd build
-$ cmake -G Ninja\ 
-        -DASSIMP_ANDROID_JNIIOSYSTEM=ON \
+$ cmake -DASSIMP_ANDROID_JNIIOSYSTEM=ON \
         -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/android-ndk/build/cmake/android.toolchain.cmake \
         -DANDROID_NDK=${ANDROID_NDK_HOME} \
         -DCMAKE_BUILD_TYPE=Release \
@@ -103,19 +111,22 @@ $ cmake -G Ninja\
         -DBUILD_SHARED_LIBS=1 \
         -DANDROID_NATIVE_API_LEVEL=24 \
         ..
+$ cmake --build .
+$ sudo cmake --install .
 ```
 
 Now build the project:
 ```
-$ git clone --depth 1 https://github.com/cheyao/opengl.git 
+$ git clone --depth 1 https://github.com/cheyao/opengl.git
 $ cd opengl
 $ git submodule --init --recrusive
 $ mkdir build && cd build 
-$ cmake -G Ninja \
-        -DCMAKE_BUILD_TYPE=Release \
+$ cmake -DCMAKE_BUILD_TYPE=Release \
         -DANDROID=ON \
         ..
-$ ninja
+# Note: You might edit CMakeLists.txt
+$ cmake --build .
+# Now there is the apk in the folder
 ```
 
 ## Improving performance
@@ -226,29 +237,5 @@ The systems manage all the logic and changes the components
     - [ ] [Game programming gems](https://www.satori.org/game-programming-gems/)
     - [ ] [Real time rendering](https://www.amazon.com/dp/1568814240)
     - [ ] [Real time collision detection](https://www.amazon.com/dp/1558607323)
-
-## Notes
-
-Language tags are first looking up main tag, if matching, use it, otherwise find sumtag, and if still not present, use `en`.
-
-Locales: First ISO-639 language specifier (such as "en" for English, "de" for German, etc). Then country strings in the format YY, where "YY" is an ISO-3166 country code
-
-Just use `git diff` to get the changes
-
-From discord:
-
-It's generally recommended to const-ref objects of which size extends 2 * sizeof(std::uintmax_t) aka 16 bytes
-
-Thx to Thimas Kole for his earth model: "Planet Earth (Alt-Drag to change Lighting)" (https://skfb.ly/Ft8J).
-
-https://harfbuzz.github.io/ ?
-
-https://github.com/fribidi/fribidi/ ?
-
-https://www.unicode.org/reports/tr9/ ?
-
-https://faultlore.com/blah/text-hates-you/
-
-https://stackoverflow.com/questions/2071621/how-to-do-opengl-live-text-rendering-for-a-gui
 
 # :3

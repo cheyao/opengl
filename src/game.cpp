@@ -56,7 +56,7 @@ Game::Game()
 
 	try {
 		mStorageManager->restore();
-	} catch (const std::runtime_error& error) {
+	} catch (const std::exception& error) {
 		SDL_Log("Failed to read saved state with error %s, creating new state", error.what());
 
 		mCurrentLevel = new Level(this);
