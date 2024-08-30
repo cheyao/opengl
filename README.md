@@ -1,17 +1,17 @@
 <p align="center">
-# Cyao Game Engine
+**Cyao Game Engine**
 </p>
 
 ## Features
-- **Cross-Platorm** :computer::iphone:: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported! (Potentially also consoles)
-- **Performant** :running:: Uses C++, the game smoothly even on browsers. (**60**+ FPS on a **10 year old** laptop with **5000**+ entities!)
-- **Multilingual** :us::jp::cn:: **Unicode** :globe_with_meridians: and Locale support build in. (No more �!)
-- **Modern** :sparkles:: Utilises **Modern** C++20 features and follows best practices. New SDL3 also used!
+- **Cross-Platorm** 💻📱: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported! (Potentially also consoles)
+- **Performant** 🏃: Uses C++, the game smoothly even on browsers. (**60**+ FPS on a **10 year old** laptop with **5000**+ entities!)
+- **Multilingual** 🇺🇨🇯: **Unicode** 🌐 and Locale support build in. (No more �!)
+- **Modern** ✨: Utilises **Modern** C++20 features and follows best practices. New SDL3 also used!
 - **ECS Arcitecture** 🧩: The Game Engine uses the **bleeding-edge** ECS arcitecture with the performant `sparse-sets`.
-- **2D and 3D** :hearts:: Make **2D** and **3D** Together!
-- **0 Memory Leaks!** :potable_water:: No memory leaks! Even **NASA is jealous**.
-- **Debuggable** :mag:: Custom asserts and [**ImGui**](https://github.com/ocornut/imgui) debug menu helps you identify any bugs :bug:!
-- **Custom Saves** :memo:: Easily save **any** data on any platform you want in a json file, the game engine will manage it for you!
+- **2D and 3D** ❤️: Make **2D** and **3D** Together!
+- **0 Memory Leaks!** 🚰: No memory leaks! Even **NASA is jealous**.
+- **Debuggable** 🔍: Custom asserts and [**ImGui**](https://github.com/ocornut/imgui) debug menu helps you identify any bugs 🐛!
+- **Custom Saves** 📝: Easily save **any** data on any platform you want in a json file, the game engine will manage it for you!
 
 ### [Try out web version now!](https://cheyao.github.io/game)
 
