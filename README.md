@@ -3,7 +3,7 @@
 <h2 align="center">Features</h2>
 
 <div align="center">
-    <img src="example.svg" width="400" height="400" alt="css-in-readme">
+    <img src="misc/styles.svg" width="400" height="400" alt="css-in-readme">
 </div>
 
 - **Cross-Platorm** 💻📱: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported! (Potentially also consoles)
