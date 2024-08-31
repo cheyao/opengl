@@ -41,6 +41,30 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 				scale,
 			true);
 	}
+
+	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
+		mBlocks[i].emplace_back(scene->newEntity());
+		const EntityID& entity = mBlocks[i].back();
+		scene->emplace<Components::block>(entity, Components::block::GRASS_BLOCK);
+		scene->emplace<Components::texture>(entity,
+						    game->getSystemManager()->getTexture("grass-block.png", true));
+
+		const auto scale = scene->get<Components::texture>(entity).scale;
+
+		scene->emplace<Components::position>(
+			entity,
+			Eigen::Vector2f(
+				(i + mPosition * 32) *
+					game->getSystemManager()->getTexture("grass-block.png", true)->getWidth() *
+					scale,
+				game->getSystemManager()->getTexture("grass-block.png", true)->getHeight() * scale));
+		scene->emplace<Components::collision>(
+			entity, Eigen::Vector2f(0.0f, 0.0f),
+			Eigen::Vector2f(game->getSystemManager()->getTexture("grass-block.png", true)->getWidth(),
+					game->getSystemManager()->getTexture("grass-block.png", true)->getHeight()) *
+				scale,
+			true);
+	}
 }
 
 Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(data["position"]) {
@@ -52,36 +76,26 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 	// Load the things only when we need them
 	std::unordered_map<Components::block::BlockType, std::function<Texture*()>> blockToTexture = {
 		{Components::block::STONE, [game] { return game->getSystemManager()->getTexture("stone.png", true); }},
+		{Components::block::GRASS_BLOCK,
+		 [game] { return game->getSystemManager()->getTexture("grass-block.png", true); }},
 	};
 
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		for (std::size_t j = 0; j < data["blocks"][i].size(); ++j) {
 			const auto& block = data["blocks"][i][j];
+			Texture* texture = blockToTexture[static_cast<Components::block::BlockType>(block)]();
+			const auto scale = scene->get<Components::texture>(entity).scale;
 
 			mBlocks[i].emplace_back(scene->newEntity());
 			const EntityID& entity = mBlocks[i].back();
 			scene->emplace<Components::block>(entity, static_cast<Components::block::BlockType>(block));
-			scene->emplace<Components::texture>(
-				entity, blockToTexture[static_cast<Components::block::BlockType>(block)]());
-
-			const auto scale = scene->get<Components::texture>(entity).scale;
-
+			scene->emplace<Components::texture>(entity, texture);
 			scene->emplace<Components::position>(
-				entity,
-				Eigen::Vector2f(
-					(i + mPosition * 32) *
-						blockToTexture[static_cast<Components::block::BlockType>(block)]()
-							->getWidth() *
-						scale,
-					0.0f));
+				entity, Eigen::Vector2f((i + mPosition * 32) * texture->getWidth() * scale,
+							j * texture->getWidth() * scale));
 			scene->emplace<Components::collision>(
 				entity, Eigen::Vector2f(0.0f, 0.0f),
-				Eigen::Vector2f(
-					blockToTexture[static_cast<Components::block::BlockType>(block)]()->getWidth(),
-					blockToTexture[static_cast<Components::block::BlockType>(block)]()
-						->getHeight()) *
-					scale,
-				true);
+				Eigen::Vector2f(texture->getWidth(), texture->getHeight()) * scale, true);
 		}
 	}
 }

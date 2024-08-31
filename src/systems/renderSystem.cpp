@@ -307,14 +307,14 @@ void RenderSystem::draw(Scene* scene) {
 			Eigen::Affine3f model = Eigen::Affine3f::Identity();
 
 			model.translate((Eigen::Vector3f() << (position.pos), 0.0f).finished());
-			model.scale(texture.scale);
 
 			vectorShader->set("model", model);
 			vectorShader->set("size",
 					  Eigen::Vector2f(texture.texture->getWidth(), texture.texture->getHeight()));
-			const Eigen::Vector2f& realPos =
-				position.pos +
-				Eigen::Vector2f(texture.texture->getWidth(), texture.texture->getHeight()) / 2;
+			const Eigen::Vector2f& realPos = position.pos + (Eigen::Vector2f(texture.texture->getWidth(),
+											 texture.texture->getHeight()) *
+									 texture.scale) /
+										2;
 			vectorShader->set("position", realPos);
 			vectorShader->set("velocity", velocity.vel);
 

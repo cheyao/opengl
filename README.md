@@ -1,8 +1,12 @@
 <div align="center">
-    <img src="https://raw.githubusercontent.com/cheyao/opengl/main/misc/styles.svg" width="100%" height="auto" alt="css-in-readme">
+    <img src="https://raw.githubusercontent.com/cheyao/opengl/main/misc/styles.svg" width="100%" height="auto" alt="Introduction">
 </div>
 
 <h3 align="center"><a href="https://cheyao.github.io/game">Try out web version now!</a></h3>
+
+<div align="center">
+    <img src="https://raw.githubusercontent.com/cheyao/opengl/main/misc/debug.png" width="auto" height="auto" alt="Debug menu">
+</div>
 
 <h2 align="center">Building</h2>
 
@@ -196,7 +200,7 @@ The systems manage all the logic and changes the components
 - [x] UI Scaling
 - [x] Multitouch
 - [x] Collision resolver
-- [ ] Scaling
+- [x] Scaling
 - [x] Save state
 - [x] Android build
     - [x] Android controls

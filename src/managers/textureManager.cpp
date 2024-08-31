@@ -10,7 +10,7 @@
 
 TextureManager::TextureManager(const std::string& path) : mPath(path + "assets" SEPARATOR "textures" SEPARATOR) {
 	// OpenGL wants this
-	stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(false);
 }
 
 Texture* TextureManager::get(const std::string& name, const bool srgb) {

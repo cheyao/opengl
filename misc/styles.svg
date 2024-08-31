@@ -45,7 +45,7 @@
 				<li><b>Modern</b> ✨: Uses <b class="flip">Modern</b> C++20 features and follows best practices. SDL3 used!</li>
 				<li><b>Extendable</b> 🧩: The Game Engine uses the <b class="flip">Bleeding-edge</b> ECS arcitecture.</li>
 				<li><b>2D and 3D</b> ❤️: Make <b class="flip">2D</b> and <b class="flip">3D</b> Together!</li>
-				<li><b>0 Memory Leaks!</b> 🚰: No memory leaks! Even <b class="flip">NASA is jealous</b>.</li>
+				<li><b>0 Memory Leaks!</b> 🚰: No memory leaks! Even <b class="flip">NASA is jealous</b> /j.</li>
 				<li><b>Debuggable</b> 🔍: Custom asserts and <b class="flip">Debug menu</b> helps you identify any bugs 🐛!</li>
 				<li><b>Custom Saves</b> 📝: Easily save <b class="flip">any</b> data on any platform you want in a json file, the game engine will manage it for you!</li>
 			</ul>
