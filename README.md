@@ -4,6 +4,7 @@
 
 <h3 align="center"><a href="https://cheyao.github.io/game">Try out web version now!</a></h3>
 
+<h3 align="center"><a href="https://cheyao.github.io/game">Debug mode</a></h3>
 <div align="center">
     <img src="https://media.githubusercontent.com/media/cheyao/opengl/main/misc/debug.png" width="auto" height="auto" alt="Debug menu">
 </div>
