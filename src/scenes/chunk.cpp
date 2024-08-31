@@ -88,12 +88,15 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 			SDL_assert(blockToTexture.contains(block));
 
 			Texture* texture = blockToTexture[block]();
-			const auto scale = scene->get<Components::texture>(block).scale;
 
 			mBlocks[i].emplace_back(scene->newEntity());
+
 			const EntityID& entity = mBlocks[i].back();
 			scene->emplace<Components::block>(entity, block);
 			scene->emplace<Components::texture>(entity, texture);
+
+			const auto scale = scene->get<Components::texture>(entity).scale;
+
 			scene->emplace<Components::position>(
 				entity, Eigen::Vector2f((i + mPosition * 32) * texture->getWidth() * scale,
 							(j) * texture->getWidth() * scale));
