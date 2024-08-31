@@ -6,11 +6,11 @@
 
 constexpr const static float PI = 3.14159265358979323846;
 
-inline float toRadians(float degrees) { return degrees * (PI / 180.f); }
+inline constexpr float toRadians(const float degrees) { return degrees * (PI / 180.f); }
 
-inline float toDegrees(float radians) { return radians * (180.f / PI); }
+inline constexpr float toDegrees(const float radians) { return radians * (180.f / PI); }
 
-inline bool nearZero(float number, float epsilon = 0.001f) {
+inline constexpr bool nearZero(const float number, const float epsilon = 0.001f) {
 	if (SDL_fabs(number) <= epsilon) {
 		return true;
 	} else {

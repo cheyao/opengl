@@ -23,7 +23,7 @@ struct collision {
 
 struct texture {
 	class Texture* texture;
-	float scale = 1.0f;
+	float scale = 0.7f;
 	class Shader* shader = nullptr;
 };
 

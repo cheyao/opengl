@@ -307,6 +307,7 @@ void RenderSystem::draw(Scene* scene) {
 			Eigen::Affine3f model = Eigen::Affine3f::Identity();
 
 			model.translate((Eigen::Vector3f() << (position.pos), 0.0f).finished());
+			model.scale(texture.scale);
 
 			vectorShader->set("model", model);
 			vectorShader->set("size",

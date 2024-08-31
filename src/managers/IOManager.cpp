@@ -5,9 +5,10 @@
 #include <SDL3/SDL.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <stdexcept>
+#include <utility>
 
 GameIOStream::GameIOStream(const char* pFile, const char* pMode) {
 	mIO = SDL_IOFromFile(pFile, pMode);
@@ -17,15 +18,16 @@ GameIOStream::GameIOStream(const char* pFile, const char* pMode) {
 	}
 }
 
-GameIOStream::~GameIOStream() { SDL_CloseIO(mIO); }
+GameIOStream::~GameIOStream() {
+	SDL_assert(mIO != nullptr);
+	SDL_CloseIO(mIO);
+}
 
 size_t GameIOStream::Read(void* pvBuffer, std::size_t pSize, std::size_t pCount) {
 	for (std::size_t i = 0; i < pCount; ++i) {
 		const std::size_t status = SDL_ReadIO(mIO, static_cast<char*>(pvBuffer) + i * pSize, pSize);
 
 		if (status == 0) {
-			// SDL_Log("Read error: %s", SDL_GetError());
-
 			return status;
 		}
 	}
@@ -38,8 +40,6 @@ size_t GameIOStream::Write(const void* pvBuffer, std::size_t pSize, std::size_t 
 		const size_t status = SDL_WriteIO(mIO, static_cast<const char*>(pvBuffer) + i * pSize, pSize);
 
 		if (status < pSize) {
-			SDL_Log("Read write: %s", SDL_GetError());
-
 			return status;
 		}
 	}
@@ -60,8 +60,9 @@ aiReturn GameIOStream::Seek(std::size_t pOffset, aiOrigin pOrigin) {
 		case aiOrigin_END:
 			whence = SDL_IO_SEEK_END;
 			break;
-		default:
-			return aiReturn_FAILURE;
+		[[unlikely]] default:
+			std::unreachable();
+			// return aiReturn_FAILURE;
 	}
 
 	int64_t status = SDL_SeekIO(mIO, pOffset, whence);
@@ -72,9 +73,9 @@ aiReturn GameIOStream::Seek(std::size_t pOffset, aiOrigin pOrigin) {
 		SDL_Log("Seek error %s", SDL_GetError());
 
 		return aiReturn_OUTOFMEMORY;
-	} else [[likely]] {
-		return aiReturn_SUCCESS;
 	}
+
+	return aiReturn_SUCCESS;
 }
 
 size_t GameIOStream::Tell() const { return SDL_TellIO(mIO); }
@@ -88,25 +89,23 @@ GameIOSystem::GameIOSystem() {}
 GameIOSystem::~GameIOSystem() {}
 
 bool GameIOSystem::Exists(const char* pFile) const {
-#ifndef ANDROID
-	int stat = SDL_GetPathInfo(pFile, nullptr);
-
-	if (stat == 0) {
-		return true;
-	} else {
-		return false;
-	}
-#else
-	// PERF: Somehow make more efficient
+#ifdef ANDROID
+	// Somehow get path info doesn't work with android
 	SDL_IOStream* file = SDL_IOFromFile(pFile, "r+b");
 	if (file == nullptr) {
 		return false;
-	} else {
-		SDL_CloseIO(file);
+	}
 
-		return true;
+	SDL_CloseIO(file);
+#else
+	SDL_bool success = SDL_GetPathInfo(pFile, nullptr);
+
+	if (!success) {
+		return false;
 	}
 #endif
+
+	return true;
 }
 
 char GameIOSystem::getOsSeparator() const { return SEPARATOR[0]; }
@@ -122,9 +121,7 @@ Assimp::IOStream* GameIOSystem::Open(const char* pFile, const char* pMode) {
 void GameIOSystem::Close(Assimp::IOStream* pFile) {
 	GameIOStream* IO = dynamic_cast<GameIOStream*>(pFile);
 
-	if (IO == nullptr) {
-		throw std::runtime_error("Assimp IO Close dynamic cast failed");
-	}
+	[[unlikely]] if (IO == nullptr) { throw std::runtime_error("Assimp IO Close dynamic cast failed"); }
 
 	delete IO;
 }

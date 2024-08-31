@@ -37,7 +37,8 @@ void Level::create() {
 
 	mScene = new Scene();
 	EntityID player = mScene->newEntity();
-	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true));
+	constexpr const static float SCALE = 0.7f;
+	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true), SCALE);
 	mScene->emplace<Components::position>(player, Eigen::Vector2f(400.0f, 400.0f));
 	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
 	mScene->emplace<Components::input>(player,
@@ -55,7 +56,7 @@ void Level::create() {
 	mScene->emplace<Components::collision>(
 		player, Eigen::Vector2f(0.0f, 0.0f),
 		Eigen::Vector2f(mGame->getSystemManager()->getTexture("stone.png", true)->getWidth(),
-				mGame->getSystemManager()->getTexture("stone.png", true)->getHeight()));
+				mGame->getSystemManager()->getTexture("stone.png", true)->getHeight()) * SCALE);
 	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
 
 	EntityID text = mScene->newEntity();
@@ -70,7 +71,8 @@ void Level::load(const nlohmann::json data) {
 
 	mScene = new Scene();
 	EntityID player = mScene->newEntity();
-	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true));
+	constexpr const static float SCALE = 0.7f;
+	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true), SCALE);
 	mScene->emplace<Components::position>(player, data["player"]["position"].get<Eigen::Vector2f>());
 	mScene->emplace<Components::velocity>(player, data["player"]["velocity"]);
 	mScene->emplace<Components::input>(player,
@@ -88,7 +90,7 @@ void Level::load(const nlohmann::json data) {
 	mScene->emplace<Components::collision>(
 		player, Eigen::Vector2f(0.0f, 0.0f),
 		Eigen::Vector2f(mGame->getSystemManager()->getTexture("stone.png", true)->getWidth(),
-				mGame->getSystemManager()->getTexture("stone.png", true)->getHeight()));
+				mGame->getSystemManager()->getTexture("stone.png", true)->getHeight()) * SCALE);
 	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
 
 	EntityID text = mScene->newEntity();

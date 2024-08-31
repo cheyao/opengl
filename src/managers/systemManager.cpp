@@ -11,15 +11,9 @@
 #include <SDL3/SDL.h>
 #include <format>
 #include <memory>
-#include <unordered_map>
-#include <vector>
 
 #ifdef IMGUI
 #include <cstdint>
-#include <functional>
-#endif
-
-#ifdef IMGUI
 #include "imgui.h"
 #endif
 
