@@ -42,6 +42,7 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 			true);
 	}
 
+	// The second layer of grass
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		mBlocks[i].emplace_back(scene->newEntity());
 		const EntityID& entity = mBlocks[i].back();
@@ -82,17 +83,20 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		for (std::size_t j = 0; j < data["blocks"][i].size(); ++j) {
-			const auto& block = data["blocks"][i][j];
-			Texture* texture = blockToTexture[static_cast<Components::block::BlockType>(block)]();
-			const auto scale = scene->get<Components::texture>(entity).scale;
+			const auto& block = static_cast<Components::block::BlockType>(data["blocks"][i][j]);
+
+			SDL_assert(blockToTexture.contains(block));
+
+			Texture* texture = blockToTexture[block]();
+			const auto scale = scene->get<Components::texture>(block).scale;
 
 			mBlocks[i].emplace_back(scene->newEntity());
 			const EntityID& entity = mBlocks[i].back();
-			scene->emplace<Components::block>(entity, static_cast<Components::block::BlockType>(block));
+			scene->emplace<Components::block>(entity, block);
 			scene->emplace<Components::texture>(entity, texture);
 			scene->emplace<Components::position>(
 				entity, Eigen::Vector2f((i + mPosition * 32) * texture->getWidth() * scale,
-							j * texture->getWidth() * scale));
+							(j) * texture->getWidth() * scale));
 			scene->emplace<Components::collision>(
 				entity, Eigen::Vector2f(0.0f, 0.0f),
 				Eigen::Vector2f(texture->getWidth(), texture->getHeight()) * scale, true);
@@ -100,7 +104,7 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 	}
 }
 
-Chunk::~Chunk() { /* SDL_assert(mBlocks.empty() && "Didn't save?"); */ }
+Chunk::~Chunk() { SDL_assert(mBlocks.empty() && "Didn't save?"); }
 
 nlohmann::json Chunk::save(Scene* scene) {
 	nlohmann::json chunk;
@@ -112,6 +116,9 @@ nlohmann::json Chunk::save(Scene* scene) {
 				static_cast<std::uint64_t>(scene->get<Components::block>(mBlocks[i][j]).type);
 		}
 	}
+	
+	// Only clear when assert is enabled
+	SDL_assert((mBlocks.clear(), true));
 
 	return chunk;
 }
