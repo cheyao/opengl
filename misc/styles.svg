@@ -31,18 +31,22 @@
 					text-shadow: 0 1px 0 #efefef;
 					animation: 5s ease 0s normal forwards 1 fadeIn;
 				}
+
+				.flip {
+					filter: drop-shadow(.05em .05em red);
+				}
 			</style>
 			<h1 align="center" style="text-shadow: 2px 2px 5px red;">Cyao Game Engine</h1>
 			<h2 align="center">Features</h2>
 			<ul>
 				<li><b>Cross-Platorm</b> 💻📱: <b class="flip">MacOS</b>, <b class="flip">Linux</b>, <b class="flip">Windows</b>, <b class="flip">Web</b>, <b class="flip">Android</b> and <b class="flip">IOS</b> all supported! (Potentially also consoles)</li>
-				<li><b>Performant</b> 🏃: Uses C++, the game smoothly even on browsers. (<b class="flip">60</b>+ FPS on a <b class="flip">10 year old</b> laptop with <b class="flip">5000</b>+ entities!)</li>
+				<li><b>Performant</b> 🏃: Uses C++, the game runs smoothly even on browsers. (<b class="flip">60</b>+ FPS on a <b class="flip">10 year old</b> laptop with <b class="flip">5000</b>+ entities!)</li>
 				<li><b>Multilingual</b> 🌐: <b class="flip">Unicode</b> and Locale support build in. (No more �!)</li>
 				<li><b>Modern</b> ✨: Utilises <b class="flip">Modern</b> C++20 features and follows best practices. New SDL3 also used!</li>
-				<li><b>ECS Arcitecture</b> 🧩: The Game Engine uses the <b class="flip">bleeding-edge</b> ECS arcitecture with the optimal sparse-sets.</li>
+				<li><b>Extendable</b> 🧩: The Game Engine uses the <b class="flip">bleeding-edge</b> ECS arcitecture, enabeling easy extending.</li>
 				<li><b>2D and 3D</b> ❤️: Make <b class="flip">2D</b> and <b class="flip">3D</b> Together!</li>
 				<li><b>0 Memory Leaks!</b> 🚰: No memory leaks! Even <b class="flip">NASA is jealous</b>.</li>
-				<li><b>Debuggable</b> 🔍: Custom asserts and <b class="flip">ImGui</b>](https://github.com/ocornut/imgui) debug menu helps you identify any bugs 🐛!</li>
+				<li><b>Debuggable</b> 🔍: Custom asserts and <a href="https://github.com/ocornut/imgui"><b class="flip">ImGui</b></a> debug menu helps you identify any bugs 🐛!</li>
 				<li><b>Custom Saves</b> 📝: Easily save <b class="flip">any</b> data on any platform you want in a json file, the game engine will manage it for you!</li>
 			</ul>
 		</div>

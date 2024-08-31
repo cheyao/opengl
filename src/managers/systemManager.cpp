@@ -8,9 +8,9 @@
 #include "systems/textSystem.hpp"
 #include "third_party/Eigen/Core"
 
+#include <SDL3/SDL.h>
 #include <format>
 #include <memory>
-#include <SDL3/SDL.h>
 #include <unordered_map>
 #include <vector>
 
@@ -93,7 +93,8 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 				if (scene->contains<Components::position>(entity)) {
 					ImGui::BulletText(
 						"Components::position %s",
-						std::format("pos {}", scene->get<Components::position>(entity).pos).data());
+						std::format("pos {}", scene->get<Components::position>(entity).pos)
+							.data());
 				}
 
 				if (scene->contains<Components::velocity>(entity)) {
@@ -138,6 +139,12 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 					ImGui::BulletText(
 						"Components::text %s",
 						std::format("id {}", scene->get<Components::text>(entity).id).data());
+				}
+
+				if (scene->contains<Components::misc>(entity)) {
+					ImGui::BulletText(
+						"Components::misc %s",
+						std::format("what {}", scene->get<Components::misc>(entity).what).data());
 				}
 
 				ImGui::TreePop();

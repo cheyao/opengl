@@ -2,15 +2,9 @@
     <img src="https://raw.githubusercontent.com/cheyao/opengl/main/misc/styles.svg" width="100%" height="auto" alt="css-in-readme">
 </div>
 
-<h3><a href="https://cheyao.github.io/game">Try out web version now!</a></h3>
+<h3 align="center"><a href="https://cheyao.github.io/game">Try out web version now!</a></h3>
 
 <h2 align="center">Building</h2>
-
-<div class="note">
-
-Some *emphasis* and <strong>strong</strong>!
-
-</div>
 
 Dependencies:
 
@@ -77,11 +71,8 @@ Same, use cmake to build project
 
 MacOS Dependencies:
 ```
-$ brew install --cask android-platform-tools
-$ brew install --cask android-ndk
-$ brew install --cask android-platform-tools
-$ brew install --cask temurin@17
-$ brew install ninja cmake
+$ brew install --cask android-platform-tools android-ndk temurin@17
+$ brew install cmake
 ```
 
 Add these to your `.zshrc` (Change it to the appropriate folders on linux):
@@ -98,7 +89,7 @@ Change the `CMAKE_TOOLCHAIN_FILE` if you are not on MacOS:
 $ git clone --depth 1 https://github.com/assimp/assimp.git
 $ cd assimp
 $ mkdir build && cd build
-$ cmake -DASSIMP_ANDROID_JNIIOSYSTEM=ON \
+$ cmake -DASSIMP_ANDROID_JNIIOSYSTEM=OFF \
         -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/android-ndk/build/cmake/android.toolchain.cmake \
         -DANDROID_NDK=${ANDROID_NDK_HOME} \
         -DCMAKE_BUILD_TYPE=Release \
@@ -114,22 +105,43 @@ Now build the project:
 ```
 $ git clone --depth 1 https://github.com/cheyao/opengl.git
 $ cd opengl
-$ git submodule --init --recrusive
+$ git submodule update --init --recursive
 $ mkdir build && cd build 
 $ cmake -DCMAKE_BUILD_TYPE=Release \
         -DANDROID=ON \
         ..
-# Note: You might edit CMakeLists.txt
+# Note: You might edit CMakeLists.txt:320 to point to your assimp dir
 $ cmake --build .
-# Now there is the apk in the folder
+```
+Now there is the apk in the folder
+
+## Web 
+Install [emsdk](https://emscripten.org/) to `~/emsdk`
+
+Build SDL3:
+
+```
+$ source ~/emsdk/emsdk_env.sh
+$ git clone --depth 1 https://github.com/libsdl-org/SDL.git
+$ cd SDL 
+$ mkdir build && cd build
+$ emcmake cmake ..
+$ emcmake cmake --build .
+$ emcmake cmake --install .
 ```
 
-## Improving performance
-Compile with the flag `-DOPTIMIZE=ON`, but you won't be able to send the binary to others (Enables also unsafe floating points)
+Build the project:
+```
+$ git clone --depth 1 https://github.com/cheyao/opengl.git
+$ cd opengl
+$ mkdir build && cd build 
+$ emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
+$ emcmake cmake --build .
+$ python3 -m http.server
+```
 
 ## Distribuing
 There are scripts in the cmake folder:
-
 ```
 cmake
 ├── distribute-linux.sh

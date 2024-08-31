@@ -286,6 +286,7 @@ check_ipo_supported(RESULT LTOSupported OUTPUT error)
 
 if(LTOSupported AND NOT ANDROID AND NOT DEBUG)
 	message(STATUS "IPO / LTO enabled")
+
 	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 	set_property(TARGET ${BUILD_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 elseif(NOT DEBUG)
@@ -316,6 +317,7 @@ endif()
 if(ANDROID)
 	# FIXME: Non-hardcoded lib
 	add_library(assimp::assimp SHARED IMPORTED) # STATIC instad of SHARED for static
+	# TODO: Use a root dir of something like /usr/local/share/android-ndk/
 	set_target_properties(assimp::assimp PROPERTIES
 	  IMPORTED_LOCATION "/usr/local/lib/libassimp.so"
 	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include"

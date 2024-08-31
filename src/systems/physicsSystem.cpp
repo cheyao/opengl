@@ -3,13 +3,13 @@
 #include "components.hpp"
 #include "game.hpp"
 #include "managers/entityManager.hpp"
+#include "misc/sparse_set_view.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
-#include "misc/sparse_set_view.hpp"
 
 #include <SDL3/SDL.h>
-#include <format>
 #include <cstddef>
+#include <format>
 #include <string>
 #include <vector>
 
@@ -112,6 +112,7 @@ void PhysicsSystem::collide(Scene* scene) {
 
 	// Iterate over all pairs of colliders
 	// PERF: Use some nice trees https://gamedev.stackexchange.com/questions/26501/how-does-a-collision-engine-work
+	// PERF: Multithread
 	for (std::size_t i = 0; i < entities.size(); ++i) {
 		for (std::size_t j = i + 1; j < entities.size(); ++j) {
 			if (AABBxAABB(scene, entities[i], entities[j])) {
@@ -126,28 +127,32 @@ void PhysicsSystem::collide(Scene* scene) {
 bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const EntityID b) const {
 	SDL_assert(a != b && "Hey! Why are the same objects colliding into each other");
 
-	const Eigen::Vector2f& leftA =
+	if (scene->get<Components::collision>(a).stationary && scene->get<Components::collision>(b).stationary) {
+		return false;
+	}
+
+	const Eigen::Vector2f& minA =
 		scene->get<Components::position>(a).pos + scene->get<Components::collision>(a).offset;
-	const Eigen::Vector2f& rightA = leftA + scene->get<Components::collision>(a).size;
+	const Eigen::Vector2f& maxA = minA + scene->get<Components::collision>(a).size;
 
-	const Eigen::Vector2f& leftB =
+	const Eigen::Vector2f& minB =
 		scene->get<Components::position>(b).pos + scene->get<Components::collision>(b).offset;
-	const Eigen::Vector2f& rightB = leftB + scene->get<Components::collision>(b).size;
+	const Eigen::Vector2f& maxB = minB + scene->get<Components::collision>(b).size;
 
-	SDL_assert(!SDL_isnan(leftA.x()) && !SDL_isinf(leftA.x()));
-	SDL_assert(!SDL_isnan(rightA.x()) && !SDL_isinf(rightA.x()));
-	SDL_assert(!SDL_isnan(leftB.x()) && !SDL_isinf(leftB.x()));
-	SDL_assert(!SDL_isnan(rightB.x()) && !SDL_isinf(rightB.x()));
-	SDL_assert(!SDL_isnan(leftA.y()) && !SDL_isinf(leftA.y()));
-	SDL_assert(!SDL_isnan(rightA.y()) && !SDL_isinf(rightA.y()));
-	SDL_assert(!SDL_isnan(leftB.y()) && !SDL_isinf(leftB.y()));
-	SDL_assert(!SDL_isnan(rightB.y()) && !SDL_isinf(rightB.y()));
+	SDL_assert(!SDL_isnan(minA.x()) && !SDL_isinf(minA.x()));
+	SDL_assert(!SDL_isnan(maxA.x()) && !SDL_isinf(maxA.x()));
+	SDL_assert(!SDL_isnan(minB.x()) && !SDL_isinf(minB.x()));
+	SDL_assert(!SDL_isnan(maxB.x()) && !SDL_isinf(maxB.x()));
+	SDL_assert(!SDL_isnan(minA.y()) && !SDL_isinf(minA.y()));
+	SDL_assert(!SDL_isnan(maxA.y()) && !SDL_isinf(maxA.y()));
+	SDL_assert(!SDL_isnan(minB.y()) && !SDL_isinf(minB.y()));
+	SDL_assert(!SDL_isnan(maxB.y()) && !SDL_isinf(maxB.y()));
 
 	// If one of these four are true, it means the cubes are not intersecting
-	const bool notIntercecting = rightA.x() <= leftB.x()	 // Amax to the left of Bmin
-				     || rightA.y() <= leftB.y()	 // Amax to the bottom of Bmin
-				     || rightB.x() <= leftA.x()	 // Bmax to the left of Amax
-				     || rightB.y() <= leftA.y(); // Bmax to the bottom of Amin
+	const bool notIntercecting = maxA.x() <= minB.x()     // Amax to the left of Bmin
+				     || maxA.y() <= minB.y()  // Amax to the bottom of Bmin
+				     || maxB.x() <= minA.x()  // Bmax to the left of Amax
+				     || maxB.y() <= minA.y(); // Bmax to the bottom of Amin
 
 	// So return the inverse of not intersecting
 	return !notIntercecting;
@@ -156,25 +161,29 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID main, const EntityID b) const {
 	SDL_assert(main != b && "Hey! Why are the same objects colliding into each other");
 
-	const Eigen::Vector2f& leftA =
-		scene->get<Components::position>(main).pos + scene->get<Components::collision>(main).offset;
-	const Eigen::Vector2f& rightA = leftA + scene->get<Components::collision>(main).size;
+	if (scene->contains<Components::velocity>(main) && scene->get<Components::velocity>(main).vel.y() > 1.0f) {
+		return false;
+	}
 
-	const Eigen::Vector2f& leftB =
+	const Eigen::Vector2f& minMain =
+		scene->get<Components::position>(main).pos + scene->get<Components::collision>(main).offset;
+	const Eigen::Vector2f& maxMain = minMain + scene->get<Components::collision>(main).size;
+
+	const Eigen::Vector2f& minB =
 		scene->get<Components::position>(b).pos + scene->get<Components::collision>(b).offset;
-	const Eigen::Vector2f& rightB = leftB + scene->get<Components::collision>(b).size;
+	const Eigen::Vector2f& maxB = minB + scene->get<Components::collision>(b).size;
 
 	// on a x level
-	const bool notIntercecting = rightA.x() <= leftB.x()	// Amax to the left of Bmin
-				     || rightB.x() <= leftA.x() // Bmax to the left of Amax
-				     || rightA.y() <= leftB.y();
+	const bool notIntercecting = maxMain.x() <= minB.x()	// entity to the left of b
+				     || maxB.x() <= minMain.x() // b to the left of main
+				     || maxMain.y() <= minB.y();
 
 	if (notIntercecting) {
 		return false;
 	}
 
-	// Remove one dot five to be more precise
-	if ((leftA.y() - 1.5f) < rightB.y()) {
+	// Remove dot five to be more precise
+	if ((minMain.y() - 0.5f) < maxB.y()) {
 		return true;
 	}
 
