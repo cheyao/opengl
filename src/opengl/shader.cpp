@@ -162,7 +162,7 @@ void Shader::bind(const std::string_view& name, const GLuint index) const {
 	const GLuint blockIndex = glGetUniformBlockIndex(mShaderProgram, name.data());
 
 	if (blockIndex == GL_INVALID_INDEX) {
-		SDL_Log("Shader.cpp: Invalid block: %s", name.data());
+		SDL_Log("\033[33mShader.cpp: Invalid block: %s\033[0m", name.data());
 
 		return;
 	}

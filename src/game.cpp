@@ -37,20 +37,47 @@ Game::Game()
 	} else {
 		mBasePath = "";
 
-		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get base path: %s\033[0m", SDL_GetError());
+		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to get base path: %s\033[0m", SDL_GetError());
 	}
 
+	// First initialize these subsystems because the other ones need it
 	mEventManager = std::make_unique<EventManager>(this);
 
 	mSystemManager = new SystemManager(this);
 	mLocaleManager = new LocaleManager(mBasePath);
+
+	SDL_GL_SetSwapInterval(1);
 
 	// TODO: Icon
 	/*
 	SDL_SetWindowIcon(mWindow, icon);
 	*/
 
-	SDL_GL_SetSwapInterval(1);
+	// Set the cursor
+	SDL_Surface* cursorSurface =
+		SDL_LoadBMP((mBasePath + "assets" SEPARATOR "textures" SEPARATOR "crosshair.bmp").data());
+
+	if (cursorSurface == nullptr) {
+		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to get cursor surface: %s\033[0m", SDL_GetError());
+	} else {
+		SDL_Cursor* cursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
+		if (cursor != nullptr) {
+			if (!SDL_SetCursor(cursor)) {
+				SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to set cursor: %s\033[0m",
+					     SDL_GetError());
+			} else {
+				SDL_SetCursor(nullptr); // Redraw
+				SDL_Log("\033[32mSuccesfully set cursor\033[0m");
+			}
+
+			SDL_DestroyCursor(cursor);
+		} else {
+			SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to create cursor: %s\033[0m",
+				     SDL_GetError());
+		}
+
+		SDL_DestroySurface(cursorSurface);
+	}
 
 	mStorageManager = new StorageManager(this);
 
@@ -103,7 +130,7 @@ SDL_AppResult Game::iterate() {
 	if (delta > 0.05f) {
 		delta = 0.05f;
 
-		SDL_Log("Delta > 0.5f, cutting frame short");
+		SDL_Log("\033[33mDelta > 0.5f, cutting frame short\033[0m");
 	}
 	mTicks = SDL_GetTicks();
 

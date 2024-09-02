@@ -7,13 +7,13 @@
 
 #include <SDL3/SDL.h>
 #include <algorithm>
-#include <functional>
 #include <cstddef>
-#include <type_traits>
-#include <version>
+#include <functional>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
+#include <version>
 
 // TODO: Accept non-Vertex data
 Mesh::Mesh(const std::span<const Vertex> vertices, const std::span<const GLuint> indices,
@@ -71,13 +71,14 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 	// TODO: Non-hardcoded attrib pointer strides
 	// TODO: Prettier
 	glBindVertexArray(mVAO);
-	SDL_assert(!positions.empty());
-	{
+	if (!positions.empty()) {
 		glBufferSubData(GL_ARRAY_BUFFER, offset, positions.size() * sizeof(float), positions.data());
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
 		glEnableVertexAttribArray(0);
 
 		offset += positions.size() * sizeof(float);
+	} else {
+		SDL_Log("\033[33mMesh.cpp: Normals empty, ignored\033[0m");
 	}
 
 	if (!normals.empty()) {
@@ -87,7 +88,7 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 
 		offset += normals.size() * sizeof(float);
 	} else {
-		SDL_Log("Mesh.cpp: Normals empty, ignored");
+		SDL_Log("\033[33mMesh.cpp: Normals empty, ignored\033[0m");
 	}
 
 	if (!texturePos.empty()) {
@@ -97,7 +98,7 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 
 		offset += texturePos.size() * sizeof(float);
 	} else {
-		SDL_Log("Mesh.cpp: Texture pos empty, ignored");
+		SDL_Log("\033[33mMesh.cpp: Texture pos empty, ignored\033[0m");
 	}
 
 	SDL_assert((positions.size() + normals.size() + texturePos.size()) * sizeof(float) == offset && "Missing data");

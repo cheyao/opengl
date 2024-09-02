@@ -18,39 +18,37 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 	SDL_Locale** loc = SDL_GetPreferredLocales(&c);
 	std::string locList = "";
 	for (int i = 0; i < c; ++i) {
-		locList += loc[i]->language;
+		locList.append(loc[i]->language);
 
 		if (loc[i]->language != nullptr) {
-			locList += '-';
-			locList += loc[i]->country;
+			locList.append("-");
+			locList.append(loc[i]->country);
 		}
 
-		locList += ' ';
+		locList.append(" ");
 	}
 
 	SDL_Log("LocaleManager.cpp: Found locales %s", locList.data());
 
 	for (int i = 0; i < c; ++i) {
-		std::string l;
-		l += loc[i]->language;
+		mLocale = loc[i]->language;
 		if (loc[i]->country != nullptr) {
-			l += '-';
-			l += loc[i]->country;
+			mLocale.append("-");
+			mLocale.append(loc[i]->country);
 		}
 
-		SDL_Log("LocaleManager.cpp: Tring to load locale %s", l.data());
-
-		mLocale = l;
+		SDL_Log("LocaleManager.cpp: Tring to load locale %s", mLocale.data());
 
 		try {
 			loadLocale();
 		} catch (const std::runtime_error& error) {
-			SDL_Log("LocaleManager.cpp: Failed to load locale %s: %s", l.data(), error.what());
+			SDL_Log("\033[33mLocaleManager.cpp: Failed to load locale %s: %s\033[0m", mLocale.data(),
+				error.what());
 
 			continue;
 		}
 
-		SDL_Log("LocaleManager.cpp: Successfully loaded locale %s", l.data());
+		SDL_Log("\033[32mLocaleManager.cpp: Successfully loaded system locale %s\033[0m", mLocale.data());
 
 		SDL_free(loc);
 
@@ -60,7 +58,7 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 	SDL_free(loc);
 
 	mLocale = "en-US";
-	SDL_Log("\x1B[31mLocaleManager.cpp: Failed to find valid locale! Falling back to english.\033[0m");
+	SDL_Log("\033[31mLocaleManager.cpp: Failed to find valid locale! Falling back to en-US.\033[0m");
 	loadLocale();
 }
 

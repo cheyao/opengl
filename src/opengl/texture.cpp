@@ -4,6 +4,7 @@
 #include "third_party/stb_image.h"
 #include "utils.hpp"
 
+#include <format>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <SDL3/SDL.h>
@@ -13,7 +14,9 @@
 
 Texture::Texture(const std::string_view& path) : name(path), mWidth(0), mHeight(0) {}
 
-Texture::Texture(const FT_Bitmap& bitmap) : name(""), mWidth(bitmap.width), mHeight(bitmap.rows) {
+Texture::Texture(const FT_Bitmap& bitmap)
+	: name(std::format("from freetype bitmap {}x{}", bitmap.width, bitmap.rows)), mWidth(bitmap.width),
+	  mHeight(bitmap.rows) {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	SDL_Log("Loading texture %s", name.data());

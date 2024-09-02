@@ -219,8 +219,6 @@ void RenderSystem::setDemensions(int width, int height) {
 	glViewport(0, 0, w, h);
 	mFramebuffer->setDemensions(w, h);
 
-	// setUIMatrix();
-
 	setOrtho();
 }
 

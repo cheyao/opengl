@@ -41,6 +41,7 @@ struct misc {
 	enum {
 		JUMP = 0b1,
 		PLAYER = 0b10,
+		CROSSHAIR = 0b100,
 	};
 	std::uint64_t what;
 };

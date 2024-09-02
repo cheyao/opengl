@@ -18,7 +18,7 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 
 	mContext = SDL_GL_CreateContext(window);
 	if (mContext == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to create window: %s", SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mGLManager.cpp: Failed to create window: %s\033[0m", SDL_GetError());
 		ERROR_BOX("Failed to initialize OpenGL Context, there is something "
 			  "wrong with your OpenGL");
 
@@ -26,27 +26,27 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 	}
 
 #ifdef GLES
-	SDL_Log("Loading OpenGL ES");
+	SDL_Log("GLManager.cpp: Loading OpenGL ES");
 
 	int version = gladLoadGLES2(static_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
 	if (version == 0) {
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init GLES glad!");
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "\033[31mGLManager.cpp: Failed to init GLES glad!\033[0m");
 #else
-	SDL_Log("Loading OpenGL");
+	SDL_Log("GLManager.cpp: Loading OpenGL");
 
 	int version = gladLoadGL(static_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
 	if (version == 0) {
-		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init GL glad!");
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "\033[31mGLManager.cpp: Failed to init GL glad!\033[0m");
 #endif
 		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
 
-		throw std::runtime_error("glManager.cpp: Failed to init glad");
+		throw std::runtime_error("GLManager.cpp: Failed to init glad");
 	}
 
-	SDL_Log("Loaded glad OpenGL %d.%d", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+	SDL_Log("\033[32mGLManager.cpp: Successfully loaded glad OpenGL %d.%d\033[0m", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
-	if (SDL_GL_SetSwapInterval(1)) {
-		SDL_Log("Failed to enable VSync");
+	if (!SDL_GL_SetSwapInterval(1)) {
+		SDL_Log("\033[31mGLManager.cpp: Failed to enable VSync\033[0m");
 	}
 
 	glEnable(GL_DEPTH_TEST);
