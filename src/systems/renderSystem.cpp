@@ -304,6 +304,10 @@ void RenderSystem::draw(Scene* scene) {
 
 		for (const auto& [_, velocity, position, texture] :
 		     scene->view<Components::velocity, Components::position, Components::texture>().each()) {
+			if (nearZero(velocity.vel.x() + velocity.vel.y())) {
+				continue;
+			}
+
 			Eigen::Affine3f model = Eigen::Affine3f::Identity();
 
 			model.translate((Eigen::Vector3f() << (position.pos), 0.0f).finished());
