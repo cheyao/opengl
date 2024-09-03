@@ -229,20 +229,20 @@ void RenderSystem::draw(Scene* scene) {
 
 	Shader* defaultShader = this->getShader("block.vert", "block.frag");
 	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
-		SDL_assert(texture.texture != nullptr);
+		SDL_assert(texture.mTexture != nullptr);
 
-		Shader* shader = texture.shader == nullptr ? defaultShader : texture.shader;
+		Shader* shader = texture.mShader == nullptr ? defaultShader : texture.mShader;
 
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();
-		model.translate((Eigen::Vector3f() << position.pos, 0.0f).finished());
-		model.scale(texture.scale);
+		model.translate((Eigen::Vector3f() << position.mPosition, 0.0f).finished());
+		model.scale(texture.mScale);
 
 		shader->activate();
 		shader->set("model", model);
-		shader->set("size", static_cast<float>(texture.texture->getWidth()),
-			    static_cast<float>(texture.texture->getHeight()));
+		shader->set("size", static_cast<float>(texture.mTexture->getWidth()),
+			    static_cast<float>(texture.mTexture->getHeight()));
 		shader->set("texture_diffuse", 0);
-		texture.texture->activate(0);
+		texture.mTexture->activate(0);
 
 		mMesh->draw(shader);
 	}
@@ -274,10 +274,11 @@ void RenderSystem::draw(Scene* scene) {
 		     scene->view<Components::collision, Components::position>().each()) {
 			Eigen::Affine3f model = Eigen::Affine3f::Identity();
 
-			model.translate((Eigen::Vector3f() << (position.pos + collision.offset), 0.0f).finished());
+			model.translate(
+				(Eigen::Vector3f() << (position.mPosition + collision.mOffset), 0.0f).finished());
 
 			editorShader->set("model", model);
-			editorShader->set("size", collision.size);
+			editorShader->set("size", collision.mSize);
 
 			mMesh->draw(editorShader);
 		}
@@ -302,23 +303,24 @@ void RenderSystem::draw(Scene* scene) {
 
 		for (const auto& [_, velocity, position, texture] :
 		     scene->view<Components::velocity, Components::position, Components::texture>().each()) {
-			if (nearZero(velocity.vel.x() + velocity.vel.y())) {
+			if (nearZero(velocity.mVelocity.x() + velocity.mVelocity.y())) {
 				continue;
 			}
 
 			Eigen::Affine3f model = Eigen::Affine3f::Identity();
 
-			model.translate((Eigen::Vector3f() << (position.pos), 0.0f).finished());
+			model.translate((Eigen::Vector3f() << (position.mPosition), 0.0f).finished());
 
 			vectorShader->set("model", model);
 			vectorShader->set("size",
-					  Eigen::Vector2f(texture.texture->getWidth(), texture.texture->getHeight()));
-			const Eigen::Vector2f& realPos = position.pos + (Eigen::Vector2f(texture.texture->getWidth(),
-											 texture.texture->getHeight()) *
-									 texture.scale) /
-										2;
+					  Eigen::Vector2f(texture.mTexture->getWidth(), texture.mTexture->getHeight()));
+			const Eigen::Vector2f& realPos =
+				position.mPosition +
+				(Eigen::Vector2f(texture.mTexture->getWidth(), texture.mTexture->getHeight()) *
+				 texture.mScale) /
+					2;
 			vectorShader->set("position", realPos);
-			vectorShader->set("velocity", velocity.vel);
+			vectorShader->set("velocity", velocity.mVelocity);
 
 			mMesh->draw(vectorShader);
 		}

@@ -14,8 +14,8 @@ void InputSystem::update(Scene* scene, const float delta) {
 	const bool* keystate = mGame->getKeystate();
 
 	for (const auto& [entity, input] : scene->view<Components::input>().each()) {
-		SDL_assert(input.function != nullptr);
+		SDL_assert(input.mFunction != nullptr);
 
-		input.function(scene, entity, keystate, delta);
+		input.mFunction(scene, entity, keystate, delta);
 	}
 }

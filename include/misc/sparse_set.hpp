@@ -3,6 +3,7 @@
 #include "managers/entityManager.hpp"
 
 #include <SDL3/SDL.h>
+#include <cinttypes>
 #include <csignal>
 #include <cstddef>
 #include <cstdint>
@@ -73,7 +74,7 @@ template <typename Component> class sparse_set {
 		}
 
 		if (mSparseContainer[entity] != 0) {
-			SDL_Log("\033[93mSparse_set.cpp: Container already contains entity %llu!\033[0m", entity);
+			SDL_Log("\033[93mSparse_set.cpp: Container already contains entity %" PRIu64 "!\033[0m", entity);
 		}
 
 		mSparseContainer[entity] = mPackedContainer.size();
@@ -86,7 +87,8 @@ template <typename Component> class sparse_set {
 		if (!contains(entity)) {
 			SDL_LogCritical(
 				SDL_LOG_CATEGORY_VIDEO,
-				"\x1B[31msparse_set.hpp: Error! Accessing invalid component %s for entity %llu\033[0m",
+				"\x1B[31msparse_set.hpp: Error! Accessing invalid component %s for entity %" PRIu64
+				"\033[0m",
 				typeid(Component).name(), entity);
 
 			assert(contains(entity) && "Hey! This sparse set doesn't contain this entity");

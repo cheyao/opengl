@@ -8,7 +8,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
-#include <utility>
 
 GameIOStream::GameIOStream(const char* pFile, const char* pMode) {
 	mIO = SDL_IOFromFile(pFile, pMode);
@@ -61,8 +60,7 @@ aiReturn GameIOStream::Seek(std::size_t pOffset, aiOrigin pOrigin) {
 			whence = SDL_IO_SEEK_END;
 			break;
 		[[unlikely]] default:
-			std::unreachable();
-			// return aiReturn_FAILURE;
+			return aiReturn_FAILURE;
 	}
 
 	int64_t status = SDL_SeekIO(mIO, pOffset, whence);

@@ -26,7 +26,7 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 		scene->emplace<Components::block>(entity, Components::block::STONE);
 		scene->emplace<Components::texture>(entity, game->getSystemManager()->getTexture("stone.png", true));
 
-		const auto scale = scene->get<Components::texture>(entity).scale;
+		const auto scale = scene->get<Components::texture>(entity).mScale;
 
 		scene->emplace<Components::position>(
 			entity,
@@ -50,7 +50,7 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 		scene->emplace<Components::texture>(entity,
 						    game->getSystemManager()->getTexture("grass-block.png", true));
 
-		const auto scale = scene->get<Components::texture>(entity).scale;
+		const auto scale = scene->get<Components::texture>(entity).mScale;
 
 		scene->emplace<Components::position>(
 			entity,
@@ -95,11 +95,11 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 			scene->emplace<Components::block>(entity, block);
 			scene->emplace<Components::texture>(entity, texture);
 
-			const auto scale = scene->get<Components::texture>(entity).scale;
+			const auto scale = scene->get<Components::texture>(entity).mScale;
 
 			scene->emplace<Components::position>(
 				entity, Eigen::Vector2f((i + mPosition * 32) * texture->getWidth() * scale,
-							(j) * texture->getWidth() * scale));
+							(j)*texture->getWidth() * scale));
 			scene->emplace<Components::collision>(
 				entity, Eigen::Vector2f(0.0f, 0.0f),
 				Eigen::Vector2f(texture->getWidth(), texture->getHeight()) * scale, true);
@@ -116,10 +116,10 @@ nlohmann::json Chunk::save(Scene* scene) {
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		for (std::size_t j = 0; j < mBlocks[i].size(); ++j) {
 			chunk["blocks"][i][j] =
-				static_cast<std::uint64_t>(scene->get<Components::block>(mBlocks[i][j]).type);
+				static_cast<std::uint64_t>(scene->get<Components::block>(mBlocks[i][j]).mType);
 		}
 	}
-	
+
 	// Only clear when assert is enabled
 	SDL_assert((mBlocks.clear(), true));
 

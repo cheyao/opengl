@@ -116,6 +116,8 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 	SDL_ReadStorageFile(storage, "worlds.json", buffer, info.size);
 	buffer[info.size] = 0; // Ensure null terminasion
 
+	SDL_Log("%lu %s", info.size, buffer);
+
 	nlohmann::json worlds;
 	try {
 		worlds = nlohmann::json::parse(buffer);
@@ -210,7 +212,7 @@ void StorageManager::saveState(SDL_Storage* storage) {
 	// FIXME: Non-hard writted world name
 	constexpr const static char* worldName = "world";
 
-	// FIXME: Version
+	// FIXME: Version compatability
 	// TODO: Save some world info
 	worlds["version"] = 100;
 	worlds["worlds"] = {worldName};

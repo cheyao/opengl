@@ -106,6 +106,16 @@ $ cmake --build .
 $ sudo cmake --install .
 ```
 
+Configure your gradlew's credentials (I'm not gonna let you use mine duh)
+```
+File: ~/.gradle/gradle.properties
+
+RELEASE_STORE_FILE=[KEYSTORE PATH RELATIVE FROM ./android]
+RELEASE_STORE_PASSWORD=[KEYSTORE PASSWORD]
+RELEASE_KEY_ALIAS=[KEY NAME]
+RELEASE_KEY_PASSWORD=[KEY PASSWORD]
+```
+
 Now build the project:
 ```
 $ git clone --depth 1 https://github.com/cheyao/opengl.git

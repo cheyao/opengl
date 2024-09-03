@@ -8,42 +8,58 @@
 
 namespace Components {
 struct position {
-	Eigen::Vector2f pos;
+	position(const Eigen::Vector2f position) : mPosition(position) {}
+
+	Eigen::Vector2f mPosition;
 };
 
 struct velocity {
-	Eigen::Vector2f vel;
+	velocity(const Eigen::Vector2f velocity) : mVelocity(velocity) {}
+	Eigen::Vector2f mVelocity;
 };
 
 struct collision {
-	Eigen::Vector2f offset;
-	Eigen::Vector2f size;
-	bool stationary = false;
+	collision(const Eigen::Vector2f offset, const Eigen::Vector2f size, const bool stationary = false)
+		: mOffset(offset), mSize(size), mStationary(stationary) {}
+
+	Eigen::Vector2f mOffset;
+	Eigen::Vector2f mSize;
+	bool mStationary = false;
 };
 
 struct texture {
-	class Texture* texture;
-	float scale = 0.7f;
-	class Shader* shader = nullptr;
+	texture(class Texture* t, const float s = 0.7f, class Shader* sh = nullptr)
+		: mTexture(t), mScale(s), mShader(sh) {}
+
+	class Texture* mTexture;
+	float mScale = 0.7f;
+	class Shader* mShader = nullptr;
 };
 
 struct input {
-	std::function<void(class Scene* scene, EntityID entity, const bool* scancodes, const float delta)> function;
+	std::function<void(class Scene* scene, EntityID entity, const bool* scancodes, const float delta)> mFunction;
+
+	// I'm not writing it all again
+	input(const decltype(mFunction) function) : mFunction(function) {}
 };
 
 struct text {
-	std::string id;
+	text(const std::string id) : mID(id) {}
+
+	std::string mID;
 	// Maybe offset
 };
 
 // Misc stuff like jumping
 struct misc {
+	misc(const std::uint64_t what) : mWhat(what) {}
+
 	enum {
 		JUMP = 0b1,
 		PLAYER = 0b10,
 		CROSSHAIR = 0b100,
 	};
-	std::uint64_t what;
+	std::uint64_t mWhat;
 };
 
 struct block {
@@ -52,6 +68,8 @@ struct block {
 		GRASS_BLOCK,
 		DIRT,
 		STONE,
-	} type;
+	} mType;
+
+	block(const decltype(mType) type) : mType(type) {}
 };
 } // namespace Components

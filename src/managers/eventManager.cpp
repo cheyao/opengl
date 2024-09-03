@@ -19,6 +19,8 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 	switch (event.type) {
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 		case SDL_EVENT_QUIT: {
+			SDL_Log("Recieved quit event.");
+
 			return SDL_APP_SUCCESS;
 		}
 

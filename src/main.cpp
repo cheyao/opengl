@@ -107,4 +107,6 @@ void SDL_AppQuit(void* appstate) {
 	}
 
 	SDL_Quit();
+	
+	SDL_Log("Cyao game engine quitted");
 }

@@ -41,9 +41,30 @@ void Level::create() {
 	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true), SCALE);
 	mScene->emplace<Components::position>(player, Eigen::Vector2f(400.0f, 400.0f));
 	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
+	SDL_Log("B");
+	GLenum err = 0;
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		switch (err) {
+			case GL_INVALID_ENUM:
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid enum\033[0m");
+				break;
+			case GL_INVALID_VALUE:
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid value\033[0m");
+				break;
+			case GL_INVALID_OPERATION:
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid operation\033[0m");
+				break;
+			case GL_INVALID_FRAMEBUFFER_OPERATION:
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid framebuffer op\033[0m");
+				break;
+			case GL_OUT_OF_MEMORY:
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Out of memory\033[0m");
+				break;
+		}
+	}
 	mScene->emplace<Components::input>(player,
 					   [](class Scene* scene, EntityID entity, const bool* scancodes, const float) {
-						   Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).vel;
+						   Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;
 
 						   if (scancodes[SDL_SCANCODE_RIGHT] == true && vel.x() < 220) {
 							   vel.x() += 70;
@@ -77,7 +98,7 @@ void Level::load(const nlohmann::json data) {
 	mScene->emplace<Components::velocity>(player, data["player"]["velocity"]);
 	mScene->emplace<Components::input>(player,
 					   [](class Scene* scene, EntityID entity, const bool* scancodes, const float) {
-						   Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).vel;
+						   Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;
 
 						   if (scancodes[SDL_SCANCODE_RIGHT] == true && vel.x() < 220) {
 							   vel.x() += 70;
@@ -107,8 +128,8 @@ nlohmann::json Level::save() {
 	const auto& view = mScene->view<Components::input>();
 	SDL_assert(view.size() == 1);
 
-	data["player"]["position"] = mScene->get<Components::position>(*view.begin()).pos;
-	data["player"]["velocity"] = mScene->get<Components::velocity>(*view.begin()).vel;
+	data["player"]["position"] = mScene->get<Components::position>(*view.begin()).mPosition;
+	data["player"]["velocity"] = mScene->get<Components::velocity>(*view.begin()).mVelocity;
 
 	data["chunks"][0] = mChunks.back()->save(mScene);
 

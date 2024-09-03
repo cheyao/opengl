@@ -11,8 +11,7 @@
 #include <string_view>
 #include <version>
 
-// TODO: SDL_EVENT_LOCALE_CHANGED
-
+// TODO: Handle SDL_EVENT_LOCALE_CHANGED
 LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "assets" SEPARATOR "strings" SEPARATOR) {
 	int c = 0;
 	SDL_Locale** loc = SDL_GetPreferredLocales(&c);

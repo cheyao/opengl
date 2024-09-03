@@ -10,7 +10,6 @@
 #include <SDL3/SDL.h>
 #include <cstdint>
 #include <memory>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -46,13 +45,12 @@ Game::Game()
 	mSystemManager = new SystemManager(this);
 	mLocaleManager = new LocaleManager(mBasePath);
 
-	SDL_GL_SetSwapInterval(1);
-
 	// TODO: Icon
 	/*
 	SDL_SetWindowIcon(mWindow, icon);
 	*/
 
+#ifndef __ANDROID__
 	// Set the cursor
 	SDL_Surface* cursorSurface =
 		SDL_LoadBMP((mBasePath + "assets" SEPARATOR "textures" SEPARATOR "crosshair.bmp").data());
@@ -78,6 +76,7 @@ Game::Game()
 
 		SDL_DestroySurface(cursorSurface);
 	}
+#endif
 
 	mStorageManager = new StorageManager(this);
 
@@ -93,6 +92,29 @@ Game::Game()
 	SDL_assert(mCurrentLevel != nullptr);
 
 	mTicks = SDL_GetTicks();
+
+#ifdef DEBUG
+	GLenum err = 0;
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		switch (err) {
+			case GL_INVALID_ENUM:
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid enum\033[0m");
+				break;
+			case GL_INVALID_VALUE:
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid value\033[0m");
+				break;
+			case GL_INVALID_OPERATION:
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid operation\033[0m");
+				break;
+			case GL_INVALID_FRAMEBUFFER_OPERATION:
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid framebuffer op\033[0m");
+				break;
+			case GL_OUT_OF_MEMORY:
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Out of memory\033[0m");
+				break;
+		}
+	}
+#endif
 }
 
 Game::~Game() {
@@ -117,7 +139,7 @@ SDL_AppResult Game::iterate() {
 		return SDL_APP_SUCCESS;
 	}
 
-	static uint64_t ticks = SDL_GetTicks();
+	static std::uint64_t ticks = SDL_GetTicks();
 	static std::uint64_t frames = 0;
 	++frames;
 	if (frames % 60 == 0) {

@@ -1,9 +1,18 @@
 cmake_minimum_required(VERSION 3.9)
-project(OpenGL C CXX)
+project(
+	OpenGL
+	LANGUAGES C CXX
+	VERSION 1.0
+	DESCRIPTION "OpenGL Game Engine"
+)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+	message(FATAL_ERROR "In-source builds not allowed! Create a build directory and run CMake from there.")
+endif()
 
 option(IMGUI 		"Enable GUI" OFF)
 option(ANDROID		"Build for android (automatically build with gradle)" OFF)
@@ -121,12 +130,11 @@ set(ASSETS_EMBED_WEB
 if(ANDROID STREQUAL ON) 
 	message("-- Building android apk - experimental")
 	message("-- Progress bar doesn't work, please wait till the end")
-	message("-- If this doesn't work, go to android folder and run ./gradlew installDebug")
+	message("-- If this doesn't work, go to android folder and run ./gradlew assembleRelease")
 
-	set(NAMESPACE com.cyao.opengl)
-	set(BUILD_NAME OpenGL)
+	set(NAMESPACE com.cyao.${PROJECT_NAME})
+	set(BUILD_NAME ${PROJECT_NAME})
 
-	# FIXME: No installRelease?
 	add_subdirectory(android)
 
 	return()
@@ -135,16 +143,9 @@ endif()
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release CACHE STRING
 		"Choose the type of build, options are:
-		 Debug Release"
+		 Debug Release RelWithDebInfo"
       	FORCE)
 endif()
-
-# if(NOT SDL_ASSERT)
-# set(SDL_ASSERT break CACHE STRING
-# "Choose the type of build, options are:
-# Debug Release"
-# FORCE)
-# endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
 	message("-- Debug enabled")
@@ -209,8 +210,8 @@ elseif(APPLE)
 		    MACOSX_BUNDLE_ICON_FILE ${CMAKE_SOURCE_DIR}/cmake/${CMAKE_PROJECT_NAME}.ico
 		    MACOSX_BUNDLE_GUI_IDENTIFIER org.cyao.${BUILD_NAME}
 	   	    MACOSX_BUNDLE_BUNDLE_NAME ${BUILD_NAME}
-		    MACOSX_BUNDLE_BUNDLE_VERSION "0.1"
-		    MACOSX_BUNDLE_SHORT_VERSION_STRING "0.1"
+		    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+		    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
 		    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_SOURCE_DIR}/cmake/info.plist.in
 		)
 	endif()
@@ -240,8 +241,8 @@ elseif(WEB)
 		target_compile_options(${BUILD_NAME} PRIVATE -gsource-map)
 		target_link_options(${BUILD_NAME} PRIVATE -gsource-map)
 
-		ADD_CUSTOM_TARGET(WebCopySrc ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../src ${CMAKE_BINARY_DIR}/src)
-		ADD_CUSTOM_TARGET(WebCopyInclude ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../include ${CMAKE_BINARY_DIR}/include)
+		add_custom_target(WebCopySrc ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../src ${CMAKE_BINARY_DIR}/src)
+		add_custom_target(WebCopyInclude ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../include ${CMAKE_BINARY_DIR}/include)
 	endif()
 else()
 	message("-- Building for linux")
@@ -278,6 +279,10 @@ else()
 	if (OPTIMIZE STREQUAL ON)
 		target_compile_options(${BUILD_NAME} PRIVATE -march=native -Ofast -fopenmp -fno-math-errno)
 	endif()
+
+	if (CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
+		target_compile_options(${BUILD_NAME} PRIVATE -g)
+	endif()
 endif()
 
 # Enable LTO for non debug
@@ -298,7 +303,7 @@ endif()
 #
 
 # Project include
-target_include_directories(${BUILD_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(${BUILD_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # SDL
 if(NOT ANDROID) # Android projects include themself using subdirectory
@@ -337,10 +342,12 @@ else()
 endif()
 
 # Freetype
-if (NOT WEB)
+if (NOT WEB AND NOT ANDROID)
 	find_package(Freetype REQUIRED)
 	target_include_directories(${BUILD_NAME} PRIVATE ${FREETYPE_INCLUDE_DIRS})
 	target_link_libraries(${BUILD_NAME} PRIVATE ${FREETYPE_LIBRARIES})
+elseif(ANDROID)
+	target_link_libraries(${BUILD_NAME} PRIVATE freetype)
 endif()
 
 # ImGUI
@@ -366,7 +373,7 @@ endif()
 # 
 
 # Strip debug symbols
-if(NOT DEBUG AND NOT ANDROID AND NOT WEB)
+if(NOT DEBUG AND NOT ANDROID AND NOT WEB AND NOT CMAKE_BUILD_TYPE STREQUAL RelWithDebInfo)
 	message("-- Striping debug symbols")
 
 	if(APPLE)
@@ -411,7 +418,7 @@ endif()
 
 # Copy stuff for apple
 if(APPLE AND NOT DEBUG)
-	# Don't remove, needed by the helper script
+	# Don't remove, needed by the dylib helper script
 	target_link_options(${BUILD_NAME} PRIVATE -headerpad_max_install_names)
 
 	# Add assets

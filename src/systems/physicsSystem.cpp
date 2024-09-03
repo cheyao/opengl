@@ -9,12 +9,13 @@
 
 #include <SDL3/SDL.h>
 #include <cstddef>
-#include <format>
 #include <string>
 #include <vector>
 
 #ifdef IMGUI
 #include "imgui.h"
+
+#include <format>
 #endif
 
 // The physicsSystem is in charge of the collision and mouvements
@@ -53,20 +54,20 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 
 		if (onGround) {
 			if (scene->contains<Components::misc>(entity) &&
-			    scene->get<Components::misc>(entity).what & Components::misc::JUMP &&
+			    scene->get<Components::misc>(entity).mWhat & Components::misc::JUMP &&
 			    (mGame->getKeystate()[SDL_SCANCODE_UP] == true ||
 			     mGame->getKeystate()[SDL_SCANCODE_SPACE] == true)) {
-				scene->get<Components::velocity>(entity).vel.y() = jumpForce;
+				scene->get<Components::velocity>(entity).mVelocity.y() = jumpForce;
 			} else {
-				scene->get<Components::velocity>(entity).vel.y() = 0.0f;
+				scene->get<Components::velocity>(entity).mVelocity.y() = 0.0f;
 			}
 		} else {
-			scene->get<Components::velocity>(entity).vel.y() -= G;
+			scene->get<Components::velocity>(entity).mVelocity.y() -= G;
 		}
 
-		scene->get<Components::position>(entity).pos += scene->get<Components::velocity>(entity).vel * delta;
-		scene->get<Components::velocity>(entity).vel.x() =
-			scene->get<Components::velocity>(entity).vel.x() * 0.7;
+		scene->get<Components::position>(entity).mPosition +=
+			scene->get<Components::velocity>(entity).mVelocity * delta;
+		scene->get<Components::velocity>(entity).mVelocity.x() *= 0.7;
 	}
 }
 
@@ -91,15 +92,15 @@ void PhysicsSystem::collide(Scene* scene) {
 		for (const auto& entity : entities) {
 			if (ImGui::TreeNode(std::format("Entity {}", entity).data())) {
 				ImGui::SliderFloat2(std::format("Position for entity {}", entity).data(),
-						    scene->get<Components::position>(entity).pos.data(), 0.0f,
+						    scene->get<Components::position>(entity).mPosition.data(), 0.0f,
 						    SDL_max(mGame->getDemensions().x(), mGame->getDemensions().y()));
 
 				ImGui::SliderFloat2(std::format("Offset for entity {}", entity).data(),
-						    scene->get<Components::collision>(entity).offset.data(), -500,
+						    scene->get<Components::collision>(entity).mOffset.data(), -500,
 						    +500);
 
 				ImGui::SliderFloat2(std::format("Size for entity {}", entity).data(),
-						    scene->get<Components::collision>(entity).size.data(), 0.0f,
+						    scene->get<Components::collision>(entity).mSize.data(), 0.0f,
 						    SDL_max(mGame->getDemensions().x(), mGame->getDemensions().y()));
 
 				ImGui::TreePop();
@@ -127,17 +128,17 @@ void PhysicsSystem::collide(Scene* scene) {
 bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const EntityID b) const {
 	SDL_assert(a != b && "Hey! Why are the same objects colliding into each other");
 
-	if (scene->get<Components::collision>(a).stationary && scene->get<Components::collision>(b).stationary) {
+	if (scene->get<Components::collision>(a).mStationary && scene->get<Components::collision>(b).mStationary) {
 		return false;
 	}
 
 	const Eigen::Vector2f& minA =
-		scene->get<Components::position>(a).pos + scene->get<Components::collision>(a).offset;
-	const Eigen::Vector2f& maxA = minA + scene->get<Components::collision>(a).size;
+		scene->get<Components::position>(a).mPosition + scene->get<Components::collision>(a).mOffset;
+	const Eigen::Vector2f& maxA = minA + scene->get<Components::collision>(a).mSize;
 
 	const Eigen::Vector2f& minB =
-		scene->get<Components::position>(b).pos + scene->get<Components::collision>(b).offset;
-	const Eigen::Vector2f& maxB = minB + scene->get<Components::collision>(b).size;
+		scene->get<Components::position>(b).mPosition + scene->get<Components::collision>(b).mOffset;
+	const Eigen::Vector2f& maxB = minB + scene->get<Components::collision>(b).mSize;
 
 	SDL_assert(!SDL_isnan(minA.x()) && !SDL_isinf(minA.x()));
 	SDL_assert(!SDL_isnan(maxA.x()) && !SDL_isinf(maxA.x()));
@@ -161,17 +162,18 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID main, const EntityID b) const {
 	SDL_assert(main != b && "Hey! Why are the same objects colliding into each other");
 
-	if (scene->contains<Components::velocity>(main) && scene->get<Components::velocity>(main).vel.y() > 1.0f) {
+	if (scene->contains<Components::velocity>(main) &&
+	    scene->get<Components::velocity>(main).mVelocity.y() > 1.0f) {
 		return false;
 	}
 
 	const Eigen::Vector2f& minMain =
-		scene->get<Components::position>(main).pos + scene->get<Components::collision>(main).offset;
-	const Eigen::Vector2f& maxMain = minMain + scene->get<Components::collision>(main).size;
+		scene->get<Components::position>(main).mPosition + scene->get<Components::collision>(main).mOffset;
+	const Eigen::Vector2f& maxMain = minMain + scene->get<Components::collision>(main).mSize;
 
 	const Eigen::Vector2f& minB =
-		scene->get<Components::position>(b).pos + scene->get<Components::collision>(b).offset;
-	const Eigen::Vector2f& maxB = minB + scene->get<Components::collision>(b).size;
+		scene->get<Components::position>(b).mPosition + scene->get<Components::collision>(b).mOffset;
+	const Eigen::Vector2f& maxB = minB + scene->get<Components::collision>(b).mSize;
 
 	// on a x level
 	const bool notIntercecting = maxMain.x() <= minB.x()	// entity to the left of b
@@ -212,7 +214,7 @@ bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID mai
 void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	SDL_assert(a != b);
 	// Two components cannot be stationary at the same time
-	if (scene->get<Components::collision>(a).stationary && scene->get<Components::collision>(b).stationary) {
+	if (scene->get<Components::collision>(a).mStationary && scene->get<Components::collision>(b).mStationary) {
 		return;
 	}
 
@@ -223,16 +225,16 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	 */
 
 	const Eigen::Vector2f& leftA =
-		scene->get<Components::position>(a).pos + scene->get<Components::collision>(a).offset;
-	const Eigen::Vector2f& centerA = leftA + scene->get<Components::collision>(a).size / 2;
+		scene->get<Components::position>(a).mPosition + scene->get<Components::collision>(a).mOffset;
+	const Eigen::Vector2f& centerA = leftA + scene->get<Components::collision>(a).mSize / 2;
 
 	const Eigen::Vector2f& leftB =
-		scene->get<Components::position>(b).pos + scene->get<Components::collision>(b).offset;
-	const Eigen::Vector2f& centerB = leftB + scene->get<Components::collision>(b).size / 2;
+		scene->get<Components::position>(b).mPosition + scene->get<Components::collision>(b).mOffset;
+	const Eigen::Vector2f& centerB = leftB + scene->get<Components::collision>(b).mSize / 2;
 
 	const Eigen::Vector2f& distance = centerA - centerB;
 	const Eigen::Vector2f& minDistance =
-		(scene->get<Components::collision>(a).size + scene->get<Components::collision>(b).size) / 2;
+		(scene->get<Components::collision>(a).mSize + scene->get<Components::collision>(b).mSize) / 2;
 
 	SDL_assert(!(SDL_abs(distance.x()) > minDistance.x() || SDL_abs(distance.y()) > minDistance.y()) &&
 		   "The objects are not colliding?");
@@ -242,24 +244,24 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 
 	const Eigen::Vector2f& depth = Eigen::Vector2f(depthX, depthY);
 
-	if (scene->get<Components::collision>(a).stationary || scene->get<Components::collision>(b).stationary) {
-		const EntityID movable = scene->get<Components::collision>(a).stationary ? b : a;
+	if (scene->get<Components::collision>(a).mStationary || scene->get<Components::collision>(b).mStationary) {
+		const EntityID movable = scene->get<Components::collision>(a).mStationary ? b : a;
 
 		// The + and - are relative to the two, so when moving a gotta add, moving b gotta subtract
 		// Why a + and b -? IDFK. Just tried out a bunch of possible solutions and got this
 		// It works, don't touch (if it's not broken)
 		if (SDL_abs(depth.x()) <= SDL_abs(depth.y())) {
-			scene->get<Components::position>(movable).pos.x() += (movable == b ? -1 : 1) * depth.x();
+			scene->get<Components::position>(movable).mPosition.x() += (movable == b ? -1 : 1) * depth.x();
 		} else {
-			scene->get<Components::position>(movable).pos.y() += (movable == b ? -1 : 1) * depth.y();
+			scene->get<Components::position>(movable).mPosition.y() += (movable == b ? -1 : 1) * depth.y();
 		}
 	} else {
 		if (SDL_abs(depth.x()) <= SDL_abs(depth.y())) {
-			scene->get<Components::position>(a).pos.x() += (depth / 2).x();
-			scene->get<Components::position>(b).pos.x() += (-depth / 2).x();
+			scene->get<Components::position>(a).mPosition.x() += (depth / 2).x();
+			scene->get<Components::position>(b).mPosition.x() += (-depth / 2).x();
 		} else {
-			scene->get<Components::position>(a).pos.y() += (depth / 2).y();
-			scene->get<Components::position>(b).pos.y() += (-depth / 2).y();
+			scene->get<Components::position>(a).mPosition.y() += (depth / 2).y();
+			scene->get<Components::position>(b).mPosition.y() += (-depth / 2).y();
 		}
 	}
 }

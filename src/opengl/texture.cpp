@@ -4,7 +4,6 @@
 #include "third_party/stb_image.h"
 #include "utils.hpp"
 
-#include <format>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <SDL3/SDL.h>
@@ -15,7 +14,7 @@
 Texture::Texture(const std::string_view& path) : name(path), mWidth(0), mHeight(0) {}
 
 Texture::Texture(const FT_Bitmap& bitmap)
-	: name(std::format("from freetype bitmap {}x{}", bitmap.width, bitmap.rows)), mWidth(bitmap.width),
+	: name(string_format("from freetype bitmap %ux%u", bitmap.width, bitmap.rows)), mWidth(bitmap.width),
 	  mHeight(bitmap.rows) {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -83,11 +82,21 @@ void Texture::load(const bool srgb) {
 	switch (channels) {
 		case 3:
 			format = GL_RGB;
+#ifdef __ANDROID__
+			intFormat = GL_RGB;
+#else
 			intFormat = GL_SRGB;
+#endif
+
 			break;
 		case 4:
 			format = GL_RGBA;
+#ifdef __ANDROID__
+			intFormat = GL_RGBA;
+#else
 			intFormat = GL_SRGB_ALPHA;
+#endif
+
 			break;
 		[[unlikely]] default:
 			SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "\x1B[31m%s:%d Unimplemented image format: %s: %d\033[0m",

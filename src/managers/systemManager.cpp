@@ -9,12 +9,13 @@
 #include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
-#include <format>
 #include <memory>
 
 #ifdef IMGUI
-#include <cstdint>
 #include "imgui.h"
+
+#include <cstdint>
+#include <format>
 #endif
 
 SystemManager::SystemManager(Game* game) : mGame(game) {
@@ -87,14 +88,16 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 				if (scene->contains<Components::position>(entity)) {
 					ImGui::BulletText(
 						"Components::position %s",
-						std::format("pos {}", scene->get<Components::position>(entity).pos)
+						std::format("pos {}",
+							    scene->get<Components::position>(entity).mPosition)
 							.data());
 				}
 
 				if (scene->contains<Components::velocity>(entity)) {
 					ImGui::BulletText(
 						"Components::velocity %s",
-						std::format("vel {}", scene->get<Components::velocity>(entity).vel)
+						std::format("vel {}",
+							    scene->get<Components::velocity>(entity).mVelocity)
 							.data());
 				}
 
@@ -102,9 +105,9 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 					ImGui::BulletText(
 						"Components::collision %s",
 						std::format("offset {} size {} stationary {}",
-							    scene->get<Components::collision>(entity).offset,
-							    scene->get<Components::collision>(entity).size,
-							    scene->get<Components::collision>(entity).stationary)
+							    scene->get<Components::collision>(entity).mOffset,
+							    scene->get<Components::collision>(entity).mSize,
+							    scene->get<Components::collision>(entity).mStationary)
 							.data());
 				}
 
@@ -114,10 +117,10 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 						"Components::texture %s",
 						std::format("texture {} shader {} scale {}",
 							    reinterpret_cast<std::uintptr_t>(
-								    scene->get<Components::texture>(entity).texture),
+								    scene->get<Components::texture>(entity).mTexture),
 							    reinterpret_cast<std::uintptr_t>(
-								    scene->get<Components::texture>(entity).shader),
-							    scene->get<Components::texture>(entity).scale)
+								    scene->get<Components::texture>(entity).mShader),
+							    scene->get<Components::texture>(entity).mScale)
 							.data());
 				}
 
@@ -125,20 +128,21 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 					ImGui::BulletText(
 						"Components::input %s",
 						std::format("{}",
-							    scene->get<Components::input>(entity).function != nullptr)
+							    scene->get<Components::input>(entity).mFunction != nullptr)
 							.data());
 				}
 
 				if (scene->contains<Components::text>(entity)) {
 					ImGui::BulletText(
 						"Components::text %s",
-						std::format("id {}", scene->get<Components::text>(entity).id).data());
+						std::format("id {}", scene->get<Components::text>(entity).mID).data());
 				}
 
 				if (scene->contains<Components::misc>(entity)) {
 					ImGui::BulletText(
 						"Components::misc %s",
-						std::format("what {}", scene->get<Components::misc>(entity).what).data());
+						std::format("what {}", scene->get<Components::misc>(entity).mWhat)
+							.data());
 				}
 
 				ImGui::TreePop();
