@@ -116,8 +116,6 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 	SDL_ReadStorageFile(storage, "worlds.json", buffer, info.size);
 	buffer[info.size] = 0; // Ensure null terminasion
 
-	SDL_Log("%lu %s", info.size, buffer);
-
 	nlohmann::json worlds;
 	try {
 		worlds = nlohmann::json::parse(buffer);

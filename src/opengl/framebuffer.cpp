@@ -97,6 +97,11 @@ void Framebuffer::swap() {
 
 	Shader* mShader = mOwner->getShader("framebuffer.vert", "framebuffer.frag");
 	mShader->activate();
+#ifdef GLES
+	mShader->set("gamma", false);
+#else
+	mShader->set("gamma", true);
+#endif
 
 	glBindTexture(GL_TEXTURE_2D, mScreenTexture);
 
