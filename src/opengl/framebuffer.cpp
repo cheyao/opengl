@@ -25,6 +25,7 @@ Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mRBO(0), mScreen(
 	SDL_Log("Framebuffer.cpp: Generating framebuffer");
 
 	SDL_assert(glGenFramebuffers != nullptr);
+	SDL_assert(glGenRenderbuffers != nullptr);
 
 	glGenFramebuffers(1, &mScreen);
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
@@ -97,6 +98,7 @@ void Framebuffer::swap() {
 
 	Shader* mShader = mOwner->getShader("framebuffer.vert", "framebuffer.frag");
 	mShader->activate();
+
 #ifdef GLES
 	mShader->set("gamma", false);
 #else

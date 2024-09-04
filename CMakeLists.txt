@@ -128,9 +128,9 @@ set(ASSETS_EMBED_WEB
 )
 
 if(ANDROID STREQUAL ON) 
-	message("-- Building android apk - experimental")
+	message("-- Building android apk with cmake - experimental")
 	message("-- Progress bar doesn't work, please wait till the end")
-	message("-- If this doesn't work, go to android folder and run ./gradlew assembleRelease")
+	message("-- If this doesn't work, go to \"android\" folder and run ./gradlew assembleRelease")
 
 	set(NAMESPACE com.cyao.${PROJECT_NAME})
 	set(BUILD_NAME ${PROJECT_NAME})
@@ -164,7 +164,7 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	set(APPLE TRUE)
 	set(BUILD_NAME ${PROJECT_NAME})
 
-	message("-- Building for MacOS, to build universal package set \"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64?\"")
+	message("-- Building for MacOS, to build universal package set \"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64\"")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WINDOWS TRUE)
 	set(BUILD_NAME ${PROJECT_NAME})
@@ -174,9 +174,10 @@ elseif(EMSCRIPTEN)
 	set(WEB TRUE)
 	set(BUILD_NAME ${PROJECT_NAME})
 
-	set(CMAKE_EXECUTABLE_SUFFIX .js) # Making javascript from C++ :sunglasses:
+	set(CMAKE_EXECUTABLE_SUFFIX .js) # Writing javascript from C++ :sunglasses:
 	configure_file(cmake/index.html.in ${CMAKE_BINARY_DIR}/index.html)
-message("-- Building for web, did you unset your env vals? \"unset CXXFLAGS CXX CPPFLAGS CC CFLAGS LDFLAGS\"")
+
+	message("-- Building for web, did you unset your env vals? \"unset CXXFLAGS CXX CPPFLAGS CC CFLAGS LDFLAGS\"")
 else()
 	set(BUILD_NAME ${PROJECT_NAME})
 endif()
@@ -351,7 +352,7 @@ elseif(ANDROID)
 endif()
 
 # ImGUI
-if(IMGUI STREQUAL ON AND CHECKS STREQUAL OFF)
+if(IMGUI STREQUAL ON)
 	message("-- Enabling IMGUI")
 
 	if(EXISTS external/imgui/backends)
@@ -454,7 +455,7 @@ if(CLANG_TIDY STREQUAL ON)
 	message("-- Running clang tidy")
 	find_program(CLANG_TIDY_EXE NAMES clang-tidy REQUIRED)
 	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-	set(CLANG_TIDY_COMMAND "${CLANG_TIDY_EXE}" "--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy;--use-color")
+	set(CLANG_TIDY_COMMAND "${CLANG_TIDY_EXE}" "--config-file=${CMAKE_SOURCE_DIR}/.clang-tidy" "--use-color")
 	set_target_properties(${BUILD_NAME} PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
 if(CPPCHECK STREQUAL ON)

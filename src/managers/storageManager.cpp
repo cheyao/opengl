@@ -8,8 +8,10 @@
 #include <SDL3/SDL.h>
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 /*
  * A World shall consist of 3 fields:
@@ -25,7 +27,7 @@ void StorageManager::restore() {
 
 	SDL_Storage* storage = SDL_OpenUserStorage("cyao", "opengl", 0);
 	if (storage == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to open user storage: %s\033[0m",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to open user storage: %s\033[0m",
 				SDL_GetError());
 		ERROR_BOX("Failed to open storage");
 
@@ -38,7 +40,7 @@ void StorageManager::restore() {
 
 		++times;
 		if (times >= 100) {
-			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to open user storage: %s\033[0m",
+			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to open user storage: %s\033[0m",
 					SDL_GetError());
 			ERROR_BOX("Failed to open storage");
 
@@ -49,7 +51,7 @@ void StorageManager::restore() {
 	try {
 		restoreState(storage);
 	} catch (const nlohmann::json::parse_error& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to parse json: id %d %s at %zu\033[0m",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s at %zu\033[0m",
 				error.id, error.what(), error.byte);
 		ERROR_BOX("Failed to parse json");
 
@@ -58,7 +60,7 @@ void StorageManager::restore() {
 
 	SDL_CloseStorage(storage);
 
-	SDL_Log("\x1B[32mSuccessfully loaded state\033[0m");
+	SDL_Log("\033[32mSuccessfully loaded state\033[0m");
 }
 
 StorageManager::~StorageManager() {
@@ -66,7 +68,7 @@ StorageManager::~StorageManager() {
 
 	SDL_Storage* storage = SDL_OpenUserStorage("cyao", "opengl", 0);
 	if (storage == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to open user storage: %s\033[0m",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to open user storage: %s\033[0m",
 				SDL_GetError());
 		ERROR_BOX("Failed to open storage: Not saving");
 
@@ -78,7 +80,7 @@ StorageManager::~StorageManager() {
 		SDL_Delay(10);
 		++i;
 		if (i >= 100) {
-			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to open user storage: %s\033[0m",
+			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to open user storage: %s\033[0m",
 					SDL_GetError());
 			ERROR_BOX("Failed to open storage: Not saving");
 
@@ -89,7 +91,7 @@ StorageManager::~StorageManager() {
 	try {
 		saveState(storage);
 	} catch (const nlohmann::json::parse_error& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to parse json: id %d %s at %zu\033[0m",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s at %zu\033[0m",
 				error.id, error.what(), error.byte);
 		ERROR_BOX("Failed to parse json");
 
@@ -98,13 +100,13 @@ StorageManager::~StorageManager() {
 
 	SDL_CloseStorage(storage);
 
-	SDL_Log("\x1B[32mSuccessfully saved state\033[0m");
+	SDL_Log("\033[32mSuccessfully saved state\033[0m");
 }
 
 // TODO: Binary json https://json.nlohmann.me/features/binary_formats/
 void StorageManager::restoreState(SDL_Storage* storage) {
 	if (!SDL_GetStoragePathInfo(storage, "worlds.json", nullptr)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mNo save index file found! Loading new state\033[0m");
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mNo save index file found! Loading new state\033[0m");
 
 		throw std::runtime_error("No save index file");
 	}
@@ -122,7 +124,7 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 
 		delete[] buffer;
 	} catch (const nlohmann::json::parse_error& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to parse json: id %d %s at %zu\033[0m",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s at %zu\033[0m",
 				error.id, error.what(), error.byte);
 
 		delete[] buffer;
@@ -133,7 +135,7 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 	SDL_assert(worlds["version"] == 100);
 
 	if (worlds["worlds"].empty()) {
-		SDL_Log("\x1B[31mWorlds empty! Returning\033[0m");
+		SDL_Log("\033[31mWorlds empty! Returning\033[0m");
 
 		return;
 	}
@@ -148,7 +150,7 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 
 void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& world) {
 	if (!SDL_GetStoragePathInfo(storage, (world + ".json").data(), nullptr)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mNo save file %s found! Loading new state\033[0m",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mNo save file %s found! Loading new state\033[0m",
 				world.data());
 
 		throw std::runtime_error("No save index file");
@@ -167,7 +169,7 @@ void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& w
 
 		delete[] buffer;
 	} catch (const nlohmann::json::parse_error& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to parse json %s: id %d %s at %zu\033[0m",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json %s: id %d %s at %zu\033[0m",
 				world.data(), error.id, error.what(), error.byte);
 
 		delete[] buffer;
@@ -200,7 +202,7 @@ void StorageManager::saveState(SDL_Storage* storage) {
 		try {
 			worlds = nlohmann::json::parse(buffer);
 		} catch (const nlohmann::json::parse_error& error) {
-			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to parse json: id %d %s at %zu\033[0m",
+			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s at %zu\033[0m",
 					error.id, error.what(), error.byte);
 		}
 
@@ -211,12 +213,22 @@ void StorageManager::saveState(SDL_Storage* storage) {
 	constexpr const static char* worldName = "world";
 
 	// FIXME: Version compatability
-	// TODO: Save some world info
+	// TODO: Save some more world info
+	// TODO: Self-recovery incase of corrupted world save
 	worlds["version"] = 100;
-	worlds["worlds"] = {worldName};
+
+	if (worlds.contains("worlds")) {
+		const auto& worldList = worlds["worlds"].get<std::vector<std::string_view>>();
+
+		if (std::find(worldList.begin(), worldList.end(), worldName) == worldList.end()) {
+			worlds["worlds"] += worldName;
+		}
+	} else {
+		worlds["worlds"] = {worldName};
+	}
 
 	if (oldWorlds && !SDL_RenameStoragePath(storage, "worlds.json", "worlds.json.old")) {
-		SDL_Log("\x1B[31mFailed to rename world.json to worlds.json.old %s, ignoring...\033[0m",
+		SDL_Log("\033[31mFailed to rename world.json to worlds.json.old %s, ignoring...\033[0m",
 			SDL_GetError());
 	}
 
@@ -228,7 +240,7 @@ void StorageManager::saveState(SDL_Storage* storage) {
 void StorageManager::saveWorld(struct SDL_Storage* storage, const std::string& world) {
 	if (SDL_GetStoragePathInfo(storage, (world + ".json").data(), nullptr)) {
 		if (!SDL_RenameStoragePath(storage, (world + ".json").data(), (world + ".json.old").data())) {
-			SDL_Log("\x1B[31mFailed to rename world.json to world.json.old %s, ignoring...\033[0m",
+			SDL_Log("\033[31mFailed to rename world.json to world.json.old %s, ignoring...\033[0m",
 				SDL_GetError());
 		}
 	}

@@ -107,7 +107,8 @@ Game::Game()
 				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid operation\033[0m");
 				break;
 			case GL_INVALID_FRAMEBUFFER_OPERATION:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid framebuffer op\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER,
+					     "\x1B[31mInit GLError: Invalid framebuffer op\033[0m");
 				break;
 			case GL_OUT_OF_MEMORY:
 				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Out of memory\033[0m");
