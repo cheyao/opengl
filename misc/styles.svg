@@ -24,12 +24,14 @@
 						0 4px 0 #efefef,
 						0 12px 5px rgba(0, 0, 0, 0.1);
 					animation: rotate ease-in-out 1s infinite alternate;
+					color: white;
 				}
 
 				p {
 					font-size: 20px;
 					text-shadow: 0 1px 0 #efefef;
 					animation: 5s ease 0s normal forwards 1 fadeIn;
+					color: white;
 				}
 
 				.flip {
