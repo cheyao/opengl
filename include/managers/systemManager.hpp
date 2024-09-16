@@ -17,6 +17,9 @@ class SystemManager {
 	void update(class Scene* scene, const float delta);
 
 	void setDemensions(const int width, const int height);
+	// Clicks must be event driven
+	void registerClick(const float x, const float y);
+
 	[[nodiscard]] Eigen::Vector2f getDemensions() const;
 	[[nodiscard]] class Texture* getTexture(const std::string& name, const bool srgb = false);
 	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,

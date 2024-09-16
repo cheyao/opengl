@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <functional>
 
+// PERF: Grid blocks, convert to cords in shader
+
 namespace Components {
 struct position {
 	position(const Eigen::Vector2f position) : mPosition(position) {}
