@@ -1,6 +1,7 @@
 #include "managers/eventManager.hpp"
 
 #include "game.hpp"
+#include "managers/systemManager.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -49,6 +50,8 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 			break;
 		}
 
+			// TODO: Fingers
+
 			/*
 			case SDL_EVENT_FINGER_DOWN: {
 				const Eigen::Vector2f dimensions = mGame->getDemensions();
@@ -69,27 +72,15 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 
 				break;
 			}
-
-			case SDL_EVENT_MOUSE_BUTTON_DOWN: {
-				const Eigen::Vector2f dimensions = mGame->getDemensions();
-				for (const auto& ui : mGame->getUIs()) {
-					ui->touch(static_cast<SDL_FingerID>(event.button.which), event.button.x,
-						  static_cast<float>(dimensions.y()) - event.button.y, false);
-				}
-
-				break;
-			}
-
-			case SDL_EVENT_MOUSE_BUTTON_UP: {
-				const Eigen::Vector2f dimensions = mGame->getDemensions();
-				for (const auto& ui : mGame->getUIs()) {
-					ui->touch(static_cast<SDL_FingerID>(event.button.which), event.button.x,
-						  static_cast<float>(dimensions.y()) - event.button.y, true);
-				}
-
-				break;
-			}
 			*/
+
+		case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+			if (event.button.button == SDL_BUTTON_LEFT) {
+				mGame->getSystemManager()->registerClick(event.button.x, event.button.y);
+			}
+
+			break;
+		}
 
 		[[likely]] default:
 			break;

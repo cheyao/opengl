@@ -12,13 +12,21 @@ class InputSystem {
 	// Updates velocity and mouse
 	void update(class Scene* scene, const float delta);
 
-      private:
-	void updateMouse(class Scene* scene, const float delta);
-	void registerClick(const float x, const float y);
+	void registerClick(const float x, const float y) {
+		mPressLength += 0.000001;
+		mPressedX = x;
+		mPressedY = y;
+	}
 
-	constexpr const static float LONG_PRESS_ACTIVATION_TIME = 0.5f;
+      private:
+	constexpr const static float LONG_PRESS_ACTIVATION_TIME = 0.3f;
+
+	void updateMouse(class Scene* scene, const float delta);
 
 	class Game* mGame;
 
+	// FIXME: When xy changed, reset length
+	float mPressedX;
+	float mPressedY;
 	float mPressLength;
 };
