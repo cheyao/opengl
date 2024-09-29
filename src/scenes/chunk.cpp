@@ -85,6 +85,11 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 		for (std::size_t j = 0; j < data["blocks"][i].size(); ++j) {
 			const auto& block = static_cast<Components::block::BlockType>(data["blocks"][i][j]);
 
+			if (block == Components::block::AIR) {
+				mBlocks[i].emplace_back(0);
+				continue;
+			}
+
 			SDL_assert(blockToTexture.contains(block));
 
 			Texture* texture = blockToTexture[block]();
@@ -115,6 +120,11 @@ nlohmann::json Chunk::save(Scene* scene) {
 	chunk["position"] = mPosition;
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		for (std::size_t j = 0; j < mBlocks[i].size(); ++j) {
+			if (!scene->valid(mBlocks[i][j])) {
+				chunk["blocks"][i][j] = Components::block::AIR;
+				continue;
+			}
+
 			chunk["blocks"][i][j] =
 				static_cast<std::uint64_t>(scene->get<Components::block>(mBlocks[i][j]).mType);
 		}

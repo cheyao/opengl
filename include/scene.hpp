@@ -16,9 +16,7 @@ class Scene {
 #endif
 
       public:
-	Scene()
-		: mEntityManager(new EntityManager()), mComponentManager(new ComponentManager()), mEntities(),
-		  mSignals() {}
+	Scene() : mEntityManager(new EntityManager()), mComponentManager(new ComponentManager()), mSignals() {}
 	Scene(Scene&&) = delete;
 	Scene(const Scene&) = delete;
 	Scene& operator=(Scene&&) = delete;
@@ -30,17 +28,16 @@ class Scene {
 
 	// This returns a UUID for a new entity
 	[[nodiscard]] EntityID newEntity() {
-		mEntities.emplace_back(mEntityManager->getEntity());
-		return mEntities.back();
+		const EntityID entity = mEntityManager->getEntity();
+#ifdef IMGUI
+		mDebugEntities.emplace_back(entity);
+#endif
+		return entity;
 	}
-
 	// Adds a component to an entity
 	template <typename Component, typename... Args> void emplace(const EntityID entity, Args&&... args) {
 		static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->emplace(entity, args...);
 	}
-
-	// TODO:
-	// void remove()
 
 	// Returns the component of the entity
 	template <typename Component> [[nodiscard]] Component& get(const EntityID entity) const {
@@ -57,19 +54,32 @@ class Scene {
 		return sparse_set_view<Components...>(mComponentManager);
 	}
 
-	bool& getSignal(const std::string& signal) {
+	void erase(const EntityID entity) noexcept {
+		mComponentManager->erase(entity);
+		mEntityManager->releaseEntity(entity);
+
+#ifdef IMGUI
+		mDebugEntities.erase(std::find(mDebugEntities.begin(), mDebugEntities.end(), entity));
+#endif
+	}
+
+	[[nodiscard]] bool valid(const EntityID entity) noexcept { return mEntityManager->valid(entity); }
+
+	[[nodiscard]] bool& getSignal(const std::string& signal) noexcept {
 		if (!mSignals.contains(signal)) {
 			mSignals[signal] = false;
 		}
 
 		return mSignals[signal];
 	}
-	void clearSignals() { mSignals.clear(); }
+	void clearSignals() noexcept { mSignals.clear(); }
 
       private:
 	class EntityManager* mEntityManager;
 	class ComponentManager* mComponentManager;
 
-	std::vector<EntityID> mEntities;
 	std::unordered_map<std::string, bool> mSignals;
+#ifdef IMGUI
+	std::vector<EntityID> mDebugEntities;
+#endif
 };

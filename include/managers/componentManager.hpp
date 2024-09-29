@@ -4,7 +4,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <functional>
 #include <limits>
 
 using ComponentID = std::uint64_t;
@@ -19,8 +18,8 @@ class ComponentManager {
 	ComponentManager& operator=(ComponentManager&&) = delete;
 	ComponentManager& operator=(const ComponentManager&) = delete;
 	~ComponentManager() {
-		for (const auto& destructor : mDestructors) {
-			destructor();
+		for (const auto& pool : mPools) {
+			delete pool;
 		}
 	}
 
@@ -30,21 +29,26 @@ class ComponentManager {
 
 		// Maybe getPool()?
 		if (mPools.size() <= componentID) {
-			mPools.emplace_back(new sparse_set<Component>());
-			mDestructors.emplace_back(std::bind(&sparse_set<Component>::destroy,
-							    static_cast<sparse_set<Component>*>(mPools.back())));
+			mPools.emplace_back(static_cast<base_sparse_set*>(new sparse_set<Component>()));
 		}
 
 		return componentID;
 	}
 
 	template <typename Component> [[nodiscard]] sparse_set<Component>* getPool() {
-		return static_cast<sparse_set<Component>*>(mPools[getID<Component>()]);
+		return dynamic_cast<sparse_set<Component>*>(mPools[getID<Component>()]);
+	}
+
+	void erase(const EntityID entity) noexcept {
+		for (auto& pool : mPools) {
+			if (pool->contains(entity)) {
+				pool->erase(entity);
+			}
+		}
 	}
 
       private:
 	size_t mComponentCount;
-	std::vector<void*> mPools;
+	std::vector<base_sparse_set*> mPools;
 	// References to destructors of the pools
-	std::vector<std::function<void()>> mDestructors;
 };

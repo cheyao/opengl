@@ -1,5 +1,6 @@
 #pragma once
 
+#include "imgui.h"
 #include "managers/entityManager.hpp"
 
 #include <SDL3/SDL.h>
@@ -50,9 +51,19 @@ template <typename Container>
 	return !(lhs == rhs);
 }
 
+class base_sparse_set {
+      public:
+	virtual ~base_sparse_set() = 0;
+	[[nodiscard]] virtual bool contains(const EntityID entity) const = 0;
+	virtual void erase(const EntityID entity) = 0;
+};
+
+// Prevent the destructor to crash the program due to polymorphism
+inline base_sparse_set::~base_sparse_set() {}
+
 // PERF: https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf
 // FIXME: This is probably not the best implementation
-template <typename Component> class sparse_set {
+template <typename Component> class sparse_set : public base_sparse_set {
 	using iterator = sparse_set_iterator<std::vector<EntityID>>;
 
       public:
@@ -64,9 +75,7 @@ template <typename Component> class sparse_set {
 	sparse_set(const sparse_set&) = delete;
 	sparse_set& operator=(sparse_set&&) = delete;
 	sparse_set& operator=(const sparse_set&) = delete;
-	~sparse_set() = default;
-
-	void destroy() { delete this; }
+	~sparse_set() override {}
 
 	template <typename... Args> void emplace(const EntityID entity, Args&&... args) {
 		while (mSparseContainer.size() <= entity) {
@@ -74,7 +83,8 @@ template <typename Component> class sparse_set {
 		}
 
 		if (mSparseContainer[entity] != 0) {
-			SDL_Log("\033[93mSparse_set.cpp: Container already contains entity %" PRIu64 "!\033[0m", entity);
+			SDL_Log("\033[93mSparse_set.cpp: Container already contains entity %" PRIu64 "!\033[0m",
+				entity);
 		}
 
 		mSparseContainer[entity] = mPackedContainer.size();
@@ -98,7 +108,7 @@ template <typename Component> class sparse_set {
 		return mComponents[mSparseContainer[entity]];
 	}
 
-	[[nodiscard]] bool contains(const EntityID entity) const {
+	[[nodiscard]] bool contains(const EntityID entity) const noexcept override {
 		if (entity >= mSparseContainer.size() || mSparseContainer[entity] >= mPackedContainer.size()) {
 			return false;
 		}
@@ -112,7 +122,21 @@ template <typename Component> class sparse_set {
 
 	[[nodiscard]] iterator end() const noexcept { return iterator{mPackedContainer, {}}; }
 
+	[[nodiscard]] bool empty() const noexcept { return mPackedContainer.empty(); }
+
 	[[nodiscard]] EntityID* data() noexcept { return mPackedContainer.data(); }
+
+	void erase(const EntityID entity) override {
+		// https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf
+		mSparseContainer[mPackedContainer.back()] = mSparseContainer[entity];
+		mPackedContainer[mSparseContainer[entity]] = mPackedContainer.back();
+		mComponents[mSparseContainer[entity]] = mComponents.back();
+		mPackedContainer.pop_back();
+		mComponents.pop_back();
+
+		mSparseContainer[entity] = 0; // 1. The index of EntityIndices, equal to the value of the entity, is
+					      // removed (leaving a hole)
+	}
 
       private:
 	// Index is entity ID, value is ptr to packed container

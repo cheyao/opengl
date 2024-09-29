@@ -66,7 +66,7 @@ struct misc {
 
 struct block {
 	enum BlockType {
-		AIR,
+		AIR = 0,
 		GRASS_BLOCK,
 		DIRT,
 		STONE,

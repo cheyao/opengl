@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 project(
 	OpenGL
 	LANGUAGES C CXX
@@ -20,7 +20,7 @@ option(OPTIMIZE		"Optimize a lot" OFF)
 option(MOLD		"Use mold" OFF)
 # TODO: option(VENDOR 		"Vendor libraries" OFF)
 
-option(HIDPI		"High dpi" OFF)
+option(HIDPI		"High DPI" OFF)
 
 # Misc
 option(ADDRESS	 	"Use address sanitizer" OFF)
@@ -158,28 +158,34 @@ endif()
 #
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Android")
-	set(ANDROID TRUE)
 	set(BUILD_NAME main) # Android needs this as libmain
+else()
+	set(BUILD_NAME ${PROJECT_NAME})
+endif()
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Android")
+	set(ANDROID TRUE)
+
+	message("-- Building for Android")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	set(APPLE TRUE)
-	set(BUILD_NAME ${PROJECT_NAME})
 
 	message("-- Building for MacOS, to build universal package set \"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64\"")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WINDOWS TRUE)
-	set(BUILD_NAME ${PROJECT_NAME})
 
 	set(CMAKE_EXECUTABLE_SUFFIX .exe) # Is this needed?
+
+	message("-- Building for Windows, I recommend you to use mingw or unix stuff")
 elseif(EMSCRIPTEN)
 	set(WEB TRUE)
-	set(BUILD_NAME ${PROJECT_NAME})
 
 	set(CMAKE_EXECUTABLE_SUFFIX .js) # Writing javascript from C++ :sunglasses:
 	configure_file(cmake/index.html.in ${CMAKE_BINARY_DIR}/index.html)
 
 	message("-- Building for web, did you unset your env vals? \"unset CXXFLAGS CXX CPPFLAGS CC CFLAGS LDFLAGS\"")
 else()
-	set(BUILD_NAME ${PROJECT_NAME})
+	message("-- WARNING: Building for unknown platform, this might not work correctly")
 endif()
 
 #
@@ -193,14 +199,11 @@ endif()
 
 # Platform dependent flags
 if (ANDROID)
-	message("-- Building for Android")
-
+	# The NDK and SDL will link for a library called libmain.so
 	add_library(${BUILD_NAME} SHARED ${SRC})
 
 	target_compile_options(${BUILD_NAME} PRIVATE -DGLES -DANDROID)
 elseif(APPLE)
-	message("-- Building for MacOS")
-
 	if(DEBUG)
 		add_executable(${BUILD_NAME} ${SRC})
 	else()
@@ -221,16 +224,12 @@ elseif(APPLE)
 
 	target_link_libraries(${BUILD_NAME} PRIVATE ${OPENGL_LIBRARIES})
 elseif(WINDOWS)
-	message("-- Building for windows")
-
 	add_executable(${BUILD_NAME} WIN32 ${SRC})
 
 	if(NOT MSVC)
 		target_compile_options(${BUILD_NAME} PRIVATE -D__WINDOWS__)
 	endif()
 elseif(WEB)
-	message("-- Building for the web")
-
 	add_executable(${BUILD_NAME} ${SRC})
 
 	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -DGLES -sNO_DISABLE_EXCEPTION_CATCHING)
@@ -246,14 +245,13 @@ elseif(WEB)
 		add_custom_target(WebCopyInclude ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../include ${CMAKE_BINARY_DIR}/include)
 	endif()
 else()
-	message("-- Building for linux")
-
 	add_executable(${BUILD_NAME} ${SRC})
 endif()
 
 # General flags
 if(MSVC)
 	if(DEBUG)
+		# TODO: Find out the correct msvc flags
 		target_compile_options(${BUILD_NAME} PRIVATE /W4 /WX /MDd /Zi /Ob0 /Od /RTC1 /W3 /GR /EHsc)
 		target_compile_definitions(${BUILD_NAME} PRIVATE /DWIN32 /D__WINDOWS__ /DDEBUG /D_DEBUG)
 	else()
@@ -356,7 +354,7 @@ if(IMGUI STREQUAL ON)
 	message("-- Enabling IMGUI")
 
 	if(EXISTS external/imgui/backends)
-		message(FATAL_ERROR "Please run git submodule update --remote --init external/imgui")
+		message(FATAL_ERROR "Please run git submodule update --remote --init ${CMAKE_PROJECT_DIR}/external/imgui")
 	endif()
 
 	target_sources(${BUILD_NAME} PRIVATE ${IMGUI_SRC})
@@ -379,23 +377,22 @@ if(NOT DEBUG AND NOT ANDROID AND NOT WEB AND NOT CMAKE_BUILD_TYPE STREQUAL RelWi
 
 	if(APPLE)
 		add_custom_command(
-			TARGET ${BUILD_NAME} 
+			TARGET ${BUILD_NAME}
 			POST_BUILD
-			COMMAND ${CMAKE_STRIP} 
+			COMMAND ${CMAKE_STRIP}
 			ARGS ${BUILD_NAME}.app/Contents/MacOS/${BUILD_NAME}
 		)
 	else()
 		add_custom_command(
-			TARGET ${BUILD_NAME} 
+			TARGET ${BUILD_NAME}
 			POST_BUILD
-			COMMAND ${CMAKE_STRIP} 
+			COMMAND ${CMAKE_STRIP}
 			ARGS ${BUILD_NAME}${CMAKE_EXECUTABLE_SUFFIX}
 		)
 	endif()
 endif()
 
 # Generate locals
-# FIXME: This prob brakes with some platforms
 add_custom_command(
 	POST_BUILD
 	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/en.json"
@@ -438,10 +435,12 @@ endif()
 
 # Checks
 if(CHECKS STREQUAL ON)
-	set(IWYU ON)
+	set(IWYU       ON)
 	set(CLANG_TIDY ON)
-	set(CPPCHECK ON)
-	set(SANITIZE ON)
+	set(CPPCHECK   ON)
+	set(ADDRESS    ON)
+	set(LEAK       ON)
+	set(UNDEFINED  ON)
 	set(CMAKE_BUILD_TYPE Debug)
 endif()
 

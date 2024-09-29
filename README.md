@@ -221,11 +221,10 @@ The systems manage all the logic and changes the components
     - [x] Velocity arrows
     - [x] Component and entity list
         - [ ] Real time component and entity addition
-- [x] UI
-    - [x] Divs
-    - [x] Embed text in buttons
+- [ ] UI
+    - [ ] Embed text in buttons
     - [ ] MacOS: Link new freetype version
-- [x] Pause menu etc
+- [ ] Pause menu etc
     - [x] Text
     - [ ] Settings
 - [x] Localization
@@ -233,7 +232,7 @@ The systems manage all the logic and changes the components
     - [ ] Maybe [ICU](https://icu.unicode.org/)?
 - [x] Emscripten build
     - [ ] Progress bar
-    - [ ] White text
+    - [ ] Text with contrast
 - [x] TTF
     - [ ] Button auto scale + text
     - [ ] Generate texturemap

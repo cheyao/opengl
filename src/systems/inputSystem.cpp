@@ -1,10 +1,12 @@
 #include "systems/inputSystem.hpp"
 
 #include "opengl/texture.hpp"
+
 #include "components.hpp"
 #include "game.hpp"
 #include "misc/sparse_set_view.hpp"
 #include "scene.hpp"
+#include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
 #include <functional>
@@ -30,13 +32,17 @@ void InputSystem::updateMouse(class Scene* scene, const float delta) {
 	float x = 0;
 	float y = 0;
 	const SDL_MouseButtonFlags flags = SDL_GetMouseState(&x, &y);
+
+	// Convert Y to opengl cords
+	y = mGame->getDemensions().y() - y;
+
 	const bool leftClick = flags & SDL_BUTTON(1);
 
 	if (leftClick) {
 		mPressLength += delta;
 
 		if (mPressLength >= LONG_PRESS_ACTIVATION_TIME) {
-			SDL_Log("Long click for %f", mPressLength);
+			SDL_Log("Unhandled ong click for %f", mPressLength);
 		}
 	}
 
@@ -46,12 +52,12 @@ void InputSystem::updateMouse(class Scene* scene, const float delta) {
 		     scene->view<Components::block, Components::position, Components::texture>().each()) {
 			// FIXME: Better collisions
 			// FIXME: Scaling
-			if (x < position.mPosition.x() ||
-			    x > position.mPosition.x() + texture.mTexture->getWidth()) {
+			if ((x <= position.mPosition.x() || x >= position.mPosition.x() + texture.mTexture->getWidth() * texture.mScale) ||
+			    (y <= position.mPosition.y() || y >= position.mPosition.y() + texture.mTexture->getHeight() * texture.mScale)) {
 				continue;
 			}
 
-			SDL_Log("Clicked on enitty %llu", entity);
+			scene->erase(entity);
 
 			// NOTE: Maybe debug test if we clicked on multiple entities?
 			break;

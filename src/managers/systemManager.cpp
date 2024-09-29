@@ -87,7 +87,7 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 		ImGui::Begin("Entity list");
 
 		// TODO: Find some better way then to manually check
-		for (const auto& entity : scene->mEntities) {
+		for (const auto& entity : scene->mDebugEntities) {
 			if (ImGui::TreeNode(std::format("Entity {}", entity).data())) {
 				if (scene->contains<Components::position>(entity)) {
 					ImGui::BulletText(

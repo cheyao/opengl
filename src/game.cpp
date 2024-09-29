@@ -165,19 +165,19 @@ SDL_AppResult Game::iterate() {
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		switch (err) {
 			case GL_INVALID_ENUM:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mGLError: Invalid enum\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\333[31mGLError: Invalid enum\033[0m");
 				break;
 			case GL_INVALID_VALUE:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mGLError: Invalid value\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\033[31mGLError: Invalid value\033[0m");
 				break;
 			case GL_INVALID_OPERATION:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mGLError: Invalid operation\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\033[31mGLError: Invalid operation\033[0m");
 				break;
 			case GL_INVALID_FRAMEBUFFER_OPERATION:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mGLError: Invalid framebuffer op\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\033[31mGLError: Invalid framebuffer op\033[0m");
 				break;
 			case GL_OUT_OF_MEMORY:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mGLError: Out of memory\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\033[31mGLError: Out of memory\033[0m");
 				break;
 		}
 	}

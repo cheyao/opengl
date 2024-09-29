@@ -13,3 +13,8 @@ EntityID EntityManager::getEntity() {
 }
 
 void EntityManager::releaseEntity(EntityID entity) { mReleased.emplace_back(entity); }
+
+bool EntityManager::valid(const EntityID entity) const {
+	return entity != 0 && std::find(mReleased.begin(), mReleased.end(), entity) == mReleased.end() &&
+	       entity < mNext;
+}
