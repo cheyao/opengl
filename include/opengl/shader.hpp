@@ -10,8 +10,7 @@
 
 class Shader {
       public:
-	explicit Shader(const std::string_view& vertName, const std::string_view& fragName,
-			const std::string_view& geomName = "");
+	explicit Shader(std::string_view vertName, std::string_view fragName, std::string_view geomName = "");
 	Shader(Shader&&) = delete;
 	Shader(const Shader&) = delete;
 	Shader& operator=(Shader&&) = delete;
@@ -21,27 +20,32 @@ class Shader {
 	void activate() const noexcept;
 
 	// set uniform
-	void set(const std::string& name, const GLboolean val);
-	void set(const std::string& name, const GLint val);
-	void set(const std::string& name, const GLuint val);
-	void set(const std::string& name, const GLfloat val);
-	void set(const std::string& name, const GLdouble val);
-	void set(const std::string& name, const GLfloat val, const GLfloat val2);
-	void set(const std::string& name, const GLfloat val, const GLfloat val2, const GLfloat val3);
-	void set(const std::string& name, const Eigen::Vector2f val);
-	void set(const std::string& name, const Eigen::Vector3f val);
-	void set(const std::string& name, const Eigen::Vector3f val, const GLfloat val2);
-	void set(const std::string& name, const Eigen::Vector4f val);
-	void set(const std::string& name, const Eigen::Affine3f& mat, const GLboolean transpose = GL_FALSE);
+	void set(std::string_view name, GLboolean val);
+	void set(std::string_view name, GLint val);
+	void set(std::string_view name, GLuint val);
+	void set(std::string_view name, GLfloat val);
+	void set(std::string_view name, GLdouble val);
+	void set(std::string_view name, GLfloat val, GLfloat val2);
+	void set(std::string_view name, GLfloat val, GLfloat val2, GLfloat val3);
+	void set(std::string_view name, Eigen::Vector2f val);
+	void set(std::string_view name, Eigen::Vector3f val);
+	void set(std::string_view name, Eigen::Vector3f val, GLfloat val2);
+	void set(std::string_view name, Eigen::Vector4f val);
+	void set(std::string_view name, const Eigen::Affine3f& mat, GLboolean transpose = GL_FALSE);
 
-	void bind(const std::string_view& name, const GLuint index) const;
+	void bind(std::string_view name, GLuint index) const;
 
       private:
-	[[nodiscard]] static GLuint compile(const std::string_view& fileName, const GLenum type);
+	[[nodiscard]] static GLuint compile(std::string_view fileName, GLenum type);
 
-	void setUniform(const std::string& name, std::function<void(GLint)> toCall);
+	void setUniform(std::string_view name, std::function<void(GLint)> toCall);
 
 	const std::string mName;
 	const GLuint mShaderProgram;
-	std::unordered_map<std::string, GLint> mPositions;
+	std::unordered_map<std::string_view, GLint> mPositions;
+	// Needed for the keys of the map
+	// We can techincally go with just using string views atm since all out uniforms
+	// are accessed using string litterals, but the code will break once we introduce ImGUI
+	std::array<std::string, 16> mKeys;
+	std::size_t mKeyHead;
 };

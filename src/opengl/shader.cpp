@@ -11,20 +11,18 @@
 #include <unordered_map>
 #include <version>
 
-Shader::Shader(const std::string_view& vertName, const std::string_view& fragName, const std::string_view& geomName)
+Shader::Shader(const std::string_view vertName, const std::string_view fragName, const std::string_view geomName)
 	: mName(std::string(vertName) + ":" + std::string(fragName) + ":" + std::string(geomName)),
-	  mShaderProgram(glCreateProgram()) {
+	  mShaderProgram(glCreateProgram()), mKeyHead(0) {
 	const GLuint vertShader = compile(vertName, GL_VERTEX_SHADER);
 	SDL_assert(glIsShader(vertShader) && "Shader.cpp: Vert shader not loaded correctly");
 
 	const GLuint fragShader = compile(fragName, GL_FRAGMENT_SHADER);
 	SDL_assert(glIsShader(fragShader) && "Shader.cpp: Frag shader not loaded correctly");
 
-	GLuint geomShader = 0;
+	GLuint geomShader = geomName.empty() ? 0 : compile(geomName, GL_GEOMETRY_SHADER);
 	if (!geomName.empty()) {
-		GLuint geom = compile(geomName, GL_GEOMETRY_SHADER);
-		SDL_assert(geom != 0);
-		geomShader = geom;
+		SDL_assert(geomShader != 0);
 		SDL_assert(glIsShader(geomShader) && "Shader.cpp: Geom shader not loaded correctly");
 	}
 
@@ -87,7 +85,10 @@ Shader::~Shader() { glDeleteProgram(mShaderProgram); }
 
 void Shader::activate() const noexcept { glUseProgram(mShaderProgram); }
 
-void Shader::setUniform(const std::string& name, std::function<void(GLint)> toCall) {
+// Well the map with string view is complicated
+// See discord discussion on C++ server:
+// https://discord.com/channels/331718482485837825/331718580070645760/1291066117002891381
+void Shader::setUniform(const std::string_view name, std::function<void(GLint)> toCall) {
 	// Bad for performance, but I need this
 	SDL_assert([] {
 		GLint prog = 0;
@@ -104,7 +105,11 @@ void Shader::setUniform(const std::string& name, std::function<void(GLint)> toCa
 	SDL_assert(glIsProgram(mShaderProgram));
 
 	if (!mPositions.contains(name)) {
-		mPositions[name] = glGetUniformLocation(mShaderProgram, name.data());
+		// Here we have to create a new element
+		SDL_assert(mKeyHead < 16);
+		mKeys[mKeyHead] = std::string(name);
+		// Store the string
+		mPositions[mKeys[mKeyHead]] = glGetUniformLocation(mShaderProgram, name.data());
 
 		if (mPositions[name] == -1) {
 			SDL_Log("\033[93mShader.cpp: Failed find uniform location \"%s\" for shader %s\033[0m",
@@ -114,51 +119,51 @@ void Shader::setUniform(const std::string& name, std::function<void(GLint)> toCa
 		}
 	}
 
-	if (mPositions[name] == -1) {
+	if (mPositions.at(name) == -1) {
 		return;
 	}
 
-	toCall(mPositions[name]);
+	toCall(mPositions.at(name));
 }
 
-void Shader::set(const std::string& name, const GLboolean val) {
+void Shader::set(const std::string_view name, const GLboolean val) {
 	setUniform(name, std::bind(glUniform1i, std::placeholders::_1, static_cast<GLint>(val)));
 }
-void Shader::set(const std::string& name, const GLint val) {
+void Shader::set(const std::string_view name, const GLint val) {
 	setUniform(name, std::bind(glUniform1i, std::placeholders::_1, val));
 }
-void Shader::set(const std::string& name, const GLuint val) {
+void Shader::set(const std::string_view name, const GLuint val) {
 	setUniform(name, std::bind(glUniform1ui, std::placeholders::_1, val));
 }
-void Shader::set(const std::string& name, const GLfloat val) {
+void Shader::set(const std::string_view name, const GLfloat val) {
 	setUniform(name, std::bind(glUniform1f, std::placeholders::_1, val));
 }
-void Shader::set(const std::string& name, const GLdouble val) {
+void Shader::set(const std::string_view name, const GLdouble val) {
 	setUniform(name, std::bind(glUniform1f, std::placeholders::_1, static_cast<GLfloat>(val)));
 }
-void Shader::set(const std::string& name, const GLfloat val, const GLfloat val2) {
+void Shader::set(const std::string_view name, const GLfloat val, const GLfloat val2) {
 	setUniform(name, std::bind(glUniform2f, std::placeholders::_1, val, val2));
 }
-void Shader::set(const std::string& name, const GLfloat val, const GLfloat val2, const GLfloat val3) {
+void Shader::set(const std::string_view name, const GLfloat val, const GLfloat val2, const GLfloat val3) {
 	setUniform(name, std::bind(glUniform3f, std::placeholders::_1, val, val2, val3));
 }
-void Shader::set(const std::string& name, const Eigen::Vector2f val) {
+void Shader::set(const std::string_view name, const Eigen::Vector2f val) {
 	setUniform(name, std::bind(glUniform2f, std::placeholders::_1, val.x(), val.y()));
 }
-void Shader::set(const std::string& name, const Eigen::Vector3f val) {
+void Shader::set(const std::string_view name, const Eigen::Vector3f val) {
 	setUniform(name, std::bind(glUniform3f, std::placeholders::_1, val.x(), val.y(), val.z()));
 }
-void Shader::set(const std::string& name, const Eigen::Vector3f val, const GLfloat val2) {
+void Shader::set(const std::string_view name, const Eigen::Vector3f val, const GLfloat val2) {
 	setUniform(name, std::bind(glUniform4f, std::placeholders::_1, val.x(), val.y(), val.z(), val2));
 }
-void Shader::set(const std::string& name, const Eigen::Vector4f val) {
+void Shader::set(const std::string_view name, const Eigen::Vector4f val) {
 	setUniform(name, std::bind(glUniform4f, std::placeholders::_1, val.x(), val.y(), val.z(), val.w()));
 }
-void Shader::set(const std::string& name, const Eigen::Affine3f& mat, const GLboolean transpose) {
+void Shader::set(const std::string_view name, const Eigen::Affine3f& mat, const GLboolean transpose) {
 	setUniform(name, std::bind(glUniformMatrix4fv, std::placeholders::_1, 1, transpose, mat.data()));
 }
 
-void Shader::bind(const std::string_view& name, const GLuint index) const {
+void Shader::bind(const std::string_view name, const GLuint index) const {
 	const GLuint blockIndex = glGetUniformBlockIndex(mShaderProgram, name.data());
 
 	if (blockIndex == GL_INVALID_INDEX) {
@@ -170,7 +175,7 @@ void Shader::bind(const std::string_view& name, const GLuint index) const {
 	glUniformBlockBinding(mShaderProgram, blockIndex, index);
 }
 
-GLuint Shader::compile(const std::string_view& fileName, const GLenum type) {
+GLuint Shader::compile(const std::string_view fileName, const GLenum type) {
 	char* shaderSource = static_cast<char*>(SDL_LoadFile(fileName.data(), nullptr));
 
 	[[unlikely]] if (shaderSource == nullptr) {

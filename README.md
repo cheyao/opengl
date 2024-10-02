@@ -229,7 +229,6 @@ The systems manage all the logic and changes the components
     - [ ] Settings
 - [x] Localization
     - [x] Fallback fonts.
-    - [ ] Maybe [ICU](https://icu.unicode.org/)?
 - [x] Emscripten build
     - [ ] Progress bar
     - [ ] Text with contrast
@@ -237,19 +236,19 @@ The systems manage all the logic and changes the components
     - [ ] Button auto scale + text
     - [ ] Generate texturemap
     - [ ] Signed distance field fonts https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf
-- [ ] Entity name saved
-- [ ] Multithreading
-    - [ ] Preload
-- [ ] Shadows
-- [ ] Add functional hot reload
-- [ ] Grid map
+- [ ] Windows build
 - [ ] Level map
     - [ ] Level generator
     - [ ] Thing
     - [ ] Binary json (MessagePack)
-    - [ ] Move scenes to `src/scenes`
-- [ ] Combine localemanager and textmanager
-- [ ] Windows build
+    - [x] Move scenes to `src/scenes`
+- [ ] Grid map
+- [ ] Add functional hot reload
+- [ ] Entity name saved
+- [x] Combine localemanager and textmanager
+- [ ] Shadows
+- [ ] Multithreading
+    - [ ] Preload
 
 - [ ] Read books (By priority)
     - [ ] [Effective Modern C++]()

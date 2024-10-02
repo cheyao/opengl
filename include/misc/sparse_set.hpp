@@ -1,6 +1,5 @@
 #pragma once
 
-#include "imgui.h"
 #include "managers/entityManager.hpp"
 
 #include <SDL3/SDL.h>
@@ -11,6 +10,7 @@
 #include <limits>
 #include <vector>
 
+// TODO: Tests
 // NOTE: Travers the thing from the end
 template <typename Container> struct sparse_set_iterator final {
 	constexpr sparse_set_iterator() noexcept : mPacked(), mOffset() {}

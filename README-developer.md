@@ -22,12 +22,4 @@ From discord:
 
 It's generally recommended to const-ref objects of which size extends 2 * sizeof(std::uintmax_t) aka 16 bytes
 
-https://harfbuzz.github.io/ ?
-
-https://github.com/fribidi/fribidi/ ?
-
-https://www.unicode.org/reports/tr9/ ?
-
-https://faultlore.com/blah/text-hates-you/
-
 https://stackoverflow.com/questions/2071621/how-to-do-opengl-live-text-rendering-for-a-gui

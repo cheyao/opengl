@@ -25,10 +25,8 @@
 
 // PERF: Optimize with font atlas when using small fonts
 // https://stackoverflow.com/questions/2071621/how-to-do-opengl-live-text-rendering-for-a-gui
-// FIXME: Lignatures
 // FIXME: Maybe add support for emojis
 // FIXME: Better unicode support
-// FIXME: Verical text https://freetype.org/freetype2/docs/tutorial/step2.html
 TextSystem::TextSystem(Game* game, const unsigned int size, bool final)
 	: mGame(game), mPath(game->fullPath("fonts" SEPARATOR)), mSize(size), mLibrary(nullptr), mFace(nullptr),
 	  mFontData(nullptr), mChild(nullptr) {
@@ -110,7 +108,7 @@ void TextSystem::loadFont(const std::string& name) {
 	mFontData = newFontData;
 
 	FT_Face newFace;
-	int status = FT_New_Memory_Face(mLibrary, mFontData, size, 0, &newFace);
+	const int status = FT_New_Memory_Face(mLibrary, mFontData, size, 0, &newFace);
 	if (status == FT_Err_Unknown_File_Format) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
 				"\x1B[31mTextSystem.cpp: Failed to load font, unknown file format: %s\033[0m",
