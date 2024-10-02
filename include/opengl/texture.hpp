@@ -11,7 +11,7 @@ class Texture {
 	friend class TextureManager;
 
       public:
-	explicit Texture(const std::string_view& path);
+	explicit Texture(std::string_view path);
 	// NOTE: Doesn't need load
 	explicit Texture(const FT_Bitmap& bitmap);
 	Texture(Texture&&) = delete;
@@ -20,13 +20,13 @@ class Texture {
 	Texture& operator=(const Texture&) = delete;
 	virtual ~Texture();
 
-	virtual void activate(const unsigned int& num) const;
+	virtual void activate(unsigned int num) const;
 
 	int getWidth() const { return mWidth; };
 	int getHeight() const { return mHeight; };
 
       protected:
-	virtual void load(const bool srgb);
+	virtual void load(bool srgb);
 
 	GLuint mID;
 	std::string name;

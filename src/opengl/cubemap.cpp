@@ -10,9 +10,9 @@
 #include <vector>
 #include <cstddef>
 
-Cubemap::Cubemap(const std::string_view& path) : Texture(path) {}
+Cubemap::Cubemap(const std::string_view path) : Texture(path) {}
 
-void Cubemap::activate(const unsigned int& num) const {
+void Cubemap::activate(const unsigned int num) const {
 	glActiveTexture(GL_TEXTURE0 + num);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, mID);
 }

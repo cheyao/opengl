@@ -3,7 +3,6 @@
 #include "third_party/Eigen/Dense"
 #include "third_party/glad/glad.h"
 
-#include <functional>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -29,7 +28,6 @@ class Shader {
 	void set(std::string_view name, GLfloat val, GLfloat val2, GLfloat val3);
 	void set(std::string_view name, Eigen::Vector2f val);
 	void set(std::string_view name, Eigen::Vector3f val);
-	void set(std::string_view name, Eigen::Vector3f val, GLfloat val2);
 	void set(std::string_view name, Eigen::Vector4f val);
 	void set(std::string_view name, const Eigen::Affine3f& mat, GLboolean transpose = GL_FALSE);
 
@@ -38,7 +36,7 @@ class Shader {
       private:
 	[[nodiscard]] static GLuint compile(std::string_view fileName, GLenum type);
 
-	void setUniform(std::string_view name, std::function<void(GLint)> toCall);
+	GLint getUniform(std::string_view name);
 
 	const std::string mName;
 	const GLuint mShaderProgram;

@@ -88,7 +88,7 @@ void Shader::activate() const noexcept { glUseProgram(mShaderProgram); }
 // Well the map with string view is complicated
 // See discord discussion on C++ server:
 // https://discord.com/channels/331718482485837825/331718580070645760/1291066117002891381
-void Shader::setUniform(const std::string_view name, std::function<void(GLint)> toCall) {
+GLint Shader::getUniform(const std::string_view name) {
 	// Bad for performance, but I need this
 	SDL_assert([] {
 		GLint prog = 0;
@@ -110,57 +110,49 @@ void Shader::setUniform(const std::string_view name, std::function<void(GLint)> 
 		mKeys[mKeyHead] = std::string(name);
 		// Store the string
 		mPositions[mKeys[mKeyHead]] = glGetUniformLocation(mShaderProgram, name.data());
+		mKeyHead++;
 
-		if (mPositions[name] == -1) {
+		if (mPositions.at(name) == -1) {
 			SDL_Log("\033[93mShader.cpp: Failed find uniform location \"%s\" for shader %s\033[0m",
 				name.data(), mName.data());
-
-			return;
 		}
 	}
 
-	if (mPositions.at(name) == -1) {
-		return;
-	}
-
-	toCall(mPositions.at(name));
+	return mPositions.at(name);
 }
 
 void Shader::set(const std::string_view name, const GLboolean val) {
-	setUniform(name, std::bind(glUniform1i, std::placeholders::_1, static_cast<GLint>(val)));
+	glUniform1i(getUniform(name), static_cast<GLint>(val));
 }
 void Shader::set(const std::string_view name, const GLint val) {
-	setUniform(name, std::bind(glUniform1i, std::placeholders::_1, val));
+	glUniform1i(getUniform(name), val);
 }
 void Shader::set(const std::string_view name, const GLuint val) {
-	setUniform(name, std::bind(glUniform1ui, std::placeholders::_1, val));
+	glUniform1ui(getUniform(name), val);
 }
 void Shader::set(const std::string_view name, const GLfloat val) {
-	setUniform(name, std::bind(glUniform1f, std::placeholders::_1, val));
+	glUniform1f(getUniform(name), val);
 }
 void Shader::set(const std::string_view name, const GLdouble val) {
-	setUniform(name, std::bind(glUniform1f, std::placeholders::_1, static_cast<GLfloat>(val)));
+	glUniform1f(getUniform(name), static_cast<GLfloat>(val));
 }
 void Shader::set(const std::string_view name, const GLfloat val, const GLfloat val2) {
-	setUniform(name, std::bind(glUniform2f, std::placeholders::_1, val, val2));
+	glUniform2f(getUniform(name), val, val2);
 }
 void Shader::set(const std::string_view name, const GLfloat val, const GLfloat val2, const GLfloat val3) {
-	setUniform(name, std::bind(glUniform3f, std::placeholders::_1, val, val2, val3));
+	glUniform3f(getUniform(name), val, val2, val3);
 }
 void Shader::set(const std::string_view name, const Eigen::Vector2f val) {
-	setUniform(name, std::bind(glUniform2f, std::placeholders::_1, val.x(), val.y()));
+	glUniform2fv(getUniform(name), 1, val.data());
 }
 void Shader::set(const std::string_view name, const Eigen::Vector3f val) {
-	setUniform(name, std::bind(glUniform3f, std::placeholders::_1, val.x(), val.y(), val.z()));
-}
-void Shader::set(const std::string_view name, const Eigen::Vector3f val, const GLfloat val2) {
-	setUniform(name, std::bind(glUniform4f, std::placeholders::_1, val.x(), val.y(), val.z(), val2));
+	glUniform3fv(getUniform(name), 1, val.data());
 }
 void Shader::set(const std::string_view name, const Eigen::Vector4f val) {
-	setUniform(name, std::bind(glUniform4f, std::placeholders::_1, val.x(), val.y(), val.z(), val.w()));
+	glUniform4fv(getUniform(name), 1, val.data());
 }
 void Shader::set(const std::string_view name, const Eigen::Affine3f& mat, const GLboolean transpose) {
-	setUniform(name, std::bind(glUniformMatrix4fv, std::placeholders::_1, 1, transpose, mat.data()));
+	glUniformMatrix4fv(getUniform(name), 1, transpose, mat.data());
 }
 
 void Shader::bind(const std::string_view name, const GLuint index) const {

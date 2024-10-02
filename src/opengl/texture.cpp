@@ -11,7 +11,7 @@
 #include <stdexcept>
 #include <string_view>
 
-Texture::Texture(const std::string_view& path) : name(path), mWidth(0), mHeight(0) {}
+Texture::Texture(const std::string_view path) : name(path), mWidth(0), mHeight(0) {}
 
 Texture::Texture(const FT_Bitmap& bitmap)
 	: name(string_format("from freetype bitmap %ux%u", bitmap.width, bitmap.rows)), mWidth(bitmap.width),
@@ -44,7 +44,7 @@ Texture::~Texture() {
 	SDL_Log("Unloading texture %s", name.data());
 }
 
-void Texture::activate(const unsigned int& num) const {
+void Texture::activate(const unsigned int num) const {
 	SDL_assert(num < 80);
 
 	glActiveTexture(GL_TEXTURE0 + num);
@@ -52,7 +52,7 @@ void Texture::activate(const unsigned int& num) const {
 }
 
 // NOTE: Maybe load on demand?
-void Texture::load(const bool srgb) {
+void Texture::load(bool srgb) {
 	SDL_Log("Loading texture %s", name.data());
 
 	std::size_t size = 0;
