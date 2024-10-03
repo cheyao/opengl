@@ -13,6 +13,7 @@ class Texture;
 #include <functional>
 #include <vector>
 
+// TODO: Backup
 Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(position) {
 	mBlocks.reserve(CHUNK_WIDTH);
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {

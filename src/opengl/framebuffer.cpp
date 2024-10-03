@@ -55,14 +55,13 @@ Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mRBO(0), mScreen(
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 
-	const static std::vector<float> pos = {
+	constexpr const static float pos[] = {
 		-1.0f, +1.0f, 0.0f, // Top left
 		-1.0f, -1.0f, 0.0f, // Bot left
 		+1.0f, +1.0f, 0.0f, // Top right
 		+1.0f, -1.0f, 0.0f, // Bot right
 	};
-	const std::vector<unsigned int> indices = {0, 1, 2, 3, 2, 1};
-	const std::vector<std::pair<Texture* const, TextureType>> textures = {};
+	constexpr const static unsigned int indices[] = {0, 1, 2, 3, 2, 1};
 
 	Shader* mShader = mOwner->getShader("framebuffer.vert", "framebuffer.frag");
 	mShader->activate();
@@ -70,7 +69,7 @@ Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mRBO(0), mScreen(
 
 	glActiveTexture(GL_TEXTURE0);
 
-	mScreenMesh = std::make_unique<Mesh>(pos, std::span<float>(), std::span<float>(), indices, textures);
+	mScreenMesh = std::make_unique<Mesh>(pos, std::span<float>(), std::span<float>(), indices);
 }
 
 void Framebuffer::setDemensions(const int width, const int height) {
