@@ -239,9 +239,12 @@ void RenderSystem::draw(Scene* scene) {
 
 		shader->activate();
 		shader->set("model", model);
-		shader->set("position", 2, 2);
 		shader->set("size", static_cast<float>(texture.mTexture->getWidth()),
 			    static_cast<float>(texture.mTexture->getHeight()));
+
+		shader->set("position", position.mPosition);
+		shader->set("scale", texture.mScale);
+
 		shader->set("texture_diffuse", 0);
 		texture.mTexture->activate(0);
 
@@ -271,18 +274,19 @@ void RenderSystem::draw(Scene* scene) {
 		editorShader->activate();
 		editorShader->set("wireframe", hitbox);
 
-		for (const auto& [_, collision, position] :
-		     scene->view<Components::collision, Components::position>().each()) {
-			Eigen::Affine3f model = Eigen::Affine3f::Identity();
-
-			model.translate(
-				(Eigen::Vector3f() << (position.mPosition + collision.mOffset), 0.0f).finished());
-
-			editorShader->set("model", model);
-			editorShader->set("size", collision.mSize);
-
-			mMesh->draw(editorShader);
-		}
+		// FIXME:
+		/*for (const auto& [_, collision, position] :*/
+		/*     scene->view<Components::collision, Components::position>().each()) {*/
+		/*	Eigen::Affine3f model = Eigen::Affine3f::Identity();*/
+		/**/
+		/*	model.translate(*/
+		/*		(Eigen::Vector3f() << (position.mPosition + collision.mOffset), 0.0f).finished());*/
+		/**/
+		/*	editorShader->set("model", model);*/
+		/*	editorShader->set("size", collision.mSize);*/
+		/**/
+		/*	mMesh->draw(editorShader);*/
+		/*}*/
 
 		if (hitbox && glPolygonMode != nullptr) {
 			glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
@@ -310,17 +314,22 @@ void RenderSystem::draw(Scene* scene) {
 
 			Eigen::Affine3f model = Eigen::Affine3f::Identity();
 
+			/*
 			model.translate((Eigen::Vector3f() << (position.mPosition), 0.0f).finished());
+			*/
 
 			vectorShader->set("model", model);
 			vectorShader->set("size",
 					  Eigen::Vector2f(texture.mTexture->getWidth(), texture.mTexture->getHeight()));
+			// FIXME:
+			/*
 			const Eigen::Vector2f center =
 				position.mPosition +
 				(Eigen::Vector2f(texture.mTexture->getWidth(), texture.mTexture->getHeight()) *
 				 texture.mScale) /
 					2;
 			vectorShader->set("position", center);
+		       */
 			vectorShader->set("velocity", velocity.mVelocity);
 
 			mMesh->draw(vectorShader);

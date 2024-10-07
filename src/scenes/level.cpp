@@ -14,9 +14,9 @@ class Texture;
 
 #include <SDL3/SDL.h>
 namespace Eigen {
-void to_json(nlohmann::json& j, const Vector3f& vec) { j = {{"X", vec.x()}, {"Y", vec.y()}, {"Z", vec.z()}}; }
+void to_json(nlohmann::json& j, const Vector3i& vec) { j = {{"X", vec.x()}, {"Y", vec.y()}, {"Z", vec.z()}}; }
 
-void from_json(const nlohmann::json& j, Vector3f& vec) {
+void from_json(const nlohmann::json& j, Vector3i& vec) {
 	j.at("X").get_to(vec.x());
 	j.at("Y").get_to(vec.y());
 	j.at("Z").get_to(vec.z());
@@ -25,6 +25,13 @@ void from_json(const nlohmann::json& j, Vector3f& vec) {
 void to_json(nlohmann::json& j, const Vector2f& vec) { j = {{"X", vec.x()}, {"Y", vec.y()}}; }
 
 void from_json(const nlohmann::json& j, Vector2f& vec) {
+	j.at("X").get_to(vec.x());
+	j.at("Y").get_to(vec.y());
+}
+
+void to_json(nlohmann::json& j, const Vector2i& vec) { j = {{"X", vec.x()}, {"Y", vec.y()}}; }
+
+void from_json(const nlohmann::json& j, Vector2i& vec) {
 	j.at("X").get_to(vec.x());
 	j.at("Y").get_to(vec.y());
 }
@@ -39,7 +46,7 @@ void Level::create() {
 	EntityID player = mScene->newEntity();
 	constexpr const static float SCALE = 0.7f;
 	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true), SCALE);
-	mScene->emplace<Components::position>(player, Eigen::Vector2f(400.0f, 400.0f));
+	mScene->emplace<Components::position>(player, Eigen::Vector2i(400.0f, 400.0f));
 	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
 	SDL_Log("B");
 	GLenum err = 0;
@@ -82,7 +89,7 @@ void Level::create() {
 
 	EntityID text = mScene->newEntity();
 	mScene->emplace<Components::text>(text, "controls");
-	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
+	mScene->emplace<Components::position>(text, Eigen::Vector2i(10.0f, 10.0f));
 
 	mChunks.emplace_back(new Chunk(mGame, mScene, 0));
 }
@@ -94,7 +101,7 @@ void Level::load(const nlohmann::json data) {
 	EntityID player = mScene->newEntity();
 	constexpr const static float SCALE = 0.7f;
 	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true), SCALE);
-	mScene->emplace<Components::position>(player, data["player"]["position"].get<Eigen::Vector2f>());
+	mScene->emplace<Components::position>(player, data["player"]["position"].get<Eigen::Vector2i>());
 	mScene->emplace<Components::velocity>(player, data["player"]["velocity"]);
 	mScene->emplace<Components::input>(player,
 					   [](class Scene* scene, EntityID entity, const bool* scancodes, const float) {
@@ -116,7 +123,7 @@ void Level::load(const nlohmann::json data) {
 
 	EntityID text = mScene->newEntity();
 	mScene->emplace<Components::text>(text, "controls");
-	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
+	mScene->emplace<Components::position>(text, Eigen::Vector2i(10.0f, 10.0f));
 
 	// SDL_assert(data["chunks"].contains(0));
 	mChunks.emplace_back(new Chunk(mGame, mScene, data["chunks"][0]));

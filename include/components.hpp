@@ -10,13 +10,14 @@
 
 namespace Components {
 struct position {
-	position(const Eigen::Vector2f position) : mPosition(position) {}
+	position(const Eigen::Vector2i position) : mPosition(position) {}
 
-	Eigen::Vector2f mPosition;
+	Eigen::Vector2i mPosition;
 };
 
 struct velocity {
 	velocity(const Eigen::Vector2f velocity) : mVelocity(velocity) {}
+
 	Eigen::Vector2f mVelocity;
 };
 
@@ -49,7 +50,6 @@ struct text {
 	text(const std::string id) : mID(id) {}
 
 	std::string mID;
-	// Maybe offset
 };
 
 // Misc stuff like jumping

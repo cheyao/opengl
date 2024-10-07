@@ -237,8 +237,11 @@ void TextSystem::draw(Scene* scene) {
 	shader->set("letter", 0);
 	shader->set("textColor", 1.0f, 1.0f, 1.0f);
 
+	// FIXME:
+	(void)scene;
+	/*
 	for (const auto& [_, text, position] : scene->view<Components::text, Components::position>().each()) {
-		Eigen::Vector2f offset = position.mPosition;
+		auto offset = position.mPosition;
 
 		for (const char32_t c : mGame->getLocaleManager()->get(text.mID)) {
 			drawGlyph(c, shader, offset);
@@ -246,4 +249,5 @@ void TextSystem::draw(Scene* scene) {
 			offset += getGlyph(c).advance;
 		}
 	}
+	*/
 }

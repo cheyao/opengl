@@ -30,6 +30,7 @@ PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
  */
 
 void PhysicsSystem::update(Scene* scene, float delta) {
+	(void)delta;
 	constexpr const static float G = 15.0f;
 	constexpr const static float jumpForce = 500.0f;
 
@@ -65,8 +66,7 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 			scene->get<Components::velocity>(entity).mVelocity.y() -= G;
 		}
 
-		scene->get<Components::position>(entity).mPosition +=
-			scene->get<Components::velocity>(entity).mVelocity * delta;
+		// scene->get<Components::position>(entity).mPosition += scene->get<Components::velocity>(entity).mVelocity * delta;
 		scene->get<Components::velocity>(entity).mVelocity.x() *= 0.7;
 	}
 }
@@ -91,9 +91,9 @@ void PhysicsSystem::collide(Scene* scene) {
 
 		for (const auto& entity : entities) {
 			if (ImGui::TreeNode(std::format("Entity {}", entity).data())) {
-				ImGui::SliderFloat2(std::format("Position for entity {}", entity).data(),
-						    scene->get<Components::position>(entity).mPosition.data(), 0.0f,
-						    SDL_max(mGame->getDemensions().x(), mGame->getDemensions().y()));
+				ImGui::SliderInt2(std::format("Position for entity {}", entity).data(),
+						  scene->get<Components::position>(entity).mPosition.data(), 0.0f,
+						  SDL_max(mGame->getDemensions().x(), mGame->getDemensions().y()));
 
 				ImGui::SliderFloat2(std::format("Offset for entity {}", entity).data(),
 						    scene->get<Components::collision>(entity).mOffset.data(), -500,
@@ -126,18 +126,22 @@ void PhysicsSystem::collide(Scene* scene) {
 }
 
 bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const EntityID b) const {
+	(void)scene;
+	(void)a;
+	(void)b;
+	/*
 	SDL_assert(a != b && "Hey! Why are the same objects colliding into each other");
 
 	if (scene->get<Components::collision>(a).mStationary && scene->get<Components::collision>(b).mStationary) {
 		return false;
 	}
 
-	const Eigen::Vector2f& minA =
-		scene->get<Components::position>(a).mPosition + scene->get<Components::collision>(a).mOffset;
+	const Eigen::Vector2f& minA = static_cast<Eigen::Vector2f>(scene->get<Components::position>(a).mPosition) +
+				      scene->get<Components::collision>(a).mOffset;
 	const Eigen::Vector2f& maxA = minA + scene->get<Components::collision>(a).mSize;
 
-	const Eigen::Vector2f& minB =
-		scene->get<Components::position>(b).mPosition + scene->get<Components::collision>(b).mOffset;
+	const Eigen::Vector2f& minB = static_cast<Eigen::Vector2f>(scene->get<Components::position>(b).mPosition) +
+				      scene->get<Components::collision>(b).mOffset;
 	const Eigen::Vector2f& maxB = minB + scene->get<Components::collision>(b).mSize;
 
 	SDL_assert(!SDL_isnan(minA.x()) && !SDL_isinf(minA.x()));
@@ -157,9 +161,16 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 
 	// So return the inverse of not intersecting
 	return !notIntercecting;
+	*/
+	return false;
 }
 
 bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID main, const EntityID b) const {
+	(void)scene;
+	(void)main;
+	(void)b;
+	return false;
+	/*
 	SDL_assert(main != b && "Hey! Why are the same objects colliding into each other");
 
 	if (scene->contains<Components::velocity>(main) &&
@@ -168,11 +179,12 @@ bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID mai
 	}
 
 	const Eigen::Vector2f& minMain =
-		scene->get<Components::position>(main).mPosition + scene->get<Components::collision>(main).mOffset;
+		static_cast<Eigen::Vector2f>(scene->get<Components::position>(main).mPosition) +
+		scene->get<Components::collision>(main).mOffset;
 	const Eigen::Vector2f& maxMain = minMain + scene->get<Components::collision>(main).mSize;
 
-	const Eigen::Vector2f& minB =
-		scene->get<Components::position>(b).mPosition + scene->get<Components::collision>(b).mOffset;
+	const Eigen::Vector2f& minB = static_cast<Eigen::Vector2f>(scene->get<Components::position>(b).mPosition) +
+				      scene->get<Components::collision>(b).mOffset;
 	const Eigen::Vector2f& maxB = minB + scene->get<Components::collision>(b).mSize;
 
 	// on a x level
@@ -190,6 +202,7 @@ bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID mai
 	}
 
 	return false;
+	*/
 }
 
 // TODO: Read
@@ -217,6 +230,9 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	if (scene->get<Components::collision>(a).mStationary && scene->get<Components::collision>(b).mStationary) {
 		return;
 	}
+	(void)scene;
+	(void)a;
+	(void)b;
 
 	/*
 	 * Thx stack https://gamedev.stackexchange.com/questions/18302/2d-platformer-collisions
@@ -224,12 +240,13 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 	 * https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/RectangleExtensions.cs#L30
 	 */
 
-	const Eigen::Vector2f& leftA =
-		scene->get<Components::position>(a).mPosition + scene->get<Components::collision>(a).mOffset;
+	/*
+	const Eigen::Vector2f& leftA = static_cast<Eigen::Vector2f>(scene->get<Components::position>(a).mPosition) +
+				       scene->get<Components::collision>(a).mOffset;
 	const Eigen::Vector2f& centerA = leftA + scene->get<Components::collision>(a).mSize / 2;
 
-	const Eigen::Vector2f& leftB =
-		scene->get<Components::position>(b).mPosition + scene->get<Components::collision>(b).mOffset;
+	const Eigen::Vector2f& leftB = static_cast<Eigen::Vector2f>(scene->get<Components::position>(b).mPosition) +
+				       scene->get<Components::collision>(b).mOffset;
 	const Eigen::Vector2f& centerB = leftB + scene->get<Components::collision>(b).mSize / 2;
 
 	const Eigen::Vector2f& distance = centerA - centerB;
@@ -264,4 +281,5 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
 			scene->get<Components::position>(b).mPosition.y() += (-depth / 2).y();
 		}
 	}
+	*/
 }

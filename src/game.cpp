@@ -19,9 +19,16 @@
 #include <imgui.h>
 #endif
 
+#ifdef DEBUG
+#include <chrono>
+#endif
+
 Game::Game()
 	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mStorageManager(nullptr),
 	  mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(false), mCurrentLevel(nullptr) {
+#ifdef DEBUG
+	auto begin = std::chrono::high_resolution_clock::now();
+#endif
 	mUIScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 	if (mUIScale <= 0.0f) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
@@ -52,7 +59,7 @@ Game::Game()
 
 #ifndef __ANDROID__
 	// FIXME: Not working :(
-	
+
 	// Set the cursor
 	SDL_Surface* cursorSurface =
 		SDL_LoadBMP((mBasePath + "assets" SEPARATOR "textures" SEPARATOR "crosshair.bmp").data());
@@ -94,6 +101,14 @@ Game::Game()
 	SDL_assert(mCurrentLevel != nullptr);
 
 	mTicks = SDL_GetTicks();
+
+#ifdef DEBUG
+	auto end = std::chrono::high_resolution_clock::now();
+	std::stringstream time;
+	time << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() << "ns ("
+	     << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "milis)";
+	SDL_Log("Startup took %s", time.str().data());
+#endif
 
 #ifdef DEBUG
 	GLenum err = 0;
@@ -138,17 +153,12 @@ Game::~Game() {
 }
 
 SDL_AppResult Game::iterate() {
+#ifdef DEBUG
+	auto begin = std::chrono::high_resolution_clock::now();
+#endif
+
 	if (mQuit) {
 		return SDL_APP_SUCCESS;
-	}
-
-	static std::uint64_t ticks = SDL_GetTicks();
-	static std::uint64_t frames = 0;
-	++frames;
-	if (frames % 60 == 0) {
-		SDL_Log("FPS: %f", static_cast<float>(frames) / ((static_cast<float>(SDL_GetTicks()) - ticks) / 1000));
-		frames = 0;
-		ticks = SDL_GetTicks();
 	}
 
 	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
@@ -163,6 +173,18 @@ SDL_AppResult Game::iterate() {
 	mSystemManager->update(mCurrentLevel->getScene(), delta);
 
 #ifdef DEBUG
+	auto end = std::chrono::high_resolution_clock::now();
+	std::stringstream time;
+	static std::chrono::nanoseconds::rep framerate = 0;
+	static std::uint64_t count = 0;
+	framerate += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
+	count++;
+	if (count == 100) {
+		SDL_Log("Average draw time (last 100 frames): %lluns", framerate / count);
+		framerate = 0;
+		count = 0;
+	}
+
 	GLenum err = 0;
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		switch (err) {

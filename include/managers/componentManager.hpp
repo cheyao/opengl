@@ -49,6 +49,6 @@ class ComponentManager {
 
       private:
 	size_t mComponentCount;
+	// PERF: Remove inderection
 	std::vector<base_sparse_set*> mPools;
-	// References to destructors of the pools
 };

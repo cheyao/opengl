@@ -148,6 +148,9 @@ void Shader::set(const std::string_view name, const Eigen::Vector3f val) {
 void Shader::set(const std::string_view name, const Eigen::Vector4f val) {
 	glUniform4fv(getUniform(name), 1, val.data());
 }
+void Shader::set(const std::string_view name, const Eigen::Vector2i val) {
+	glUniform2iv(getUniform(name), 1, val.data());
+}
 void Shader::set(const std::string_view name, const Eigen::Affine3f& mat, const GLboolean transpose) {
 	glUniformMatrix4fv(getUniform(name), 1, transpose, mat.data());
 }

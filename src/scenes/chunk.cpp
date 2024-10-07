@@ -29,12 +29,7 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 
 		const auto scale = scene->get<Components::texture>(entity).mScale;
 
-		scene->emplace<Components::position>(
-			entity,
-			Eigen::Vector2f((i + mPosition * 32) *
-						game->getSystemManager()->getTexture("stone.png", true)->getWidth() *
-						scale,
-					0.0f));
+		scene->emplace<Components::position>(entity, Eigen::Vector2i(i + mPosition * 32, 0));
 		scene->emplace<Components::collision>(
 			entity, Eigen::Vector2f(0.0f, 0.0f),
 			Eigen::Vector2f(game->getSystemManager()->getTexture("stone.png", true)->getWidth(),
@@ -53,13 +48,7 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 
 		const auto scale = scene->get<Components::texture>(entity).mScale;
 
-		scene->emplace<Components::position>(
-			entity,
-			Eigen::Vector2f(
-				(i + mPosition * 32) *
-					game->getSystemManager()->getTexture("grass-block.png", true)->getWidth() *
-					scale,
-				game->getSystemManager()->getTexture("grass-block.png", true)->getHeight() * scale));
+		scene->emplace<Components::position>(entity, Eigen::Vector2i(i + mPosition * 32, 1));
 		scene->emplace<Components::collision>(
 			entity, Eigen::Vector2f(0.0f, 0.0f),
 			Eigen::Vector2f(game->getSystemManager()->getTexture("grass-block.png", true)->getWidth(),
@@ -76,7 +65,7 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 	}
 
 	// Load the things only when we need them
-	std::unordered_map<Components::block::BlockType, std::function<Texture*()>> blockToTexture = {
+	const static std::unordered_map<Components::block::BlockType, std::function<Texture*()>> blockToTexture = {
 		{Components::block::STONE, [game] { return game->getSystemManager()->getTexture("stone.png", true); }},
 		{Components::block::GRASS_BLOCK,
 		 [game] { return game->getSystemManager()->getTexture("grass-block.png", true); }},
@@ -93,7 +82,7 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 
 			SDL_assert(blockToTexture.contains(block));
 
-			Texture* texture = blockToTexture[block]();
+			Texture* texture = blockToTexture.at(block)();
 
 			mBlocks[i].emplace_back(scene->newEntity());
 
@@ -103,9 +92,7 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 
 			const auto scale = scene->get<Components::texture>(entity).mScale;
 
-			scene->emplace<Components::position>(
-				entity, Eigen::Vector2f((i + mPosition * 32) * texture->getWidth() * scale,
-							(j)*texture->getWidth() * scale));
+			scene->emplace<Components::position>(entity, Eigen::Vector2i(i + mPosition * 32, j));
 			scene->emplace<Components::collision>(
 				entity, Eigen::Vector2f(0.0f, 0.0f),
 				Eigen::Vector2f(texture->getWidth(), texture->getHeight()) * scale, true);
