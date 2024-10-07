@@ -205,6 +205,7 @@ The systems manage all the logic and changes the components
 
 ## TODO
 
+- [ ] In-game metrics & ms count
 - [x] Game pause + resume things
 - [x] Debug menu with ImGUI and item names
 - [x] Better component and actors

@@ -51,6 +51,8 @@ Game::Game()
 	*/
 
 #ifndef __ANDROID__
+	// FIXME: Not working :(
+	
 	// Set the cursor
 	SDL_Surface* cursorSurface =
 		SDL_LoadBMP((mBasePath + "assets" SEPARATOR "textures" SEPARATOR "crosshair.bmp").data());

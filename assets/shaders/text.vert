@@ -12,12 +12,8 @@ layout(std140) uniform Matrices {
 uniform mat4 model;
 uniform vec2 size;
 
-uniform ivec2 position;
-
 void main() {
-	vec2 pos = vec2(model * vec4(aPos.x * size.x, aPos.y * size.y, 0.0f, 1.0f));
-	pos.x += /position.x * 32.0f;
-	gl_Position = proj * vec4(pos, 0.0f, 1.0f);
+	gl_Position = proj * model * vec4(aPos.x * size.x, aPos.y * size.y, 0.0f, 1.0f);
 
 	vTexPos = aTexPos;
 }

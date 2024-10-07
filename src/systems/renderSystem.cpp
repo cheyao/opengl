@@ -234,11 +234,12 @@ void RenderSystem::draw(Scene* scene) {
 		Shader* shader = texture.mShader == nullptr ? defaultShader : texture.mShader;
 
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();
-		model.translate((Eigen::Vector3f() << position.mPosition, 0.0f).finished());
+		// model.translate((Eigen::Vector3f() << position.mPosition, 0.0f).finished());
 		model.scale(texture.mScale);
 
 		shader->activate();
 		shader->set("model", model);
+		shader->set("position", 2, 2);
 		shader->set("size", static_cast<float>(texture.mTexture->getWidth()),
 			    static_cast<float>(texture.mTexture->getHeight()));
 		shader->set("texture_diffuse", 0);
@@ -314,12 +315,12 @@ void RenderSystem::draw(Scene* scene) {
 			vectorShader->set("model", model);
 			vectorShader->set("size",
 					  Eigen::Vector2f(texture.mTexture->getWidth(), texture.mTexture->getHeight()));
-			const Eigen::Vector2f& realPos =
+			const Eigen::Vector2f center =
 				position.mPosition +
 				(Eigen::Vector2f(texture.mTexture->getWidth(), texture.mTexture->getHeight()) *
 				 texture.mScale) /
 					2;
-			vectorShader->set("position", realPos);
+			vectorShader->set("position", center);
 			vectorShader->set("velocity", velocity.mVelocity);
 
 			mMesh->draw(vectorShader);
@@ -341,35 +342,6 @@ void RenderSystem::draw(Scene* scene) {
 void RenderSystem::present() const { mFramebuffer->swap(); }
 
 void RenderSystem::swapWindow() const { SDL_GL_SwapWindow(mWindow); }
-
-void RenderSystem::setUIMatrix() {
-	Eigen::Affine3f ortho = Eigen::Affine3f::Identity();
-
-	constexpr const static float left = 0.0f;
-	constexpr const static float bottom = 0.0f;
-	constexpr const static float near = 0.1f;
-	constexpr const static float far = 100.0f;
-
-	const float right = mWidth;
-	const float top = mHeight;
-
-	ortho(0, 0) = 2.0f / (right - left);
-	ortho(1, 1) = 2.0f / (top - bottom);
-	ortho(2, 2) = -2.0f / (far - near);
-	ortho(3, 3) = 1;
-
-	ortho(0, 3) = -(right + left) / (right - left);
-	ortho(1, 3) = -(top + bottom) / (top - bottom);
-	ortho(2, 3) = -(far + near) / (far - near);
-
-	Shader* const UIshader = this->getShader("ui.vert", "ui.frag");
-	UIshader->activate();
-	UIshader->set("proj", ortho);
-
-	Shader* const textshader = this->getShader("text.vert", "text.frag");
-	textshader->activate();
-	textshader->set("proj", ortho);
-}
 
 void RenderSystem::setDisplayScale() const {
 	SDL_assert(mWindow != nullptr);
@@ -402,31 +374,15 @@ Shader* RenderSystem::getShader(const std::string& vert, const std::string& frag
 	return mShaders->get(vert, frag, geom);
 }
 
-// NOTE: Not needed for our 2D game
-/*
- * void RenderSystem::view() {
- * 	Eigen::Matrix3f R;
- * 	const Eigen::Vector3f up(0.0f, 1.0f, 0.0f);
- * 	R.col(2) = (-mOwner->getForward() * 100.f).normalized();
- * 	R.col(0) = up.cross(R.col(2)).normalized();
- * 	R.col(1) = R.col(2).cross(R.col(0));
- *
- * 	Eigen::Affine3f mViewMatrix = Eigen::Affine3f::Identity();
- * 	mViewMatrix.matrix().topLeftCorner<3, 3>() = R.transpose();
- * 	mViewMatrix.matrix().topRightCorner<3, 1>() = -R.transpose(); // * mOwner->getPosition();
- * 	mViewMatrix(3, 3) = 1.0f;
- * }
- */
-
 void RenderSystem::setPersp() const {
 	constexpr const static float near = 0.1f;
 	constexpr const static float far = 100.0f;
 	constexpr const static float range = far - near;
 	constexpr const static float fov = 45.0f;
+	constexpr const static float theta = fov * 0.5;
+	const static float invtan = 1.0f / SDL_tan(theta);
 
 	const float aspect = static_cast<float>(mWidth) / mHeight;
-	const float theta = fov * 0.5;
-	const float invtan = 1.0f / SDL_tan(theta);
 
 	// https://www.songho.ca/opengl/gl_projectionmatrix.html
 	Eigen::Affine3f projectionMatrix = Eigen::Affine3f::Identity();

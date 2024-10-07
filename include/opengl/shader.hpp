@@ -21,6 +21,7 @@ class Shader {
 	// set uniform
 	void set(std::string_view name, GLboolean val);
 	void set(std::string_view name, GLint val);
+	void set(std::string_view name, GLint val, GLint val2);
 	void set(std::string_view name, GLuint val);
 	void set(std::string_view name, GLfloat val);
 	void set(std::string_view name, GLdouble val);

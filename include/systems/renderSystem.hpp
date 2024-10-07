@@ -30,7 +30,6 @@ class RenderSystem {
 
       private:
 	void setLights(class Shader* shader) const;
-	void setUIMatrix();
 	void setOrtho() const;
 	void setPersp() const;
 

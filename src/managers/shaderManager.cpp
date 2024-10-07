@@ -10,23 +10,42 @@
 #include <unordered_map>
 #include <version>
 
-ShaderManager::ShaderManager(const std::string& path) : mPath(path + "assets" SEPARATOR "shaders" SEPARATOR) {
+ShaderManager::ShaderManager(const std::string_view path)
+	: mPath(std::string(path) + "assets" SEPARATOR "shaders" SEPARATOR) {
 	mShaders["default.vert:default.frag"] = nullptr;
 }
 
-Shader* ShaderManager::get(const std::string& vert, const std::string& frag, const std::string& geom) {
+Shader* ShaderManager::get(std::string_view vert, std::string_view frag, std::string_view geom) {
+	SDL_assert(!(vert == "default.vert" && frag == "default.frag"));
 #ifdef __cpp_lib_string_contains
 	// Ugh don't mind assering when the libc++ isn't up to date
 	SDL_assert(!vert.contains(':') && !frag.contains(':') && !geom.contains(':'));
 #endif
 
-	std::string concated = (vert + ':').append(frag).append(":").append(geom);
+	std::string concated = std::string(vert) + ':';
+	concated += frag;
+	concated += ':';
+	concated += geom;
+
 	// Using append avoids copies, this function will be called a couple times per loop
-	if (mShaders.contains(concated) && mShaders[concated] != nullptr) {
+	if (mShaders.contains(concated)) {
 		return mShaders.at(concated);
 	}
 
-	Shader* shader = new Shader(mPath + vert, mPath + frag, geom.empty() ? geom : mPath + geom);
+	Shader* shader = nullptr;
+	try {
+		shader = new Shader(mPath + std::string(vert), mPath + std::string(frag),
+				    geom.empty() ? geom : mPath + std::string(geom));
+	} catch (const std::runtime_error& error) {
+		SDL_LogError(SDL_LOG_CATEGORY_RENDER,
+			     "\x1B[31mShaderManager.cpp: Error compiling shader %s, falling back to default shader\033[0m", concated.data());
+
+		if (mShaders["default.vert:default.frag"] == nullptr) {
+			mShaders["default.vert:default.frag"] =
+				new Shader(mPath + "default.vert", mPath + "default.frag");
+		}
+		shader = mShaders["default.vert:default.frag"];
+	}
 
 	mShaders[concated] = shader;
 
@@ -38,7 +57,7 @@ ShaderManager::~ShaderManager() {
 	// Default shader might get used multiple times
 	Shader* def = mShaders["default.vert:default.frag"];
 
-	for (const auto& [_, shader] : mShaders) {
+	for (const auto [_, shader] : mShaders) {
 		if (shader != def) {
 			delete shader;
 		}

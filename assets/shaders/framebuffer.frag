@@ -5,6 +5,11 @@ in vec2 texPos;
 
 layout (location = 0) out vec4 color;
 
+// Getting rid of a error
+layout(std140) uniform Matrices {
+	mat4 proj;
+	mat4 view;
+};
 uniform sampler2D screen;
 uniform bool gamma;
 

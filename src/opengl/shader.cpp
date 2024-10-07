@@ -124,15 +124,12 @@ GLint Shader::getUniform(const std::string_view name) {
 void Shader::set(const std::string_view name, const GLboolean val) {
 	glUniform1i(getUniform(name), static_cast<GLint>(val));
 }
-void Shader::set(const std::string_view name, const GLint val) {
-	glUniform1i(getUniform(name), val);
+void Shader::set(const std::string_view name, const GLint val) { glUniform1i(getUniform(name), val); }
+void Shader::set(const std::string_view name, const GLint val, const GLint val2) {
+	glUniform2i(getUniform(name), val, val2);
 }
-void Shader::set(const std::string_view name, const GLuint val) {
-	glUniform1ui(getUniform(name), val);
-}
-void Shader::set(const std::string_view name, const GLfloat val) {
-	glUniform1f(getUniform(name), val);
-}
+void Shader::set(const std::string_view name, const GLuint val) { glUniform1ui(getUniform(name), val); }
+void Shader::set(const std::string_view name, const GLfloat val) { glUniform1f(getUniform(name), val); }
 void Shader::set(const std::string_view name, const GLdouble val) {
 	glUniform1f(getUniform(name), static_cast<GLfloat>(val));
 }

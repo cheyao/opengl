@@ -232,7 +232,7 @@ TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
 void TextSystem::draw(Scene* scene) {
 	glDisable(GL_DEPTH_TEST);
 
-	Shader* shader = mGame->getSystemManager()->getShader("block.vert", "text.frag");
+	Shader* shader = mGame->getSystemManager()->getShader("text.vert", "text.frag");
 	shader->activate();
 	shader->set("letter", 0);
 	shader->set("textColor", 1.0f, 1.0f, 1.0f);
