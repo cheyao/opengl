@@ -91,9 +91,11 @@ void PhysicsSystem::collide(Scene* scene) {
 
 		for (const auto& entity : entities) {
 			if (ImGui::TreeNode(std::format("Entity {}", entity).data())) {
+				/*
 				ImGui::SliderInt2(std::format("Position for entity {}", entity).data(),
 						  scene->get<Components::position>(entity).mPosition.data(), 0.0f,
 						  SDL_max(mGame->getDemensions().x(), mGame->getDemensions().y()));
+				*/
 
 				ImGui::SliderFloat2(std::format("Offset for entity {}", entity).data(),
 						    scene->get<Components::collision>(entity).mOffset.data(), -500,

@@ -36,7 +36,7 @@ void InputSystem::updateMouse(class Scene* scene, const float delta) {
 	// Convert Y to opengl cords
 	y = mGame->getDemensions().y() - y;
 
-	const bool leftClick = flags & SDL_BUTTON(1);
+	const bool leftClick = flags & SDL_BUTTON_MASK(1);
 
 	if (leftClick) {
 		mPressLength += delta;
@@ -48,6 +48,7 @@ void InputSystem::updateMouse(class Scene* scene, const float delta) {
 
 	SDL_assert(mPressLength >= 0 && "Hey! Why is the press length negative?");
 	if (!leftClick && mPressLength > 0 && mPressLength < LONG_PRESS_ACTIVATION_TIME) {
+		/*
 		for (const auto [entity, block, position, texture] :
 		     scene->view<Components::block, Components::position, Components::texture>().each()) {
 			// FIXME: Better collisions
@@ -62,6 +63,7 @@ void InputSystem::updateMouse(class Scene* scene, const float delta) {
 			// NOTE: Maybe debug test if we clicked on multiple entities?
 			break;
 		}
+		*/
 	}
 
 	// TODO: Control options

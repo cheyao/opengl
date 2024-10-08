@@ -22,7 +22,7 @@ GameIOStream::~GameIOStream() {
 	SDL_CloseIO(mIO);
 }
 
-size_t GameIOStream::Read(void* pvBuffer, std::size_t pSize, std::size_t pCount) {
+size_t GameIOStream::Read(void* pvBuffer, const std::size_t pSize, const std::size_t pCount) {
 	for (std::size_t i = 0; i < pCount; ++i) {
 		const std::size_t status = SDL_ReadIO(mIO, static_cast<char*>(pvBuffer) + i * pSize, pSize);
 
@@ -34,7 +34,7 @@ size_t GameIOStream::Read(void* pvBuffer, std::size_t pSize, std::size_t pCount)
 	return pCount;
 }
 
-size_t GameIOStream::Write(const void* pvBuffer, std::size_t pSize, std::size_t pCount) {
+size_t GameIOStream::Write(const void* pvBuffer, const std::size_t pSize, const std::size_t pCount) {
 	for (size_t i = 0; i < pCount; ++i) {
 		const size_t status = SDL_WriteIO(mIO, static_cast<const char*>(pvBuffer) + i * pSize, pSize);
 
@@ -46,7 +46,7 @@ size_t GameIOStream::Write(const void* pvBuffer, std::size_t pSize, std::size_t 
 	return pCount;
 }
 
-aiReturn GameIOStream::Seek(std::size_t pOffset, aiOrigin pOrigin) {
+aiReturn GameIOStream::Seek(const std::size_t pOffset, const aiOrigin pOrigin) {
 	SDL_IOWhence whence;
 
 	switch (pOrigin) {
@@ -96,9 +96,7 @@ bool GameIOSystem::Exists(const char* pFile) const {
 
 	SDL_CloseIO(file);
 #else
-	SDL_bool success = SDL_GetPathInfo(pFile, nullptr);
-
-	if (!success) {
+	if(!SDL_GetPathInfo(pFile, nullptr)) {
 		return false;
 	}
 #endif

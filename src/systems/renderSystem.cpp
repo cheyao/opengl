@@ -227,11 +227,33 @@ void RenderSystem::draw(Scene* scene) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
-	Shader* defaultShader = this->getShader("block.vert", "block.frag");
+	Shader* blockShader = this->getShader("block.vert", "block.frag");
+	for (const auto& [_, texture, block] : scene->view<Components::texture, Components::block>().each()) {
+		SDL_assert(texture.mTexture != nullptr);
+
+		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
+
+		Eigen::Affine3f model = Eigen::Affine3f::Identity();
+		model.scale(texture.mScale);
+
+		shader->activate();
+		shader->set("model", model);
+		shader->set("size", static_cast<float>(texture.mTexture->getWidth()),
+			    static_cast<float>(texture.mTexture->getHeight()));
+
+		shader->set("position", block.mPosition);
+		shader->set("scale", texture.mScale);
+
+		shader->set("texture_diffuse", 0);
+		texture.mTexture->activate(0);
+
+		mMesh->draw(shader);
+	}
+
 	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
 		SDL_assert(texture.mTexture != nullptr);
 
-		Shader* shader = texture.mShader == nullptr ? defaultShader : texture.mShader;
+		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
 
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();
 		// model.translate((Eigen::Vector3f() << position.mPosition, 0.0f).finished());
@@ -242,7 +264,7 @@ void RenderSystem::draw(Scene* scene) {
 		shader->set("size", static_cast<float>(texture.mTexture->getWidth()),
 			    static_cast<float>(texture.mTexture->getHeight()));
 
-		shader->set("position", position.mPosition);
+		// shader->set("position", position.mPosition);
 		shader->set("scale", texture.mScale);
 
 		shader->set("texture_diffuse", 0);

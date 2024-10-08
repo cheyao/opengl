@@ -6,62 +6,62 @@
 #include <cstdint>
 #include <functional>
 
-// PERF: Grid blocks, convert to cords in shader
+// Android needs the xonstructers to be able to use emplace
 
 namespace Components {
 struct position {
-	position(const Eigen::Vector2i position) : mPosition(position) {}
-
-	Eigen::Vector2i mPosition;
+	// FIXME:
+	constexpr position() noexcept {} // mPosition(position) {}
 };
 
 struct velocity {
-	velocity(const Eigen::Vector2f velocity) : mVelocity(velocity) {}
-
 	Eigen::Vector2f mVelocity;
+
+	velocity(const decltype(mVelocity) velocity) noexcept : mVelocity(velocity) {}
 };
 
 struct collision {
-	collision(const Eigen::Vector2f offset, const Eigen::Vector2f size, const bool stationary = false)
-		: mOffset(offset), mSize(size), mStationary(stationary) {}
-
 	Eigen::Vector2f mOffset;
 	Eigen::Vector2f mSize;
 	bool mStationary = false;
+
+	collision(const decltype(mOffset) offset, const decltype(mSize) size,
+		  const decltype(mStationary) stationary = false) noexcept
+		: mOffset(offset), mSize(size), mStationary(stationary) {}
 };
 
 struct texture {
-	texture(class Texture* t, const float s = 0.7f, class Shader* sh = nullptr)
-		: mTexture(t), mScale(s), mShader(sh) {}
-
 	class Texture* mTexture;
 	float mScale = 0.7f;
 	class Shader* mShader = nullptr;
+
+	texture(const decltype(mTexture) t, const decltype(mScale) scale = 0.7f,
+		const decltype(mShader) shader = nullptr) noexcept
+		: mTexture(t), mScale(scale), mShader(shader) {}
 };
 
 struct input {
 	std::function<void(class Scene* scene, EntityID entity, const bool* scancodes, const float delta)> mFunction;
 
-	// I'm not writing it all again
-	input(const decltype(mFunction) function) : mFunction(function) {}
+	input(const decltype(mFunction) function) noexcept : mFunction(function) {}
 };
 
 struct text {
-	text(const std::string id) : mID(id) {}
-
 	std::string mID;
+
+	text(const decltype(mID) id) noexcept : mID(id) {}
 };
 
 // Misc stuff like jumping
 struct misc {
-	misc(const std::uint64_t what) : mWhat(what) {}
-
 	enum {
 		JUMP = 0b1,
 		PLAYER = 0b10,
 		CROSSHAIR = 0b100,
 	};
 	std::uint64_t mWhat;
+
+	constexpr misc(const decltype(mWhat) what) noexcept : mWhat(what) {}
 };
 
 struct block {
@@ -71,7 +71,9 @@ struct block {
 		DIRT,
 		STONE,
 	} mType;
+	Eigen::Vector2i mPosition;
 
-	block(const decltype(mType) type) : mType(type) {}
+	block(const decltype(mType) type, const decltype(mPosition) position) noexcept
+		: mType(type), mPosition(position) {}
 };
 } // namespace Components

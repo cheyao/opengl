@@ -90,11 +90,13 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 		for (const auto& entity : scene->mDebugEntities) {
 			if (ImGui::TreeNode(std::format("Entity {}", entity).data())) {
 				if (scene->contains<Components::position>(entity)) {
+					/*
 					ImGui::BulletText(
 						"Components::position %s",
 						std::format("pos {}",
 							    scene->get<Components::position>(entity).mPosition)
 							.data());
+					*/
 				}
 
 				if (scene->contains<Components::velocity>(entity)) {

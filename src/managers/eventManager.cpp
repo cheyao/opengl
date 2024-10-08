@@ -6,9 +6,10 @@
 #include <SDL3/SDL.h>
 
 EventManager::EventManager(class Game* game) : mGame(game) {
-	mKeys = new bool[SDL_NUM_SCANCODES];
+	// TODO: Use std::array and std::span
+	mKeys = new bool[SDL_SCANCODE_COUNT];
 
-	for (size_t i = 0; i < SDL_NUM_SCANCODES; ++i) {
+	for (size_t i = 0; i < SDL_SCANCODE_COUNT; ++i) {
 		mKeys[i] = false;
 	}
 }

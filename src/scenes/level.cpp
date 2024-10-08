@@ -43,32 +43,12 @@ void Level::create() {
 	SDL_assert(mGame != nullptr);
 
 	mScene = new Scene();
-	EntityID player = mScene->newEntity();
+	const EntityID player = mScene->newEntity();
+	// FIXME: Scaling problem
 	constexpr const static float SCALE = 0.7f;
 	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true), SCALE);
-	mScene->emplace<Components::position>(player, Eigen::Vector2i(400.0f, 400.0f));
+	// mScene->emplace<Components::position>(player, Eigen::Vector2i(400.0f, 400.0f));
 	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
-	SDL_Log("B");
-	GLenum err = 0;
-	while ((err = glGetError()) != GL_NO_ERROR) {
-		switch (err) {
-			case GL_INVALID_ENUM:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid enum\033[0m");
-				break;
-			case GL_INVALID_VALUE:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid value\033[0m");
-				break;
-			case GL_INVALID_OPERATION:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid operation\033[0m");
-				break;
-			case GL_INVALID_FRAMEBUFFER_OPERATION:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid framebuffer op\033[0m");
-				break;
-			case GL_OUT_OF_MEMORY:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Out of memory\033[0m");
-				break;
-		}
-	}
 	mScene->emplace<Components::input>(player,
 					   [](class Scene* scene, EntityID entity, const bool* scancodes, const float) {
 						   Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;
@@ -87,9 +67,9 @@ void Level::create() {
 				mGame->getSystemManager()->getTexture("stone.png", true)->getHeight()) * SCALE);
 	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
 
-	EntityID text = mScene->newEntity();
+	const EntityID text = mScene->newEntity();
 	mScene->emplace<Components::text>(text, "controls");
-	mScene->emplace<Components::position>(text, Eigen::Vector2i(10.0f, 10.0f));
+	// FIXME: mScene->emplace<Components::position>(text, Eigen::Vector2i(10.0f, 10.0f));
 
 	mChunks.emplace_back(new Chunk(mGame, mScene, 0));
 }
@@ -98,10 +78,11 @@ void Level::load(const nlohmann::json data) {
 	SDL_assert(data.contains("player"));
 
 	mScene = new Scene();
-	EntityID player = mScene->newEntity();
+	const EntityID player = mScene->newEntity();
 	constexpr const static float SCALE = 0.7f;
 	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true), SCALE);
-	mScene->emplace<Components::position>(player, data["player"]["position"].get<Eigen::Vector2i>());
+	// FIXME:
+	// mScene->emplace<Components::position>(player, data["player"]["position"].get<Eigen::Vector2i>());
 	mScene->emplace<Components::velocity>(player, data["player"]["velocity"]);
 	mScene->emplace<Components::input>(player,
 					   [](class Scene* scene, EntityID entity, const bool* scancodes, const float) {
@@ -121,9 +102,9 @@ void Level::load(const nlohmann::json data) {
 				mGame->getSystemManager()->getTexture("stone.png", true)->getHeight()) * SCALE);
 	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
 
-	EntityID text = mScene->newEntity();
+	const EntityID text = mScene->newEntity();
 	mScene->emplace<Components::text>(text, "controls");
-	mScene->emplace<Components::position>(text, Eigen::Vector2i(10.0f, 10.0f));
+	//mScene->emplace<Components::position>(text, Eigen::Vector2i(10.0f, 10.0f));
 
 	// SDL_assert(data["chunks"].contains(0));
 	mChunks.emplace_back(new Chunk(mGame, mScene, data["chunks"][0]));
@@ -135,7 +116,7 @@ nlohmann::json Level::save() {
 	const auto& view = mScene->view<Components::input>();
 	SDL_assert(view.size() == 1);
 
-	data["player"]["position"] = mScene->get<Components::position>(*view.begin()).mPosition;
+	// data["player"]["position"] = mScene->get<Components::position>(*view.begin()).mPosition;
 	data["player"]["velocity"] = mScene->get<Components::velocity>(*view.begin()).mVelocity;
 
 	data["chunks"][0] = mChunks.back()->save(mScene);
