@@ -250,13 +250,14 @@ void RenderSystem::draw(Scene* scene) {
 		mMesh->draw(shader);
 	}
 
+	blockShader->set("position", 0, 0);
 	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
 		SDL_assert(texture.mTexture != nullptr);
 
 		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
 
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();
-		// model.translate((Eigen::Vector3f() << position.mPosition, 0.0f).finished());
+		model.translate((Eigen::Vector3f() << position.mPosition, 0.0f).finished());
 		model.scale(texture.mScale);
 
 		shader->activate();
@@ -264,7 +265,6 @@ void RenderSystem::draw(Scene* scene) {
 		shader->set("size", static_cast<float>(texture.mTexture->getWidth()),
 			    static_cast<float>(texture.mTexture->getHeight()));
 
-		// shader->set("position", position.mPosition);
 		shader->set("scale", texture.mScale);
 
 		shader->set("texture_diffuse", 0);

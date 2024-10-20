@@ -18,6 +18,9 @@
 #ifndef INCLUDE_NLOHMANN_JSON_HPP_
 #define INCLUDE_NLOHMANN_JSON_HPP_
 
+#include <SDL3/SDL.h>
+#define JSON_ASSERT(x) SDL_assert(x)
+
 #define JSON_NO_IO
 
 #include <algorithm> // all_of, find, for_each

@@ -8,7 +8,6 @@
 #include <SDL3/SDL.h>
 #include <cstddef>
 #include <cstdint>
-#include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -53,7 +52,9 @@ void StorageManager::restore() {
 	} catch (const nlohmann::json::parse_error& error) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s at %zu\033[0m",
 				error.id, error.what(), error.byte);
-		ERROR_BOX("Failed to parse json");
+		ERROR_BOX("Failed to parse level file");
+
+		SDL_CloseStorage(storage);
 
 		throw std::runtime_error("StorageManager.cpp: Failed to parse json");
 	}

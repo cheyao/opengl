@@ -12,7 +12,7 @@ constexpr const static ComponentID MAX_COMPONENTS = std::numeric_limits<Componen
 
 class ComponentManager {
       public:
-	ComponentManager() : mComponentCount(0) {}
+	ComponentManager() {}
 	ComponentManager(ComponentManager&&) = delete;
 	ComponentManager(const ComponentManager&) = delete;
 	ComponentManager& operator=(ComponentManager&&) = delete;
@@ -25,18 +25,17 @@ class ComponentManager {
 
 	template <typename Component> [[nodiscard]] ComponentID getID() noexcept {
 		assert(mComponentCount < MAX_COMPONENTS);
-		static size_t componentID = mComponentCount++;
+		static std::size_t componentID = mComponentCount++;
 
-		// Maybe getPool()?
 		if (mPools.size() <= componentID) {
-			mPools.emplace_back(static_cast<base_sparse_set*>(new sparse_set<Component>()));
+			mPools.emplace_back(new sparse_set<Component>());
 		}
 
 		return componentID;
 	}
 
 	template <typename Component> [[nodiscard]] sparse_set<Component>* getPool() {
-		return dynamic_cast<sparse_set<Component>*>(mPools[getID<Component>()]);
+		return static_cast<sparse_set<Component>*>(mPools[getID<Component>()]);
 	}
 
 	void erase(const EntityID entity) noexcept {
@@ -48,7 +47,6 @@ class ComponentManager {
 	}
 
       private:
-	size_t mComponentCount;
-	// PERF: Remove inderection
+	static inline std::size_t mComponentCount = 0;
 	std::vector<base_sparse_set*> mPools;
 };

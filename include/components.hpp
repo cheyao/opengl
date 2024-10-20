@@ -10,8 +10,9 @@
 
 namespace Components {
 struct position {
-	// FIXME:
-	constexpr position() noexcept {} // mPosition(position) {}
+	Eigen::Vector2f mPosition;
+
+	position(const decltype(mPosition) position) noexcept : mPosition(position) {}
 };
 
 struct velocity {
@@ -35,9 +36,9 @@ struct texture {
 	float mScale = 0.7f;
 	class Shader* mShader = nullptr;
 
-	texture(const decltype(mTexture) t, const decltype(mScale) scale = 0.7f,
+	texture(const decltype(mTexture) texture, const decltype(mScale) scale = 0.7f,
 		const decltype(mShader) shader = nullptr) noexcept
-		: mTexture(t), mScale(scale), mShader(shader) {}
+		: mTexture(texture), mScale(scale), mShader(shader) {}
 };
 
 struct input {

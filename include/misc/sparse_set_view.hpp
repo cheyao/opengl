@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <limits>
 #include <span>
 #include <tuple>
 #include <type_traits>
@@ -123,8 +124,8 @@ template <typename... ComponentTypes> class sparse_set_view {
 		const std::vector<size_t> sizes = {mComponentManager->getPool<ComponentTypes>()->size()...};
 
 		// This second part loops over all the sizes of in the vector and picks out the smallest
-		size_t smallestSize = SIZE_T_MAX;
-		size_t smallestIndex = SIZE_T_MAX;
+		size_t smallestSize = std::numeric_limits<std::size_t>::max();
+		size_t smallestIndex = std::numeric_limits<std::size_t>::max();
 
 		for (size_t i = 0; i < sizes.size(); ++i) {
 			if (sizes[i] <= smallestSize) {
@@ -133,8 +134,8 @@ template <typename... ComponentTypes> class sparse_set_view {
 			}
 		}
 
-		assert(smallestSize != SIZE_T_MAX);
-		assert(smallestIndex != SIZE_T_MAX);
+		assert(smallestSize != std::numeric_limits<std::size_t>::max());
+		assert(smallestIndex != std::numeric_limits<std::size_t>::max());
 
 		// This should be the same
 		assert(smallestSize == sizes[smallestIndex]);
