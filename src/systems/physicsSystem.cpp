@@ -9,6 +9,8 @@
 
 #include <SDL3/SDL.h>
 #include <cstddef>
+#include <iterator>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -28,7 +30,6 @@ PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
  * <Components::position, Components::velocity, Components::force(, Components::move?)>
  * Like this we won't need to depend on a lot of checks and prayers
  */
-
 void PhysicsSystem::update(Scene* scene, float delta) {
 	(void)delta;
 	constexpr const static float G = 15.0f;
@@ -66,15 +67,24 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 			scene->get<Components::velocity>(entity).mVelocity.y() -= G;
 		}
 
-		// scene->get<Components::position>(entity).mPosition += scene->get<Components::velocity>(entity).mVelocity * delta;
+		scene->get<Components::position>(entity).mPosition += scene->get<Components::velocity>(entity).mVelocity * delta;
 		scene->get<Components::velocity>(entity).mVelocity.x() *= 0.7;
 	}
 }
 
+template <typename T> 
+// requires std::ranges::sized_range<T>
+requires std::input_or_output_iterator<T>
+struct boo {};
+
 void PhysicsSystem::collide(Scene* scene) {
+	auto v = scene->view<Components::collision, Components::position>();
+	boo<utils::sparse_set_view<Components::collision>::iterator> a;
 	// Get a list of all the entities we need to check
 	auto entities = std::vector<EntityID>();
-	scene->view<Components::collision, Components::position>().each(
+
+	auto blocks = std::vector<EntityID>();
+	scene->view<Components::collision, Components::block>().each(
 		[&entities](const EntityID& entity) { entities.emplace_back(entity); });
 
 	// Debug editor
@@ -91,11 +101,9 @@ void PhysicsSystem::collide(Scene* scene) {
 
 		for (const auto& entity : entities) {
 			if (ImGui::TreeNode(std::format("Entity {}", entity).data())) {
-				/*
-				ImGui::SliderInt2(std::format("Position for entity {}", entity).data(),
+				ImGui::SliderFloat2(std::format("Position for entity {}", entity).data(),
 						  scene->get<Components::position>(entity).mPosition.data(), 0.0f,
 						  SDL_max(mGame->getDemensions().x(), mGame->getDemensions().y()));
-				*/
 
 				ImGui::SliderFloat2(std::format("Offset for entity {}", entity).data(),
 						    scene->get<Components::collision>(entity).mOffset.data(), -500,
@@ -116,12 +124,15 @@ void PhysicsSystem::collide(Scene* scene) {
 	// Iterate over all pairs of colliders
 	// PERF: Use some nice trees https://gamedev.stackexchange.com/questions/26501/how-does-a-collision-engine-work
 	// PERF: Multithread
-	for (std::size_t i = 0; i < entities.size(); ++i) {
-		for (std::size_t j = i + 1; j < entities.size(); ++j) {
-			if (AABBxAABB(scene, entities[i], entities[j])) {
-				pushBack(scene, entities[i], entities[j]);
+	// FIXME: FIX
+	for (const auto& entity : entities) {
+		/*
+		for (std::size_t j = i + 1; j < blocks.size(); ++j) {
+			if (AABBxAABB(scene, entities[i], blocks[j])) {
+				pushBack(scene, entities[i], blocks[j]);
 			}
 		}
+		*/
 	}
 
 	return;

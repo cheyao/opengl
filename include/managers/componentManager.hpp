@@ -7,7 +7,6 @@
 #include <limits>
 
 using ComponentID = std::uint64_t;
-
 constexpr const static ComponentID MAX_COMPONENTS = std::numeric_limits<ComponentID>::max();
 
 class ComponentManager {
@@ -28,14 +27,14 @@ class ComponentManager {
 		static std::size_t componentID = mComponentCount++;
 
 		if (mPools.size() <= componentID) {
-			mPools.emplace_back(new sparse_set<Component>());
+			mPools.emplace_back(new utils::sparse_set<Component>());
 		}
 
 		return componentID;
 	}
 
-	template <typename Component> [[nodiscard]] sparse_set<Component>* getPool() {
-		return static_cast<sparse_set<Component>*>(mPools[getID<Component>()]);
+	template <typename Component> [[nodiscard]] utils::sparse_set<Component>* getPool() {
+		return static_cast<utils::sparse_set<Component>*>(mPools[getID<Component>()]);
 	}
 
 	void erase(const EntityID entity) noexcept {
@@ -48,5 +47,5 @@ class ComponentManager {
 
       private:
 	static inline std::size_t mComponentCount = 0;
-	std::vector<base_sparse_set*> mPools;
+	std::vector<utils::sparse_set_interface*> mPools;
 };

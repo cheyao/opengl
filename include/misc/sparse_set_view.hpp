@@ -3,14 +3,16 @@
 #include "managers/componentManager.hpp"
 #include "managers/entityManager.hpp"
 
+#include <SDL3/SDL.h>
 #include <algorithm>
 #include <cstddef>
-#include <limits>
 #include <span>
 #include <tuple>
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+namespace utils {
 
 template <typename Iterator> struct iterable_adaptor final {
 	constexpr iterable_adaptor(Iterator from, Iterator to) noexcept : first{std::move(from)}, last{std::move(to)} {}
@@ -120,36 +122,21 @@ template <typename... ComponentTypes> class sparse_set_view {
       public:
 	// Please don't touch this, took a long time to figure out
 	sparse_set_view(ComponentManager* componentManager) : mComponentManager(componentManager) {
-		// This first part makes a vector of all the sizes of the components
-		const std::vector<size_t> sizes = {mComponentManager->getPool<ComponentTypes>()->size()...};
+		SDL_COMPILE_TIME_ASSERT(sizeof...(ComponentTypes) != 0, "No empty views!");
 
-		// This second part loops over all the sizes of in the vector and picks out the smallest
-		size_t smallestSize = std::numeric_limits<std::size_t>::max();
-		size_t smallestIndex = std::numeric_limits<std::size_t>::max();
+		// This first part makes a array of all the sizes of the that we loop through
+		const std::array<utils::sparse_set_interface*, sizeof...(ComponentTypes)> sets = {
+			mComponentManager->getPool<ComponentTypes>()...};
+		const auto& smallest = *std::ranges::min_element(
+			sets, [](const auto& a, const auto& b) { return a->size() < b->size(); });
 
-		for (size_t i = 0; i < sizes.size(); ++i) {
-			if (sizes[i] <= smallestSize) {
-				smallestSize = sizes[i];
-				smallestIndex = i;
-			}
-		}
-
-		assert(smallestSize != std::numeric_limits<std::size_t>::max());
-		assert(smallestIndex != std::numeric_limits<std::size_t>::max());
-
-		// This should be the same
-		assert(smallestSize == sizes[smallestIndex]);
-
-		// Now we are looping through all the entity ids of the the smallest component pool
-		// FIXME: This is __NOT__ good code
-		const std::vector<EntityID*> ids = {mComponentManager->getPool<ComponentTypes>()->data()...};
-		for (const auto& id : std::span<EntityID>(ids[smallestIndex], smallestSize)) {
+		for (const auto& id : std::span<EntityID>(smallest->data(), smallest->size())) {
 			// This creates a vector of bools for every pool which represent if the pool contains the entity
 			const std::vector<bool> poolContains = {
 				mComponentManager->getPool<ComponentTypes>()->contains(id)...};
 
 			// If it does add the entity to our view's pool
-			if (std::all_of(poolContains.begin(), poolContains.end(), [](const bool v) { return v; })) {
+			if (std::ranges::all_of(poolContains, [](const bool v) { return v; })) {
 				mEntities.emplace_back(id);
 			}
 		}
@@ -157,10 +144,20 @@ template <typename... ComponentTypes> class sparse_set_view {
 		// mEntities (doesn't count in addition and deletion)
 	}
 
-	sparse_set_view(sparse_set_view&&) = delete;
-	sparse_set_view(const sparse_set_view&) = delete;
-	sparse_set_view& operator=(sparse_set_view&&) = delete;
-	sparse_set_view& operator=(const sparse_set_view&) = delete;
+	sparse_set_view(const sparse_set_view& other) noexcept
+		: mComponentManager(other.mComponentManager), mEntities(other.mEntities) {}
+	sparse_set_view& operator=(const sparse_set_view& other) noexcept {
+		mComponentManager = other.mComponentManager;
+		mEntities = other.mEntities;
+	}
+
+	sparse_set_view(sparse_set_view&& other) noexcept
+		: mComponentManager(other.mComponentManager), mEntities(std::move(other.mEntities)) {}
+	sparse_set_view& operator=(sparse_set_view&& other) noexcept {
+		mComponentManager = other.mComponentManager;
+		mEntities = std::move(other.mEntities);
+	}
+
 	~sparse_set_view() {}
 
 	[[nodiscard]] iterator begin() const noexcept { return iterator{mComponentManager, mEntities, 0}; }
@@ -200,7 +197,12 @@ template <typename... ComponentTypes> class sparse_set_view {
 
 	std::size_t size() const noexcept { return mEntities.size(); }
 
+	EntityID* data() noexcept { return mEntities.data(); }
+	const EntityID* data() const noexcept { return mEntities.data(); }
+
       private:
-	class ComponentManager* mComponentManager;
+	class ComponentManager* const mComponentManager;
 	std::vector<EntityID> mEntities;
 };
+
+} // namespace utils

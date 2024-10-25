@@ -10,6 +10,8 @@
 #include <limits>
 #include <vector>
 
+namespace utils {
+
 // TODO: Tests
 // NOTE: Travers the thing from the end
 template <typename Container> struct sparse_set_iterator final {
@@ -51,23 +53,25 @@ template <typename Container>
 	return !(lhs == rhs);
 }
 
-class base_sparse_set {
+class sparse_set_interface {
       public:
-	virtual ~base_sparse_set() = 0;
-	[[nodiscard]] virtual bool contains(const EntityID entity) const = 0;
-	virtual void erase(const EntityID entity) = 0;
+	virtual ~sparse_set_interface() = 0;
+	[[nodiscard]] virtual bool contains(EntityID entity) const noexcept = 0;
+	virtual void erase(const EntityID entity) noexcept = 0;
+	[[nodiscard]] virtual std::size_t size() const noexcept = 0;
+	[[nodiscard]] virtual EntityID* data() noexcept = 0;
 };
 
 // Prevent the destructor to crash the program due to polymorphism
-inline base_sparse_set::~base_sparse_set() {}
+inline sparse_set_interface::~sparse_set_interface() {}
 
 // PERF: https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf
 // FIXME: This is probably not the best implementation
-template <typename Component> class sparse_set : public base_sparse_set {
+template <typename Component> class sparse_set : public sparse_set_interface {
 	using iterator = sparse_set_iterator<std::vector<EntityID>>;
 
       public:
-	constexpr const static size_t max_size = std::numeric_limits<std::uint64_t>::max();
+	constexpr const static std::size_t max_size = std::numeric_limits<std::uint64_t>::max();
 
 	// No need to clean up, everything is in a vector
 	sparse_set() = default;
@@ -101,7 +105,7 @@ template <typename Component> class sparse_set : public base_sparse_set {
 				"\033[0m",
 				typeid(Component).name(), entity);
 
-			assert(contains(entity) && "Hey! This sparse set doesn't contain this entity");
+			SDL_assert(contains(entity) && "Hey! This sparse set doesn't contain this entity");
 		}
 #endif
 
@@ -116,7 +120,7 @@ template <typename Component> class sparse_set : public base_sparse_set {
 		return mPackedContainer[mSparseContainer[entity]] == entity;
 	}
 
-	[[nodiscard]] size_t size() const noexcept { return mPackedContainer.size(); }
+	[[nodiscard]] std::size_t size() const noexcept override { return mPackedContainer.size(); }
 
 	[[nodiscard]] iterator begin() const noexcept { return iterator{mPackedContainer, mPackedContainer.size()}; }
 
@@ -124,9 +128,9 @@ template <typename Component> class sparse_set : public base_sparse_set {
 
 	[[nodiscard]] bool empty() const noexcept { return mPackedContainer.empty(); }
 
-	[[nodiscard]] EntityID* data() noexcept { return mPackedContainer.data(); }
+	[[nodiscard]] EntityID* data() noexcept override { return mPackedContainer.data(); }
 
-	void erase(const EntityID entity) override {
+	void erase(const EntityID entity) noexcept override {
 		// https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf
 		mSparseContainer[mPackedContainer.back()] = mSparseContainer[entity];
 		mPackedContainer[mSparseContainer[entity]] = mPackedContainer.back();
@@ -140,11 +144,13 @@ template <typename Component> class sparse_set : public base_sparse_set {
 
       private:
 	// Index is entity ID, value is ptr to packed container
-	std::vector<uintptr_t> mSparseContainer;
+	std::vector<std::uintptr_t> mSparseContainer;
 	// Value is entity ID, index is ptr to component
 	std::vector<EntityID> mPackedContainer;
 	// The real values
 	std::vector<Component> mComponents;
 	// The component storage
-	size_t mHead;
+	std::size_t mHead;
 };
+
+} // namespace utils

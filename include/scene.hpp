@@ -36,22 +36,22 @@ class Scene {
 	}
 	// Adds a component to an entity
 	template <typename Component, typename... Args> void emplace(const EntityID entity, Args&&... args) {
-		static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->emplace(entity, args...);
+		static_cast<utils::sparse_set<Component>*>(mComponentManager->getPool<Component>())->emplace(entity, args...);
 	}
 
 	// Returns the component of the entity
 	template <typename Component> [[nodiscard]] Component& get(const EntityID entity) const {
-		return static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->get(entity);
+		return static_cast<utils::sparse_set<Component>*>(mComponentManager->getPool<Component>())->get(entity);
 	}
 
 	// Returns weather a entity contains a component
 	template <typename Component> [[nodiscard]] bool contains(const EntityID entity) const {
-		return static_cast<sparse_set<Component>*>(mComponentManager->getPool<Component>())->contains(entity);
+		return static_cast<utils::sparse_set<Component>*>(mComponentManager->getPool<Component>())->contains(entity);
 	}
 
 	// Returns a view of the components
-	template <typename... Components> [[nodiscard]] sparse_set_view<Components...> view() const {
-		return sparse_set_view<Components...>(mComponentManager);
+	template <typename... Components> [[nodiscard]] utils::sparse_set_view<Components...> view() const {
+		return utils::sparse_set_view<Components...>(mComponentManager);
 	}
 
 	void erase(const EntityID entity) noexcept {
