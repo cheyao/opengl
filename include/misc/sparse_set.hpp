@@ -14,52 +14,105 @@ namespace utils {
 
 // TODO: Tests
 // NOTE: Travers the thing from the end
-template <typename Container> struct sparse_set_iterator final {
-	constexpr sparse_set_iterator() noexcept : mPacked(), mOffset() {}
-	constexpr sparse_set_iterator(const Container& ref, const std::size_t idx) noexcept : mPacked(&ref), mOffset(idx) {}
+template <typename T> struct sparse_set_iterator final {
+      public:
+	using difference_type = std::ptrdiff_t;
+	using size_type = std::size_t;
+	using value_type = T;
+	using reference = value_type&;
+	using const_reference = const value_type&;
 
-	[[nodiscard]] constexpr sparse_set_iterator& operator++() noexcept {
+	constexpr sparse_set_iterator() noexcept : mPacked(nullptr), mOffset(0) {}
+	constexpr sparse_set_iterator(T& ref, const std::size_t idx) noexcept : mPacked(&ref), mOffset(idx) {}
+
+	constexpr sparse_set_iterator(const sparse_set_iterator& other)
+		: mPacked(other.mPacked), mOffset(other.mOffset) {}
+	constexpr sparse_set_iterator& operator=(const sparse_set_iterator& other) {
+		mPacked = other.mPacked;
+		mOffset = other.mOffset;
+		return *this;
+	}
+
+	constexpr ~sparse_set_iterator() = default;
+
+	constexpr sparse_set_iterator& operator++() noexcept {
 		--mOffset;
 		return *this;
 	}
+	constexpr sparse_set_iterator operator++(int) noexcept {
+		sparse_set_iterator old(*this);
+		operator++();
+		return old;
+	}
 
-	[[nodiscard]] constexpr sparse_set_iterator& operator--() noexcept {
+	constexpr sparse_set_iterator& operator--() noexcept {
 		++mOffset;
 		return *this;
 	}
+	constexpr sparse_set_iterator operator--(int) noexcept {
+		sparse_set_iterator old(*this);
+		operator--();
+		return old;
+	}
 
-	[[nodiscard]] constexpr const EntityID& operator[](const size_t value) const noexcept {
+	[[nodiscard]] constexpr const T& operator[](const std::size_t value) const noexcept {
 		return (*mPacked)[index() - value];
 	}
 
-	[[nodiscard]] constexpr const EntityID& operator*() const noexcept { return operator[](0); }
+	[[nodiscard]] constexpr const T& operator*() const noexcept { return operator[](0); }
 
-	[[nodiscard]] constexpr size_t index() const noexcept { return mOffset - 1; }
+	[[nodiscard]] constexpr std::size_t index() const noexcept { return mOffset - 1; }
 
       private:
-	const Container* mPacked;
+	T* mPacked;
 	std::size_t mOffset;
 };
 
-template <typename Container>
-[[nodiscard]] bool operator==(const sparse_set_iterator<Container>& lhs,
-			      const sparse_set_iterator<Container>& rhs) noexcept {
+template <typename T>
+[[nodiscard]] bool operator==(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) noexcept {
 	return lhs.index() == rhs.index();
 }
 
-template <typename Container>
-[[nodiscard]] bool operator!=(const sparse_set_iterator<Container>& lhs,
-			      const sparse_set_iterator<Container>& rhs) noexcept {
+template <typename T>
+[[nodiscard]] bool operator!=(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) noexcept {
 	return !(lhs == rhs);
+}
+
+template <typename T>
+[[nodiscard]] bool operator<(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) noexcept {
+	return lhs.index() > rhs.index();
+}
+template <typename T>
+[[nodiscard]] bool operator>(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) {
+	return rhs < lhs;
+}
+template <typename T>
+[[nodiscard]] bool operator<=(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) {
+	return !(lhs > rhs);
+}
+template <typename T>
+[[nodiscard]] bool operator>=(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) {
+	return !(lhs < rhs);
 }
 
 class sparse_set_interface {
       public:
+	using iterator = sparse_set_iterator<EntityID>;
+	using const_iterator = sparse_set_iterator<const EntityID>;
+
 	virtual ~sparse_set_interface() = 0;
 	[[nodiscard]] virtual bool contains(EntityID entity) const noexcept = 0;
 	virtual void erase(const EntityID entity) noexcept = 0;
 	[[nodiscard]] virtual std::size_t size() const noexcept = 0;
 	[[nodiscard]] virtual EntityID* data() noexcept = 0;
+
+	[[nodiscard]] virtual iterator begin() noexcept = 0;
+	[[nodiscard]] virtual const_iterator begin() const noexcept = 0;
+	[[nodiscard]] virtual const_iterator cbegin() const noexcept = 0;
+
+	[[nodiscard]] virtual iterator end() noexcept = 0;
+	[[nodiscard]] virtual const_iterator end() const noexcept = 0;
+	[[nodiscard]] virtual const_iterator cend() const noexcept = 0;
 };
 
 // Prevent the destructor to crash the program due to polymorphism
@@ -68,9 +121,10 @@ inline sparse_set_interface::~sparse_set_interface() {}
 // PERF: https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf
 // FIXME: This is probably not the best implementation
 template <typename Component> class sparse_set : public sparse_set_interface {
-	using iterator = sparse_set_iterator<std::vector<EntityID>>;
-
       public:
+	using iterator = sparse_set_interface::iterator;
+	using const_iterator = sparse_set_interface::const_iterator;
+
 	constexpr const static std::size_t max_size = std::numeric_limits<std::uint64_t>::max();
 
 	// No need to clean up, everything is in a vector
@@ -122,10 +176,23 @@ template <typename Component> class sparse_set : public sparse_set_interface {
 
 	[[nodiscard]] std::size_t size() const noexcept override { return mPackedContainer.size(); }
 
-	// FIXME: NON const
-	[[nodiscard]] iterator begin() const noexcept { return iterator{mPackedContainer, mPackedContainer.size()}; }
+	[[nodiscard]] iterator begin() noexcept override {
+		return iterator{*mPackedContainer.data(), mPackedContainer.size()};
+	}
+	[[nodiscard]] const_iterator begin() const noexcept override {
+		return const_iterator{*mPackedContainer.data(), mPackedContainer.size()};
+	}
+	[[nodiscard]] const_iterator cbegin() const noexcept override {
+		return const_iterator{*mPackedContainer.data(), mPackedContainer.size()};
+	}
 
-	[[nodiscard]] iterator end() const noexcept { return iterator{mPackedContainer, {}}; }
+	[[nodiscard]] iterator end() noexcept override { return iterator{*mPackedContainer.data(), 0}; }
+	[[nodiscard]] const_iterator end() const noexcept override {
+		return const_iterator{*mPackedContainer.data(), 0};
+	}
+	[[nodiscard]] const_iterator cend() const noexcept override {
+		return const_iterator{*mPackedContainer.data(), 0};
+	}
 
 	[[nodiscard]] bool empty() const noexcept { return mPackedContainer.empty(); }
 
@@ -139,8 +206,8 @@ template <typename Component> class sparse_set : public sparse_set_interface {
 		mPackedContainer.pop_back();
 		mComponents.pop_back();
 
-		mSparseContainer[entity] = 0; // 1. The index of EntityIndices, equal to the value of the entity, is
-					      // removed (leaving a hole)
+		mSparseContainer[entity] = 0; // 1. The index of EntityIndices, equal to the value of the
+					      // entity, is removed (leaving a hole)
 	}
 
       private:

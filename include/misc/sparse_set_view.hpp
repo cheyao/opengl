@@ -28,14 +28,13 @@ template <typename Iterator> struct iterable_adaptor final {
 	Iterator last;
 };
 
-template <typename Type> class sparse_set_view_iterator {
+template <typename T> class sparse_set_view_iterator final {
       public:
 	using difference_type = std::ptrdiff_t;
 
 	constexpr sparse_set_view_iterator() noexcept : mEntities(nullptr), mOffset(0) {}
-
-	constexpr sparse_set_view_iterator(Type* entities, const std::size_t offset) noexcept
-		: mEntities(entities), mOffset(offset) {}
+	constexpr sparse_set_view_iterator(T& entities, const std::size_t offset) noexcept
+		: mEntities(&entities), mOffset(offset) {}
 
 	constexpr sparse_set_view_iterator(const sparse_set_view_iterator& other)
 		: mEntities(other.mEntities), mOffset(other.mOffset) {}
@@ -47,50 +46,50 @@ template <typename Type> class sparse_set_view_iterator {
 
 	constexpr ~sparse_set_view_iterator() = default;
 
-	sparse_set_view_iterator& operator++() noexcept {
+	constexpr sparse_set_view_iterator& operator++() noexcept {
 		++mOffset;
 		return *this;
 	}
-	sparse_set_view_iterator& operator++(int) noexcept {
+	constexpr sparse_set_view_iterator operator++(int) noexcept {
 		sparse_set_view_iterator old(*this);
 		operator++();
 		return old;
 	}
 
-	sparse_set_view_iterator& operator--() noexcept {
+	constexpr sparse_set_view_iterator& operator--() noexcept {
 		--mOffset;
 		return *this;
 	}
-	sparse_set_view_iterator& operator--(int) noexcept {
+	constexpr sparse_set_view_iterator operator--(int) noexcept {
 		sparse_set_view_iterator old(*this);
 		operator--();
 		return old;
 	}
 
-	[[nodiscard]] Type& operator[](const std::size_t value) const noexcept { return mEntities[index() + value]; }
+	[[nodiscard]] constexpr T& operator[](const std::size_t value) const noexcept {
+		return mEntities[index() + value];
+	}
 
-	[[nodiscard]] Type& operator*() const noexcept { return operator[](0); }
+	[[nodiscard]] constexpr T& operator*() const noexcept { return operator[](0); }
 
-	[[nodiscard]] std::size_t index() const noexcept { return mOffset; }
+	[[nodiscard]] constexpr std::size_t index() const noexcept { return mOffset; }
 
       protected:
-	Type* mEntities;
+	T* mEntities;
 	std::size_t mOffset;
 };
 
-template <typename PointerType>
-[[nodiscard]] bool operator==(const sparse_set_view_iterator<PointerType>& lhs,
-			      const sparse_set_view_iterator<PointerType>& rhs) noexcept {
+template <typename T>
+[[nodiscard]] bool operator==(const sparse_set_view_iterator<T>& lhs, const sparse_set_view_iterator<T>& rhs) noexcept {
 	return lhs.index() == rhs.index();
 }
 
-template <typename PointerType>
-[[nodiscard]] bool operator!=(const sparse_set_view_iterator<PointerType>& lhs,
-			      const sparse_set_view_iterator<PointerType>& rhs) noexcept {
+template <typename T>
+[[nodiscard]] bool operator!=(const sparse_set_view_iterator<T>& lhs, const sparse_set_view_iterator<T>& rhs) noexcept {
 	return !(lhs == rhs);
 }
 
-template <typename... ComponentTypes> class sparse_set_view_tuple_iterator {
+template <typename... ComponentTypes> class sparse_set_view_tuple_iterator final {
       public:
 	// mEntities is copied, but it shouldn't - bad for perf
 	sparse_set_view_tuple_iterator(ComponentManager* componentManager, const std::vector<EntityID>& entities,
@@ -148,10 +147,10 @@ template <typename... ComponentTypes> class sparse_set_view {
 		// This first part makes a array of all the sizes of the that we loop through
 		const std::array<utils::sparse_set_interface*, sizeof...(ComponentTypes)> sets = {
 			mComponentManager->getPool<ComponentTypes>()...};
-		const auto& smallest = *std::ranges::min_element(
+		const auto& smallest = **std::ranges::min_element(
 			sets, [](const auto& a, const auto& b) { return a->size() < b->size(); });
 
-		for (const auto& id : std::span<EntityID>(smallest->data(), smallest->size())) {
+		for (const auto& id : std::span<EntityID>(smallest)) {
 			// This creates a vector of bools for every pool which represent if the pool contains the entity
 			const std::vector<bool> poolContains = {
 				mComponentManager->getPool<ComponentTypes>()->contains(id)...};
@@ -181,12 +180,14 @@ template <typename... ComponentTypes> class sparse_set_view {
 
 	~sparse_set_view() {}
 
-	[[nodiscard]] iterator begin() noexcept { return iterator{mEntities.data(), 0}; }
-	[[nodiscard]] const_iterator begin() const noexcept { return const_iterator{mEntities.data(), 0}; }
+	[[nodiscard]] iterator begin() noexcept { return iterator{*mEntities.data(), 0}; }
+	[[nodiscard]] const_iterator begin() const noexcept { return const_iterator{*mEntities.data(), 0}; }
 	[[nodiscard]] const_iterator cbegin() const noexcept { return begin(); }
 
-	[[nodiscard]] iterator end() noexcept { return iterator{mEntities.data(), mEntities.size()}; }
-	[[nodiscard]] const_iterator end() const noexcept { return const_iterator{mEntities.data(), mEntities.size()}; }
+	[[nodiscard]] iterator end() noexcept { return iterator{*mEntities.data(), mEntities.size()}; }
+	[[nodiscard]] const_iterator end() const noexcept {
+		return const_iterator{*mEntities.data(), mEntities.size()};
+	}
 	[[nodiscard]] const_iterator cend() const noexcept { return end(); }
 
 	[[nodiscard]] iterable each() const noexcept {
