@@ -19,33 +19,35 @@ class Shader {
 	void activate() const noexcept;
 
 	// set uniform
-	void set(std::string_view name, GLboolean val);
-	void set(std::string_view name, GLint val);
-	void set(std::string_view name, GLint val, GLint val2);
-	void set(std::string_view name, GLuint val);
-	void set(std::string_view name, GLfloat val);
-	void set(std::string_view name, GLdouble val);
-	void set(std::string_view name, GLfloat val, GLfloat val2);
-	void set(std::string_view name, GLfloat val, GLfloat val2, GLfloat val3);
-	void set(std::string_view name, Eigen::Vector2f val);
-	void set(std::string_view name, Eigen::Vector3f val);
-	void set(std::string_view name, Eigen::Vector4f val);
-	void set(std::string_view name, Eigen::Vector2i val);
-	void set(std::string_view name, const Eigen::Affine3f& mat, GLboolean transpose = GL_FALSE);
+	void set(std::string_view name, GLboolean val) const;
+	void set(std::string_view name, GLint val) const;
+	void set(std::string_view name, GLint val, GLint val2) const;
+	void set(std::string_view name, GLuint val) const;
+	void set(std::string_view name, GLfloat val) const;
+	void set(std::string_view name, GLdouble val) const;
+	void set(std::string_view name, GLfloat val, GLfloat val2) const;
+	void set(std::string_view name, GLfloat val, GLfloat val2, GLfloat val3) const;
+	void set(std::string_view name, Eigen::Vector2f val) const;
+	void set(std::string_view name, Eigen::Vector3f val) const;
+	void set(std::string_view name, Eigen::Vector4f val) const;
+	void set(std::string_view name, Eigen::Vector2i val) const;
+	void set(std::string_view name, const Eigen::Affine3f& mat, GLboolean transpose = GL_FALSE) const;
 
 	void bind(std::string_view name, GLuint index) const;
 
       private:
 	[[nodiscard]] static GLuint compile(std::string_view fileName, GLenum type);
 
-	GLint getUniform(std::string_view name);
+	GLint getUniform(std::string_view name) const;
 
 	const std::string mName;
 	const GLuint mShaderProgram;
-	std::unordered_map<std::string_view, GLint> mPositions;
+
+	// Cache
+	mutable std::unordered_map<std::string_view, GLint> mPositionCache;
 	// Needed for the keys of the map
 	// We can techincally go with just using string views atm since all out uniforms
 	// are accessed using string litterals, but the code will break once we introduce ImGUI
-	std::array<std::string, 16> mKeys;
-	std::size_t mKeyHead;
+	mutable std::array<std::string, 16> mKeys;
+	mutable std::size_t mKeyHead;
 };

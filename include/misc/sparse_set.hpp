@@ -16,7 +16,7 @@ namespace utils {
 // NOTE: Travers the thing from the end
 template <typename Container> struct sparse_set_iterator final {
 	constexpr sparse_set_iterator() noexcept : mPacked(), mOffset() {}
-	constexpr sparse_set_iterator(const Container& ref, const size_t idx) noexcept : mPacked(&ref), mOffset(idx) {}
+	constexpr sparse_set_iterator(const Container& ref, const std::size_t idx) noexcept : mPacked(&ref), mOffset(idx) {}
 
 	[[nodiscard]] constexpr sparse_set_iterator& operator++() noexcept {
 		--mOffset;
@@ -38,7 +38,7 @@ template <typename Container> struct sparse_set_iterator final {
 
       private:
 	const Container* mPacked;
-	size_t mOffset;
+	std::size_t mOffset;
 };
 
 template <typename Container>
@@ -122,6 +122,7 @@ template <typename Component> class sparse_set : public sparse_set_interface {
 
 	[[nodiscard]] std::size_t size() const noexcept override { return mPackedContainer.size(); }
 
+	// FIXME: NON const
 	[[nodiscard]] iterator begin() const noexcept { return iterator{mPackedContainer, mPackedContainer.size()}; }
 
 	[[nodiscard]] iterator end() const noexcept { return iterator{mPackedContainer, {}}; }

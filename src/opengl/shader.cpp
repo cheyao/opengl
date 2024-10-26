@@ -88,7 +88,7 @@ void Shader::activate() const noexcept { glUseProgram(mShaderProgram); }
 // Well the map with string view is complicated
 // See discord discussion on C++ server:
 // https://discord.com/channels/331718482485837825/331718580070645760/1291066117002891381
-GLint Shader::getUniform(const std::string_view name) {
+GLint Shader::getUniform(const std::string_view name) const {
 	// Bad for performance, but I need this
 	SDL_assert([] {
 		GLint prog = 0;
@@ -104,54 +104,54 @@ GLint Shader::getUniform(const std::string_view name) {
 	SDL_assert(!(name[0] == 'g' && name[1] == 'l' && name[2] == '_'));
 	SDL_assert(glIsProgram(mShaderProgram));
 
-	if (!mPositions.contains(name)) {
+	[[unlikely]] if (!mPositionCache.contains(name)) {
 		// Here we have to create a new element
 		SDL_assert(mKeyHead < 16);
 		mKeys[mKeyHead] = std::string(name);
 		// Store the string
-		mPositions[mKeys[mKeyHead]] = glGetUniformLocation(mShaderProgram, name.data());
+		mPositionCache[mKeys[mKeyHead]] = glGetUniformLocation(mShaderProgram, name.data());
 		mKeyHead++;
 
-		if (mPositions.at(name) == -1) {
+		if (mPositionCache.at(name) == -1) {
 			SDL_Log("\033[93mShader.cpp: Failed find uniform location \"%s\" for shader %s\033[0m",
 				name.data(), mName.data());
 		}
 	}
 
-	return mPositions.at(name);
+	return mPositionCache.at(name);
 }
 
-void Shader::set(const std::string_view name, const GLboolean val) {
+void Shader::set(const std::string_view name, const GLboolean val) const {
 	glUniform1i(getUniform(name), static_cast<GLint>(val));
 }
-void Shader::set(const std::string_view name, const GLint val) { glUniform1i(getUniform(name), val); }
-void Shader::set(const std::string_view name, const GLint val, const GLint val2) {
+void Shader::set(const std::string_view name, const GLint val) const { glUniform1i(getUniform(name), val); }
+void Shader::set(const std::string_view name, const GLint val, const GLint val2) const {
 	glUniform2i(getUniform(name), val, val2);
 }
-void Shader::set(const std::string_view name, const GLuint val) { glUniform1ui(getUniform(name), val); }
-void Shader::set(const std::string_view name, const GLfloat val) { glUniform1f(getUniform(name), val); }
-void Shader::set(const std::string_view name, const GLdouble val) {
+void Shader::set(const std::string_view name, const GLuint val) const { glUniform1ui(getUniform(name), val); }
+void Shader::set(const std::string_view name, const GLfloat val) const { glUniform1f(getUniform(name), val); }
+void Shader::set(const std::string_view name, const GLdouble val) const {
 	glUniform1f(getUniform(name), static_cast<GLfloat>(val));
 }
-void Shader::set(const std::string_view name, const GLfloat val, const GLfloat val2) {
+void Shader::set(const std::string_view name, const GLfloat val, const GLfloat val2) const {
 	glUniform2f(getUniform(name), val, val2);
 }
-void Shader::set(const std::string_view name, const GLfloat val, const GLfloat val2, const GLfloat val3) {
+void Shader::set(const std::string_view name, const GLfloat val, const GLfloat val2, const GLfloat val3) const {
 	glUniform3f(getUniform(name), val, val2, val3);
 }
-void Shader::set(const std::string_view name, const Eigen::Vector2f val) {
+void Shader::set(const std::string_view name, const Eigen::Vector2f val) const {
 	glUniform2fv(getUniform(name), 1, val.data());
 }
-void Shader::set(const std::string_view name, const Eigen::Vector3f val) {
+void Shader::set(const std::string_view name, const Eigen::Vector3f val) const {
 	glUniform3fv(getUniform(name), 1, val.data());
 }
-void Shader::set(const std::string_view name, const Eigen::Vector4f val) {
+void Shader::set(const std::string_view name, const Eigen::Vector4f val) const {
 	glUniform4fv(getUniform(name), 1, val.data());
 }
-void Shader::set(const std::string_view name, const Eigen::Vector2i val) {
+void Shader::set(const std::string_view name, const Eigen::Vector2i val) const {
 	glUniform2iv(getUniform(name), 1, val.data());
 }
-void Shader::set(const std::string_view name, const Eigen::Affine3f& mat, const GLboolean transpose) {
+void Shader::set(const std::string_view name, const Eigen::Affine3f& mat, const GLboolean transpose) const {
 	glUniformMatrix4fv(getUniform(name), 1, transpose, mat.data());
 }
 

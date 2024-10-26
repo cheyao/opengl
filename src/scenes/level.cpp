@@ -116,7 +116,7 @@ void Level::load(const nlohmann::json data) {
 nlohmann::json Level::save() {
 	nlohmann::json data;
 
-	const auto& view = mScene->view<Components::input>();
+	const auto&& view = mScene->view<Components::input>();
 	SDL_assert(view.size() == 1);
 
 	data["player"]["position"] = mScene->get<Components::position>(*view.begin()).mPosition;

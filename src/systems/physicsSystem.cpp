@@ -73,13 +73,11 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 }
 
 template <typename T> 
-// requires std::ranges::sized_range<T>
-requires std::input_or_output_iterator<T>
+requires std::ranges::sized_range<T>
 struct boo {};
 
 void PhysicsSystem::collide(Scene* scene) {
 	auto v = scene->view<Components::collision, Components::position>();
-	boo<utils::sparse_set_view<Components::collision>::iterator> a;
 	// Get a list of all the entities we need to check
 	auto entities = std::vector<EntityID>();
 
@@ -126,6 +124,7 @@ void PhysicsSystem::collide(Scene* scene) {
 	// PERF: Multithread
 	// FIXME: FIX
 	for (const auto& entity : entities) {
+		(void)entity;
 		/*
 		for (std::size_t j = i + 1; j < blocks.size(); ++j) {
 			if (AABBxAABB(scene, entities[i], blocks[j])) {
