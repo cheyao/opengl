@@ -150,7 +150,7 @@ template <typename... ComponentTypes> class sparse_set_view {
 		const auto& smallest = **std::ranges::min_element(
 			sets, [](const auto& a, const auto& b) { return a->size() < b->size(); });
 
-		for (const auto& id : std::span<EntityID>(smallest)) {
+		for (const auto& id : std::span<const EntityID>(smallest)) {
 			// This creates a vector of bools for every pool which represent if the pool contains the entity
 			const std::vector<bool> poolContains = {
 				mComponentManager->getPool<ComponentTypes>()->contains(id)...};

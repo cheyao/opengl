@@ -7,6 +7,7 @@
 #include <csignal>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <limits>
 #include <vector>
 
@@ -22,6 +23,7 @@ template <typename T> struct sparse_set_iterator final {
 	using reference = value_type&;
 	using const_reference = const value_type&;
 	using pointer = value_type*;
+	using iterator_category = std::contiguous_iterator_tag;
 
 	constexpr sparse_set_iterator() noexcept : mPacked(nullptr), mOffset(0) {}
 	constexpr sparse_set_iterator(T& ref, const std::size_t idx) noexcept : mPacked(&ref), mOffset(idx) {}
@@ -56,11 +58,13 @@ template <typename T> struct sparse_set_iterator final {
 		return old;
 	}
 
-	[[nodiscard]] constexpr const T& operator[](const std::size_t value) const noexcept {
-		return (*mPacked)[index() - value];
+	[[nodiscard]] constexpr reference operator[](const std::size_t value) const noexcept {
+		return mPacked[index() - value];
 	}
 
-	[[nodiscard]] constexpr const T& operator*() const noexcept { return operator[](0); }
+	[[nodiscard]] constexpr reference operator*() const noexcept { return operator[](0); }
+
+	[[nodiscard]] constexpr pointer operator->() const noexcept { return &operator[](0); }
 
 	[[nodiscard]] constexpr std::size_t index() const noexcept { return mOffset - 1; }
 
@@ -97,6 +101,42 @@ template <typename T>
 [[nodiscard]] inline sparse_set_iterator<T>::difference_type operator-(const sparse_set_iterator<T>& lhs,
 								       const sparse_set_iterator<T>& rhs) {
 	return lhs.index() - rhs.index();
+}
+template <typename T>
+[[nodiscard]] inline sparse_set_iterator<T>& operator+=(sparse_set_iterator<T>& lhs,
+							const typename sparse_set_iterator<T>::difference_type n) {
+	lhs.index() -= n;
+	return lhs;
+}
+template <typename T>
+[[nodiscard]] inline sparse_set_iterator<T> operator+(sparse_set_iterator<T> lhs,
+						      const typename sparse_set_iterator<T>::difference_type n) {
+	lhs += n;
+	return lhs;
+}
+template <typename T>
+[[nodiscard]] inline sparse_set_iterator<T> operator+(const typename sparse_set_iterator<T>::difference_type n,
+						      sparse_set_iterator<T> rhs) {
+	rhs += n;
+	return rhs;
+}
+template <typename T>
+[[nodiscard]] inline sparse_set_iterator<T>& operator-=(sparse_set_iterator<T>& lhs,
+							const typename sparse_set_iterator<T>::difference_type n) {
+	lhs.index() += n;
+	return lhs;
+}
+template <typename T>
+[[nodiscard]] inline sparse_set_iterator<T> operator-(sparse_set_iterator<T> lhs,
+						      const typename sparse_set_iterator<T>::difference_type n) {
+	lhs -= n;
+	return lhs;
+}
+template <typename T>
+[[nodiscard]] inline sparse_set_iterator<T> operator-(const typename sparse_set_iterator<T>::difference_type n,
+						      sparse_set_iterator<T> rhs) {
+	rhs -= n;
+	return rhs;
 }
 
 class sparse_set_interface {
