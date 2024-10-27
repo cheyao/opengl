@@ -21,6 +21,7 @@ template <typename T> struct sparse_set_iterator final {
 	using value_type = T;
 	using reference = value_type&;
 	using const_reference = const value_type&;
+	using pointer = value_type*;
 
 	constexpr sparse_set_iterator() noexcept : mPacked(nullptr), mOffset(0) {}
 	constexpr sparse_set_iterator(T& ref, const std::size_t idx) noexcept : mPacked(&ref), mOffset(idx) {}
@@ -69,30 +70,33 @@ template <typename T> struct sparse_set_iterator final {
 };
 
 template <typename T>
-[[nodiscard]] bool operator==(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) noexcept {
+[[nodiscard]] inline bool operator==(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) noexcept {
 	return lhs.index() == rhs.index();
 }
-
 template <typename T>
-[[nodiscard]] bool operator!=(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) noexcept {
+[[nodiscard]] inline bool operator!=(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) noexcept {
 	return !(lhs == rhs);
 }
-
 template <typename T>
-[[nodiscard]] bool operator<(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) noexcept {
+[[nodiscard]] inline bool operator<(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) noexcept {
 	return lhs.index() > rhs.index();
 }
 template <typename T>
-[[nodiscard]] bool operator>(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) {
+[[nodiscard]] inline bool operator>(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) {
 	return rhs < lhs;
 }
 template <typename T>
-[[nodiscard]] bool operator<=(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) {
+[[nodiscard]] inline bool operator<=(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) {
 	return !(lhs > rhs);
 }
 template <typename T>
-[[nodiscard]] bool operator>=(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) {
+[[nodiscard]] inline bool operator>=(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) {
 	return !(lhs < rhs);
+}
+template <typename T>
+[[nodiscard]] inline sparse_set_iterator<T>::difference_type operator-(const sparse_set_iterator<T>& lhs,
+								       const sparse_set_iterator<T>& rhs) {
+	return lhs.index() - rhs.index();
 }
 
 class sparse_set_interface {
