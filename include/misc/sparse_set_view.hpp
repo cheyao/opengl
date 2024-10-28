@@ -152,11 +152,7 @@ template <typename... ComponentTypes> class sparse_set_view {
 
 		for (const auto& id : std::span<const EntityID>(smallest)) {
 			// This creates a vector of bools for every pool which represent if the pool contains the entity
-			const std::vector<bool> poolContains = {
-				mComponentManager->getPool<ComponentTypes>()->contains(id)...};
-
-			// If it does add the entity to our view's pool
-			if (std::ranges::all_of(poolContains, [](const bool v) { return v; })) {
+			if ((... && (mComponentManager->getPool<ComponentTypes>()->contains(id)))) {
 				mEntities.emplace_back(id);
 			}
 		}

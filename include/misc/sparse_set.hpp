@@ -38,20 +38,14 @@ template <typename T> struct sparse_set_iterator final {
 
 	constexpr ~sparse_set_iterator() = default;
 
-	constexpr sparse_set_iterator& operator++() noexcept {
-		--mOffset;
-		return *this;
-	}
+	constexpr sparse_set_iterator& operator++() noexcept { return ++mOffset, *this; }
 	constexpr sparse_set_iterator operator++(int) noexcept {
 		sparse_set_iterator old(*this);
 		operator++();
 		return old;
 	}
 
-	constexpr sparse_set_iterator& operator--() noexcept {
-		++mOffset;
-		return *this;
-	}
+	constexpr sparse_set_iterator& operator--() noexcept { return --mOffset, *this; }
 	constexpr sparse_set_iterator operator--(int) noexcept {
 		sparse_set_iterator old(*this);
 		operator--();
@@ -66,7 +60,7 @@ template <typename T> struct sparse_set_iterator final {
 
 	[[nodiscard]] constexpr pointer operator->() const noexcept { return &operator[](0); }
 
-	[[nodiscard]] constexpr std::size_t index() const noexcept { return mOffset - 1; }
+	[[nodiscard]] constexpr std::size_t index() const noexcept { return mOffset; }
 
       private:
 	T* mPacked;
@@ -83,7 +77,7 @@ template <typename T>
 }
 template <typename T>
 [[nodiscard]] inline bool operator<(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) noexcept {
-	return lhs.index() > rhs.index();
+	return lhs.index() < rhs.index();
 }
 template <typename T>
 [[nodiscard]] inline bool operator>(const sparse_set_iterator<T>& lhs, const sparse_set_iterator<T>& rhs) {
@@ -100,12 +94,12 @@ template <typename T>
 template <typename T>
 [[nodiscard]] inline sparse_set_iterator<T>::difference_type operator-(const sparse_set_iterator<T>& lhs,
 								       const sparse_set_iterator<T>& rhs) {
-	return lhs.index() - rhs.index();
+	return rhs.index() - lhs.index();
 }
 template <typename T>
 [[nodiscard]] inline sparse_set_iterator<T>& operator+=(sparse_set_iterator<T>& lhs,
 							const typename sparse_set_iterator<T>::difference_type n) {
-	lhs.index() -= n;
+	lhs.index() += n;
 	return lhs;
 }
 template <typename T>
@@ -123,7 +117,7 @@ template <typename T>
 template <typename T>
 [[nodiscard]] inline sparse_set_iterator<T>& operator-=(sparse_set_iterator<T>& lhs,
 							const typename sparse_set_iterator<T>::difference_type n) {
-	lhs.index() += n;
+	lhs.index() -= n;
 	return lhs;
 }
 template <typename T>
@@ -224,18 +218,18 @@ template <typename Component> class sparse_set : public sparse_set_interface {
 		return iterator{*mPackedContainer.data(), mPackedContainer.size()};
 	}
 	[[nodiscard]] const_iterator begin() const noexcept override {
-		return const_iterator{*mPackedContainer.data(), mPackedContainer.size()};
+		return const_iterator{*mPackedContainer.data(), 0};
 	}
 	[[nodiscard]] const_iterator cbegin() const noexcept override {
-		return const_iterator{*mPackedContainer.data(), mPackedContainer.size()};
+		return const_iterator{*mPackedContainer.data(), 0};
 	}
 
 	[[nodiscard]] iterator end() noexcept override { return iterator{*mPackedContainer.data(), 0}; }
 	[[nodiscard]] const_iterator end() const noexcept override {
-		return const_iterator{*mPackedContainer.data(), 0};
+		return const_iterator{*mPackedContainer.data(), mPackedContainer.size()};
 	}
 	[[nodiscard]] const_iterator cend() const noexcept override {
-		return const_iterator{*mPackedContainer.data(), 0};
+		return const_iterator{*mPackedContainer.data(), mPackedContainer.size()};
 	}
 
 	[[nodiscard]] bool empty() const noexcept { return mPackedContainer.empty(); }
