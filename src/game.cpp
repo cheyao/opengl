@@ -61,8 +61,7 @@ Game::Game()
 	// FIXME: Not working :(
 
 	// Set the cursor
-	SDL_Surface* cursorSurface =
-		SDL_LoadBMP((mBasePath + "assets" SEPARATOR "textures" SEPARATOR "crosshair.bmp").data());
+	SDL_Surface* cursorSurface = SDL_LoadBMP((mBasePath + "assets/textures/crosshair.bmp").data());
 
 	if (cursorSurface == nullptr) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to get cursor surface: %s\033[0m", SDL_GetError());
@@ -300,5 +299,6 @@ SDL_AppResult Game::event(const SDL_Event& event) {
 	return mEventManager->manageEvent(event);
 }
 
-void Game::setKey(const size_t key, const bool val) { mEventManager->setKey(key, val); }
+// FIXME: There shouldn't be so much inderection
+void Game::setKey(const std::size_t key, const bool val) { mEventManager->setKey(key, val); }
 [[nodiscard]] bool* Game::getKeystate() { return mEventManager->getKeystate(); };

@@ -391,7 +391,7 @@ void RenderSystem::setDisplayScale() const {
 	ImGuiIO& io = ImGui::GetIO();
 
 	ImFont* font =
-		io.Fonts->AddFontFromFileTTF(mGame->fullPath("fonts" SEPARATOR "NotoSans.ttf").data(), 16.0f * scale);
+		io.Fonts->AddFontFromFileTTF(mGame->fullPath("fonts/NotoSans.ttf").data(), 16.0f * scale);
 	SDL_assert(font != nullptr);
 
 	ImGuiStyle& style = ImGui::GetStyle();

@@ -26,23 +26,23 @@ class Game {
 	[[nodiscard]] SDL_AppResult iterate();
 	[[nodiscard]] SDL_AppResult event(const union SDL_Event& event);
 
-	void setPause(const bool val) { mPaused = val; }
+	void setPause(bool val) { mPaused = val; }
 	[[nodiscard]] bool isPaused() const { return mPaused; }
 
-	void setUIScale(const float scale) { mUIScale = scale; }
+	void setUIScale(float scale) { mUIScale = scale; }
 
 	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager; }
 	[[nodiscard]] class SystemManager* getSystemManager() const { return mSystemManager; }
 
 	[[nodiscard]] inline std::string fullPath(const std::string& path) const {
-		return (mBasePath + "assets" SEPARATOR + path);
+		return (mBasePath + "assets/" + path);
 	}
 	[[nodiscard]] inline std::string getBasePath() const { return mBasePath; }
 
-	void setDemensions(const int width, const int height) { mSystemManager->setDemensions(width, height); }
+	void setDemensions(int width, int height) { mSystemManager->setDemensions(width, height); }
 	Eigen::Vector2f getDemensions() const { return mSystemManager->getDemensions(); }
 
-	void setKey(const size_t key, const bool val);
+	void setKey(std::size_t key, bool val);
 	[[nodiscard]] bool* getKeystate();
 
 	void quit() { mQuit = true; }

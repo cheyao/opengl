@@ -16,9 +16,9 @@
 SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
 	SDL_srand(0);
 
-	SDL_Log("Initializing cyao engine v3.0\n");
+	SDL_Log("Initializing cyao engine v0.2\n");
 
-	SDL_SetAppMetadata("Cyao", "1.0", "com.cyao.opengl");
+	SDL_SetAppMetadata("Cyao", "0.2", "com.cyao.opengl");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, "Cyao's opengl Game Engine");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_URL_STRING, "https://github.com/cheyao/opengl");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_TYPE_STRING, "game");
@@ -32,14 +32,15 @@ SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to init SDL: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to initialize SDL, there is something wrong with your system");
+
 		return SDL_APP_FAILURE;
 	}
 
 	SDL_assert(SDL_WasInit(SDL_INIT_VIDEO) && "Why wasn't video initalized?");
 
-	SDL_Log("Hello! I am on %s!", SDL_GetPlatform());
+	SDL_Log("Current platform: %s", SDL_GetPlatform());
 #ifdef __ANDROID__
-	SDL_Log("I am on android %d.", SDL_GetAndroidSDKVersion());
+	SDL_Log("The SDL version is %d", SDL_GetAndroidSDKVersion());
 #endif
 
 	try {
@@ -53,7 +54,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
 
 		return SDL_APP_FAILURE;
 	} catch (...) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Main.cpp: Uncaught error\n");
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Main.cpp: Uncaught exception\n");
 
 		return SDL_APP_FAILURE;
 	}
@@ -101,7 +102,7 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 	}
 }
 
-void SDL_AppQuit(void* appstate, SDL_AppResult result) {
+void SDL_AppQuit(void* appstate, const SDL_AppResult result) {
 	if (appstate != nullptr) {
 		delete static_cast<Game*>(appstate);
 	}

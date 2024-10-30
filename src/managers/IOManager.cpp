@@ -1,7 +1,5 @@
 #include "managers/IOManager.hpp"
 
-#include "utils.hpp"
-
 #include <SDL3/SDL.h>
 #include <assimp/IOStream.hpp>
 #include <assimp/IOSystem.hpp>
@@ -17,10 +15,7 @@ GameIOStream::GameIOStream(const char* pFile, const char* pMode) {
 	}
 }
 
-GameIOStream::~GameIOStream() {
-	SDL_assert(mIO != nullptr);
-	SDL_CloseIO(mIO);
-}
+GameIOStream::~GameIOStream() { SDL_CloseIO(mIO); }
 
 size_t GameIOStream::Read(void* pvBuffer, const std::size_t pSize, const std::size_t pCount) {
 	for (std::size_t i = 0; i < pCount; ++i) {
@@ -80,7 +75,7 @@ size_t GameIOStream::Tell() const { return SDL_TellIO(mIO); }
 
 size_t GameIOStream::FileSize() const { return SDL_GetIOSize(mIO); }
 
-void GameIOStream::Flush() { /* NOTE: SDL probably doesn't need flush */ }
+void GameIOStream::Flush() { SDL_FlushIO(mIO); }
 
 GameIOSystem::GameIOSystem() {}
 
@@ -96,7 +91,7 @@ bool GameIOSystem::Exists(const char* pFile) const {
 
 	SDL_CloseIO(file);
 #else
-	if(!SDL_GetPathInfo(pFile, nullptr)) {
+	if (!SDL_GetPathInfo(pFile, nullptr)) {
 		return false;
 	}
 #endif
@@ -104,7 +99,7 @@ bool GameIOSystem::Exists(const char* pFile) const {
 	return true;
 }
 
-char GameIOSystem::getOsSeparator() const { return SEPARATOR[0]; }
+char GameIOSystem::getOsSeparator() const { return '/'; }
 
 Assimp::IOStream* GameIOSystem::Open(const char* pFile, const char* pMode) {
 	try {

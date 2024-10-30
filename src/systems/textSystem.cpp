@@ -27,8 +27,8 @@
 // https://stackoverflow.com/questions/2071621/how-to-do-opengl-live-text-rendering-for-a-gui
 // FIXME: Maybe add support for emojis
 // FIXME: Better unicode support
-TextSystem::TextSystem(Game* game, const unsigned int size, bool final)
-	: mGame(game), mPath(game->fullPath("fonts" SEPARATOR)), mSize(size), mLibrary(nullptr), mFace(nullptr),
+TextSystem::TextSystem(Game* game, const unsigned int size, const bool final)
+	: mGame(game), mPath(game->fullPath("fonts/")), mSize(size), mLibrary(nullptr), mFace(nullptr),
 	  mFontData(nullptr), mChild(nullptr) {
 	if (FT_Init_FreeType(&mLibrary)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "TextSystem.cpp: Failed to init freetype");

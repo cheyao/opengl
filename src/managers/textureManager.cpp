@@ -3,12 +3,11 @@
 #include "opengl/cubemap.hpp"
 #include "opengl/texture.hpp"
 #include "third_party/stb_image.h"
-#include "utils.hpp"
 
 #include <unordered_map>
 #include <version>
 
-TextureManager::TextureManager(const std::string& path) : mPath(path + "assets" SEPARATOR "textures" SEPARATOR) {
+TextureManager::TextureManager(const std::string& path) : mPath(path + "assets/textures/") {
 	// OpenGL wants this
 	stbi_set_flip_vertically_on_load(false);
 }
@@ -24,7 +23,7 @@ Texture* TextureManager::get(const std::string& name, const bool srgb) {
 #else
 	if (name.find('.') == std::string::npos) {
 #endif
-		texture = new Cubemap(mPath + name + SEPARATOR);
+		texture = new Cubemap(mPath + name + '/');
 	} else {
 		texture = new Texture(mPath + name);
 	}
@@ -37,7 +36,7 @@ Texture* TextureManager::get(const std::string& name, const bool srgb) {
 
 // TODO: Unloading when out of memory
 TextureManager::~TextureManager() {
-	for (auto& [_, texture] : mTextures) {
+	for (const auto& [_, texture] : mTextures) {
 		delete texture;
 	}
 }

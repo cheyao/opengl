@@ -10,6 +10,7 @@
 
 #include <SDL3/SDL.h>
 #include <memory>
+#include <version>
 
 #ifdef IMGUI
 #include "imgui.h"
@@ -59,12 +60,10 @@ void SystemManager::update(Scene* scene, const float delta) {
 	mRenderSystem->present();
 }
 
-void SystemManager::registerClick(const float x, const float y) {
-	mInputSystem->registerClick(x, y);
-}
+void SystemManager::registerClick(const float x, const float y) { mInputSystem->registerClick(x, y); }
 
 void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
-#ifdef IMGUI
+#if defined(IMGUI)
 	// Print out signals
 	static bool signalList = false;
 	static bool entityList = false;

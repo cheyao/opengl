@@ -11,7 +11,7 @@
 #include <version>
 
 ShaderManager::ShaderManager(const std::string_view path)
-	: mPath(std::string(path) + "assets" SEPARATOR "shaders" SEPARATOR) {
+	: mPath(std::string(path) + "assets/shaders/") {
 	mShaders["default.vert:default.frag"] = nullptr;
 }
 

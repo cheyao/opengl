@@ -36,12 +36,6 @@ inline constexpr bool nearZero(const float number, const float epsilon = 0.001f)
 	}
 }
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__)
-#define SEPARATOR "\\"
-#else
-#define SEPARATOR "/"
-#endif
-
 #define CHECKERROR()                                                                                                   \
 	{                                                                                                              \
 		GLenum err;                                                                                            \

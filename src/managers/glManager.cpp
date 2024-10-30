@@ -28,17 +28,18 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 #ifdef GLES
 	SDL_Log("GLManager.cpp: Loading OpenGL ES");
 
-	int version = gladLoadGLES2(static_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
+	const int version = gladLoadGLES2(static_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
 	if (version == 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "\033[31mGLManager.cpp: Failed to init GLES glad!\033[0m");
 #else
 	SDL_Log("GLManager.cpp: Loading OpenGL");
 
-	int version = gladLoadGL(static_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
+	const int version = gladLoadGL(static_cast<GLADloadfunc>(SDL_GL_GetProcAddress));
 	if (version == 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "\033[31mGLManager.cpp: Failed to init GL glad!\033[0m");
 #endif
-		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL");
+	
+		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL installation");
 
 		throw std::runtime_error("GLManager.cpp: Failed to init glad");
 	}
@@ -114,6 +115,7 @@ void GLManager::printInfo() const {
 	SDL_Log("Maximum number of vertex attributes supported: %d\n", value);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &value);
 	SDL_Log("Maximum number of texture units supported: %d\n", value);
+
 #ifndef GLES
 	glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &value);
 	SDL_Log("Maximum number of vertex uniform blocks: %d\n", value);

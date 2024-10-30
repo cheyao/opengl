@@ -12,9 +12,9 @@
 #include <version>
 
 // TODO: Handle SDL_EVENT_LOCALE_CHANGED
-LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "assets" SEPARATOR "strings" SEPARATOR) {
+LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "assets/strings/") {
 	int c = 0;
-	SDL_Locale** loc = SDL_GetPreferredLocales(&c);
+	SDL_Locale** const loc = SDL_GetPreferredLocales(&c);
 	std::string locList = "";
 	for (int i = 0; i < c; ++i) {
 		locList.append(loc[i]->language);
