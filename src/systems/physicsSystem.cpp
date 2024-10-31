@@ -1,15 +1,17 @@
 #include "systems/physicsSystem.hpp"
 
+class Texture;
+
 #include "components.hpp"
 #include "game.hpp"
 #include "managers/entityManager.hpp"
 #include "misc/sparse_set_view.hpp"
+#include "opengl/texture.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
 #include <cstddef>
-#include <iterator>
 #include <ranges>
 #include <string>
 #include <vector>
@@ -46,6 +48,7 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 	 */
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
+		// TODO: Just use delta time
 		for (std::size_t i = 0; i < entities.size(); ++i) {
 			if (entity != entities[i] && collidingBellow(scene, entity, entities[i])) {
 				onGround = true;
@@ -67,23 +70,32 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 			scene->get<Components::velocity>(entity).mVelocity.y() -= G;
 		}
 
-		scene->get<Components::position>(entity).mPosition += scene->get<Components::velocity>(entity).mVelocity * delta;
+		scene->get<Components::position>(entity).mPosition +=
+			scene->get<Components::velocity>(entity).mVelocity * delta;
 		scene->get<Components::velocity>(entity).mVelocity.x() *= 0.7;
 	}
 }
 
-template <typename T> 
-requires std::ranges::sized_range<T>
+template <typename T>
+	requires std::ranges::sized_range<T>
 struct boo {};
 
 void PhysicsSystem::collide(Scene* scene) {
-	auto v = scene->view<Components::collision, Components::position>();
 	// Get a list of all the entities we need to check
-	auto entities = std::vector<EntityID>();
+	// Wow my move operator has usages!
+	const auto entities = scene->view<Components::collision, Components::position>();
+	const auto blocks = scene->view<Components::collision, Components::block>();
 
-	auto blocks = std::vector<EntityID>();
-	scene->view<Components::collision, Components::block>().each(
-		[&entities](const EntityID& entity) { entities.emplace_back(entity); });
+	// Iterate over all pairs of colliders
+	// PERF: Use some nice trees https://gamedev.stackexchange.com/questions/26501/how-does-a-collision-engine-work
+	// PERF: Multithread
+	for (const auto& entity : entities) {
+		for (const auto& block : blocks) {
+			if (AABBxAABB(scene, entity, block)) {
+				pushBack(scene, entity, block);
+			}
+		}
+	}
 
 	// Debug editor
 #if defined(IMGUI) && defined(DEBUG)
@@ -99,13 +111,22 @@ void PhysicsSystem::collide(Scene* scene) {
 
 		for (const auto& entity : entities) {
 			if (ImGui::TreeNode(std::format("Entity {}", entity).data())) {
-				ImGui::SliderFloat2(std::format("Position for entity {}", entity).data(),
-						  scene->get<Components::position>(entity).mPosition.data(), 0.0f,
-						  SDL_max(mGame->getDemensions().x(), mGame->getDemensions().y()));
+				if (scene->contains<Components::position>(entity)) {
+					ImGui::SliderFloat2(
+						std::format("Position for entity {}", entity).data(),
+						scene->get<Components::position>(entity).mPosition.data(), 0.0f,
+						SDL_max(mGame->getDemensions().x(), mGame->getDemensions().y()));
+				}
+
+				if (scene->contains<Components::block>(entity)) {
+					ImGui::SliderInt2(std::format("Position for entity {}", entity).data(),
+							  scene->get<Components::block>(entity).mPosition.data(), -10,
+							  10);
+				}
 
 				ImGui::SliderFloat2(std::format("Offset for entity {}", entity).data(),
 						    scene->get<Components::collision>(entity).mOffset.data(), -500,
-						    +500);
+						    500);
 
 				ImGui::SliderFloat2(std::format("Size for entity {}", entity).data(),
 						    scene->get<Components::collision>(entity).mSize.data(), 0.0f,
@@ -118,52 +139,25 @@ void PhysicsSystem::collide(Scene* scene) {
 		ImGui::End();
 	}
 #endif
-
-	// Iterate over all pairs of colliders
-	// PERF: Use some nice trees https://gamedev.stackexchange.com/questions/26501/how-does-a-collision-engine-work
-	// PERF: Multithread
-	// FIXME: FIX
-	for (const auto& entity : entities) {
-		(void)entity;
-		/*
-		for (std::size_t j = i + 1; j < blocks.size(); ++j) {
-			if (AABBxAABB(scene, entities[i], blocks[j])) {
-				pushBack(scene, entities[i], blocks[j]);
-			}
-		}
-		*/
-	}
-
-	return;
 }
 
-bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const EntityID b) const {
-	(void)scene;
-	(void)a;
-	(void)b;
-	/*
-	SDL_assert(a != b && "Hey! Why are the same objects colliding into each other");
+bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID entity, const EntityID block) const {
+	SDL_assert(entity != block && "Hey! Why are the same objects colliding into each other");
 
-	if (scene->get<Components::collision>(a).mStationary && scene->get<Components::collision>(b).mStationary) {
-		return false;
-	}
+	const Eigen::Vector2f minA =
+		scene->get<Components::position>(entity).mPosition + scene->get<Components::collision>(entity).mOffset;
+	const Eigen::Vector2f maxA = minA + scene->get<Components::collision>(entity).mSize;
 
-	const Eigen::Vector2f& minA = static_cast<Eigen::Vector2f>(scene->get<Components::position>(a).mPosition) +
-				      scene->get<Components::collision>(a).mOffset;
-	const Eigen::Vector2f& maxA = minA + scene->get<Components::collision>(a).mSize;
+	const auto& blockCollision = scene->get<Components::collision>(block);
+	const auto& blockTexture = scene->get<Components::texture>(block);
+	const auto& blockPosition = scene->get<Components::block>(block).mPosition;
 
-	const Eigen::Vector2f& minB = static_cast<Eigen::Vector2f>(scene->get<Components::position>(b).mPosition) +
-				      scene->get<Components::collision>(b).mOffset;
-	const Eigen::Vector2f& maxB = minB + scene->get<Components::collision>(b).mSize;
-
-	SDL_assert(!SDL_isnan(minA.x()) && !SDL_isinf(minA.x()));
-	SDL_assert(!SDL_isnan(maxA.x()) && !SDL_isinf(maxA.x()));
-	SDL_assert(!SDL_isnan(minB.x()) && !SDL_isinf(minB.x()));
-	SDL_assert(!SDL_isnan(maxB.x()) && !SDL_isinf(maxB.x()));
-	SDL_assert(!SDL_isnan(minA.y()) && !SDL_isinf(minA.y()));
-	SDL_assert(!SDL_isnan(maxA.y()) && !SDL_isinf(maxA.y()));
-	SDL_assert(!SDL_isnan(minB.y()) && !SDL_isinf(minB.y()));
-	SDL_assert(!SDL_isnan(maxB.y()) && !SDL_isinf(maxB.y()));
+	const Eigen::Vector2f minB =
+		Eigen::Vector2f(static_cast<float>(blockPosition.x()) * blockTexture.mTexture->getWidth(),
+				static_cast<float>(blockPosition.y()) * blockTexture.mTexture->getHeight()) *
+			blockTexture.mScale +
+		blockCollision.mOffset;
+	const Eigen::Vector2f maxB = minB + blockCollision.mSize;
 
 	// If one of these four are true, it means the cubes are not intersecting
 	const bool notIntercecting = maxA.x() <= minB.x()     // Amax to the left of Bmin
@@ -173,48 +167,45 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID a, const Entity
 
 	// So return the inverse of not intersecting
 	return !notIntercecting;
-	*/
-	return false;
 }
 
-bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID main, const EntityID b) const {
-	(void)scene;
-	(void)main;
-	(void)b;
-	return false;
-	/*
-	SDL_assert(main != b && "Hey! Why are the same objects colliding into each other");
-
-	if (scene->contains<Components::velocity>(main) &&
-	    scene->get<Components::velocity>(main).mVelocity.y() > 1.0f) {
+bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID entity, const EntityID block) const {
+	// They are definetly not touching the ground when having a upwards velocity
+	if (scene->contains<Components::velocity>(entity) &&
+	    scene->get<Components::velocity>(entity).mVelocity.y() > 1.0f) {
 		return false;
 	}
 
-	const Eigen::Vector2f& minMain =
-		static_cast<Eigen::Vector2f>(scene->get<Components::position>(main).mPosition) +
-		scene->get<Components::collision>(main).mOffset;
-	const Eigen::Vector2f& maxMain = minMain + scene->get<Components::collision>(main).mSize;
+	const Eigen::Vector2f minEntity =
+		scene->get<Components::position>(entity).mPosition + scene->get<Components::collision>(entity).mOffset;
+	const Eigen::Vector2f maxEntity = minEntity + scene->get<Components::collision>(entity).mSize;
 
-	const Eigen::Vector2f& minB = static_cast<Eigen::Vector2f>(scene->get<Components::position>(b).mPosition) +
-				      scene->get<Components::collision>(b).mOffset;
-	const Eigen::Vector2f& maxB = minB + scene->get<Components::collision>(b).mSize;
+	const auto& blockCollision = scene->get<Components::collision>(block);
+	const auto& blockTexture = scene->get<Components::texture>(block);
+	const auto& blockPosition = scene->get<Components::block>(block).mPosition;
+
+	const Eigen::Vector2f minBlock =
+		Eigen::Vector2f(static_cast<float>(blockPosition.x()) * blockTexture.mTexture->getWidth(),
+				static_cast<float>(blockPosition.y()) * blockTexture.mTexture->getHeight()) *
+			blockTexture.mScale +
+		blockCollision.mOffset;
+	const Eigen::Vector2f maxBlock = minBlock + blockCollision.mSize;
 
 	// on a x level
-	const bool notIntercecting = maxMain.x() <= minB.x()	// entity to the left of b
-				     || maxB.x() <= minMain.x() // b to the left of main
-				     || maxMain.y() <= minB.y();
+	const bool notIntercecting = maxEntity.x() <= minBlock.x()    // entity to the left of b
+				     || maxBlock.x() <= minEntity.x() // b to the left of main
+				     || maxEntity.y() <= minBlock.y();
 
 	if (notIntercecting) {
 		return false;
 	}
 
 	// Remove dot five to be more precise
-	if ((minMain.y() - 0.5f) < maxB.y()) {
+	if ((minEntity.y() - 0.5f) < maxBlock.y()) {
 		return true;
 	}
 
 	return false;
-	*/
 }
 
 // TODO: Read
@@ -236,62 +227,46 @@ bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID mai
  * 2. Both aren't static, thus push back both by half the overlap
  * (If the objects are both stationary, pass)
  */
-void PhysicsSystem::pushBack(class Scene* scene, const EntityID a, EntityID b) {
-	SDL_assert(a != b);
-	// Two components cannot be stationary at the same time
-	if (scene->get<Components::collision>(a).mStationary && scene->get<Components::collision>(b).mStationary) {
-		return;
-	}
-	(void)scene;
-	(void)a;
-	(void)b;
-
+void PhysicsSystem::pushBack(class Scene* scene, const EntityID entity, EntityID block) {
 	/*
 	 * Thx stack https://gamedev.stackexchange.com/questions/18302/2d-platformer-collisions
 	 * See https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/Player.cs
 	 * https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/RectangleExtensions.cs#L30
 	 */
 
-	/*
-	const Eigen::Vector2f& leftA = static_cast<Eigen::Vector2f>(scene->get<Components::position>(a).mPosition) +
-				       scene->get<Components::collision>(a).mOffset;
-	const Eigen::Vector2f& centerA = leftA + scene->get<Components::collision>(a).mSize / 2;
+	const Eigen::Vector2f leftEntity =
+		scene->get<Components::position>(entity).mPosition + scene->get<Components::collision>(entity).mOffset;
+	const Eigen::Vector2f centerEntity = leftEntity + scene->get<Components::collision>(entity).mSize / 2;
 
-	const Eigen::Vector2f& leftB = static_cast<Eigen::Vector2f>(scene->get<Components::position>(b).mPosition) +
-				       scene->get<Components::collision>(b).mOffset;
-	const Eigen::Vector2f& centerB = leftB + scene->get<Components::collision>(b).mSize / 2;
+	const auto& blockCollision = scene->get<Components::collision>(block);
+	const auto& blockTexture = scene->get<Components::texture>(block);
+	const auto& blockPosition = scene->get<Components::block>(block).mPosition;
 
-	const Eigen::Vector2f& distance = centerA - centerB;
-	const Eigen::Vector2f& minDistance =
-		(scene->get<Components::collision>(a).mSize + scene->get<Components::collision>(b).mSize) / 2;
+	const Eigen::Vector2f leftBlock =
+		Eigen::Vector2f(static_cast<float>(blockPosition.x()) * blockTexture.mTexture->getWidth(),
+				static_cast<float>(blockPosition.y()) * blockTexture.mTexture->getHeight()) *
+			blockTexture.mScale +
+		blockCollision.mOffset;
+	const Eigen::Vector2f centerB = leftBlock + scene->get<Components::collision>(block).mSize / 2;
+
+	const Eigen::Vector2f distance = centerEntity - centerB;
+	const Eigen::Vector2f minDistance =
+		(scene->get<Components::collision>(entity).mSize + scene->get<Components::collision>(block).mSize) / 2;
 
 	SDL_assert(!(SDL_abs(distance.x()) > minDistance.x() || SDL_abs(distance.y()) > minDistance.y()) &&
 		   "The objects are not colliding?");
 
-	const float& depthX = (distance.x() > 0 ? minDistance.x() : -minDistance.x()) - distance.x();
-	const float& depthY = (distance.y() > 0 ? minDistance.y() : -minDistance.y()) - distance.y();
+	const float depthX = (distance.x() > 0 ? minDistance.x() : -minDistance.x()) - distance.x();
+	const float depthY = (distance.y() > 0 ? minDistance.y() : -minDistance.y()) - distance.y();
 
-	const Eigen::Vector2f& depth = Eigen::Vector2f(depthX, depthY);
+	const Eigen::Vector2f depth = Eigen::Vector2f(depthX, depthY);
 
-	if (scene->get<Components::collision>(a).mStationary || scene->get<Components::collision>(b).mStationary) {
-		const EntityID movable = scene->get<Components::collision>(a).mStationary ? b : a;
-
-		// The + and - are relative to the two, so when moving a gotta add, moving b gotta subtract
-		// Why a + and b -? IDFK. Just tried out a bunch of possible solutions and got this
-		// It works, don't touch (if it's not broken)
-		if (SDL_abs(depth.x()) <= SDL_abs(depth.y())) {
-			scene->get<Components::position>(movable).mPosition.x() += (movable == b ? -1 : 1) * depth.x();
-		} else {
-			scene->get<Components::position>(movable).mPosition.y() += (movable == b ? -1 : 1) * depth.y();
-		}
+	// The + and - are relative to the two, so when moving a gotta add, moving b gotta subtract
+	// Why a + and b -? IDFK. Just tried out a bunch of possible solutions and got this
+	// It works, don't touch (if it's not broken)
+	if (SDL_abs(depth.x()) <= SDL_abs(depth.y())) {
+		scene->get<Components::position>(entity).mPosition.x() += depth.x();
 	} else {
-		if (SDL_abs(depth.x()) <= SDL_abs(depth.y())) {
-			scene->get<Components::position>(a).mPosition.x() += (depth / 2).x();
-			scene->get<Components::position>(b).mPosition.x() += (-depth / 2).x();
-		} else {
-			scene->get<Components::position>(a).mPosition.y() += (depth / 2).y();
-			scene->get<Components::position>(b).mPosition.y() += (-depth / 2).y();
-		}
+		scene->get<Components::position>(entity).mPosition.y() += depth.y();
 	}
-	*/
 }

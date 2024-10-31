@@ -21,9 +21,9 @@
 
 SystemManager::SystemManager(Game* game) : mGame(game) {
 	mPhysicsSystem = std::make_unique<PhysicsSystem>(mGame);
-	mRenderSystem = std::make_unique<RenderSystem>(mGame);
-	mTextSystem = std::make_unique<TextSystem>(mGame);
-	mInputSystem = std::make_unique<InputSystem>(mGame);
+	mRenderSystem  = std::make_unique<RenderSystem>(mGame);
+	mTextSystem    = std::make_unique<TextSystem>(mGame);
+	mInputSystem   = std::make_unique<InputSystem>(mGame);
 }
 
 SystemManager::~SystemManager() {}

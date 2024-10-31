@@ -88,6 +88,7 @@ void Shader::activate() const noexcept { glUseProgram(mShaderProgram); }
 // Well the map with string view is complicated
 // See discord discussion on C++ server:
 // https://discord.com/channels/331718482485837825/331718580070645760/1291066117002891381
+// FIXME: string_view isn't guarenteed to be NULL-terminated :(
 GLint Shader::getUniform(const std::string_view name) const {
 	// Bad for performance, but I need this
 	SDL_assert([] {

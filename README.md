@@ -22,7 +22,7 @@ Dependencies:
 Install `assimp` and `freetype` with your package manager
 
 Compile SDL3:
-```
+```bash
 $ git clone --depth 1 https://github.com/libsdl-org/SDL.git
 $ cd SDL 
 $ mkdir build && cd build
@@ -33,7 +33,7 @@ $ sudo cmake --install .
 
 Install dependencies:
 
-```
+```bash
 # Install freetype 2
 # MacOS
 $ brew install freetype
@@ -43,7 +43,7 @@ $ sudo pacman -S freetype2
 
 Compile project:
 
-```
+```bash
 $ git clone --depth 1 https://github.com/cheyao/opengl.git
 $ cd opengl 
 $ mkdir build && cd build 
@@ -59,7 +59,7 @@ $ open /Applications/OpenGL.app # Or just openg the app
 ```
 
 If you are getting this error:
-```
+```bash
 Undefined symbols for architecture x86_64:
   "Assimp::IOSystem::CurrentDirectory[abi:cxx11]() const", referenced from:
       vtable for GameIOSystem in IOManager.cpp.o
@@ -75,22 +75,22 @@ Same, use cmake to build project
 ### Android
 
 MacOS Dependencies:
-```
+```bash
 $ brew install --cask android-platform-tools android-ndk temurin@17
 $ brew install cmake
 ```
 
 Add these to your `.zshrc` (Change it to the appropriate folders on linux):
-```
-export ANDROID_NDK_HOME="/usr/local/share/android-ndk"
-export JAVA_HOME=`/usr/libexec/java_home -v 17` # Yes, you __must__ use java 17, blame android
-export ANDROID_HOME="/usr/local/share/android-commandlinetools/"
+```bash
+$ export ANDROID_NDK_HOME="/usr/local/share/android-ndk"
+$ export JAVA_HOME=`/usr/libexec/java_home -v 17` # Yes, you __must__ use java 17, blame android
+$ export ANDROID_HOME="/usr/local/share/android-commandlinetools/"
 ```
 
 For android you need to compile assimp by yourself:
 
 Change the `CMAKE_TOOLCHAIN_FILE` if you are not on MacOS:
-```
+```bash
 $ git clone --depth 1 https://github.com/assimp/assimp.git
 $ cd assimp
 $ mkdir build && cd build
@@ -117,7 +117,7 @@ RELEASE_KEY_PASSWORD=[KEY PASSWORD]
 ```
 
 Now build the project:
-```
+```bash
 $ git clone --depth 1 https://github.com/cheyao/opengl.git
 $ cd opengl
 $ git submodule update --init --recursive
@@ -125,7 +125,7 @@ $ mkdir build && cd build
 $ cmake -DCMAKE_BUILD_TYPE=Release \
         -DANDROID=ON \
         ..
-# Note: You might edit CMakeLists.txt:320 to point to your assimp dir
+# Note: You might need to edit CMakeLists.txt:320 to point to your assimp lib dir
 $ cmake --build .
 ```
 Now there is the apk in the folder
@@ -135,7 +135,7 @@ Install [emsdk](https://emscripten.org/) to `~/emsdk`
 
 Build SDL3:
 
-```
+```bash
 $ source ~/emsdk/emsdk_env.sh
 $ git clone --depth 1 https://github.com/libsdl-org/SDL.git
 $ cd SDL 
@@ -146,7 +146,7 @@ $ emcmake cmake --install .
 ```
 
 Build the project:
-```
+```bash
 $ git clone --depth 1 https://github.com/cheyao/opengl.git
 $ cd opengl
 $ mkdir build && cd build 
@@ -202,6 +202,10 @@ Entities are just UUIDs
 Components are just plain old structs
 
 The systems manage all the logic and changes the components
+
+## Notes
+
+The linux save directory is `~/.local/share/cyao/opengl/`
 
 ## TODO
 

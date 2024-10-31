@@ -96,7 +96,6 @@ RenderSystem::RenderSystem(Game* game)
 #ifdef HIDPI
 					   | SDL_WINDOW_HIGH_PIXEL_DENSITY
 #endif
-
 	);
 	if (mWindow == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Game.cpp: Failed to create window: %s\n", SDL_GetError());
@@ -238,8 +237,7 @@ void RenderSystem::draw(Scene* scene) {
 
 		shader->activate();
 		shader->set("model", model);
-		shader->set("size", static_cast<float>(texture.mTexture->getWidth()),
-			    static_cast<float>(texture.mTexture->getHeight()));
+		shader->set("size", texture.mTexture->getSize());
 
 		shader->set("position", block.mPosition);
 		shader->set("scale", texture.mScale);
@@ -297,18 +295,18 @@ void RenderSystem::draw(Scene* scene) {
 		editorShader->set("wireframe", hitbox);
 
 		// FIXME:
-		/*for (const auto& [_, collision, position] :*/
-		/*     scene->view<Components::collision, Components::position>().each()) {*/
-		/*	Eigen::Affine3f model = Eigen::Affine3f::Identity();*/
-		/**/
-		/*	model.translate(*/
-		/*		(Eigen::Vector3f() << (position.mPosition + collision.mOffset), 0.0f).finished());*/
-		/**/
-		/*	editorShader->set("model", model);*/
-		/*	editorShader->set("size", collision.mSize);*/
-		/**/
-		/*	mMesh->draw(editorShader);*/
-		/*}*/
+		for (const auto& [_, collision, position] :
+		     scene->view<Components::collision, Components::position>().each()) {
+			Eigen::Affine3f model = Eigen::Affine3f::Identity();
+
+			model.translate(
+				(Eigen::Vector3f() << (position.mPosition + collision.mOffset), 0.0f).finished());
+
+			editorShader->set("model", model);
+			editorShader->set("size", collision.mSize);
+
+			mMesh->draw(editorShader);
+		}
 
 		if (hitbox && glPolygonMode != nullptr) {
 			glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
@@ -336,9 +334,7 @@ void RenderSystem::draw(Scene* scene) {
 
 			Eigen::Affine3f model = Eigen::Affine3f::Identity();
 
-			/*
 			model.translate((Eigen::Vector3f() << (position.mPosition), 0.0f).finished());
-			*/
 
 			vectorShader->set("model", model);
 			vectorShader->set("size",
@@ -390,8 +386,7 @@ void RenderSystem::setDisplayScale() const {
 #ifdef IMGUI
 	ImGuiIO& io = ImGui::GetIO();
 
-	ImFont* font =
-		io.Fonts->AddFontFromFileTTF(mGame->fullPath("fonts/NotoSans.ttf").data(), 16.0f * scale);
+	ImFont* font = io.Fonts->AddFontFromFileTTF(mGame->fullPath("fonts/NotoSans.ttf").data(), 16.0f * scale);
 	SDL_assert(font != nullptr);
 
 	ImGuiStyle& style = ImGui::GetStyle();

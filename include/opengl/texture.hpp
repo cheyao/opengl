@@ -1,5 +1,6 @@
 #pragma once
 
+#include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
 
 #include <ft2build.h>
@@ -24,6 +25,7 @@ class Texture {
 
 	int getWidth() const { return mWidth; };
 	int getHeight() const { return mHeight; };
+	Eigen::Vector2f getSize() const { return Eigen::Vector2f(mWidth, mHeight); }
 
       protected:
 	virtual void load(bool srgb);

@@ -16,9 +16,9 @@ class PhysicsSystem {
 
       private:
 	// Collision tests
-	bool AABBxAABB(const class Scene* scene, const EntityID a, const EntityID b) const;
-	bool collidingBellow(const class Scene* scene, const EntityID main, const EntityID b) const;
-	void pushBack(class Scene* scene, const EntityID a, EntityID b);
+	bool AABBxAABB(const class Scene* scene, const EntityID entity, const EntityID block) const;
+	bool collidingBellow(const class Scene* scene, const EntityID entity, const EntityID block) const;
+	void pushBack(class Scene* scene, const EntityID entity, EntityID block);
 
 	class Game* mGame;
 };

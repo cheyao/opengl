@@ -66,7 +66,7 @@ struct misc {
 };
 
 struct block {
-	enum BlockType {
+	enum BlockType : std::uint64_t {
 		AIR = 0,
 		GRASS_BLOCK,
 		DIRT,
