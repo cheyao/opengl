@@ -46,11 +46,12 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 	 * https://gamedev.stackexchange.com/questions/15708/how-can-i-implement-gravity
 	 * To fix it we need to add a acceleration vector(Wow school knowladge has usages)
 	 */
+	// TODO: Seamless key transition
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
-		// TODO: Just use delta time
-		for (std::size_t i = 0; i < entities.size(); ++i) {
-			if (entity != entities[i] && collidingBellow(scene, entity, entities[i])) {
+		// TODO: Just use delta time for G
+		for (const auto& block : scene->view<Components::collision, Components::block>()) {
+			if (collidingBellow(scene, entity, block)) {
 				onGround = true;
 
 				break;
@@ -58,6 +59,7 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 		}
 
 		if (onGround) {
+
 			if (scene->contains<Components::misc>(entity) &&
 			    scene->get<Components::misc>(entity).mWhat & Components::misc::JUMP &&
 			    (mGame->getKeystate()[SDL_SCANCODE_UP] == true ||
@@ -66,6 +68,7 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 			} else {
 				scene->get<Components::velocity>(entity).mVelocity.y() = 0.0f;
 			}
+
 		} else {
 			scene->get<Components::velocity>(entity).mVelocity.y() -= G;
 		}
@@ -234,10 +237,12 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID entity, EntityID
 	 * https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/RectangleExtensions.cs#L30
 	 */
 
+	// This is the position of our entity
 	const Eigen::Vector2f leftEntity =
 		scene->get<Components::position>(entity).mPosition + scene->get<Components::collision>(entity).mOffset;
 	const Eigen::Vector2f centerEntity = leftEntity + scene->get<Components::collision>(entity).mSize / 2;
 
+	// And the position of the block
 	const auto& blockCollision = scene->get<Components::collision>(block);
 	const auto& blockTexture = scene->get<Components::texture>(block);
 	const auto& blockPosition = scene->get<Components::block>(block).mPosition;
@@ -251,19 +256,17 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID entity, EntityID
 
 	const Eigen::Vector2f distance = centerEntity - centerB;
 	const Eigen::Vector2f minDistance =
-		(scene->get<Components::collision>(entity).mSize + scene->get<Components::collision>(block).mSize) / 2;
+		(scene->get<Components::collision>(entity).mSize + blockCollision.mSize) / 2;
 
 	SDL_assert(!(SDL_abs(distance.x()) > minDistance.x() || SDL_abs(distance.y()) > minDistance.y()) &&
 		   "The objects are not colliding?");
 
+	// Calculate the collision depth
 	const float depthX = (distance.x() > 0 ? minDistance.x() : -minDistance.x()) - distance.x();
 	const float depthY = (distance.y() > 0 ? minDistance.y() : -minDistance.y()) - distance.y();
 
 	const Eigen::Vector2f depth = Eigen::Vector2f(depthX, depthY);
 
-	// The + and - are relative to the two, so when moving a gotta add, moving b gotta subtract
-	// Why a + and b -? IDFK. Just tried out a bunch of possible solutions and got this
-	// It works, don't touch (if it's not broken)
 	if (SDL_abs(depth.x()) <= SDL_abs(depth.y())) {
 		scene->get<Components::position>(entity).mPosition.x() += depth.x();
 	} else {
