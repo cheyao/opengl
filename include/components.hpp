@@ -12,13 +12,13 @@ namespace Components {
 struct position {
 	Eigen::Vector2f mPosition;
 
-	position(const decltype(mPosition) position) noexcept : mPosition(position) {}
+	position(const decltype(mPosition) pos) noexcept : mPosition(pos) {}
 };
 
 struct velocity {
 	Eigen::Vector2f mVelocity;
 
-	velocity(const decltype(mVelocity) velocity) noexcept : mVelocity(velocity) {}
+	velocity(const decltype(mVelocity) vel) noexcept : mVelocity(vel) {}
 };
 
 struct collision {
@@ -36,9 +36,9 @@ struct texture {
 	float mScale = 0.7f;
 	class Shader* mShader = nullptr;
 
-	texture(const decltype(mTexture) texture, const decltype(mScale) scale = 0.7f,
+	texture(const decltype(mTexture) tex, const decltype(mScale) scale = 0.7f,
 		const decltype(mShader) shader = nullptr) noexcept
-		: mTexture(texture), mScale(scale), mShader(shader) {}
+		: mTexture(tex), mScale(scale), mShader(shader) {}
 };
 
 struct input {

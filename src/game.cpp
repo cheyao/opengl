@@ -8,6 +8,7 @@
 #include "third_party/glad/glad.h"
 
 #include <SDL3/SDL.h>
+#include <cinttypes>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -148,7 +149,7 @@ SDL_AppResult Game::iterate() {
 	framerate += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 	count++;
 	if (count == 100) {
-		SDL_Log("Average draw time (last 100 frames): %lluns", framerate / count);
+		SDL_Log("Average draw time (last 100 frames): %" PRIu64 "ns", static_cast<std::uint64_t>(framerate) / count);
 		framerate = 0;
 		count = 0;
 	}

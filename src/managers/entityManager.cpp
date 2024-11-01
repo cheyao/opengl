@@ -1,5 +1,7 @@
 #include "managers/entityManager.hpp"
 
+#include <algorithm>
+
 EntityManager::EntityManager() : mNext(1) {}
 
 EntityID EntityManager::getEntity() {

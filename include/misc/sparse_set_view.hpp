@@ -157,7 +157,7 @@ template <typename... ComponentTypes> class sparse_set_view {
 	constexpr const EntityID* data() const noexcept { return mEntities.data(); }
 
       private:
-	class ComponentManager* const mComponentManager;
+	class ComponentManager* mComponentManager;
 	std::vector<EntityID> mEntities;
 };
 
