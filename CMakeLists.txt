@@ -288,7 +288,8 @@ endif()
 include(CheckIPOSupported)
 check_ipo_supported(RESULT LTOSupported OUTPUT error)
 
-if(LTOSupported AND NOT ANDROID AND NOT DEBUG)
+# Web takes too long to compile with LTO
+if(LTOSupported AND NOT ANDROID AND NOT DEBUG AND NOT WEB)
 	message(STATUS "IPO / LTO enabled")
 
 	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)

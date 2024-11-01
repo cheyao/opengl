@@ -9,7 +9,6 @@
 #include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
-#include <memory>
 #include <version>
 
 #ifdef IMGUI
@@ -146,7 +145,7 @@ void SystemManager::update(Scene* scene, const float delta) {
 void SystemManager::registerClick(const float x, const float y) { mInputSystem->registerClick(x, y); }
 
 void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
-#if defined(IMGUI)
+#ifdef IMGUI
 	// Print out signals
 	static bool signalList = false;
 	static bool entityList = false;

@@ -16,6 +16,10 @@ class ShaderManager {
 
 	void reload();
 
+#ifdef IMGUI
+	void debugGui();
+#endif
+
       private:
 	const std::string mPath;
 

@@ -163,8 +163,6 @@ template <typename Component> class sparse_set : public sparse_set_interface {
 	using iterator = sparse_set_interface::iterator;
 	using const_iterator = sparse_set_interface::const_iterator;
 
-	constexpr const static std::size_t max_size = std::numeric_limits<std::uint64_t>::max();
-
 	// No need to clean up, everything is in a vector
 	sparse_set() = default;
 	sparse_set(sparse_set&&) = delete;

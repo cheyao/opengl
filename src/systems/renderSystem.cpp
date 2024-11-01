@@ -294,7 +294,7 @@ void RenderSystem::draw(Scene* scene) {
 		mMesh->draw(shader);
 	}
 
-#ifdef IMGUI
+#if defined(IMGUI) && !defined(__ANDROID__)
 	static bool hitbox = false;
 	static bool vector = false;
 

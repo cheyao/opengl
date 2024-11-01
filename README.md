@@ -143,16 +143,26 @@ Now there is the apk in the folder
 ## Web 
 Install [emsdk](https://emscripten.org/) to `~/emsdk`
 
+On arch just run `sudo pacman -S emscripten`
+
 Build SDL3:
 
 ```bash
-$ source ~/emsdk/emsdk_env.sh
+$ source ~/emsdk/emsdk_env.sh # Only on MacOS
 $ git clone --depth 1 https://github.com/libsdl-org/SDL.git
 $ cd SDL 
 $ mkdir build && cd build
 $ emcmake cmake ..
 $ emcmake cmake --build .
 $ emcmake cmake --install .
+```
+
+Build assimp:
+```bash
+$ git clone --depth 1 https://github.com/assimp/assimp && cd assimp
+$ mkdir build && cd build
+& emcmake cmake -DASSIMP_BUILD_ZLIB=ON ..
+$ emcmake cmake --build .
 ```
 
 Build the project:

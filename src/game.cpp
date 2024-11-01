@@ -13,6 +13,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <chrono>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -20,16 +21,10 @@
 #include <imgui.h>
 #endif
 
-#ifdef DEBUG
-#include <chrono>
-#endif
-
 Game::Game()
 	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mStorageManager(nullptr),
 	  mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(false), mCurrentLevel(nullptr) {
-#ifdef DEBUG
 	const auto begin = std::chrono::high_resolution_clock::now();
-#endif
 	mUIScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 	if (mUIScale <= 0.0f) {
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
@@ -71,13 +66,11 @@ Game::Game()
 
 	mTicks = SDL_GetTicks();
 
-#ifdef DEBUG
 	const auto end = std::chrono::high_resolution_clock::now();
 	std::stringstream time;
 	time << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() << "ns ("
 	     << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "milis)";
 	SDL_Log("Startup took %s", time.str().data());
-#endif
 
 #ifdef DEBUG
 	GLenum err = 0;
@@ -122,9 +115,7 @@ Game::~Game() {
 }
 
 SDL_AppResult Game::iterate() {
-#ifdef DEBUG
 	const auto begin = std::chrono::high_resolution_clock::now();
-#endif
 
 	if (mQuit) {
 		return SDL_APP_SUCCESS;
@@ -141,7 +132,6 @@ SDL_AppResult Game::iterate() {
 	gui();
 	mSystemManager->update(mCurrentLevel->getScene(), delta);
 
-#ifdef DEBUG
 	const auto end = std::chrono::high_resolution_clock::now();
 	std::stringstream time;
 	static std::chrono::nanoseconds::rep framerate = 0;
@@ -154,6 +144,7 @@ SDL_AppResult Game::iterate() {
 		count = 0;
 	}
 
+#ifdef DEBUG
 	GLenum err = 0;
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		switch (err) {

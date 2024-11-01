@@ -6,7 +6,9 @@
 #include <cstdint>
 #include <functional>
 
-// Android needs the xonstructers to be able to use emplace
+// Android needs the constructers to be able to use emplace
+class Texture;
+class Shader;
 
 namespace Components {
 struct position {

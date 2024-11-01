@@ -1,7 +1,5 @@
 #include "systems/physicsSystem.hpp"
 
-class Texture;
-
 #include "components.hpp"
 #include "game.hpp"
 #include "managers/entityManager.hpp"
@@ -28,6 +26,8 @@ PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
 // Before enabling checks (98f1275078cad77b0b7a3145b4e57c6f098bd078): 2560632.097561ns avg (391 FPS)
 // After enabling checks  (1b5262e0b971bb3b8308703605b070f7b8d31608): 2757778.578947ns avg (363 FPS)
 // Diff:                                                               197146.481386ns avg ( 28 FPS)
+
+// Whole prog perf
 // GCC                                                                2917566.270833ns avg (343 FPS)
 // Parralel collision detection std::execution::par_unseq             2887647.807018ns avg (346 FPS)
 // Aww soo many frances lost
@@ -93,7 +93,7 @@ void PhysicsSystem::collide(Scene* scene) {
 
 	// Iterate over all pairs of colliders
 	// PERF: Use some nice trees https://gamedev.stackexchange.com/questions/26501/how-does-a-collision-engine-work
-	
+
 	// Multithreading this will result in worse performance :(
 	for (const auto& entity : entities) {
 		for (const auto& block : blocks) {

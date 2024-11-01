@@ -18,8 +18,6 @@ Texture::Texture(const FT_Bitmap& bitmap)
 	  mHeight(bitmap.rows) {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	// SDL_Log("Loading texture %s", name.data());
-
 	glGenTextures(1, &mID);
 	glBindTexture(GL_TEXTURE_2D, mID);
 
@@ -34,8 +32,6 @@ Texture::Texture(const FT_Bitmap& bitmap)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	// SDL_Log("Loaded freetype bitmap: %dx%d", bitmap.width, bitmap.rows);
 }
 
 Texture::~Texture() {

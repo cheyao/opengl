@@ -17,14 +17,14 @@ LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "asset
 	SDL_Locale** const loc = SDL_GetPreferredLocales(&c);
 	std::string locList = "";
 	for (int i = 0; i < c; ++i) {
-		locList.append(loc[i]->language);
+		locList += loc[i]->language;
 
 		if (loc[i]->language != nullptr) {
-			locList.append("-");
-			locList.append(loc[i]->country);
+			locList += "-";
+			locList += loc[i]->country;
 		}
 
-		locList.append(" ");
+		locList += " ";
 	}
 
 	SDL_Log("LocaleManager.cpp: Found locales %s", locList.data());

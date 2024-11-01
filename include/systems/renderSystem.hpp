@@ -28,6 +28,10 @@ class RenderSystem {
 	void swapWindow() const;
 	void present() const;
 
+#ifdef IMGUI
+	void debugGui();
+#endif
+
       private:
 	void setLights(class Shader* shader) const;
 	void setOrtho() const;

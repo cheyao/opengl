@@ -107,3 +107,8 @@ void ShaderManager::reload() {
 #endif
 	}
 }
+
+#ifdef IMGUI
+void ShaderManager::debugGui() {
+}
+#endif

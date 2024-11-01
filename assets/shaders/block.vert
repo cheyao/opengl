@@ -17,8 +17,8 @@ uniform float scale;
 
 void main() {
 	vec2 pos = vec2(model * vec4(aPos.x * size.x, aPos.y * size.y, 0.0f, 1.0f));
-	pos.x += position.x * size.x * scale;
-	pos.y += position.y * size.y * scale;
+	pos.x += float(position.x) * size.x * scale;
+	pos.y += float(position.y) * size.y * scale;
 	gl_Position = proj * vec4(pos, 0.0f, 1.0f);
 
 	vTexPos = aTexPos;
