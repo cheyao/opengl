@@ -140,10 +140,14 @@ template <typename... ComponentTypes> class sparse_set_view {
 			for (const auto entity : mEntities) {
 				func(entity, mComponentManager->getPool<ComponentTypes>()->get(entity)...);
 			}
-		} else {
+		} else if constexpr (std::is_invocable_v<Func, ComponentTypes&...>) {
 			for (const auto entity : mEntities) {
 				func(mComponentManager->getPool<ComponentTypes>()->get(entity)...);
 			}
+		} else {
+			static_assert(false, "The signatures for each are: (EntityID), (EntityID, ComponentTypes&...) "
+					     "and (ComponentTypes&...)");
+			std::unreachable();
 		}
 	}
 

@@ -63,7 +63,7 @@ TextSystem::TextSystem(Game* game, const unsigned int size, const bool final)
 
 	mMesh = std::unique_ptr<Mesh>(new Mesh(vertices, {}, texturePos, indices, {}));
 
-	// TODO: Dyn load
+	// TODO: Dyn load CJK
 	if (!final) {
 		mChild = new TextSystem(game, size, true);
 		mChild->loadFont("NotoSansCJK.ttc");
@@ -237,17 +237,13 @@ void TextSystem::draw(Scene* scene) {
 	shader->set("letter", 0);
 	shader->set("textColor", 1.0f, 1.0f, 1.0f);
 
-	// FIXME:
-	(void)scene;
-	/*
 	for (const auto& [_, text, position] : scene->view<Components::text, Components::position>().each()) {
 		auto offset = position.mPosition;
 
-		for (const char32_t c : mGame->getLocaleManager()->get(text.mID)) {
+		for (const auto c : mGame->getLocaleManager()->get(text.mID)) {
 			drawGlyph(c, shader, offset);
 
 			offset += getGlyph(c).advance;
 		}
 	}
-	*/
 }

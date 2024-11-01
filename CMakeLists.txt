@@ -194,7 +194,7 @@ endif()
 
 # Clang got some errors with `unordered_map` when using c++23 and libstdc++
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT ANDROID)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -fexperimental-library")
 endif()
 
 # Platform dependent flags

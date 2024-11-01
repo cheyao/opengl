@@ -12,7 +12,6 @@ class Texture;
 
 #include <SDL3/SDL.h>
 #include <cstddef>
-#include <ranges>
 #include <string>
 #include <vector>
 
@@ -25,6 +24,13 @@ class Texture;
 // The physicsSystem is in charge of the collision and mouvements
 PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
 
+// Performance benchmark:
+// Before enabling checks (98f1275078cad77b0b7a3145b4e57c6f098bd078): 2560632.097561ns avg (391 FPS)
+// After enabling checks  (1b5262e0b971bb3b8308703605b070f7b8d31608): 2757778.578947ns avg (363 FPS)
+// Diff:                                                               197146.481386ns avg ( 28 FPS)
+// Parralel collision detection std::execution::par_unseq             2887647.807018ns avg (346 FPS)
+// Aww soo many frances lost
+
 /*
  * FIXME:
  * Currently we are checking the player by using a bitmask or smt
@@ -33,7 +39,6 @@ PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
  * Like this we won't need to depend on a lot of checks and prayers
  */
 void PhysicsSystem::update(Scene* scene, float delta) {
-	(void)delta;
 	constexpr const static float G = 1200.0f;
 	constexpr const static float jumpForce = 500.0f;
 
@@ -79,10 +84,6 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 	}
 }
 
-template <typename T>
-	requires std::ranges::sized_range<T>
-struct boo {};
-
 void PhysicsSystem::collide(Scene* scene) {
 	// Get a list of all the entities we need to check
 	// Wow my move operator has usages!
@@ -91,7 +92,8 @@ void PhysicsSystem::collide(Scene* scene) {
 
 	// Iterate over all pairs of colliders
 	// PERF: Use some nice trees https://gamedev.stackexchange.com/questions/26501/how-does-a-collision-engine-work
-	// PERF: Multithread
+	
+	// Multithreading this will result in worse performance :(
 	for (const auto& entity : entities) {
 		for (const auto& block : blocks) {
 			if (AABBxAABB(scene, entity, block)) {

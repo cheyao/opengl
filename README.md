@@ -1,6 +1,16 @@
-<div align="center">
-    <img src="https://raw.githubusercontent.com/cheyao/opengl/main/misc/styles.svg" width="100%" height="auto" alt="Introduction">
-</div>
+<h1 align="center" style="text-shadow: 2px 2px 5px red;">Cyao Game Engine</h1>
+<h2 align="center">Features</h2>
+
+<ul>
+    <li><b>Cross-Platorm</b> 💻📱: <b>MacOS</b>, <b>Linux</b>, <b>Windows</b>, <b>Web</b>, <b>Android</b> and <b>IOS</b> all supported!</li>
+    <li><b>Performant</b> 🏃: Uses C++, the game runs smoothly even on browsers. (<b>60</b>+ FPS on a <b>10 year old</b> laptop with <b>5000</b>+ entities!)</li>
+    <li><b>Multilingual</b> 🌐: <b>Unicode</b> and Locale support build in. (No more �!)</li>
+    <li><b>Modern</b> ✨: Uses <b>Modern</b> C++20 features and follows best practices. SDL3 used!</li>
+    <li><b>Extendable</b> 🧩: The Game Engine uses the <b class="flip">Bleeding-edge</b> ECS arcitecture.</li>
+    <li><b>2D and 3D</b> ❤️: Make <b>2D</b> and <b>3D</b> Together!</li>
+    <li><b>Debuggable</b> 🔍: Custom asserts and <b>Debug menu</b> helps you identify any bugs 🐛!</li>
+    <li><b>Custom Saves</b> 📝: Easily save <b>any</b> data on any platform you want in a json file, the game engine will manage it for you!</li>
+</ul>
 
 <h3 align="center"><a href="https://cheyao.github.io/game">Try out web version now!</a></h3>
 

@@ -27,7 +27,7 @@ Game::Game()
 	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mStorageManager(nullptr),
 	  mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(false), mCurrentLevel(nullptr) {
 #ifdef DEBUG
-	auto begin = std::chrono::high_resolution_clock::now();
+	const auto begin = std::chrono::high_resolution_clock::now();
 #endif
 	mUIScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
 	if (mUIScale <= 0.0f) {
@@ -53,9 +53,7 @@ Game::Game()
 	mLocaleManager = new LocaleManager(mBasePath);
 
 	// TODO: Icon
-	/*
-	SDL_SetWindowIcon(mWindow, icon);
-	*/
+	// SDL_SetWindowIcon(mWindow, icon);
 
 	mStorageManager = new StorageManager(this);
 
@@ -73,7 +71,7 @@ Game::Game()
 	mTicks = SDL_GetTicks();
 
 #ifdef DEBUG
-	auto end = std::chrono::high_resolution_clock::now();
+	const auto end = std::chrono::high_resolution_clock::now();
 	std::stringstream time;
 	time << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() << "ns ("
 	     << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "milis)";
@@ -124,7 +122,7 @@ Game::~Game() {
 
 SDL_AppResult Game::iterate() {
 #ifdef DEBUG
-	auto begin = std::chrono::high_resolution_clock::now();
+	const auto begin = std::chrono::high_resolution_clock::now();
 #endif
 
 	if (mQuit) {
@@ -143,7 +141,7 @@ SDL_AppResult Game::iterate() {
 	mSystemManager->update(mCurrentLevel->getScene(), delta);
 
 #ifdef DEBUG
-	auto end = std::chrono::high_resolution_clock::now();
+	const auto end = std::chrono::high_resolution_clock::now();
 	std::stringstream time;
 	static std::chrono::nanoseconds::rep framerate = 0;
 	static std::uint64_t count = 0;
