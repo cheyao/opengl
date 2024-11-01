@@ -1,7 +1,5 @@
 #include "systems/inputSystem.hpp"
 
-#include "opengl/texture.hpp"
-
 #include "components.hpp"
 #include "game.hpp"
 #include "misc/sparse_set_view.hpp"

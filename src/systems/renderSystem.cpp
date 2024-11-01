@@ -208,9 +208,6 @@ RenderSystem::RenderSystem(Game* game)
 	mMesh = std::unique_ptr<Mesh>(new Mesh(vertices, {}, texturePos, indices, {}));
 
 #ifndef __ANDROID__
-	// FIXME: Not working :(
-
-	// Set the cursor
 	SDL_Surface* cursorSurface = SDL_LoadBMP((mGame->getBasePath() + "assets/textures/crosshair.bmp").data());
 
 	if (cursorSurface) {

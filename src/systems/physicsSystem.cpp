@@ -42,11 +42,11 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 		[&entities](const EntityID& entity) { entities.emplace_back(entity); });
 
 	/*
-	 * FIXME: This is messed up when the framerate isn't constant
+	 * FIXME: Currently this is a mock up gravity impl
 	 * https://gamedev.stackexchange.com/questions/15708/how-can-i-implement-gravity
 	 * To fix it we need to add a acceleration vector(Wow school knowladge has usages)
 	 */
-	// TODO: Seamless key transition
+	// FIXME: Seamless key transition
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
 
@@ -58,23 +58,24 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 			}
 		}
 
+		auto& velocity = scene->get<Components::velocity>(entity).mVelocity;
+
 		if (onGround) {
 			// We can jump IF the entity is a misc entity with the jump flag, and the up key is pressed, and
 			// we are on the ground
 			if (scene->contains<Components::misc>(entity) &&
 			    (scene->get<Components::misc>(entity).mWhat & Components::misc::JUMP) &&
 			    (mGame->getKeystate()[SDL_SCANCODE_UP] || mGame->getKeystate()[SDL_SCANCODE_SPACE])) {
-				scene->get<Components::velocity>(entity).mVelocity.y() = jumpForce;
+				velocity.y() = jumpForce;
 			} else {
-				scene->get<Components::velocity>(entity).mVelocity.y() = 0.0f;
+				velocity.y() = 0.0f;
 			}
 		} else {
-			scene->get<Components::velocity>(entity).mVelocity.y() -= G * delta;
+			velocity.y() -= G * delta;
 		}
 
-		scene->get<Components::position>(entity).mPosition +=
-			scene->get<Components::velocity>(entity).mVelocity * delta;
-		scene->get<Components::velocity>(entity).mVelocity.x() *= 0.7;
+		scene->get<Components::position>(entity).mPosition += velocity * delta;
+		velocity.x() *= 0.7;
 	}
 }
 

@@ -10,8 +10,7 @@
 #include <unordered_map>
 #include <version>
 
-ShaderManager::ShaderManager(const std::string_view path)
-	: mPath(std::string(path) + "assets/shaders/") {
+ShaderManager::ShaderManager(const std::string_view path) : mPath(std::string(path) + "assets/shaders/") {
 	mShaders["default.vert:default.frag"] = nullptr;
 }
 
@@ -37,8 +36,10 @@ Shader* ShaderManager::get(std::string_view vert, std::string_view frag, std::st
 		shader = new Shader(mPath + std::string(vert), mPath + std::string(frag),
 				    geom.empty() ? geom : mPath + std::string(geom));
 	} catch (const std::runtime_error& error) {
-		SDL_LogError(SDL_LOG_CATEGORY_RENDER,
-			     "\x1B[31mShaderManager.cpp: Error compiling shader %s, falling back to default shader\033[0m", concated.data());
+		SDL_LogError(
+			SDL_LOG_CATEGORY_RENDER,
+			"\x1B[31mShaderManager.cpp: Error compiling shader %s, falling back to default shader\033[0m",
+			concated.data());
 
 		if (mShaders["default.vert:default.frag"] == nullptr) {
 			mShaders["default.vert:default.frag"] =
@@ -57,15 +58,13 @@ ShaderManager::~ShaderManager() {
 	// Default shader might get used multiple times
 	Shader* def = mShaders["default.vert:default.frag"];
 
-	for (const auto [_, shader] : mShaders) {
+	for (const auto& [_, shader] : mShaders) {
 		if (shader != def) {
 			delete shader;
 		}
 	}
 
-	if (def != nullptr) {
-		delete def;
-	}
+	delete def;
 }
 
 void ShaderManager::reload() {
