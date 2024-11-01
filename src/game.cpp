@@ -57,35 +57,6 @@ Game::Game()
 	SDL_SetWindowIcon(mWindow, icon);
 	*/
 
-#ifndef __ANDROID__
-	// FIXME: Not working :(
-
-	// Set the cursor
-	SDL_Surface* cursorSurface = SDL_LoadBMP((mBasePath + "assets/textures/crosshair.bmp").data());
-
-	if (cursorSurface == nullptr) {
-		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to get cursor surface: %s\033[0m", SDL_GetError());
-	} else {
-		SDL_Cursor* cursor = SDL_CreateColorCursor(cursorSurface, 0, 0);
-		if (cursor != nullptr) {
-			if (!SDL_SetCursor(cursor)) {
-				SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to set cursor: %s\033[0m",
-					     SDL_GetError());
-			} else {
-				SDL_SetCursor(nullptr); // Redraw
-				SDL_Log("\033[32mSuccesfully set cursor\033[0m");
-			}
-
-			SDL_DestroyCursor(cursor);
-		} else {
-			SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to create cursor: %s\033[0m",
-				     SDL_GetError());
-		}
-
-		SDL_DestroySurface(cursorSurface);
-	}
-#endif
-
 	mStorageManager = new StorageManager(this);
 
 	try {

@@ -34,7 +34,7 @@ PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
  */
 void PhysicsSystem::update(Scene* scene, float delta) {
 	(void)delta;
-	constexpr const static float G = 15.0f;
+	constexpr const static float G = 1200.0f;
 	constexpr const static float jumpForce = 500.0f;
 
 	auto entities = std::vector<EntityID>();
@@ -49,7 +49,7 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 	// TODO: Seamless key transition
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
-		// TODO: Just use delta time for G
+
 		for (const auto& block : scene->view<Components::collision, Components::block>()) {
 			if (collidingBellow(scene, entity, block)) {
 				onGround = true;
@@ -59,18 +59,17 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 		}
 
 		if (onGround) {
-
+			// We can jump IF the entity is a misc entity with the jump flag, and the up key is pressed, and
+			// we are on the ground
 			if (scene->contains<Components::misc>(entity) &&
-			    scene->get<Components::misc>(entity).mWhat & Components::misc::JUMP &&
-			    (mGame->getKeystate()[SDL_SCANCODE_UP] == true ||
-			     mGame->getKeystate()[SDL_SCANCODE_SPACE] == true)) {
+			    (scene->get<Components::misc>(entity).mWhat & Components::misc::JUMP) &&
+			    (mGame->getKeystate()[SDL_SCANCODE_UP] || mGame->getKeystate()[SDL_SCANCODE_SPACE])) {
 				scene->get<Components::velocity>(entity).mVelocity.y() = jumpForce;
 			} else {
 				scene->get<Components::velocity>(entity).mVelocity.y() = 0.0f;
 			}
-
 		} else {
-			scene->get<Components::velocity>(entity).mVelocity.y() -= G;
+			scene->get<Components::velocity>(entity).mVelocity.y() -= G * delta;
 		}
 
 		scene->get<Components::position>(entity).mPosition +=

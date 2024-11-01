@@ -43,7 +43,7 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 #endif
 
 RenderSystem::RenderSystem(Game* game)
-	: mGame(game), mWindow(nullptr), mGL(nullptr), mFramebuffer(nullptr), mMatricesUBO(nullptr),
+	: mGame(game), mWindow(nullptr), mCursor(nullptr), mGL(nullptr), mFramebuffer(nullptr), mMatricesUBO(nullptr),
 	  mTextures(std::make_unique<TextureManager>(mGame->getBasePath())),
 	  mShaders(std::make_unique<ShaderManager>(mGame->getBasePath())), mWidth(0), mHeight(0) {
 	const SDL_DisplayMode* const DM = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
@@ -134,6 +134,8 @@ RenderSystem::RenderSystem(Game* game)
 #else
 	// TODO: Storage path
 #endif
+
+	io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 #ifdef __ANDROID__
 	io.ConfigFlags |= ImGuiConfigFlags_IsTouchScreen;
 #endif
@@ -158,10 +160,10 @@ RenderSystem::RenderSystem(Game* game)
 	}
 
 	ImGui_ImplSDL3_InitForOpenGL(mWindow, mGL->getContext());
-#ifndef GLES
-	ImGui_ImplOpenGL3_Init("#version 410 core");
-#else
+#ifdef GLES
 	ImGui_ImplOpenGL3_Init("#version 300 es  ");
+#else
+	ImGui_ImplOpenGL3_Init("#version 410 core");
 #endif
 
 	SDL_Log("Finished Initializing ImGUI");
@@ -204,9 +206,33 @@ RenderSystem::RenderSystem(Game* game)
 	static_assert(sizeof(indices) == 6 * sizeof(GLuint) && "Just a square, why not 6 indices?");
 
 	mMesh = std::unique_ptr<Mesh>(new Mesh(vertices, {}, texturePos, indices, {}));
+
+#ifndef __ANDROID__
+	// FIXME: Not working :(
+
+	// Set the cursor
+	SDL_Surface* cursorSurface = SDL_LoadBMP((mGame->getBasePath() + "assets/textures/crosshair.bmp").data());
+
+	if (cursorSurface) {
+		mCursor = SDL_CreateColorCursor(cursorSurface, 8, 8);
+
+		SDL_DestroySurface(cursorSurface);
+
+		if (mCursor && SDL_SetCursor(mCursor)) {
+			SDL_Log("\033[32mSuccesfully set cursor\033[0m");
+		} else {
+			SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to set cursor: %s\033[0m", SDL_GetError());
+		}
+	} else {
+		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to get cursor surface: %s\033[0m", SDL_GetError());
+	}
+#endif
 }
 
-RenderSystem::~RenderSystem() { SDL_DestroyWindow(mWindow); /* Other stuff are smart pointers */ }
+RenderSystem::~RenderSystem() {
+	SDL_DestroyWindow(mWindow);
+	SDL_DestroyCursor(mCursor);
+}
 
 void RenderSystem::setDemensions(int width, int height) {
 	mWidth = width;
