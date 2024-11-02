@@ -30,7 +30,7 @@ class TextSystem {
 		Eigen::Vector2f advance;
 	};
 
-	void drawGlyph(const char32_t character, class Shader* shader, const Eigen::Vector2f offset);
+	void drawGlyph(const char32_t character, class Shader* shader, const Eigen::Vector2f& offset);
 	Glyph& getGlyph(const char32_t character);
 
 	class Game* mGame;

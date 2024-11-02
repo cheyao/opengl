@@ -169,7 +169,7 @@ void TextSystem::setFontSize(const unsigned int size) {
 	mGlyphMap.clear();
 }
 
-void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen::Vector2f offset) {
+void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen::Vector2f& offset) {
 	SDL_assert(mFace != nullptr);
 
 	const TextSystem::Glyph& glyph = getGlyph(character);

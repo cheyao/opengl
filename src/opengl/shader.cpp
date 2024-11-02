@@ -140,16 +140,16 @@ void Shader::set(const std::string_view name, const GLfloat val, const GLfloat v
 void Shader::set(const std::string_view name, const GLfloat val, const GLfloat val2, const GLfloat val3) const {
 	glUniform3f(getUniform(name), val, val2, val3);
 }
-void Shader::set(const std::string_view name, const Eigen::Vector2f val) const {
+void Shader::set(const std::string_view name, const Eigen::Vector2f& val) const {
 	glUniform2fv(getUniform(name), 1, val.data());
 }
-void Shader::set(const std::string_view name, const Eigen::Vector3f val) const {
+void Shader::set(const std::string_view name, const Eigen::Vector3f& val) const {
 	glUniform3fv(getUniform(name), 1, val.data());
 }
-void Shader::set(const std::string_view name, const Eigen::Vector4f val) const {
+void Shader::set(const std::string_view name, const Eigen::Vector4f& val) const {
 	glUniform4fv(getUniform(name), 1, val.data());
 }
-void Shader::set(const std::string_view name, const Eigen::Vector2i val) const {
+void Shader::set(const std::string_view name, const Eigen::Vector2i& val) const {
 	glUniform2iv(getUniform(name), 1, val.data());
 }
 void Shader::set(const std::string_view name, const Eigen::Affine3f& mat, const GLboolean transpose) const {

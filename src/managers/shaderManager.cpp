@@ -5,6 +5,7 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <algorithm>
 #include <cstddef>
 #include <stddef.h>
 #include <stdexcept>
@@ -13,7 +14,7 @@
 #include <version>
 
 ShaderManager::ShaderManager(const std::string_view path) : mPath(std::string(path) + "assets/shaders/") {
-	mShaders["default.vert:default.frag"] = nullptr;
+	mShaders["default.vert:default.frag:"] = nullptr;
 }
 
 Shader* ShaderManager::get(std::string_view vert, std::string_view frag, std::string_view geom) {
@@ -43,11 +44,11 @@ Shader* ShaderManager::get(std::string_view vert, std::string_view frag, std::st
 			"\x1B[31mShaderManager.cpp: Error compiling shader %s, falling back to default shader\033[0m",
 			concated.data());
 
-		if (mShaders["default.vert:default.frag"] == nullptr) {
-			mShaders["default.vert:default.frag"] =
-				new Shader(mPath + "default.vert", mPath + "default.frag");
+		if (mShaders["default.vert:default.frag:"] == nullptr) {
+			mShaders["default.vert:default.frag:"] = new Shader(mPath + "default.vert", mPath + "default.frag");
 		}
-		shader = mShaders["default.vert:default.frag"];
+
+		shader = mShaders["default.vert:default.frag:"];
 	}
 
 	mShaders[concated] = shader;
@@ -58,7 +59,7 @@ Shader* ShaderManager::get(std::string_view vert, std::string_view frag, std::st
 // TODO: Unloading when out of memory
 ShaderManager::~ShaderManager() {
 	// Default shader might get used multiple times
-	Shader* def = mShaders["default.vert:default.frag"];
+	Shader* def = mShaders["default.vert:default.frag:"];
 
 	for (const auto& [_, shader] : mShaders) {
 		if (shader != def) {
@@ -141,6 +142,7 @@ void ShaderManager::debugGui() {
 		}
 	}
 
+	// Make the vector unique
 	ImGui::Begin("Shader Editor");
 	if (ImGui::BeginCombo("file", shaders[selection].data())) {
 		for (std::size_t i = 0; i < shaders.size(); i++) {

@@ -27,10 +27,10 @@ class Shader {
 	void set(std::string_view name, GLdouble val) const;
 	void set(std::string_view name, GLfloat val, GLfloat val2) const;
 	void set(std::string_view name, GLfloat val, GLfloat val2, GLfloat val3) const;
-	void set(std::string_view name, Eigen::Vector2f val) const;
-	void set(std::string_view name, Eigen::Vector3f val) const;
-	void set(std::string_view name, Eigen::Vector4f val) const;
-	void set(std::string_view name, Eigen::Vector2i val) const;
+	void set(std::string_view name, const Eigen::Vector2f& val) const;
+	void set(std::string_view name, const Eigen::Vector3f& val) const;
+	void set(std::string_view name, const Eigen::Vector4f& val) const;
+	void set(std::string_view name, const Eigen::Vector2i& val) const;
 	void set(std::string_view name, const Eigen::Affine3f& mat, GLboolean transpose = GL_FALSE) const;
 
 	void bind(std::string_view name, GLuint index) const;
