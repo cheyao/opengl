@@ -2,6 +2,7 @@
 
 #include "components.hpp"
 #include "game.hpp"
+#include "managers/entityManager.hpp"
 #include "managers/glManager.hpp"
 #include "managers/shaderManager.hpp"
 #include "managers/systemManager.hpp"
@@ -249,6 +250,15 @@ void RenderSystem::draw(Scene* scene) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
+	EntityID playerID = -1;
+	for (const auto& [id, entity] : scene->view<Components::misc>().each()) {
+		if (entity.mWhat & Components::misc::PLAYER) {
+			playerID = id;
+		}
+	}
+	SDL_assert(playerID != static_cast<EntityID>(-1));
+	const auto& playerPos = scene->get<Components::position>(playerID);
+
 	Shader* blockShader = this->getShader("block.vert", "block.frag");
 	for (const auto& [_, texture, block] : scene->view<Components::texture, Components::block>().each()) {
 		SDL_assert(texture.mTexture != nullptr);
@@ -257,6 +267,7 @@ void RenderSystem::draw(Scene* scene) {
 
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();
 		model.scale(texture.mScale);
+		model.translate((Eigen::Vector3f() << -playerPos.mPosition + Eigen::Vector2f(mWidth / 2, mHeight / 2), 0.0f).finished());
 
 		shader->activate();
 		shader->set("model", model);
@@ -277,13 +288,12 @@ void RenderSystem::draw(Scene* scene) {
 		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
 
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();
-		model.translate((Eigen::Vector3f() << position.mPosition, 0.0f).finished());
+		model.translate((Eigen::Vector3f() << (position.mPosition - playerPos.mPosition + Eigen::Vector2f(mWidth / 2, mHeight / 2)), 0.0f).finished());
 		model.scale(texture.mScale);
 
 		shader->activate();
 		shader->set("model", model);
-		shader->set("size", static_cast<float>(texture.mTexture->getWidth()),
-			    static_cast<float>(texture.mTexture->getHeight()));
+		shader->set("size", texture.mTexture->getSize());
 
 		shader->set("texture_diffuse", 0);
 		texture.mTexture->activate(0);
@@ -358,11 +368,7 @@ void RenderSystem::draw(Scene* scene) {
 			vectorShader->set("model", model);
 			vectorShader->set("size",
 					  Eigen::Vector2f(texture.mTexture->getWidth(), texture.mTexture->getHeight()));
-			const Eigen::Vector2f center =
-				position.mPosition +
-				(Eigen::Vector2f(texture.mTexture->getWidth(), texture.mTexture->getHeight()) *
-				 texture.mScale) /
-					2;
+			const Eigen::Vector2f center = position.mPosition + texture.mTexture->getSize() / 2;
 			vectorShader->set("position", center);
 			vectorShader->set("velocity", velocity.mVelocity);
 

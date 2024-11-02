@@ -5,19 +5,11 @@
 
 #include <SDL3/SDL.h>
 
-EventManager::EventManager(class Game* game) : mGame(game) {
-	// TODO: Use std::array and std::span
-	mKeys = new bool[SDL_SCANCODE_COUNT];
+EventManager::EventManager(class Game* game) : mGame(game), mKeys({}) {}
 
-	for (size_t i = 0; i < SDL_SCANCODE_COUNT; ++i) {
-		mKeys[i] = false;
-	}
-}
-
-EventManager::~EventManager() { delete[] mKeys; }
+EventManager::~EventManager() {}
 
 SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
-	// NOTE: Returns in switch!
 	switch (event.type) {
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 		case SDL_EVENT_QUIT: {
@@ -43,7 +35,6 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 			// Up, left, right, no lect: 77??? (End)
 			// Macos: Normal....
 			// Bruh my bluetooth keyboard is bad :(
-			SDL_Log("Key %d pressed", event.key.scancode);
 
 			break;
 		}
@@ -93,7 +84,7 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 			break;
 		}
 
-		[[likely]] default:
+		default:
 			break;
 	}
 

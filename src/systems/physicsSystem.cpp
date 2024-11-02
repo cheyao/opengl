@@ -39,7 +39,7 @@ PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
  * <Components::position, Components::velocity, Components::force(, Components::move?)>
  * Like this we won't need to depend on a lot of checks and prayers
  */
-void PhysicsSystem::update(Scene* scene, float delta) {
+void PhysicsSystem::update(Scene* scene, const float delta) {
 	constexpr const static float G = 1200.0f;
 	constexpr const static float jumpForce = 500.0f;
 
@@ -159,8 +159,7 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID entity, const E
 
 	const Eigen::Vector2f minB =
 		Eigen::Vector2f(static_cast<float>(blockPosition.x()) * blockTexture.mTexture->getWidth(),
-				static_cast<float>(blockPosition.y()) * blockTexture.mTexture->getHeight()) *
-			blockTexture.mScale +
+				static_cast<float>(blockPosition.y()) * blockTexture.mTexture->getHeight()) +
 		blockCollision.mOffset;
 	const Eigen::Vector2f maxB = minB + blockCollision.mSize;
 
@@ -191,8 +190,7 @@ bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID ent
 
 	const Eigen::Vector2f minBlock =
 		Eigen::Vector2f(static_cast<float>(blockPosition.x()) * blockTexture.mTexture->getWidth(),
-				static_cast<float>(blockPosition.y()) * blockTexture.mTexture->getHeight()) *
-			blockTexture.mScale +
+				static_cast<float>(blockPosition.y()) * blockTexture.mTexture->getHeight()) +
 		blockCollision.mOffset;
 	const Eigen::Vector2f maxBlock = minBlock + blockCollision.mSize;
 
@@ -251,8 +249,7 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID entity, EntityID
 
 	const Eigen::Vector2f leftBlock =
 		Eigen::Vector2f(static_cast<float>(blockPosition.x()) * blockTexture.mTexture->getWidth(),
-				static_cast<float>(blockPosition.y()) * blockTexture.mTexture->getHeight()) *
-			blockTexture.mScale +
+				static_cast<float>(blockPosition.y()) * blockTexture.mTexture->getHeight()) +
 		blockCollision.mOffset;
 	const Eigen::Vector2f centerB = leftBlock + scene->get<Components::collision>(block).mSize / 2;
 

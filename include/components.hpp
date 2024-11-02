@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <span>
 
 // Android needs the constructers to be able to use emplace
 class Texture;
@@ -35,16 +36,17 @@ struct collision {
 
 struct texture {
 	class Texture* mTexture;
-	float mScale = 0.7f;
+	float mScale = 1.0f;
 	class Shader* mShader = nullptr;
 
-	texture(const decltype(mTexture) tex, const decltype(mScale) scale = 0.7f,
+	texture(const decltype(mTexture) tex, const decltype(mScale) scale = 1.0f,
 		const decltype(mShader) shader = nullptr) noexcept
 		: mTexture(tex), mScale(scale), mShader(shader) {}
 };
 
 struct input {
-	std::function<void(class Scene* scene, EntityID entity, const bool* scancodes, const float delta)> mFunction;
+	std::function<void(class Scene* scene, EntityID entity, const std::span<bool> scancodes, const float delta)>
+		mFunction;
 
 	input(const decltype(mFunction) function) noexcept : mFunction(function) {}
 };

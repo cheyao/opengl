@@ -2,6 +2,8 @@
 
 #include <SDL3/SDL.h>
 #include <cstddef>
+#include <array>
+#include <span>
 
 class EventManager {
       public:
@@ -14,13 +16,13 @@ class EventManager {
 
 	[[nodiscard]] SDL_AppResult manageEvent(const union SDL_Event& event);
 
-	void setKey(const size_t key, const bool val) { mKeys[key] = val; }
-	[[nodiscard]] bool* getKeystate() { return mKeys; };
+	void setKey(const std::size_t key, const bool val) { mKeys[key] = val; }
+	[[nodiscard]] std::span<bool> getKeystate() { return mKeys; };
 
       private:
 	[[nodiscard]] SDL_AppResult manageKeyboardEvent(const union SDL_Event& event);
 
 	class Game* mGame;
 
-	bool* mKeys;
+	std::array<bool, SDL_SCANCODE_COUNT> mKeys;
 };

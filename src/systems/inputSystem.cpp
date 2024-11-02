@@ -9,10 +9,10 @@
 #include <SDL3/SDL.h>
 #include <functional>
 
-InputSystem::InputSystem(class Game* game) : mGame(game), mPressedX(0), mPressedY(0), mPressLength(0) {}
+InputSystem::InputSystem(Game* game) : mGame(game), mPressedX(0), mPressedY(0), mPressLength(0) {}
 
 void InputSystem::update(Scene* scene, const float delta) {
-	const bool* keystate = mGame->getKeystate();
+	const auto keystate = mGame->getKeystate();
 
 	for (const auto& [entity, input] : scene->view<Components::input>().each()) {
 		SDL_assert(input.mFunction != nullptr);
@@ -23,7 +23,7 @@ void InputSystem::update(Scene* scene, const float delta) {
 	updateMouse(scene, delta);
 }
 
-void InputSystem::updateMouse(class Scene* scene, const float delta) {
+void InputSystem::updateMouse(Scene* scene, const float delta) {
 	(void)scene;
 
 	// From Topright
@@ -40,7 +40,8 @@ void InputSystem::updateMouse(class Scene* scene, const float delta) {
 		mPressLength += delta;
 
 		if (mPressLength >= LONG_PRESS_ACTIVATION_TIME) {
-			SDL_Log("Unhandled ong click for %f", mPressLength);
+			// SDL_Log("Unhandled long click for %f", mPressLength);
+			// TODO: Implement
 		}
 	}
 

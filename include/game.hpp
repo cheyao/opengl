@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <string>
 
 // TODO: Cleanup this
@@ -43,7 +44,7 @@ class Game {
 	Eigen::Vector2f getDemensions() const { return mSystemManager->getDemensions(); }
 
 	void setKey(std::size_t key, bool val);
-	[[nodiscard]] bool* getKeystate();
+	[[nodiscard]] std::span<bool> getKeystate();
 
 	void quit() { mQuit = true; }
 

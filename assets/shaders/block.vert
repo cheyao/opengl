@@ -16,8 +16,8 @@ uniform ivec2 position;
 
 void main() {
 	vec2 pos = vec2(model * vec4(aPos.x * size.x, aPos.y * size.y, 0.0f, 1.0f));
-	pos.x += float(position.x) * size.x * 0.7f;
-	pos.y += float(position.y) * size.y * 0.7f;
+	pos.x += float(position.x) * size.x;
+	pos.y += float(position.y) * size.y;
 	gl_Position = proj * vec4(pos, 0.0f, 1.0f);
 
 	vTexPos = aTexPos;

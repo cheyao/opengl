@@ -24,35 +24,25 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		mBlocks[i].emplace_back(scene->newEntity());
 		const EntityID& entity = mBlocks[i].back();
-		scene->emplace<Components::block>(entity, Components::block::STONE, Eigen::Vector2i(i + mPosition * 32, 0));
+		scene->emplace<Components::block>(entity, Components::block::STONE,
+						  Eigen::Vector2i(i + mPosition * 32, 0));
 		scene->emplace<Components::texture>(entity, game->getSystemManager()->getTexture("stone.png", true));
-
-		const auto scale = scene->get<Components::texture>(entity).mScale;
-
 		scene->emplace<Components::collision>(
 			entity, Eigen::Vector2f(0.0f, 0.0f),
-			Eigen::Vector2f(game->getSystemManager()->getTexture("stone.png", true)->getWidth(),
-					game->getSystemManager()->getTexture("stone.png", true)->getHeight()) *
-				scale,
-			true);
+			game->getSystemManager()->getTexture("stone.png", true)->getSize(), true);
 	}
 
 	// The second layer of grass
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		mBlocks[i].emplace_back(scene->newEntity());
 		const EntityID& entity = mBlocks[i].back();
-		scene->emplace<Components::block>(entity, Components::block::GRASS_BLOCK, Eigen::Vector2i(i + mPosition * 32, 1));
+		scene->emplace<Components::block>(entity, Components::block::GRASS_BLOCK,
+						  Eigen::Vector2i(i + mPosition * 32, 1));
 		scene->emplace<Components::texture>(entity,
 						    game->getSystemManager()->getTexture("grass-block.png", true));
-
-		const auto scale = scene->get<Components::texture>(entity).mScale;
-
 		scene->emplace<Components::collision>(
 			entity, Eigen::Vector2f(0.0f, 0.0f),
-			Eigen::Vector2f(game->getSystemManager()->getTexture("grass-block.png", true)->getWidth(),
-					game->getSystemManager()->getTexture("grass-block.png", true)->getHeight()) *
-				scale,
-			true);
+			game->getSystemManager()->getTexture("grass-block.png", true)->getSize(), true);
 	}
 }
 
@@ -87,12 +77,8 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 			const EntityID& entity = mBlocks[i].back();
 			scene->emplace<Components::block>(entity, block, Eigen::Vector2i(i + mPosition * 32, j));
 			scene->emplace<Components::texture>(entity, texture);
-
-			const auto scale = scene->get<Components::texture>(entity).mScale;
-
-			scene->emplace<Components::collision>(
-				entity, Eigen::Vector2f(0.0f, 0.0f),
-				Eigen::Vector2f(texture->getWidth(), texture->getHeight()) * scale, true);
+			scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(),
+							      true);
 		}
 	}
 }
