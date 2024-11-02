@@ -26,7 +26,6 @@ concept EigenTypeMatExpr = requires(const EigenExprTypeT t) {
 	{ t.rows() } -> std::same_as<typename Eigen::Index>;
 	{ t.cols() } -> std::same_as<typename Eigen::Index>;
 };
-
 enum class EigenCustomFormats {
 	Default,	     //
 	CleanFormat,	     // cf
@@ -35,7 +34,6 @@ enum class EigenCustomFormats {
 	HighPrecisionFormat, // hpf
 	DebuggingFormat	     // df
 };
-
 static const auto defaultFormat = Eigen::IOFormat();
 static const auto cleanFormat = Eigen::IOFormat(4, 0, ", ", "\n", "[", "]");
 static const auto heavyFormat = Eigen::IOFormat(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]", "[", "]");
@@ -45,7 +43,6 @@ static const auto highPrecisionFormat =
 	Eigen::IOFormat(Eigen::FullPrecision, Eigen::DontAlignCols, " ", "\n", "", "", "", "");
 static const auto debuggingFormat =
 	Eigen::IOFormat(Eigen::FullPrecision, Eigen::DontAlignCols, " ", "\n", "", "", "\n", "");
-
 template <EigenTypeMatExpr MatT> struct std::formatter<MatT> {
 	constexpr auto parse(format_parse_context& ctx) {
 		const std::string_view fmt(ctx.begin(), ctx.end());
@@ -61,8 +58,6 @@ template <EigenTypeMatExpr MatT> struct std::formatter<MatT> {
 			_format = EigenCustomFormats::DebuggingFormat;
 		return ctx.begin() + fmt.find_first_of('}');
 	}
-
-	// Format the type for output
 	template <typename FormatContext> auto format(const MatT& m, FormatContext& ctx) const {
 		switch (_format) {
 			case EigenCustomFormats::CleanFormat:
@@ -95,7 +90,6 @@ template <EigenTypeMatExpr MatT> struct std::formatter<MatT> {
       private:
 	EigenCustomFormats _format{EigenCustomFormats::Default};
 };
-
 template <EigenTypeMatExpr MatT> std::ostream& operator<<(std::ostream& os, const MatT& mat) {
 	return os << std::format("{:hf}", mat);
 }

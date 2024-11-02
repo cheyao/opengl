@@ -130,6 +130,7 @@ SDL_AppResult Game::iterate() {
 	mTicks = SDL_GetTicks();
 
 	gui();
+	mCurrentLevel->update();
 	mSystemManager->update(mCurrentLevel->getScene(), delta);
 
 	const auto end = std::chrono::high_resolution_clock::now();

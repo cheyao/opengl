@@ -250,14 +250,10 @@ void RenderSystem::draw(Scene* scene) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
-	EntityID playerID = -1;
-	for (const auto& [id, entity] : scene->view<Components::misc>().each()) {
-		if (entity.mWhat & Components::misc::PLAYER) {
-			playerID = id;
-		}
-	}
-	SDL_assert(playerID != static_cast<EntityID>(-1));
-	const auto& playerPos = scene->get<Components::position>(playerID);
+	const auto playerID = scene->view<Components::input>();
+	SDL_assert(playerID.size() == 1);
+
+	const auto& playerPos = scene->get<Components::position>(*playerID.begin());
 
 	Shader* blockShader = this->getShader("block.vert", "block.frag");
 	for (const auto& [_, texture, block] : scene->view<Components::texture, Components::block>().each()) {

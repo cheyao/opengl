@@ -8,6 +8,9 @@
 
 class Chunk {
       public:
+	inline constexpr const static int MAX_HEIGHT = 128;
+	inline constexpr const static int CHUNK_WIDTH = 32;
+
 	// Generate
 	Chunk(class Game* game, class Scene* scene, const std::int64_t position);
 	// Load
@@ -22,9 +25,6 @@ class Chunk {
 	nlohmann::json save(class Scene* scene);
 
       private:
-	constexpr const static int MAX_HEIGHT = 128;
-	constexpr const static int CHUNK_WIDTH = 32;
-
 	const std::int64_t mPosition;
 	std::vector<std::vector<EntityID>> mBlocks;
 };

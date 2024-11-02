@@ -78,8 +78,8 @@ void Level::load(const nlohmann::json data) {
 	mScene = new Scene();
 	const EntityID player = mScene->newEntity();
 	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true));
-	mScene->emplace<Components::position>(player, data["player"]["position"].get<Eigen::Vector2f>());
-	mScene->emplace<Components::velocity>(player, data["player"]["velocity"]);
+	mScene->emplace<Components::position>(player, data[PLAYER_KEY]["position"].get<Eigen::Vector2f>());
+	mScene->emplace<Components::velocity>(player, data[PLAYER_KEY]["velocity"]);
 	mScene->emplace<Components::input>(
 		player, [](class Scene* scene, EntityID entity, const auto scancodes, const float) {
 			Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;
@@ -101,19 +101,28 @@ void Level::load(const nlohmann::json data) {
 	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
 
 	// SDL_assert(data["chunks"].contains(0));
-	mChunks.emplace_back(new Chunk(mGame, mScene, data["chunks"][0]));
+	mChunks.emplace_back(new Chunk(mGame, mScene, data[CHUNK_KEY][0]));
 }
 
 nlohmann::json Level::save() {
 	nlohmann::json data;
 
-	const auto&& view = mScene->view<Components::input>();
-	SDL_assert(view.size() == 1);
+	const auto playerID = mScene->view<Components::input>();
+	SDL_assert(playerID.size() == 1);
 
-	data["player"]["position"] = mScene->get<Components::position>(*view.begin()).mPosition;
-	data["player"]["velocity"] = mScene->get<Components::velocity>(*view.begin()).mVelocity;
+	data[PLAYER_KEY]["position"] = mScene->get<Components::position>(*playerID.begin()).mPosition;
+	data[PLAYER_KEY]["velocity"] = mScene->get<Components::velocity>(*playerID.begin()).mVelocity;
 
-	data["chunks"][0] = mChunks.back()->save(mScene);
+	data["chunks"]["+"][0] = mChunks.back()->save(mScene);
+	data["chunks"]["-"][0] = mChunks.back()->save(mScene);
 
 	return data;
+}
+
+void Level::update() {
+	const auto playerID = mScene->view<Components::input>();
+	SDL_assert(playerID.size() == 1);
+
+	const auto currentChunk = static_cast<int>(mScene->get<Components::position>(*playerID.begin()).mPosition.x()) / Chunk::CHUNK_WIDTH;
+	SDL_Log("Cur %d", currentChunk);
 }

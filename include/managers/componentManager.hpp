@@ -5,6 +5,8 @@
 #include <cassert>
 #include <cstdint>
 #include <limits>
+#include <typeindex>
+#include <unordered_map>
 
 using ComponentID = std::uint64_t;
 constexpr const static ComponentID MAX_COMPONENTS = std::numeric_limits<ComponentID>::max();
@@ -17,28 +19,21 @@ class ComponentManager {
 	ComponentManager& operator=(ComponentManager&&) = delete;
 	ComponentManager& operator=(const ComponentManager&) = delete;
 	~ComponentManager() {
-		for (const auto& pool : mPools) {
+		for (const auto& [_, pool] : mPools) {
 			delete pool;
 		}
 	}
 
-	template <typename Component> [[nodiscard]] ComponentID getID() noexcept {
-		assert(mComponentCount < MAX_COMPONENTS);
-		static std::size_t componentID = mComponentCount++;
-
-		if (mPools.size() <= componentID) {
-			mPools.emplace_back(new utils::sparse_set<Component>());
+	template <typename Component> [[nodiscard]] utils::sparse_set<Component>* getPool() {
+		[[unlikely]] if (!mPools.contains(typeid(Component))) {
+			mPools[typeid(Component)] = new utils::sparse_set<Component>();
 		}
 
-		return componentID;
-	}
-
-	template <typename Component> [[nodiscard]] utils::sparse_set<Component>* getPool() {
-		return static_cast<utils::sparse_set<Component>*>(mPools[getID<Component>()]);
+		return static_cast<utils::sparse_set<Component>*>(mPools[typeid(Component)]);
 	}
 
 	void erase(const EntityID entity) noexcept {
-		for (auto& pool : mPools) {
+		for (auto& [_, pool] : mPools) {
 			if (pool->contains(entity)) {
 				pool->erase(entity);
 			}
@@ -47,5 +42,5 @@ class ComponentManager {
 
       private:
 	static inline std::size_t mComponentCount = 0;
-	std::vector<utils::sparse_set_interface*> mPools;
+	std::unordered_map<std::type_index, utils::sparse_set_interface*> mPools;
 };

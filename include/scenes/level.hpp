@@ -12,16 +12,22 @@ class Level {
 	Level(const Level&) = delete;
 	Level& operator=(Level&&) = delete;
 	Level& operator=(const Level&) = delete;
-	virtual ~Level() = default;
+	~Level() = default;
 
-	virtual void create();
-	virtual void load(const nlohmann::json data);
-	virtual nlohmann::json save();
+	void create();
+	void load(const nlohmann::json data);
+	nlohmann::json save();
 
 	std::string getName() const { return mName; }
 	class Scene* getScene() const { return mScene; };
 
+	// The update method maily checks if new chunks needs to be loaded
+	void update();
+
       private:
+	inline constexpr const static char* const CHUNK_KEY = "chunks";
+	inline constexpr const static char* const PLAYER_KEY = "player";
+
 	const std::string mName;
 
 	class Game* mGame;
