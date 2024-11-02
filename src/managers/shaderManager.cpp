@@ -45,7 +45,8 @@ Shader* ShaderManager::get(std::string_view vert, std::string_view frag, std::st
 			concated.data());
 
 		if (mShaders["default.vert:default.frag:"] == nullptr) {
-			mShaders["default.vert:default.frag:"] = new Shader(mPath + "default.vert", mPath + "default.frag");
+			mShaders["default.vert:default.frag:"] =
+				new Shader(mPath + "default.vert", mPath + "default.frag");
 		}
 
 		shader = mShaders["default.vert:default.frag:"];
@@ -113,7 +114,6 @@ void ShaderManager::reload() {
 
 #ifdef IMGUI
 void ShaderManager::debugGui() {
-	// TODO: Live edit GUI
 	static bool liveEdit = false;
 	ImGui::Begin("Main menu");
 	ImGui::Checkbox("Shader Editor", &liveEdit);
@@ -122,8 +122,6 @@ void ShaderManager::debugGui() {
 	if (!liveEdit) {
 		return;
 	}
-
-	static std::size_t selection = 0;
 
 	std::vector<std::string> shaders;
 
@@ -142,6 +140,9 @@ void ShaderManager::debugGui() {
 		}
 	}
 
+	static std::size_t selection = 0;
+	bool update = false;
+
 	// Make the vector unique
 	ImGui::Begin("Shader Editor");
 	if (ImGui::BeginCombo("file", shaders[selection].data())) {
@@ -149,6 +150,7 @@ void ShaderManager::debugGui() {
 			const bool is_selected = (selection == i);
 			if (ImGui::Selectable(shaders[i].data(), is_selected)) {
 				selection = i;
+				update = true;
 			}
 
 			if (is_selected) {
@@ -157,6 +159,14 @@ void ShaderManager::debugGui() {
 		}
 		ImGui::EndCombo();
 	}
+
+	if (!update) {
+		ImGui::End();
+		return;
+	}
+
+	// TODO: Live edit GUI
+
 	ImGui::End();
 }
 #endif
