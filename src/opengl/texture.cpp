@@ -78,7 +78,7 @@ void Texture::load(bool srgb) {
 	switch (channels) {
 		case 3:
 			format = GL_RGB;
-#ifdef __ANDROID__
+#ifdef GLES
 			intFormat = GL_RGB;
 #else
 			intFormat = GL_SRGB;
@@ -87,7 +87,7 @@ void Texture::load(bool srgb) {
 			break;
 		case 4:
 			format = GL_RGBA;
-#ifdef __ANDROID__
+#ifdef GLES
 			intFormat = GL_RGBA;
 #else
 			intFormat = GL_SRGB_ALPHA;

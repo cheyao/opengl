@@ -52,7 +52,6 @@ void PhysicsSystem::update(Scene* scene, float delta) {
 	 * https://gamedev.stackexchange.com/questions/15708/how-can-i-implement-gravity
 	 * To fix it we need to add a acceleration vector(Wow school knowladge has usages)
 	 */
-	// FIXME: Seamless key transition
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
 

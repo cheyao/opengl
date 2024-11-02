@@ -1,9 +1,11 @@
 #include "managers/shaderManager.hpp"
 
+#include "imgui.h"
 #include "opengl/shader.hpp"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <cstddef>
 #include <stddef.h>
 #include <stdexcept>
 #include <string>
@@ -71,8 +73,8 @@ void ShaderManager::reload() {
 	SDL_Log("Reloading shaders");
 
 	for (auto& [names, shader] : mShaders) {
-		const size_t pos = names.find(':');
-		const size_t pos2 = names.find(':', pos + 1);
+		const std::size_t pos = names.find(':');
+		const std::size_t pos2 = names.find(':', pos + 1);
 		const std::string vert = mPath + names.substr(0, pos);
 		const std::string frag = mPath + names.substr(pos + 1, pos2 - pos - 1);
 		std::string geom = names.substr(pos2 + 1, names.size() - pos);
@@ -110,5 +112,49 @@ void ShaderManager::reload() {
 
 #ifdef IMGUI
 void ShaderManager::debugGui() {
+	// TODO: Live edit GUI
+	static bool liveEdit = false;
+	ImGui::Begin("Main menu");
+	ImGui::Checkbox("Shader Editor", &liveEdit);
+	ImGui::End();
+
+	if (!liveEdit) {
+		return;
+	}
+
+	static std::size_t selection = 0;
+
+	std::vector<std::string> shaders;
+
+	for (const auto& [names, _] : mShaders) {
+		const std::size_t pos = names.find(':');
+		const std::size_t pos2 = names.find(':', pos + 1);
+		const std::string vert = names.substr(0, pos);
+		const std::string frag = names.substr(pos + 1, pos2 - pos - 1);
+		std::string geom = names.substr(pos2 + 1, names.size() - pos);
+
+		shaders.emplace_back(vert);
+		shaders.emplace_back(frag);
+
+		if (!geom.empty()) {
+			shaders.emplace_back(geom);
+		}
+	}
+
+	ImGui::Begin("Shader Editor");
+	if (ImGui::BeginCombo("file", shaders[selection].data())) {
+		for (std::size_t i = 0; i < shaders.size(); i++) {
+			const bool is_selected = (selection == i);
+			if (ImGui::Selectable(shaders[i].data(), is_selected)) {
+				selection = i;
+			}
+
+			if (is_selected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::End();
 }
 #endif

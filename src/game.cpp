@@ -217,44 +217,6 @@ void Game::gui() {
 SDL_AppResult Game::event(const SDL_Event& event) {
 #ifdef IMGUI
 	ImGui_ImplSDL3_ProcessEvent(&event);
-
-	ImGuiIO& io = ImGui::GetIO();
-
-	switch (event.type) {
-		case SDL_EVENT_MOUSE_BUTTON_DOWN:
-		case SDL_EVENT_MOUSE_BUTTON_UP:
-		case SDL_EVENT_MOUSE_MOTION:
-		case SDL_EVENT_MOUSE_WHEEL:
-			if (io.WantCaptureMouse) {
-				return SDL_APP_CONTINUE;
-			}
-
-			break;
-
-		case SDL_EVENT_TEXT_INPUT:
-			if (io.WantTextInput) {
-				return SDL_APP_CONTINUE;
-			}
-
-			break;
-
-		case SDL_EVENT_KEY_UP:
-		case SDL_EVENT_KEY_DOWN:
-		case SDL_EVENT_WINDOW_MOUSE_ENTER:
-		case SDL_EVENT_WINDOW_MOUSE_LEAVE:
-		case SDL_EVENT_WINDOW_FOCUS_GAINED:
-		case SDL_EVENT_WINDOW_FOCUS_LOST:
-		case SDL_EVENT_GAMEPAD_ADDED:
-		case SDL_EVENT_GAMEPAD_REMOVED:
-			if (io.WantCaptureKeyboard) {
-				return SDL_APP_CONTINUE;
-			}
-
-			break;
-
-		default:
-			break;
-	}
 #endif
 
 	return mEventManager->manageEvent(event);

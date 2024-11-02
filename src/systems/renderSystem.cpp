@@ -263,7 +263,6 @@ void RenderSystem::draw(Scene* scene) {
 		shader->set("size", texture.mTexture->getSize());
 
 		shader->set("position", block.mPosition);
-		shader->set("scale", texture.mScale);
 
 		shader->set("texture_diffuse", 0);
 		texture.mTexture->activate(0);
@@ -286,15 +285,13 @@ void RenderSystem::draw(Scene* scene) {
 		shader->set("size", static_cast<float>(texture.mTexture->getWidth()),
 			    static_cast<float>(texture.mTexture->getHeight()));
 
-		shader->set("scale", texture.mScale);
-
 		shader->set("texture_diffuse", 0);
 		texture.mTexture->activate(0);
 
 		mMesh->draw(shader);
 	}
 
-#if defined(IMGUI) && !defined(__ANDROID__)
+#if defined(IMGUI) && !defined(GLES)
 	static bool hitbox = false;
 	static bool vector = false;
 
@@ -317,7 +314,6 @@ void RenderSystem::draw(Scene* scene) {
 		editorShader->activate();
 		editorShader->set("wireframe", hitbox);
 
-		// FIXME:
 		for (const auto& [_, collision, position] :
 		     scene->view<Components::collision, Components::position>().each()) {
 			Eigen::Affine3f model = Eigen::Affine3f::Identity();
@@ -362,20 +358,19 @@ void RenderSystem::draw(Scene* scene) {
 			vectorShader->set("model", model);
 			vectorShader->set("size",
 					  Eigen::Vector2f(texture.mTexture->getWidth(), texture.mTexture->getHeight()));
-			// FIXME:
-			/*
 			const Eigen::Vector2f center =
 				position.mPosition +
 				(Eigen::Vector2f(texture.mTexture->getWidth(), texture.mTexture->getHeight()) *
 				 texture.mScale) /
 					2;
 			vectorShader->set("position", center);
-		       */
 			vectorShader->set("velocity", velocity.mVelocity);
 
 			mMesh->draw(vectorShader);
 		}
 	}
+
+	mShaders->debugGui();
 #endif
 
 #ifdef __EMSCRIPTEN__
