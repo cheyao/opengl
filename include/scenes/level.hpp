@@ -30,8 +30,13 @@ class Level {
 
 	const std::string mName;
 
+	nlohmann::json mData;
+
 	class Game* mGame;
 	class Scene* mScene;
 
-	std::vector<class Chunk*> mChunks;
+	// We only need three chunks max loaded at once
+	class Chunk* mLeft;
+	class Chunk* mCenter;
+	class Chunk* mRight;
 };

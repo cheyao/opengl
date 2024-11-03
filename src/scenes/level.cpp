@@ -38,7 +38,8 @@ void from_json(const nlohmann::json& j, Vector2i& vec) {
 }
 } // namespace Eigen
 
-Level::Level(class Game* game, const std::string& name) : mName(name), mGame(game) {}
+Level::Level(class Game* game, const std::string& name)
+	: mName(name), mGame(game), mLeft(nullptr), mCenter(nullptr), mRight(nullptr) {}
 
 void Level::create() {
 	SDL_assert(mGame != nullptr);
@@ -69,17 +70,25 @@ void Level::create() {
 	mScene->emplace<Components::text>(text, "controls");
 	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
 
-	mChunks.emplace_back(new Chunk(mGame, mScene, 0));
+	mLeft = new Chunk(mGame, mScene, -1);
+	mCenter = new Chunk(mGame, mScene, 0);
+	mRight = new Chunk(mGame, mScene, 1);
+
+	mData[CHUNK_KEY]["-"];
+	mData[CHUNK_KEY]["+"];
 }
 
+// FIXME: Old chunk data gets prob overwritten
 void Level::load(const nlohmann::json data) {
 	SDL_assert(data.contains("player"));
+
+	mData = std::move(data);
 
 	mScene = new Scene();
 	const EntityID player = mScene->newEntity();
 	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true));
-	mScene->emplace<Components::position>(player, data[PLAYER_KEY]["position"].get<Eigen::Vector2f>());
-	mScene->emplace<Components::velocity>(player, data[PLAYER_KEY]["velocity"]);
+	mScene->emplace<Components::position>(player, mData[PLAYER_KEY]["position"].get<Eigen::Vector2f>());
+	mScene->emplace<Components::velocity>(player, mData[PLAYER_KEY]["velocity"]);
 	mScene->emplace<Components::input>(
 		player, [](class Scene* scene, EntityID entity, const auto scancodes, const float) {
 			Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;
@@ -100,29 +109,96 @@ void Level::load(const nlohmann::json data) {
 	mScene->emplace<Components::text>(text, "controls");
 	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
 
-	// SDL_assert(data["chunks"].contains(0));
-	mChunks.emplace_back(new Chunk(mGame, mScene, data[CHUNK_KEY][0]));
+	auto loadChunk = [this](Chunk*& chunk, const float playerPos) {
+		const auto sign = playerPos < 0;
+
+		const auto centerChunk = static_cast<int>(playerPos) /
+						 mGame->getSystemManager()->getTexture("stone.png", true)->getWidth() /
+						 Chunk::CHUNK_WIDTH -
+					 sign;
+
+		try {
+			chunk = new Chunk(this->mGame, this->mScene,
+					  this->mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(centerChunk)]);
+		} catch (const nlohmann::json::exception& error) {
+			SDL_LogCritical(
+				SDL_LOG_CATEGORY_VIDEO,
+				"\033[31mGenerating new chunk: Failed to parse json for chunk %d: id %d %s\033[0m",
+				centerChunk, error.id, error.what());
+
+			chunk = new Chunk(this->mGame, this->mScene, centerChunk);
+		}
+	};
+
+	const auto playerPos = mData[PLAYER_KEY]["position"].get<Eigen::Vector2f>().x();
+	const auto blockWidth = mGame->getSystemManager()->getTexture("stone.png", true)->getWidth();
+
+	loadChunk(mCenter, playerPos);
+	loadChunk(mLeft, playerPos - Chunk::CHUNK_WIDTH * blockWidth);
+	loadChunk(mRight, playerPos + Chunk::CHUNK_WIDTH * blockWidth);
 }
 
 nlohmann::json Level::save() {
-	nlohmann::json data;
-
 	const auto playerID = mScene->view<Components::input>();
 	SDL_assert(playerID.size() == 1);
 
-	data[PLAYER_KEY]["position"] = mScene->get<Components::position>(*playerID.begin()).mPosition;
-	data[PLAYER_KEY]["velocity"] = mScene->get<Components::velocity>(*playerID.begin()).mVelocity;
+	mData[PLAYER_KEY]["position"] = mScene->get<Components::position>(*playerID.begin()).mPosition;
+	mData[PLAYER_KEY]["velocity"] = mScene->get<Components::velocity>(*playerID.begin()).mVelocity;
 
-	data["chunks"]["+"][0] = mChunks.back()->save(mScene);
-	data["chunks"]["-"][0] = mChunks.back()->save(mScene);
+	auto save = [this](Chunk* chunk) {
+		this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())] =
+			chunk->save(this->mScene);
+	};
 
-	return data;
+	save(mLeft);
+	save(mCenter);
+	save(mRight);
+
+	return mData;
 }
 
 void Level::update() {
 	const auto playerID = mScene->view<Components::input>();
 	SDL_assert(playerID.size() == 1);
 
-	const auto currentChunk = static_cast<int>(mScene->get<Components::position>(*playerID.begin()).mPosition.x()) / Chunk::CHUNK_WIDTH;
-	SDL_Log("Cur %d", currentChunk);
+	const auto playerX = static_cast<int>(mScene->get<Components::position>(*playerID.begin()).mPosition.x());
+	const auto blockWidth = mGame->getSystemManager()->getTexture("stone.png", true)->getWidth();
+	const auto sign = playerX < 0;
+	const auto currentChunk = playerX / blockWidth / Chunk::CHUNK_WIDTH - sign;
+
+	// Now, we need to check if we need to load a chunk
+	if (currentChunk == mCenter->getPosition()) {
+		return;
+	}
+
+	if (currentChunk == mLeft->getPosition()) {
+		mData[CHUNK_KEY][mRight->getPosition() < 0 ? "-" : "+"][SDL_abs(mRight->getPosition())] =
+			mRight->save(mScene);
+		mRight = mCenter;
+		mCenter = mLeft;
+		mLeft = new Chunk(mGame, mScene, currentChunk - 1);
+	} else if (currentChunk == mRight->getPosition()) {
+		mData[CHUNK_KEY][mLeft->getPosition() < 0 ? "-" : "+"][SDL_abs(mLeft->getPosition())] =
+			mLeft->save(mScene);
+		mLeft = mCenter;
+		mCenter = mRight;
+		// FIXME: Load from save
+		mRight = new Chunk(mGame, mScene, currentChunk + 1);
+	} else {
+		// Wut
+		SDL_Log("\033[33mOut of boundary for chunk %d, loaded chunks: %ld %ld %ld\033[0m", currentChunk,
+			mLeft->getPosition(), mCenter->getPosition(), mRight->getPosition());
+		auto save = [this](Chunk* chunk) {
+			this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())] =
+				chunk->save(this->mScene);
+		};
+
+		save(mLeft);
+		save(mCenter);
+		save(mRight);
+
+		mLeft = new Chunk(mGame, mScene, currentChunk - 1);
+		mCenter = new Chunk(mGame, mScene, currentChunk);
+		mRight = new Chunk(mGame, mScene, currentChunk + 1);
+	}
 }

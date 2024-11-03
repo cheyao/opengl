@@ -124,9 +124,9 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 		worlds = nlohmann::json::parse(buffer);
 
 		delete[] buffer;
-	} catch (const nlohmann::json::parse_error& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s at %zu\033[0m",
-				error.id, error.what(), error.byte);
+	} catch (const nlohmann::json::exception& error) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s\033[0m",
+				error.id, error.what());
 
 		delete[] buffer;
 

@@ -13,7 +13,7 @@ constexpr const static ComponentID MAX_COMPONENTS = std::numeric_limits<Componen
 
 class ComponentManager {
       public:
-	ComponentManager() {}
+	ComponentManager() = default;
 	ComponentManager(ComponentManager&&) = delete;
 	ComponentManager(const ComponentManager&) = delete;
 	ComponentManager& operator=(ComponentManager&&) = delete;
@@ -41,6 +41,5 @@ class ComponentManager {
 	}
 
       private:
-	static inline std::size_t mComponentCount = 0;
 	std::unordered_map<std::type_index, utils::sparse_set_interface*> mPools;
 };

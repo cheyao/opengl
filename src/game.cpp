@@ -56,7 +56,7 @@ Game::Game()
 	try {
 		mStorageManager->restore();
 	} catch (const std::exception& error) {
-		SDL_Log("Failed to read saved state with error %s, creating new state", error.what());
+		SDL_Log("\033[31mFailed to read saved state with error %s, creating new state\033[0m", error.what());
 
 		mCurrentLevel = new Level(this);
 		mCurrentLevel->create();
@@ -77,7 +77,7 @@ Game::Game()
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		switch (err) {
 			case GL_INVALID_ENUM:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid enum\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\033[31mInit GLError: Invalid enum\033[0m");
 				break;
 			case GL_INVALID_VALUE:
 				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid value\033[0m");

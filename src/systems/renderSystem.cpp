@@ -277,6 +277,7 @@ void RenderSystem::draw(Scene* scene) {
 		mMesh->draw(shader);
 	}
 
+	blockShader->activate();
 	blockShader->set("position", 0, 0);
 	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
 		SDL_assert(texture.mTexture != nullptr);

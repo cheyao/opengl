@@ -172,6 +172,14 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 							.data());
 				}
 
+				if (scene->contains<Components::block>(entity)) {
+					ImGui::BulletText(
+						"Components::block %s",
+						std::format("pos {}",
+							    scene->get<Components::block>(entity).mPosition)
+							.data());
+				}
+
 				if (scene->contains<Components::velocity>(entity)) {
 					ImGui::BulletText(
 						"Components::velocity %s",
