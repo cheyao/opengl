@@ -176,14 +176,34 @@ void Level::update() {
 			mRight->save(mScene);
 		mRight = mCenter;
 		mCenter = mLeft;
-		mLeft = new Chunk(mGame, mScene, currentChunk - 1);
+
+		try {
+			mLeft = new Chunk(mGame, mScene, mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(currentChunk - 1)]);
+		} catch (const nlohmann::json::exception& error) {
+			SDL_LogCritical(
+				SDL_LOG_CATEGORY_VIDEO,
+				"\033[31mGenerating new chunk: Failed to parse json for chunk %d: id %d %s\033[0m",
+				currentChunk, error.id, error.what());
+
+			mLeft = new Chunk(mGame, mScene, currentChunk - 1);
+		}
 	} else if (currentChunk == mRight->getPosition()) {
 		mData[CHUNK_KEY][mLeft->getPosition() < 0 ? "-" : "+"][SDL_abs(mLeft->getPosition())] =
 			mLeft->save(mScene);
 		mLeft = mCenter;
 		mCenter = mRight;
-		// FIXME: Load from save
-		mRight = new Chunk(mGame, mScene, currentChunk + 1);
+
+		try {
+			mRight =
+				new Chunk(mGame, mScene, mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(currentChunk + 1)]);
+		} catch (const nlohmann::json::exception& error) {
+			SDL_LogCritical(
+				SDL_LOG_CATEGORY_VIDEO,
+				"\033[31mGenerating new chunk: Failed to parse json for chunk %d: id %d %s\033[0m",
+				currentChunk, error.id, error.what());
+
+			mRight = new Chunk(mGame, mScene, currentChunk + 1);
+		}
 	} else {
 		// Wut
 		SDL_Log("\033[33mOut of boundary for chunk %d, loaded chunks: %ld %ld %ld\033[0m", currentChunk,
