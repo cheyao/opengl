@@ -263,7 +263,9 @@ void RenderSystem::draw(Scene* scene) {
 
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();
 		model.scale(texture.mScale);
-		model.translate((Eigen::Vector3f() << -playerPos.mPosition + Eigen::Vector2f(mWidth / 2, mHeight / 2), 0.0f).finished());
+		model.translate(
+			(Eigen::Vector3f() << -playerPos.mPosition + Eigen::Vector2f(mWidth / 2, mHeight / 2), 0.0f)
+				.finished());
 
 		shader->activate();
 		shader->set("model", model);
@@ -285,7 +287,10 @@ void RenderSystem::draw(Scene* scene) {
 		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
 
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();
-		model.translate((Eigen::Vector3f() << (position.mPosition - playerPos.mPosition + Eigen::Vector2f(mWidth / 2, mHeight / 2)), 0.0f).finished());
+		model.translate((Eigen::Vector3f() << (position.mPosition - playerPos.mPosition +
+						       Eigen::Vector2f(mWidth / 2, mHeight / 2)),
+				 0.0f)
+					.finished());
 		model.scale(texture.mScale);
 
 		shader->activate();
@@ -326,7 +331,10 @@ void RenderSystem::draw(Scene* scene) {
 			Eigen::Affine3f model = Eigen::Affine3f::Identity();
 
 			model.translate(
-				(Eigen::Vector3f() << (position.mPosition + collision.mOffset), 0.0f).finished());
+				(Eigen::Vector3f() << (position.mPosition + collision.mOffset - playerPos.mPosition +
+						       Eigen::Vector2f(mWidth / 2, mHeight / 2)),
+				 0.0f)
+					.finished());
 
 			editorShader->set("model", model);
 			editorShader->set("size", collision.mSize);

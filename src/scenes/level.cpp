@@ -47,9 +47,13 @@ void Level::create() {
 	mScene = new Scene();
 	const auto player = mScene->newEntity();
 
-	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true));
+	auto* playerTexture = mGame->getSystemManager()->getTexture("stone.png", true);
+	mScene->emplace<Components::texture>(player, playerTexture);
 	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
-	mScene->emplace<Components::position>(player, Eigen::Vector2f(400.0f, 400.0f));
+	mScene->emplace<Components::position>(
+		player, Eigen::Vector2f(0.0f, (Chunk::WATER_LEVEL + 1) * playerTexture->getHeight()));
+	mScene->emplace<Components::collision>(player, Eigen::Vector2f(0.0f, 0.0f), playerTexture->getSize());
+	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
 	mScene->emplace<Components::input>(
 		player, [](class Scene* scene, const EntityID entity, const auto scancodes, const float) {
 			Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;
@@ -62,9 +66,6 @@ void Level::create() {
 				vel.x() -= 70;
 			}
 		});
-	mScene->emplace<Components::collision>(player, Eigen::Vector2f(0.0f, 0.0f),
-					       mGame->getSystemManager()->getTexture("stone.png", true)->getSize());
-	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
 
 	const EntityID text = mScene->newEntity();
 	mScene->emplace<Components::text>(text, "controls");
@@ -78,8 +79,7 @@ void Level::create() {
 	mData[CHUNK_KEY]["+"];
 }
 
-// FIXME: Old chunk data gets prob overwritten
-void Level::load(const nlohmann::json data) {
+void Level::load(const nlohmann::json& data) {
 	SDL_assert(data.contains("player"));
 
 	mData = std::move(data);

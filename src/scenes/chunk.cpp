@@ -20,41 +20,48 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 		mBlocks.emplace_back(std::vector<EntityID>());
 	}
 
-	Texture* stone = game->getSystemManager()->getTexture("stone.png", true);
+	// NOTE: The order is important!!!
+	// The save saves from the array in a lifo order
+	// So the top block must go in last!
 
 	// Spawn blocks
-	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
-		mBlocks[i].emplace_back(scene->newEntity());
-		const EntityID& entity = mBlocks[i].back();
-		scene->emplace<Components::block>(entity, Components::block::STONE,
-						  Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, 0));
-		scene->emplace<Components::texture>(entity, stone);
-		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), stone->getSize(), true);
+	Texture* stone = game->getSystemManager()->getTexture("stone.png", true);
+	for (auto y = 0; y < WATER_LEVEL; ++y) {
+		for (auto i = 0; i < CHUNK_WIDTH; ++i) {
+			mBlocks[i].emplace_back(scene->newEntity());
+			const EntityID& entity = mBlocks[i].back();
+			scene->emplace<Components::block>(entity, Components::block::STONE,
+							  Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, y));
+			scene->emplace<Components::texture>(entity, stone);
+			scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), stone->getSize(),
+							      true);
+		}
 	}
-	Texture* grass = game->getSystemManager()->getTexture("grass-block.png", true);
 
 	// The second layer of grass
+	Texture* grass = game->getSystemManager()->getTexture("grass-block.png", true);
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		mBlocks[i].emplace_back(scene->newEntity());
 		const EntityID& entity = mBlocks[i].back();
 		scene->emplace<Components::block>(entity, Components::block::GRASS_BLOCK,
-						  Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, 1));
+						  Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, WATER_LEVEL));
 		scene->emplace<Components::texture>(entity, grass);
 		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), grass->getSize(), true);
 	}
 }
 
+// Loading from save
 Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(data["position"]) {
 	mBlocks.reserve(CHUNK_WIDTH);
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		mBlocks.emplace_back(std::vector<EntityID>());
 	}
 
-	auto getTexture = std::bind(&SystemManager::getTexture, game->getSystemManager(), std::placeholders::_1,
-				    std::placeholders::_2);
+	auto getTexture = std::bind(&SystemManager::getTexture, game->getSystemManager(), std::placeholders::_1, std::placeholders::_2);
 
 	// Load the things only when we need them
-	const static std::unordered_map<Components::block::BlockType, std::function<Texture*()>> blockToTexture = {
+	// FIXME: Better load on demand
+	const std::unordered_map<Components::block::BlockType, std::function<Texture*()>> blockToTexture = {
 		{Components::block::STONE, [&getTexture] { return getTexture("stone.png", true); }},
 		{Components::block::GRASS_BLOCK, [&getTexture] { return getTexture("grass-block.png", true); }},
 	};
@@ -103,6 +110,12 @@ nlohmann::json Chunk::save(Scene* scene) {
 	}
 
 	// Only clear when assert is enabled
+	for (const auto& layer : mBlocks) {
+		for (const auto& block : layer) {
+			scene->erase(block);
+		}
+	}
+
 	SDL_assert((mBlocks.clear(), true));
 
 	return chunk;

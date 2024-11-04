@@ -15,7 +15,7 @@ class Level {
 	~Level() = default;
 
 	void create();
-	void load(const nlohmann::json data);
+	void load(const nlohmann::json& data);
 	nlohmann::json save();
 
 	std::string getName() const { return mName; }
