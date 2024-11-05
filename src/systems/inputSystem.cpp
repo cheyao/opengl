@@ -3,6 +3,7 @@
 #include "components.hpp"
 #include "game.hpp"
 #include "misc/sparse_set_view.hpp"
+#include "opengl/texture.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
 
@@ -70,6 +71,21 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 
 	SDL_assert(mPressLength >= 0 && "Hey! Why is the press length negative?");
 	if (!leftClick && mPressLength > 0 && mPressLength < LONG_PRESS_ACTIVATION_TIME) {
+		// FIXME: Better collisions
+		for (const auto [entity, block, position, texture] :
+		     scene->view<Components::block, Components::position, Components::texture>().each()) {
+			if ((x <= position.mPosition.x() ||
+			     x >= position.mPosition.x() + texture.mTexture->getWidth() * texture.mScale) ||
+			    (y <= position.mPosition.y() ||
+			     y >= position.mPosition.y() + texture.mTexture->getHeight() * texture.mScale)) {
+				continue;
+			}
+
+			scene->erase(entity);
+
+			// NOTE: Maybe debug test if we clicked on multiple entities?
+			break;
+		}
 	}
 
 	// TODO: Control options
