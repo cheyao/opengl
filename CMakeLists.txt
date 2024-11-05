@@ -185,7 +185,7 @@ elseif(EMSCRIPTEN)
 
 	message("-- Building for web, did you unset your env vals? \"unset CXXFLAGS CXX CPPFLAGS CC CFLAGS LDFLAGS\"")
 else()
-	message("-- WARNING: Building for unknown platform, this might not work correctly")
+	message("-- WARNING Building for unknown platform, this might not work correctly")
 endif()
 
 #
@@ -320,9 +320,8 @@ endif()
 
 # Assimp
 if(ANDROID)
-	# FIXME: Non-hardcoded lib
 	add_library(assimp::assimp SHARED IMPORTED) # STATIC instad of SHARED for static
-	# TODO: Use a root dir of something like /usr/local/share/android-ndk/
+	# FIXME: Non-hardcoded lib
 	set_target_properties(assimp::assimp PROPERTIES
 	  IMPORTED_LOCATION "/usr/local/lib/libassimp.so"
 	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include"

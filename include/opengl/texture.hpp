@@ -12,8 +12,7 @@ class Texture {
 	friend class TextureManager;
 
       public:
-	explicit Texture(std::string_view path);
-	// NOTE: Doesn't need load
+	Texture(std::string_view path);
 	explicit Texture(const FT_Bitmap& bitmap);
 	Texture(Texture&&) = delete;
 	Texture(const Texture&) = delete;

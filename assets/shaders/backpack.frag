@@ -79,21 +79,6 @@ void main() {
 	color = vec4(outColor, 1.0f);
 }
 
-// TODO: Concat common parts
-
-/*
-vec3 cubeReflect(vec3 normal, vec3 viewDir) {
-	vec3 reflection = reflect(-viewDir, normal);
-	return vec3(texture(texture_diffuse1, reflection));
-}
-
-vec3 cubeRefract(vec3 normal, vec3 viewDir) {
-	const float ratio = 1.00f / 1.52f;
-	vec3 refration = refract(-viewDir, normal, ratio);
-	return vec3(texture(texture_diffuse1, refration));
-}
-*/
-
 vec3 calcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
 	vec3 lightDir = normalize(-light.direction);
 

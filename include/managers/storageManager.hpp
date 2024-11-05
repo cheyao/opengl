@@ -5,7 +5,7 @@
 // When object is destoryed, save state, when crated restor state
 class StorageManager {
       public:
-	explicit StorageManager(class Game* game);
+	explicit StorageManager(class Game* const game);
 	StorageManager(StorageManager&&) = delete;
 	StorageManager(const StorageManager&) = delete;
 	StorageManager& operator=(StorageManager&&) = delete;
@@ -20,5 +20,8 @@ class StorageManager {
 	void saveState(struct SDL_Storage* storage);
 	void saveWorld(struct SDL_Storage* storage, const std::string& world);
 
-	class Game* mGame;
+	constexpr const static inline unsigned long long LATEST_LEVEL_VERSION = 100;
+	constexpr const static inline unsigned long long LATEST_WORLD_VERSION = 100;
+
+	class Game* const mGame;
 };

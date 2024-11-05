@@ -12,7 +12,6 @@ class UBO {
 	UBO& operator=(const UBO&);
 	~UBO();
 
-	// TODO: More setters
 	void set(GLintptr name, Eigen::Affine3f matrix) const;
 	void bind(GLuint index) const;
 

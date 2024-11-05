@@ -8,13 +8,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <limits>
 #include <vector>
 
 namespace utils {
 
 // TODO: Tests
-// NOTE: Travers the thing from the end
 template <typename T> struct sparse_set_iterator final {
       public:
 	using difference_type = std::ptrdiff_t;

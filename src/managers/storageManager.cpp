@@ -19,7 +19,7 @@
  * 3. "data"
  */
 
-StorageManager::StorageManager(Game* game) : mGame(game) {}
+StorageManager::StorageManager(Game* const game) : mGame(game) {}
 
 void StorageManager::restore() {
 	SDL_Log("Restoring state");
@@ -83,7 +83,7 @@ StorageManager::~StorageManager() {
 		if (i >= 100) {
 			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to open user storage: %s\033[0m",
 					SDL_GetError());
-			ERROR_BOX("Failed to open storage: Not saving");
+			ERROR_BOX("Failed to open storage: Abandoning saving operation");
 
 			return;
 		}
@@ -125,15 +125,21 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 
 		delete[] buffer;
 	} catch (const nlohmann::json::exception& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s\033[0m",
-				error.id, error.what());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s\033[0m", error.id,
+				error.what());
 
 		delete[] buffer;
 
 		throw error;
 	}
 
-	SDL_assert(worlds["version"] == 100);
+	if (worlds["version"] != LATEST_WORLD_VERSION) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mERROR! The save file version is not for this game engine version\033[0m",
+				SDL_GetError());
+		ERROR_BOX("ERROR! The save file version is not for this game engine version");
+
+		throw std::runtime_error("StorageManager.cpp: Failed to read wrong version save file");
+	}
 
 	if (worlds["worlds"].empty()) {
 		SDL_Log("\033[31mWorlds empty! Returning\033[0m");
@@ -178,7 +184,14 @@ void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& w
 		throw error;
 	}
 
-	SDL_assert(level["version"] == 100);
+	if (level["version"] != LATEST_LEVEL_VERSION) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mERROR! The save file version is not for this game engine version\033[0m",
+				SDL_GetError());
+		ERROR_BOX("ERROR! The save file version is not for this game engine version");
+
+		throw std::runtime_error("StorageManager.cpp: Failed to read wrong version save file");
+	}
+
 	SDL_assert(level["name"] == "Level"); // TODO: More option
 
 	mGame->mCurrentLevel = new Level(mGame);
@@ -210,13 +223,12 @@ void StorageManager::saveState(SDL_Storage* storage) {
 		delete[] buffer;
 	}
 
-	// FIXME: Non-hard writted world name
+	// FIXME: Non-hard writted world name, ask for user input
 	constexpr const static char* worldName = "world";
 
-	// FIXME: Version compatability
 	// TODO: Save some more world info
 	// TODO: Self-recovery incase of corrupted world save
-	worlds["version"] = 100;
+	worlds["version"] = LATEST_WORLD_VERSION;
 
 	if (worlds.contains("worlds")) {
 		const auto& worldList = worlds["worlds"].get<std::vector<std::string_view>>();
@@ -248,7 +260,7 @@ void StorageManager::saveWorld(struct SDL_Storage* storage, const std::string& w
 
 	nlohmann::json level;
 
-	level["version"] = 100;
+	level["version"] = LATEST_LEVEL_VERSION;
 	level["name"] = mGame->mCurrentLevel->getName(); // TODO: More option
 	level["data"] = mGame->mCurrentLevel->save();
 

@@ -178,7 +178,6 @@ void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen
 		return;
 	}
 
-	// TODO: Scale
 	Eigen::Affine3f model = Eigen::Affine3f::Identity();
 	model.translate(Eigen::Vector3f(offset.x() + glyph.bearing.x(),
 					offset.y() - (glyph.size.y() - glyph.bearing.y()), 0.0f));

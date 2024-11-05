@@ -12,6 +12,7 @@
 #include <string>
 
 // TODO: Cleanup this
+// TODO: Make this a singeton
 class Game {
 	// Our storage manager gotta restore state
 	friend class StorageManager;
