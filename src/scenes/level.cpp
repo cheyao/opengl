@@ -46,6 +46,7 @@ void Level::create() {
 
 	mScene = new Scene();
 	const auto player = mScene->newEntity();
+	mGame->setPlayerID(player);
 
 	auto* playerTexture = mGame->getSystemManager()->getTexture("stone.png", true);
 	mScene->emplace<Components::texture>(player, playerTexture);
@@ -86,6 +87,8 @@ void Level::load(const nlohmann::json& data) {
 
 	mScene = new Scene();
 	const EntityID player = mScene->newEntity();
+	mGame->setPlayerID(player);
+
 	mScene->emplace<Components::texture>(player, mGame->getSystemManager()->getTexture("stone.png", true));
 	mScene->emplace<Components::position>(player, mData[PLAYER_KEY]["position"].get<Eigen::Vector2f>());
 	mScene->emplace<Components::velocity>(player, mData[PLAYER_KEY]["velocity"]);
@@ -134,7 +137,7 @@ void Level::load(const nlohmann::json& data) {
 	const auto blockWidth = mGame->getSystemManager()->getTexture("stone.png", true)->getWidth();
 
 	loadChunk(mCenter, playerPos);
-	loadChunk(mLeft, playerPos - Chunk::CHUNK_WIDTH * blockWidth);
+	loadChunk(mLeft, playerPos - Chunk::CHUNK_WIDTH * blockWidth + 1);
 	loadChunk(mRight, playerPos + Chunk::CHUNK_WIDTH * blockWidth);
 }
 
@@ -158,10 +161,9 @@ nlohmann::json Level::save() {
 }
 
 void Level::update() {
-	const auto playerID = mScene->view<Components::input>();
-	SDL_assert(playerID.size() == 1);
+	const auto playerID = mGame->getPlayerID();
 
-	const auto playerX = static_cast<int>(mScene->get<Components::position>(*playerID.begin()).mPosition.x());
+	const auto playerX = static_cast<int>(mScene->get<Components::position>(playerID).mPosition.x());
 	const auto blockWidth = mGame->getSystemManager()->getTexture("stone.png", true)->getWidth();
 	const auto sign = playerX < 0;
 	const auto currentChunk = playerX / blockWidth / Chunk::CHUNK_WIDTH - sign;

@@ -8,12 +8,12 @@
 #include "third_party/glad/glad.h"
 
 #include <SDL3/SDL.h>
+#include <chrono>
 #include <cinttypes>
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <string_view>
-#include <chrono>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -22,16 +22,9 @@
 #endif
 
 Game::Game()
-	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mStorageManager(nullptr),
-	  mUIScale(1.0f), mTicks(0), mBasePath(""), mPaused(false), mQuit(false), mCurrentLevel(nullptr) {
+	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mStorageManager(nullptr), mTicks(0),
+	  mBasePath(""), mPaused(false), mCurrentLevel(nullptr) {
 	const auto begin = std::chrono::high_resolution_clock::now();
-	mUIScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
-	if (mUIScale <= 0.0f) {
-		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
-			     SDL_GetError());
-
-		mUIScale = 1.0f;
-	}
 
 	const char* basepath = SDL_GetBasePath();
 	if (basepath != nullptr) {
@@ -117,10 +110,6 @@ Game::~Game() {
 SDL_AppResult Game::iterate() {
 	const auto begin = std::chrono::high_resolution_clock::now();
 
-	if (mQuit) {
-		return SDL_APP_SUCCESS;
-	}
-
 	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
 	if (delta > 0.05f) {
 		delta = 0.05f;
@@ -140,7 +129,8 @@ SDL_AppResult Game::iterate() {
 	framerate += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 	count++;
 	if (count == 100) {
-		SDL_Log("Average draw time (last 100 frames): %" PRIu64 "ns", static_cast<std::uint64_t>(framerate) / count);
+		SDL_Log("Average draw time (last 100 frames): %" PRIu64 "ns",
+			static_cast<std::uint64_t>(framerate) / count);
 		framerate = 0;
 		count = 0;
 	}

@@ -170,8 +170,6 @@ RenderSystem::RenderSystem(Game* game)
 	SDL_Log("Finished Initializing ImGUI");
 #endif
 
-	setDisplayScale();
-
 	SDL_GetWindowSize(mWindow, &mWidth, &mHeight);
 
 	mFramebuffer = std::make_unique<Framebuffer>(this);
@@ -255,25 +253,31 @@ void RenderSystem::draw(Scene* scene) {
 
 	const auto& playerPos = scene->get<Components::position>(*playerID.begin());
 
+	Eigen::Affine3f blockModel = Eigen::Affine3f::Identity();
+	blockModel.translate(
+		(Eigen::Vector3f() << -playerPos.mPosition + Eigen::Vector2f(mWidth / 2, mHeight / 2), 0.0f)
+			.finished());
+
 	Shader* blockShader = this->getShader("block.vert", "block.frag");
+	blockShader->activate();
+	blockShader->set("model", blockModel);
+	blockShader->set("size", 112.0f, 112.0f);
+	blockShader->set("texture_diffuse", 0);
+
 	for (const auto& [_, texture, block] : scene->view<Components::texture, Components::block>().each()) {
 		SDL_assert(texture.mTexture != nullptr);
 
 		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
 
-		Eigen::Affine3f model = Eigen::Affine3f::Identity();
-		model.scale(texture.mScale);
-		model.translate(
-			(Eigen::Vector3f() << -playerPos.mPosition + Eigen::Vector2f(mWidth / 2, mHeight / 2), 0.0f)
-				.finished());
+		if (!texture.mShader) {
+			shader->activate();
+			shader->set("model", blockModel);
+			shader->set("size", texture.mTexture->getSize());
 
-		shader->activate();
-		shader->set("model", model);
-		shader->set("size", texture.mTexture->getSize());
+			shader->set("texture_diffuse", 0);
+		}
 
 		shader->set("position", block.mPosition);
-
-		shader->set("texture_diffuse", 0);
 		texture.mTexture->activate(0);
 
 		mMesh->draw(shader);
@@ -398,30 +402,6 @@ void RenderSystem::draw(Scene* scene) {
 void RenderSystem::present() const { mFramebuffer->swap(); }
 
 void RenderSystem::swapWindow() const { SDL_GL_SwapWindow(mWindow); }
-
-void RenderSystem::setDisplayScale() const {
-	SDL_assert(mWindow != nullptr);
-
-	float scale = SDL_GetWindowDisplayScale(mWindow);
-	if (scale <= 0.0f) {
-		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\x1B[31mFailed to get display context scale: %s\033[0m",
-			     SDL_GetError());
-
-		scale = 1.0f;
-	}
-
-	mGame->setUIScale(scale);
-
-#ifdef IMGUI
-	ImGuiIO& io = ImGui::GetIO();
-
-	ImFont* font = io.Fonts->AddFontFromFileTTF(mGame->fullPath("fonts/NotoSans.ttf").data(), 16.0f * scale);
-	SDL_assert(font != nullptr);
-
-	ImGuiStyle& style = ImGui::GetStyle();
-	style.ScaleAllSizes(scale);
-#endif
-}
 
 Texture* RenderSystem::getTexture(const std::string& name, const bool srgb) { return mTextures->get(name, srgb); }
 

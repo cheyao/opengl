@@ -21,7 +21,6 @@ class RenderSystem {
 					      const std::string& geom = "");
 
 	void setDemensions(int width, int height);
-	void setDisplayScale() const;
 
 	void draw(class Scene* scene);
 	void reload() const;

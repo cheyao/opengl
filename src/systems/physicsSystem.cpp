@@ -19,6 +19,8 @@
 #include <format>
 #endif
 
+// FIXME: Big bottleneck
+
 // The physicsSystem is in charge of the collision and mouvements
 PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
 
@@ -43,19 +45,16 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 	constexpr const static float G = 1200.0f;
 	constexpr const static float jumpForce = 500.0f;
 
-	auto entities = std::vector<EntityID>();
-	scene->view<Components::collision, Components::position>().each(
-		[&entities](const EntityID& entity) { entities.emplace_back(entity); });
-
 	/*
 	 * FIXME: Currently this is a mock up gravity impl
 	 * https://gamedev.stackexchange.com/questions/15708/how-can-i-implement-gravity
 	 * To fix it we need to add a acceleration vector(Wow school knowladge has usages)
 	 */
+	const auto blocks = scene->view<Components::collision, Components::block>();
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
 
-		for (const auto& block : scene->view<Components::collision, Components::block>()) {
+		for (const auto& block : blocks) {
 			if (collidingBellow(scene, entity, block)) {
 				onGround = true;
 
@@ -64,7 +63,6 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 		}
 
 		auto& velocity = scene->get<Components::velocity>(entity).mVelocity;
-
 		if (onGround) {
 			// We can jump IF the entity is a misc entity with the jump flag, and the up key is pressed, and
 			// we are on the ground
@@ -117,10 +115,9 @@ void PhysicsSystem::collide(Scene* scene) {
 		for (const auto& entity : entities) {
 			if (ImGui::TreeNode(std::format("Entity {}", entity).data())) {
 				if (scene->contains<Components::position>(entity)) {
-					ImGui::SliderFloat2(
-						std::format("Position for entity {}", entity).data(),
-						scene->get<Components::position>(entity).mPosition.data(), 0.0f,
-						SDL_max(mGame->getDemensions().x(), mGame->getDemensions().y()));
+					ImGui::SliderFloat2(std::format("Position for entity {}", entity).data(),
+							    scene->get<Components::position>(entity).mPosition.data(),
+							    -10000.0f, 10000.0f);
 				}
 
 				if (scene->contains<Components::block>(entity)) {
@@ -135,7 +132,7 @@ void PhysicsSystem::collide(Scene* scene) {
 
 				ImGui::SliderFloat2(std::format("Size for entity {}", entity).data(),
 						    scene->get<Components::collision>(entity).mSize.data(), 0.0f,
-						    SDL_max(mGame->getDemensions().x(), mGame->getDemensions().y()));
+						    1000.0f);
 
 				ImGui::TreePop();
 			}
@@ -154,12 +151,12 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID entity, const E
 	const Eigen::Vector2f maxA = minA + scene->get<Components::collision>(entity).mSize;
 
 	const auto& blockCollision = scene->get<Components::collision>(block);
-	const auto& blockTexture = scene->get<Components::texture>(block);
+	const auto& blockTexture = scene->get<Components::texture>(block).mTexture;
 	const auto& blockPosition = scene->get<Components::block>(block).mPosition;
 
 	const Eigen::Vector2f minB =
-		Eigen::Vector2f(static_cast<float>(blockPosition.x()) * blockTexture.mTexture->getWidth(),
-				static_cast<float>(blockPosition.y()) * blockTexture.mTexture->getHeight()) +
+		Eigen::Vector2f(static_cast<float>(blockPosition.x()) * blockTexture->getWidth(),
+				static_cast<float>(blockPosition.y()) * blockTexture->getHeight()) +
 		blockCollision.mOffset;
 	const Eigen::Vector2f maxB = minB + blockCollision.mSize;
 

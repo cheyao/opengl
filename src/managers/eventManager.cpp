@@ -47,7 +47,7 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 
 		case SDL_EVENT_WINDOW_RESIZED: {
 			//	case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: {
-			mGame->setDemensions(event.window.data1, event.window.data2);
+			mGame->getSystemManager()->setDemensions(event.window.data1, event.window.data2);
 
 			break;
 		}

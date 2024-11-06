@@ -31,6 +31,7 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 	const static std::unordered_map<Components::block::BlockType, std::uint64_t> BREAK_TIMES = {
 		{Components::block::BlockType::AIR, 0},
 		{Components::block::BlockType::DIRT, 20},
+		{Components::block::BlockType::GRASS_BLOCK, 20},
 		{Components::block::BlockType::STONE, 80},
 	};
 
@@ -42,11 +43,13 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 	const SDL_MouseButtonFlags flags = SDL_GetMouseState(&x, &y);
 
 	// Convert Y to opengl cords
-	y = mGame->getDemensions().y() - y;
+	const auto windowSize = mGame->getSystemManager()->getDemensions();
+	y = windowSize.y() - y;
 
 	const bool leftClick = flags & SDL_BUTTON_MASK(1);
 
-	float realX = 0, realY = 0;
+	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
+	const float realX = x + playerPos.x() - windowSize.x() / 2, realY = y + playerPos.y() - windowSize.y() / 2;
 
 	if (leftClick) {
 		mPressLength += delta;
@@ -54,11 +57,16 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 		if (mPressLength >= LONG_PRESS_ACTIVATION_TIME) {
 			for (const auto [entity, block, texture] :
 			     scene->view<Components::block, Components::texture>().each()) {
+				if (mPressLength / 20 < BREAK_TIMES.at(block.mType)) {
+					continue;
+				}
+
 				const auto textureSize = texture.mTexture->getSize();
 				const auto bx = block.mPosition.x() * textureSize.x();
 				const auto by = block.mPosition.y() * textureSize.y();
-				// FIXME: Better collisions
-				if ((realX <= bx || realX >= bx + textureSize.x()) || (realY <= by || realY >= by + textureSize.y())) {
+
+				if ((realX <= bx || realX >= bx + textureSize.x()) ||
+				    (realY <= by || realY >= by + textureSize.y())) {
 					// Not colliding with the mouse
 					continue;
 				}

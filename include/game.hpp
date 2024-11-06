@@ -1,5 +1,6 @@
 #pragma once
 
+#include "managers/entityManager.hpp"
 #include "managers/systemManager.hpp"
 #include "third_party/Eigen/Core"
 #include "utils.hpp"
@@ -37,23 +38,16 @@ class Game {
 	void setPause(bool val) { mPaused = val; }
 	[[nodiscard]] bool isPaused() const { return mPaused; }
 
-	void setUIScale(float scale) { mUIScale = scale; }
-
 	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager; }
 	[[nodiscard]] class SystemManager* getSystemManager() const { return mSystemManager; }
 
-	[[nodiscard]] inline std::string fullPath(const std::string& path) const {
-		return (mBasePath + "assets/" + path);
-	}
 	[[nodiscard]] inline std::string getBasePath() const { return mBasePath; }
-
-	void setDemensions(int width, int height) { mSystemManager->setDemensions(width, height); }
-	Eigen::Vector2f getDemensions() const { return mSystemManager->getDemensions(); }
 
 	void setKey(std::size_t key, bool val);
 	[[nodiscard]] std::span<bool> getKeystate();
 
-	void quit() { mQuit = true; }
+	void setPlayerID(const EntityID id) { mPlayer = id; }
+	[[nodiscard]] EntityID getPlayerID() const { return mPlayer; }
 
       private:
 	void gui();
@@ -64,12 +58,10 @@ class Game {
 	class LocaleManager* mLocaleManager;
 	class StorageManager* mStorageManager;
 
-	float mUIScale;
-	uint64_t mTicks;
+	std::uint64_t mTicks;
 	std::string mBasePath;
-
 	bool mPaused;
-	bool mQuit;
+	EntityID mPlayer;
 
 	class Level* mCurrentLevel;
 };

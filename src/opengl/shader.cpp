@@ -91,19 +91,14 @@ void Shader::activate() const noexcept { glUseProgram(mShaderProgram); }
 // FIXME: string_view isn't guarenteed to be NULL-terminated :(
 GLint Shader::getUniform(const std::string_view name) const {
 	// Bad for performance, but I need this
+	/*
 	SDL_assert([] {
 		GLint prog = 0;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
 		return static_cast<GLuint>(prog);
 	}() == mShaderProgram &&
 		   "The shader isn't activated!");
-
-	// Safety checks
-#ifdef __cpp_lib_string_contains
-	SDL_assert(!name.contains(' '));
-#endif
-	SDL_assert(!(name[0] == 'g' && name[1] == 'l' && name[2] == '_'));
-	SDL_assert(glIsProgram(mShaderProgram));
+	*/
 
 	[[unlikely]] if (!mPositionCache.contains(name)) {
 		// Here we have to create a new element
@@ -119,7 +114,7 @@ GLint Shader::getUniform(const std::string_view name) const {
 		}
 	}
 
-	return mPositionCache.at(name);
+	return mPositionCache[name];
 }
 
 void Shader::set(const std::string_view name, const GLboolean val) const {

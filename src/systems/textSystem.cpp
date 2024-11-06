@@ -28,7 +28,7 @@
 // FIXME: Maybe add support for emojis
 // FIXME: Better unicode support
 TextSystem::TextSystem(Game* game, const unsigned int size, const bool final)
-	: mGame(game), mPath(game->fullPath("fonts/")), mSize(size), mLibrary(nullptr), mFace(nullptr),
+	: mGame(game), mPath(game->getBasePath() + "assets/fonts/"), mSize(size), mLibrary(nullptr), mFace(nullptr),
 	  mFontData(nullptr), mChild(nullptr) {
 	if (FT_Init_FreeType(&mLibrary)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "TextSystem.cpp: Failed to init freetype");
@@ -92,7 +92,7 @@ TextSystem::~TextSystem() {
 void TextSystem::loadFont(const std::string& name) {
 	SDL_assert(mLibrary != nullptr);
 
-	size_t size = 0;
+	std::size_t size = 0;
 	FT_Byte* newFontData = static_cast<FT_Byte*>(SDL_LoadFile((mPath + name).data(), &size));
 	if (newFontData == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mTextSystem.cpp: SDL failed to load file %s: %s",
