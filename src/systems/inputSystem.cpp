@@ -28,11 +28,12 @@ void InputSystem::update(Scene* scene, const float delta) {
 }
 
 void InputSystem::updateMouse(Scene* scene, const float delta) {
-	constexpr const static std::unordered_map<Components::block::BlockType, std::uint64_t> BREAK_TIMES = {
+	const static std::unordered_map<Components::block::BlockType, std::uint64_t> BREAK_TIMES = {
 		{Components::block::BlockType::AIR, 0},
 		{Components::block::BlockType::DIRT, 20},
 		{Components::block::BlockType::STONE, 80},
 	};
+
 	(void)scene;
 	(void)BREAK_TIMES;
 
@@ -45,19 +46,19 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 
 	const bool leftClick = flags & SDL_BUTTON_MASK(1);
 
+	float realX = 0, realY = 0;
+
 	if (leftClick) {
 		mPressLength += delta;
 
 		if (mPressLength >= LONG_PRESS_ACTIVATION_TIME) {
-			// SDL_Log("Unhandled long click for %f", mPressLength);
-			// TODO: Implement
-			for (const auto [entity, block, position, texture] :
-			     scene->view<Components::block, Components::position, Components::texture>().each()) {
+			for (const auto [entity, block, texture] :
+			     scene->view<Components::block, Components::texture>().each()) {
+				const auto textureSize = texture.mTexture->getSize();
+				const auto bx = block.mPosition.x() * textureSize.x();
+				const auto by = block.mPosition.y() * textureSize.y();
 				// FIXME: Better collisions
-				if ((x <= position.mPosition.x() ||
-				     x >= position.mPosition.x() + texture.mTexture->getWidth()) ||
-				    (y <= position.mPosition.y() ||
-				     y >= position.mPosition.y() + texture.mTexture->getHeight())) {
+				if ((realX <= bx || realX >= bx + textureSize.x()) || (realY <= by || realY >= by + textureSize.y())) {
 					// Not colliding with the mouse
 					continue;
 				}
@@ -71,21 +72,6 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 
 	SDL_assert(mPressLength >= 0 && "Hey! Why is the press length negative?");
 	if (!leftClick && mPressLength > 0 && mPressLength < LONG_PRESS_ACTIVATION_TIME) {
-		// FIXME: Better collisions
-		for (const auto [entity, block, position, texture] :
-		     scene->view<Components::block, Components::position, Components::texture>().each()) {
-			if ((x <= position.mPosition.x() ||
-			     x >= position.mPosition.x() + texture.mTexture->getWidth() * texture.mScale) ||
-			    (y <= position.mPosition.y() ||
-			     y >= position.mPosition.y() + texture.mTexture->getHeight() * texture.mScale)) {
-				continue;
-			}
-
-			scene->erase(entity);
-
-			// NOTE: Maybe debug test if we clicked on multiple entities?
-			break;
-		}
 	}
 
 	// TODO: Control options

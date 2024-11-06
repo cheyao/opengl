@@ -12,18 +12,24 @@
 #include <string>
 
 // TODO: Cleanup this
-// TODO: Make this a singeton
 class Game {
 	// Our storage manager gotta restore state
 	friend class StorageManager;
 
-      public:
+      private:
 	Game();
 	Game(Game&&) = delete;
 	Game(const Game&) = delete;
 	Game& operator=(Game&&) = delete;
 	Game& operator=(const Game&) = delete;
+
+      public:
 	~Game();
+
+	static Game* getInstance() {
+		static Game* instance = new Game();
+		return instance;
+	}
 
 	[[nodiscard]] SDL_AppResult iterate();
 	[[nodiscard]] SDL_AppResult event(const union SDL_Event& event);

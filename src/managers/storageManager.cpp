@@ -134,8 +134,8 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 	}
 
 	if (worlds["version"] != LATEST_WORLD_VERSION) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mERROR! The save file version is not for this game engine version\033[0m",
-				SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
+				"\033[31mERROR! The save file version is not for this game engine version\033[0m");
 		ERROR_BOX("ERROR! The save file version is not for this game engine version");
 
 		throw std::runtime_error("StorageManager.cpp: Failed to read wrong version save file");
@@ -185,8 +185,8 @@ void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& w
 	}
 
 	if (level["version"] != LATEST_LEVEL_VERSION) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mERROR! The save file version is not for this game engine version\033[0m",
-				SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
+				"\033[31mERROR! The save file version is not for this game engine version\033[0m");
 		ERROR_BOX("ERROR! The save file version is not for this game engine version");
 
 		throw std::runtime_error("StorageManager.cpp: Failed to read wrong version save file");
