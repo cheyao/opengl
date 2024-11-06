@@ -54,11 +54,13 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
 
-		for (const auto& block : blocks) {
-			if (collidingBellow(scene, entity, block)) {
-				onGround = true;
+		if (!scene->get<Components::velocity>(entity).mVelocity.y() > 1.0f) {
+			for (const auto& block : blocks) {
+				if (collidingBellow(scene, entity, block)) {
+					onGround = true;
 
-				break;
+					break;
+				}
 			}
 		}
 
@@ -66,8 +68,7 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 		if (onGround) {
 			// We can jump IF the entity is a misc entity with the jump flag, and the up key is pressed, and
 			// we are on the ground
-			if (scene->contains<Components::misc>(entity) &&
-			    (scene->get<Components::misc>(entity).mWhat & Components::misc::JUMP) &&
+			if (entity == mGame->getPlayerID() &&
 			    (mGame->getKeystate()[SDL_SCANCODE_UP] || mGame->getKeystate()[SDL_SCANCODE_SPACE])) {
 				velocity.y() = jumpForce;
 			} else {
@@ -144,8 +145,6 @@ void PhysicsSystem::collide(Scene* scene) {
 }
 
 bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID entity, const EntityID block) const {
-	SDL_assert(entity != block && "Hey! Why are the same objects colliding into each other");
-
 	const Eigen::Vector2f minA =
 		scene->get<Components::position>(entity).mPosition + scene->get<Components::collision>(entity).mOffset;
 	const Eigen::Vector2f maxA = minA + scene->get<Components::collision>(entity).mSize;
@@ -172,11 +171,6 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID entity, const E
 
 bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID entity, const EntityID block) const {
 	// They are definetly not touching the ground when having a upwards velocity
-	if (scene->contains<Components::velocity>(entity) &&
-	    scene->get<Components::velocity>(entity).mVelocity.y() > 1.0f) {
-		return false;
-	}
-
 	const Eigen::Vector2f minEntity =
 		scene->get<Components::position>(entity).mPosition + scene->get<Components::collision>(entity).mOffset;
 	const Eigen::Vector2f maxEntity = minEntity + scene->get<Components::collision>(entity).mSize;

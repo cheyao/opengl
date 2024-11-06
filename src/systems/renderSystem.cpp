@@ -265,8 +265,6 @@ void RenderSystem::draw(Scene* scene) {
 	blockShader->set("texture_diffuse", 0);
 
 	for (const auto& [_, texture, block] : scene->view<Components::texture, Components::block>().each()) {
-		SDL_assert(texture.mTexture != nullptr);
-
 		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
 
 		if (!texture.mShader) {
@@ -286,18 +284,13 @@ void RenderSystem::draw(Scene* scene) {
 	blockShader->activate();
 	blockShader->set("position", 0, 0);
 	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
-		SDL_assert(texture.mTexture != nullptr);
-
 		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
 
 		Eigen::Affine3f model = Eigen::Affine3f::Identity();
 		model.translate((Eigen::Vector3f() << (position.mPosition - playerPos.mPosition +
-						       Eigen::Vector2f(mWidth / 2, mHeight / 2)),
-				 0.0f)
+						       Eigen::Vector2f(mWidth / 2, mHeight / 2)), 0.0f)
 					.finished());
-		model.scale(texture.mScale);
 
-		shader->activate();
 		shader->set("model", model);
 		shader->set("size", texture.mTexture->getSize());
 

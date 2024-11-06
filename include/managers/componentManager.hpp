@@ -25,6 +25,7 @@ class ComponentManager {
 	}
 
 	template <typename Component> [[nodiscard]] utils::sparse_set<Component>* getPool() {
+		// PERF: Critical path bottleneck
 		[[unlikely]] if (!mPools.contains(typeid(Component))) {
 			mPools[typeid(Component)] = new utils::sparse_set<Component>();
 		}
