@@ -5,15 +5,28 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <cstddef>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <version>
 
+std::uint64_t crc32(const char* str, std::size_t len) {
+	len = len - 1;
+
+	std::uint64_t crc = 0xFFFFFFFF;
+
+	for (std::size_t i = 0; i <= len; ++i) {
+		crc = (crc >> 8) ^ crc_table[(crc ^ str[i]) & 0xFF];
+	}
+
+	return crc ^ 0xFFFFFFFF;
+}
+
 Shader::Shader(const std::string_view vertName, const std::string_view fragName, const std::string_view geomName)
 	: mName(std::string(vertName) + ":" + std::string(fragName) + ":" + std::string(geomName)),
-	  mShaderProgram(glCreateProgram()), mKeyHead(0) {
+	  mShaderProgram(glCreateProgram()) {
 	const GLuint vertShader = compile(vertName, GL_VERTEX_SHADER);
 	SDL_assert(glIsShader(vertShader) && "Shader.cpp: Vert shader not loaded correctly");
 
@@ -59,10 +72,20 @@ Shader::Shader(const std::string_view vertName, const std::string_view fragName,
 		throw std::runtime_error("Shader.cpp: Failed to link shader");
 	}
 
-	SDL_assert(glIsProgram(mShaderProgram) &&
-		   "Shader.cpp: Error compiling program, something wrong with code: should have been catched");
+	bind("Matrices"_u, 0);
 
-	bind("Matrices", 0);
+	GLint maxLen, uniformCount;
+	glGetProgramiv(mShaderProgram, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxLen);
+	glGetProgramiv(mShaderProgram, GL_ACTIVE_UNIFORMS, &uniformCount);
+
+	std::vector<char> uniform(maxLen + 2);
+
+	for (GLint i = 0; i < uniformCount; ++i) {
+		GLsizei len;
+		GLenum type;
+
+		glGetActiveUniform(mShaderProgram, uniformCount, maxLen + 2, &len, nullptr, &type, uniform.data());
+	}
 
 #ifdef DEBUG
 	GLint len = 0;
@@ -89,17 +112,8 @@ void Shader::activate() const noexcept { glUseProgram(mShaderProgram); }
 // See discord discussion on C++ server:
 // https://discord.com/channels/331718482485837825/331718580070645760/1291066117002891381
 // FIXME: string_view isn't guarenteed to be NULL-terminated :(
-GLint Shader::getUniform(const std::string_view name) const {
+GLint Shader::getUniform(const std::size_t name) const {
 	// Bad for performance, but I need this
-	/*
-	SDL_assert([] {
-		GLint prog = 0;
-		glGetIntegerv(GL_CURRENT_PROGRAM, &prog);
-		return static_cast<GLuint>(prog);
-	}() == mShaderProgram &&
-		   "The shader isn't activated!");
-	*/
-
 	[[unlikely]] if (!mPositionCache.contains(name)) {
 		// Here we have to create a new element
 		SDL_assert(mKeyHead < 16);
@@ -117,41 +131,41 @@ GLint Shader::getUniform(const std::string_view name) const {
 	return mPositionCache[name];
 }
 
-void Shader::set(const std::string_view name, const GLboolean val) const {
+void Shader::set(const std::size_t name, const GLboolean val) const {
 	glUniform1i(getUniform(name), static_cast<GLint>(val));
 }
-void Shader::set(const std::string_view name, const GLint val) const { glUniform1i(getUniform(name), val); }
-void Shader::set(const std::string_view name, const GLint val, const GLint val2) const {
+void Shader::set(const std::size_t name, const GLint val) const { glUniform1i(getUniform(name), val); }
+void Shader::set(const std::size_t name, const GLint val, const GLint val2) const {
 	glUniform2i(getUniform(name), val, val2);
 }
-void Shader::set(const std::string_view name, const GLuint val) const { glUniform1ui(getUniform(name), val); }
-void Shader::set(const std::string_view name, const GLfloat val) const { glUniform1f(getUniform(name), val); }
-void Shader::set(const std::string_view name, const GLdouble val) const {
+void Shader::set(const std::size_t name, const GLuint val) const { glUniform1ui(getUniform(name), val); }
+void Shader::set(const std::size_t name, const GLfloat val) const { glUniform1f(getUniform(name), val); }
+void Shader::set(const std::size_t name, const GLdouble val) const {
 	glUniform1f(getUniform(name), static_cast<GLfloat>(val));
 }
-void Shader::set(const std::string_view name, const GLfloat val, const GLfloat val2) const {
+void Shader::set(const std::size_t name, const GLfloat val, const GLfloat val2) const {
 	glUniform2f(getUniform(name), val, val2);
 }
-void Shader::set(const std::string_view name, const GLfloat val, const GLfloat val2, const GLfloat val3) const {
+void Shader::set(const std::size_t name, const GLfloat val, const GLfloat val2, const GLfloat val3) const {
 	glUniform3f(getUniform(name), val, val2, val3);
 }
-void Shader::set(const std::string_view name, const Eigen::Vector2f& val) const {
+void Shader::set(const std::size_t name, const Eigen::Vector2f& val) const {
 	glUniform2fv(getUniform(name), 1, val.data());
 }
-void Shader::set(const std::string_view name, const Eigen::Vector3f& val) const {
+void Shader::set(const std::size_t name, const Eigen::Vector3f& val) const {
 	glUniform3fv(getUniform(name), 1, val.data());
 }
-void Shader::set(const std::string_view name, const Eigen::Vector4f& val) const {
+void Shader::set(const std::size_t name, const Eigen::Vector4f& val) const {
 	glUniform4fv(getUniform(name), 1, val.data());
 }
-void Shader::set(const std::string_view name, const Eigen::Vector2i& val) const {
+void Shader::set(const std::size_t name, const Eigen::Vector2i& val) const {
 	glUniform2iv(getUniform(name), 1, val.data());
 }
-void Shader::set(const std::string_view name, const Eigen::Affine3f& mat, const GLboolean transpose) const {
+void Shader::set(const std::size_t name, const Eigen::Affine3f& mat, const GLboolean transpose) const {
 	glUniformMatrix4fv(getUniform(name), 1, transpose, mat.data());
 }
 
-void Shader::bind(const std::string_view name, const GLuint index) const {
+void Shader::bind(const std::size_t name, const GLuint index) const {
 	const GLuint blockIndex = glGetUniformBlockIndex(mShaderProgram, name.data());
 
 	if (blockIndex == GL_INVALID_INDEX) {

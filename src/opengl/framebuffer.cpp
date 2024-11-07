@@ -2,8 +2,6 @@
 
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
-#include "opengl/texture.hpp"
-#include "opengl/types.hpp"
 #include "systems/renderSystem.hpp"
 #include "third_party/glad/glad.h"
 #include "utils.hpp"
@@ -13,8 +11,6 @@
 #include <span>
 #include <stdexcept>
 #include <string>
-#include <utility>
-#include <vector>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -65,7 +61,7 @@ Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mRBO(0), mScreen(
 
 	Shader* mShader = mOwner->getShader("framebuffer.vert", "framebuffer.frag");
 	mShader->activate();
-	mShader->set("screen", 0);
+	mShader->set("screen"_u, 0);
 
 	glActiveTexture(GL_TEXTURE0);
 
@@ -99,9 +95,9 @@ void Framebuffer::swap() {
 	mShader->activate();
 
 #ifdef GLES
-	mShader->set("gamma", false);
+	mShader->set("gamma"_u, false);
 #else
-	mShader->set("gamma", true);
+	mShader->set("gamma"_u, true);
 #endif
 
 	glBindTexture(GL_TEXTURE_2D, mScreenTexture);

@@ -215,7 +215,8 @@ void Mesh::draw(Shader* shader) {
 				break;
 		}
 
-		shader->set(name, static_cast<GLint>(i));
+		// FIXME:
+		// shader->set(, static_cast<GLint>(i));
 
 		mTextures[i].first->activate(i);
 	}

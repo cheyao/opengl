@@ -54,7 +54,7 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
 
-		if (!scene->get<Components::velocity>(entity).mVelocity.y() > 1.0f) {
+		if (scene->get<Components::velocity>(entity).mVelocity.y() < 1.0f) {
 			for (const auto& block : blocks) {
 				if (collidingBellow(scene, entity, block)) {
 					onGround = true;

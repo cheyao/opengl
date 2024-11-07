@@ -260,29 +260,29 @@ void RenderSystem::draw(Scene* scene) {
 
 	Shader* blockShader = this->getShader("block.vert", "block.frag");
 	blockShader->activate();
-	blockShader->set("model", blockModel);
-	blockShader->set("size", 112.0f, 112.0f);
-	blockShader->set("texture_diffuse", 0);
+	blockShader->set("model"_u, blockModel);
+	blockShader->set("size"_u, 112.0f, 112.0f);
+	blockShader->set("texture_diffuse"_u, 0);
 
 	for (const auto& [_, texture, block] : scene->view<Components::texture, Components::block>().each()) {
 		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
 
 		if (!texture.mShader) {
 			shader->activate();
-			shader->set("model", blockModel);
-			shader->set("size", texture.mTexture->getSize());
+			shader->set("model"_u, blockModel);
+			shader->set("size"_u, texture.mTexture->getSize());
 
-			shader->set("texture_diffuse", 0);
+			shader->set("texture_diffuse"_u, 0);
 		}
 
-		shader->set("position", block.mPosition);
+		shader->set("position"_u, block.mPosition);
 		texture.mTexture->activate(0);
 
 		mMesh->draw(shader);
 	}
 
 	blockShader->activate();
-	blockShader->set("position", 0, 0);
+	blockShader->set("position"_u, 0, 0);
 	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
 		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
 
@@ -291,10 +291,10 @@ void RenderSystem::draw(Scene* scene) {
 						       Eigen::Vector2f(mWidth / 2, mHeight / 2)), 0.0f)
 					.finished());
 
-		shader->set("model", model);
-		shader->set("size", texture.mTexture->getSize());
+		shader->set("model"_u, model);
+		shader->set("size"_u, texture.mTexture->getSize());
 
-		shader->set("texture_diffuse", 0);
+		shader->set("texture_diffuse"_u, 0);
 		texture.mTexture->activate(0);
 
 		mMesh->draw(shader);
@@ -321,7 +321,7 @@ void RenderSystem::draw(Scene* scene) {
 		Shader* editorShader = mGame->getSystemManager()->getShader("block.vert", "editor.frag");
 
 		editorShader->activate();
-		editorShader->set("wireframe", hitbox);
+		editorShader->set("wireframe"_u, hitbox);
 
 		for (const auto& [_, collision, position] :
 		     scene->view<Components::collision, Components::position>().each()) {
@@ -333,8 +333,8 @@ void RenderSystem::draw(Scene* scene) {
 				 0.0f)
 					.finished());
 
-			editorShader->set("model", model);
-			editorShader->set("size", collision.mSize);
+			editorShader->set("model"_u, model);
+			editorShader->set("size"_u, collision.mSize);
 
 			mMesh->draw(editorShader);
 		}
@@ -355,7 +355,7 @@ void RenderSystem::draw(Scene* scene) {
 			mGame->getSystemManager()->getShader("vector.vert", "vector.frag", "vector.geom");
 
 		vectorShader->activate();
-		vectorShader->set("magnitude", magnitude);
+		vectorShader->set("magnitude"_u, magnitude);
 
 		for (const auto& [_, velocity, position, texture] :
 		     scene->view<Components::velocity, Components::position, Components::texture>().each()) {
@@ -367,12 +367,12 @@ void RenderSystem::draw(Scene* scene) {
 
 			model.translate((Eigen::Vector3f() << (position.mPosition), 0.0f).finished());
 
-			vectorShader->set("model", model);
-			vectorShader->set("size",
+			vectorShader->set("model"_u, model);
+			vectorShader->set("size"_u,
 					  Eigen::Vector2f(texture.mTexture->getWidth(), texture.mTexture->getHeight()));
 			const Eigen::Vector2f center = position.mPosition + texture.mTexture->getSize() / 2;
-			vectorShader->set("position", center);
-			vectorShader->set("velocity", velocity.mVelocity);
+			vectorShader->set("position"_u, center);
+			vectorShader->set("velocity"_u, velocity.mVelocity);
 
 			mMesh->draw(vectorShader);
 		}

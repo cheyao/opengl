@@ -181,8 +181,8 @@ void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen
 	Eigen::Affine3f model = Eigen::Affine3f::Identity();
 	model.translate(Eigen::Vector3f(offset.x() + glyph.bearing.x(),
 					offset.y() - (glyph.size.y() - glyph.bearing.y()), 0.0f));
-	shader->set("model", model);
-	shader->set("size", glyph.size);
+	shader->set("model"_u, model);
+	shader->set("size"_u, glyph.size);
 
 	SDL_assert(glyph.texture != nullptr);
 	glyph.texture->activate(0);
@@ -233,8 +233,8 @@ void TextSystem::draw(Scene* scene) {
 
 	Shader* shader = mGame->getSystemManager()->getShader("text.vert", "text.frag");
 	shader->activate();
-	shader->set("letter", 0);
-	shader->set("textColor", 1.0f, 1.0f, 1.0f);
+	shader->set("letter"_u, 0);
+	shader->set("textColor"_u, 1.0f, 1.0f, 1.0f);
 
 	for (const auto& [_, text, position] : scene->view<Components::text, Components::position>().each()) {
 		auto offset = position.mPosition;

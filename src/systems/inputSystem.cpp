@@ -28,7 +28,7 @@ void InputSystem::update(Scene* scene, const float delta) {
 }
 
 void InputSystem::updateMouse(Scene* scene, const float delta) {
-	const static std::unordered_map<Components::block::BlockType, std::uint64_t> BREAK_TIMES = {
+	static std::unordered_map<Components::block::BlockType, std::uint64_t> BREAK_TIMES = {
 		{Components::block::BlockType::AIR, 0},
 		{Components::block::BlockType::DIRT, 20},
 		{Components::block::BlockType::GRASS_BLOCK, 20},
@@ -57,7 +57,7 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 		if (mPressLength >= LONG_PRESS_ACTIVATION_TIME) {
 			for (const auto [entity, block, texture] :
 			     scene->view<Components::block, Components::texture>().each()) {
-				if (mPressLength / 20 < BREAK_TIMES.at(block.mType)) {
+				if (mPressLength / 20 < BREAK_TIMES[block.mType]) {
 					continue;
 				}
 

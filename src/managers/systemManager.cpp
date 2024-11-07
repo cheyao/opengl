@@ -118,17 +118,18 @@ Shader* SystemManager::getShader(const std::string& vert, const std::string& fra
 	return mRenderSystem->getShader(vert, frag, geom);
 }
 
+// 83.3% of the time
 void SystemManager::update(Scene* scene, const float delta) {
 	SDL_assert(scene != nullptr);
 
 	scene->clearSignals();
 
 	mInputSystem->update(scene, delta);
-	mPhysicsSystem->update(scene, delta);
+	mPhysicsSystem->update(scene, delta);  // 12.08%
 
-	mPhysicsSystem->collide(scene);
+	mPhysicsSystem->collide(scene); // 33.72%
 
-	mRenderSystem->draw(scene);
+	mRenderSystem->draw(scene); // 36.51%
 	mTextSystem->draw(scene);
 
 	printDebug(scene);
