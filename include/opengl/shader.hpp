@@ -72,30 +72,30 @@ class Shader {
 	void activate() const noexcept;
 
 	// set uniform
-	void set(std::size_t name, GLboolean val) const;
-	void set(std::size_t name, GLint val) const;
-	void set(std::size_t name, GLint val, GLint val2) const;
-	void set(std::size_t name, GLuint val) const;
-	void set(std::size_t name, GLfloat val) const;
-	void set(std::size_t name, GLdouble val) const;
-	void set(std::size_t name, GLfloat val, GLfloat val2) const;
-	void set(std::size_t name, GLfloat val, GLfloat val2, GLfloat val3) const;
-	void set(std::size_t name, const Eigen::Vector2f& val) const;
-	void set(std::size_t name, const Eigen::Vector3f& val) const;
-	void set(std::size_t name, const Eigen::Vector4f& val) const;
-	void set(std::size_t name, const Eigen::Vector2i& val) const;
-	void set(std::size_t name, const Eigen::Affine3f& mat, GLboolean transpose = GL_FALSE) const;
+	void set(std::uint64_t name, GLboolean val) const;
+	void set(std::uint64_t name, GLint val) const;
+	void set(std::uint64_t name, GLint val, GLint val2) const;
+	void set(std::uint64_t name, GLuint val) const;
+	void set(std::uint64_t name, GLfloat val) const;
+	void set(std::uint64_t name, GLdouble val) const;
+	void set(std::uint64_t name, GLfloat val, GLfloat val2) const;
+	void set(std::uint64_t name, GLfloat val, GLfloat val2, GLfloat val3) const;
+	void set(std::uint64_t name, const Eigen::Vector2f& val) const;
+	void set(std::uint64_t name, const Eigen::Vector3f& val) const;
+	void set(std::uint64_t name, const Eigen::Vector4f& val) const;
+	void set(std::uint64_t name, const Eigen::Vector2i& val) const;
+	void set(std::uint64_t name, const Eigen::Affine3f& mat, GLboolean transpose = GL_FALSE) const;
 
-	void bind(std::size_t name, GLuint index) const;
+	void bind(std::string_view name, GLuint index) const;
 
       private:
 	[[nodiscard]] static GLuint compile(std::string_view fileName, GLenum type);
 
-	GLint getUniform(std::size_t name) const;
+	GLint getUniform(std::uint64_t name) const;
 
 	const std::string mName;
 	const GLuint mShaderProgram;
 
 	// Cache
-	std::unordered_map<std::size_t, GLint> mPositionCache;
+	mutable std::unordered_map<std::uint64_t, GLint> mPositionCache;
 };
