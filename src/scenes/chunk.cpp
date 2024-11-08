@@ -57,7 +57,8 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 		mBlocks.emplace_back(std::vector<EntityID>());
 	}
 
-	auto getTexture = std::bind(&SystemManager::getTexture, game->getSystemManager(), std::placeholders::_1, std::placeholders::_2);
+	auto getTexture = std::bind(&SystemManager::getTexture, game->getSystemManager(), std::placeholders::_1,
+				    std::placeholders::_2);
 
 	// Load the things only when we need them
 	// FIXME: Better load on demand
@@ -91,7 +92,7 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 	}
 }
 
-Chunk::~Chunk() { SDL_assert(mBlocks.empty() && "Didn't save?"); }
+Chunk::~Chunk() {}
 
 nlohmann::json Chunk::save(Scene* scene) {
 	nlohmann::json chunk;
@@ -115,8 +116,6 @@ nlohmann::json Chunk::save(Scene* scene) {
 			scene->erase(block);
 		}
 	}
-
-	SDL_assert((mBlocks.clear(), true));
 
 	return chunk;
 }

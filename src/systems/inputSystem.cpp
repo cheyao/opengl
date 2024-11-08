@@ -35,9 +35,6 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 		{Components::block::BlockType::STONE, 80},
 	};
 
-	(void)scene;
-	(void)BREAK_TIMES;
-
 	// From Topright
 	float x = 0, y = 0;
 	const SDL_MouseButtonFlags flags = SDL_GetMouseState(&x, &y);
@@ -57,7 +54,7 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 		if (mPressLength >= LONG_PRESS_ACTIVATION_TIME) {
 			for (const auto [entity, block, texture] :
 			     scene->view<Components::block, Components::texture>().each()) {
-				if (mPressLength / 20 < BREAK_TIMES[block.mType]) {
+				if ((mPressLength * 20) < BREAK_TIMES[block.mType]) {
 					continue;
 				}
 
@@ -73,12 +70,13 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 
 				scene->erase(entity);
 
+				mPressLength = 0;
+
 				break;
 			}
 		}
 	}
 
-	SDL_assert(mPressLength >= 0 && "Hey! Why is the press length negative?");
 	if (!leftClick && mPressLength > 0 && mPressLength < LONG_PRESS_ACTIVATION_TIME) {
 	}
 

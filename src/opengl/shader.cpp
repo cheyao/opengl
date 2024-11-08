@@ -90,8 +90,6 @@ Shader::Shader(const std::string_view vertName, const std::string_view fragName,
 
 		std::uint64_t hash = crc32(uniform.data(), len);
 
-		SDL_Log("Got shader %d %s %s %lu %d", i, vertName.data(), uniform.data(), hash, len);
-
 		mPositionCache[hash] = glGetUniformLocation(mShaderProgram, uniform.data());
 	}
 
