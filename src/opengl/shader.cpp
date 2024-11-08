@@ -29,15 +29,15 @@ Shader::Shader(const std::string_view vertName, const std::string_view fragName,
 	: mName(std::string(vertName) + ":" + std::string(fragName) + ":" + std::string(geomName)),
 	  mShaderProgram(glCreateProgram()) {
 	const GLuint vertShader = compile(vertName, GL_VERTEX_SHADER);
-	SDL_assert(glIsShader(vertShader) && "Shader.cpp: Vert shader not loaded correctly");
+	SDL_assert(glIsShader(vertShader) && "Shader.cpp: Vertex shader not loaded correctly");
 
 	const GLuint fragShader = compile(fragName, GL_FRAGMENT_SHADER);
-	SDL_assert(glIsShader(fragShader) && "Shader.cpp: Frag shader not loaded correctly");
+	SDL_assert(glIsShader(fragShader) && "Shader.cpp: Fragment shader not loaded correctly");
 
 	GLuint geomShader = geomName.empty() ? 0 : compile(geomName, GL_GEOMETRY_SHADER);
 	if (!geomName.empty()) {
 		SDL_assert(geomShader != 0);
-		SDL_assert(glIsShader(geomShader) && "Shader.cpp: Geom shader not loaded correctly");
+		SDL_assert(glIsShader(geomShader) && "Shader.cpp: Geometry shader not loaded correctly");
 	}
 
 	glAttachShader(mShaderProgram, vertShader);
@@ -114,15 +114,11 @@ Shader::~Shader() { glDeleteProgram(mShaderProgram); }
 
 void Shader::activate() const noexcept { glUseProgram(mShaderProgram); }
 
-// Well the map with string view is complicated
-// See discord discussion on C++ server:
-// https://discord.com/channels/331718482485837825/331718580070645760/1291066117002891381
-// FIXME: string_view isn't guarenteed to be NULL-terminated :(
 GLint Shader::getUniform(const std::uint64_t name) const {
-	// Bad for performance, but I need this
 	[[unlikely]] if (!mPositionCache.contains(name)) {
-		SDL_Log("\033[93mShader.cpp: Failed find uniform location \"%" PRIu64 "\" for shader %s\033[0m", name,
-			mName.data());
+		SDL_Log("\033[93mShader.cpp: Failed find uniform location with hash \"%" PRIu64
+			"\" for shader %s\033[0m",
+			name, mName.data());
 	}
 
 	return mPositionCache[name];

@@ -21,6 +21,46 @@
 
 StorageManager::StorageManager(Game* const game) : mGame(game) {}
 
+StorageManager::~StorageManager() {
+	SDL_Log("Saving state");
+
+	SDL_Storage* storage = SDL_OpenUserStorage("cyao", "opengl", 0);
+	if (storage == nullptr) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to open user storage: %s\033[0m",
+				SDL_GetError());
+		ERROR_BOX("Failed to open storage: Not saving");
+
+		return;
+	}
+
+	std::size_t i = 0;
+	while (!SDL_StorageReady(storage)) {
+		SDL_Delay(10);
+		++i;
+		if (i >= 100) {
+			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to open user storage: %s\033[0m",
+					SDL_GetError());
+			ERROR_BOX("Failed to open storage: Abandoning saving operation");
+
+			return;
+		}
+	}
+
+	try {
+		saveState(storage);
+	} catch (const nlohmann::json::parse_error& error) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s at %zu\033[0m",
+				error.id, error.what(), error.byte);
+		ERROR_BOX("Failed to parse json");
+
+		return;
+	}
+
+	SDL_CloseStorage(storage);
+
+	SDL_Log("\033[32mSuccessfully saved state\033[0m");
+}
+
 void StorageManager::restore() {
 	SDL_Log("Restoring state");
 
@@ -62,46 +102,6 @@ void StorageManager::restore() {
 	SDL_CloseStorage(storage);
 
 	SDL_Log("\033[32mSuccessfully loaded state\033[0m");
-}
-
-StorageManager::~StorageManager() {
-	SDL_Log("Saving state");
-
-	SDL_Storage* storage = SDL_OpenUserStorage("cyao", "opengl", 0);
-	if (storage == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to open user storage: %s\033[0m",
-				SDL_GetError());
-		ERROR_BOX("Failed to open storage: Not saving");
-
-		return;
-	}
-
-	std::size_t i = 0;
-	while (!SDL_StorageReady(storage)) {
-		SDL_Delay(10);
-		++i;
-		if (i >= 100) {
-			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to open user storage: %s\033[0m",
-					SDL_GetError());
-			ERROR_BOX("Failed to open storage: Abandoning saving operation");
-
-			return;
-		}
-	}
-
-	try {
-		saveState(storage);
-	} catch (const nlohmann::json::parse_error& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s at %zu\033[0m",
-				error.id, error.what(), error.byte);
-		ERROR_BOX("Failed to parse json");
-
-		return;
-	}
-
-	SDL_CloseStorage(storage);
-
-	SDL_Log("\033[32mSuccessfully saved state\033[0m");
 }
 
 // TODO: Binary json https://json.nlohmann.me/features/binary_formats/

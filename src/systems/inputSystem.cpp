@@ -46,7 +46,9 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 	const bool leftClick = flags & SDL_BUTTON_MASK(1);
 
 	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
-	const float realX = x + playerPos.x() - windowSize.x() / 2, realY = y + playerPos.y() - windowSize.y() / 2;
+	const int realX = static_cast<float>(x + playerPos.x() - windowSize.x() / 2) / Components::block::BLOCK_SIZE;
+	const int realY = static_cast<float>(y + playerPos.y() - windowSize.y() / 2) / Components::block::BLOCK_SIZE;
+	const Eigen::Vector2i blockPos{realX, realY};
 
 	if (leftClick) {
 		mPressLength += delta;
@@ -54,25 +56,15 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 		if (mPressLength >= LONG_PRESS_ACTIVATION_TIME) {
 			for (const auto [entity, block, texture] :
 			     scene->view<Components::block, Components::texture>().each()) {
-				if ((mPressLength * 20) < BREAK_TIMES[block.mType]) {
-					continue;
+				SDL_Log("Overlap at %d %d", realX, realY);
+
+				if (block.mPosition == blockPos && (mPressLength * 20) >= BREAK_TIMES[block.mType]) {
+					scene->erase(entity);
+
+					mPressLength = 0;
+
+					break;
 				}
-
-				const auto textureSize = texture.mTexture->getSize();
-				const auto bx = block.mPosition.x() * textureSize.x();
-				const auto by = block.mPosition.y() * textureSize.y();
-
-				if ((realX <= bx || realX >= bx + textureSize.x()) ||
-				    (realY <= by || realY >= by + textureSize.y())) {
-					// Not colliding with the mouse
-					continue;
-				}
-
-				scene->erase(entity);
-
-				mPressLength = 0;
-
-				break;
 			}
 		}
 	}

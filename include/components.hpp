@@ -80,5 +80,7 @@ struct block {
 
 	block(const decltype(mType) type, const decltype(mPosition) position) noexcept
 		: mType(type), mPosition(position) {}
+
+	constexpr const static inline auto BLOCK_SIZE = 112;
 };
 } // namespace Components

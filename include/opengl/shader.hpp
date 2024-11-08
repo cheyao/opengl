@@ -8,7 +8,7 @@
 #include <string_view>
 #include <unordered_map>
 
-const static constexpr unsigned int crc_table[256] = {
+constexpr const static unsigned int crc_table[256] = {
 	0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3, 0x0edb8832,
 	0x79dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2,
 	0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7, 0x136c9856, 0x646ba8c0, 0xfd62f97a,
@@ -40,23 +40,23 @@ const static constexpr unsigned int crc_table[256] = {
 	0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d};
 
 template <int size, int idx = 0, class dummy = void> struct MM {
-	static constexpr unsigned int crc32(const char* str, unsigned int prev_crc = 0xFFFFFFFF) {
+	consteval static unsigned int crc32(const char* str, unsigned int prev_crc = 0xFFFFFFFF) {
 		return MM<size, idx + 1>::crc32(str, (prev_crc >> 8) ^ crc_table[(prev_crc ^ str[idx]) & 0xFF]);
 	}
 };
 
 // This is the stop-recursion function
 template <int size, class dummy> struct MM<size, size, dummy> {
-	static constexpr unsigned int crc32(const char*, unsigned int prev_crc = 0xFFFFFFFF) {
+	consteval static unsigned int crc32(const char*, unsigned int prev_crc = 0xFFFFFFFF) {
 		return prev_crc ^ 0xFFFFFFFF;
 	}
 };
 
 struct hash_value {
-	std::uint64_t value;
-	template <std::size_t N> consteval hash_value(const char (&str)[N]) : value(MM<N>::crc32(str)) {}
+	std::uint64_t hash;
+	template <std::size_t N> consteval hash_value(const char (&str)[N]) : hash(MM<N>::crc32(str)) {}
 };
-template <hash_value v> consteval std::uint64_t operator""_u() { return v.value; }
+template <hash_value v> consteval std::uint64_t operator""_u() { return v.hash; }
 
 std::uint64_t crc32(const char* str, std::size_t len);
 

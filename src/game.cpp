@@ -91,9 +91,6 @@ Game::Game()
 }
 
 Game::~Game() {
-	// Save state
-	delete mStorageManager;
-
 	SDL_Log("Quitting game\n");
 
 #ifdef IMGUI
@@ -101,6 +98,8 @@ Game::~Game() {
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
 #endif
+	// Save state
+	delete mStorageManager;
 
 	delete mLocaleManager;
 	delete mSystemManager;
