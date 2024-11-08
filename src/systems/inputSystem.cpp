@@ -46,9 +46,9 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 	const bool leftClick = flags & SDL_BUTTON_MASK(1);
 
 	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
-	const int realX = static_cast<float>(x + playerPos.x() - windowSize.x() / 2) / Components::block::BLOCK_SIZE;
-	const int realY = static_cast<float>(y + playerPos.y() - windowSize.y() / 2) / Components::block::BLOCK_SIZE;
-	const Eigen::Vector2i blockPos{realX, realY};
+	const int realX = x + playerPos.x() - windowSize.x() / 2;
+	const int realY = y + playerPos.y() - windowSize.y() / 2;
+	const Eigen::Vector2i blockPos{realX / Components::block::BLOCK_SIZE - (realX < 0), realY / Components::block::BLOCK_SIZE - (realY < 0)};
 
 	if (leftClick) {
 		mPressLength += delta;
@@ -56,7 +56,6 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 		if (mPressLength >= LONG_PRESS_ACTIVATION_TIME) {
 			for (const auto [entity, block, texture] :
 			     scene->view<Components::block, Components::texture>().each()) {
-				SDL_Log("Overlap at %d %d", realX, realY);
 
 				if (block.mPosition == blockPos && (mPressLength * 20) >= BREAK_TIMES[block.mType]) {
 					scene->erase(entity);
@@ -70,6 +69,7 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 	}
 
 	if (!leftClick && mPressLength > 0 && mPressLength < LONG_PRESS_ACTIVATION_TIME) {
+		// Short click
 	}
 
 	// TODO: Control options

@@ -16,7 +16,7 @@ class Level {
 
 	void create();
 	void load(const nlohmann::json& data);
-	nlohmann::json save();
+	nlohmann::json& save();
 
 	std::string getName() const { return mName; }
 	class Scene* getScene() const { return mScene; };

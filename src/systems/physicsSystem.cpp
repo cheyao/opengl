@@ -3,7 +3,6 @@
 #include "components.hpp"
 #include "game.hpp"
 #include "managers/entityManager.hpp"
-#include "misc/sparse_set_view.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
@@ -11,7 +10,6 @@
 #include <SDL3/SDL.h>
 #include <cstddef>
 #include <string>
-#include <vector>
 
 #ifdef IMGUI
 #include "imgui.h"
@@ -43,7 +41,7 @@ PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
  */
 void PhysicsSystem::update(Scene* scene, const float delta) {
 	constexpr const static float G = 1200.0f;
-	constexpr const static float jumpForce = 500.0f;
+	constexpr const static float jumpForce = 600.0f;
 
 	/*
 	 * FIXME: Currently this is a mock up gravity impl
