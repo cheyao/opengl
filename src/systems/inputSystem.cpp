@@ -48,7 +48,8 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
 	const int realX = x + playerPos.x() - windowSize.x() / 2;
 	const int realY = y + playerPos.y() - windowSize.y() / 2;
-	const Eigen::Vector2i blockPos{realX / Components::block::BLOCK_SIZE - (realX < 0), realY / Components::block::BLOCK_SIZE - (realY < 0)};
+	const Eigen::Vector2i blockPos{realX / Components::block::BLOCK_SIZE - (realX < 0),
+				       realY / Components::block::BLOCK_SIZE - (realY < 0)};
 
 	if (leftClick) {
 		mPressLength += delta;

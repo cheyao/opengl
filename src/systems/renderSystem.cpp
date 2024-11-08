@@ -247,58 +247,53 @@ void RenderSystem::draw(Scene* scene) {
 	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 
 	const auto playerID = scene->view<Components::input>();
 	SDL_assert(playerID.size() == 1);
 
 	const auto& playerPos = scene->get<Components::position>(*playerID.begin());
 
-	Eigen::Affine3f blockModel = Eigen::Affine3f::Identity();
-	blockModel.translate(
-		(Eigen::Vector3f() << -playerPos.mPosition + Eigen::Vector2f(mWidth / 2, mHeight / 2), 0.0f)
-			.finished());
-
+	// Draw blocks
 	Shader* blockShader = this->getShader("block.vert", "block.frag");
 	blockShader->activate();
-	blockShader->set("model"_u, blockModel);
 	blockShader->set("size"_u, 112.0f, 112.0f);
 	blockShader->set("texture_diffuse"_u, 0);
-
+	Eigen::Vector2f cameraOffset = -playerPos.mPosition + Eigen::Vector2f(mWidth / 2, mHeight / 2);
+	blockShader->set("offset"_u, cameraOffset);
 	for (const auto& [_, texture, block] : scene->view<Components::texture, Components::block>().each()) {
 		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
 
 		if (!texture.mShader) {
 			shader->activate();
-			shader->set("model"_u, blockModel);
 			shader->set("size"_u, texture.mTexture->getSize());
 
 			shader->set("texture_diffuse"_u, 0);
 		}
 
 		shader->set("position"_u, block.mPosition);
+
 		texture.mTexture->activate(0);
 
 		mMesh->draw(shader);
 	}
 
+	// Draw other textures
 	blockShader->activate();
 	blockShader->set("position"_u, 0, 0);
 	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
-		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
+		Shader* shader = texture.mShader ? texture.mShader : blockShader;
 
-		Eigen::Affine3f model = Eigen::Affine3f::Identity();
-		model.translate((Eigen::Vector3f() << (position.mPosition - playerPos.mPosition +
-						       Eigen::Vector2f(mWidth / 2, mHeight / 2)), 0.0f)
-					.finished());
-
-		shader->set("model"_u, model);
+		const Eigen::Vector2f offset = position.mPosition - playerPos.mPosition + Eigen::Vector2f(mWidth, mHeight) / 2;
+		shader->set("offset"_u, offset);
 		shader->set("size"_u, texture.mTexture->getSize());
 
-		shader->set("texture_diffuse"_u, 0);
 		texture.mTexture->activate(0);
 
 		mMesh->draw(shader);
 	}
+
+	glEnable(GL_BLEND);
 
 #if defined(IMGUI) && !defined(GLES)
 	static bool hitbox = false;

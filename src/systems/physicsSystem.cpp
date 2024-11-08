@@ -66,8 +66,7 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 		if (onGround) {
 			// We can jump IF the entity is a misc entity with the jump flag, and the up key is pressed, and
 			// we are on the ground
-			if (entity == mGame->getPlayerID() &&
-			    (mGame->getKeystate()[SDL_SCANCODE_UP] || mGame->getKeystate()[SDL_SCANCODE_SPACE])) {
+			if (entity == mGame->getPlayerID() && mGame->getKeystate()[SDL_SCANCODE_SPACE]) {
 				velocity.y() = jumpForce;
 			} else {
 				velocity.y() = 0.0f;

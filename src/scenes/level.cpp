@@ -59,11 +59,11 @@ void Level::create() {
 		player, [](class Scene* scene, const EntityID entity, const auto scancodes, const float) {
 			Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;
 
-			if (scancodes[SDL_SCANCODE_RIGHT] && vel.x() < 220) {
+			if (scancodes[SDL_SCANCODE_D] && vel.x() < 220) {
 				vel.x() += 70;
 			}
 
-			if (scancodes[SDL_SCANCODE_LEFT] && vel.x() > -220) {
+			if (scancodes[SDL_SCANCODE_A] && vel.x() > -220) {
 				vel.x() -= 70;
 			}
 		});
@@ -93,14 +93,14 @@ void Level::load(const nlohmann::json& data) {
 	mScene->emplace<Components::position>(player, mData[PLAYER_KEY]["position"].get<Eigen::Vector2f>());
 	mScene->emplace<Components::velocity>(player, mData[PLAYER_KEY]["velocity"]);
 	mScene->emplace<Components::input>(
-		player, [](class Scene* scene, EntityID entity, const auto scancodes, const float) {
+		player, [](class Scene* scene, const EntityID entity, const auto scancodes, const float) {
 			Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;
 
-			if (scancodes[SDL_SCANCODE_RIGHT] && vel.x() < 220) {
+			if (scancodes[SDL_SCANCODE_D] && vel.x() < 220) {
 				vel.x() += 70;
 			}
 
-			if (scancodes[SDL_SCANCODE_LEFT] && vel.x() > -220) {
+			if (scancodes[SDL_SCANCODE_A] && vel.x() > -220) {
 				vel.x() -= 70;
 			}
 		});

@@ -116,6 +116,7 @@ void TextSystem::loadFont(const std::string& name) {
 		ERROR_BOX("Failed load font, unknown file format, please reinstall assets and the freetype library");
 
 		SDL_free(static_cast<void*>(mFontData));
+		mFontData = nullptr;
 
 		throw std::runtime_error("TextSystem.cpp: Failed to load font: unknown file format");
 	} else if (status) {
@@ -123,6 +124,7 @@ void TextSystem::loadFont(const std::string& name) {
 		ERROR_BOX("Failed load font, please reinstall assets and the freetype library");
 
 		SDL_free(static_cast<void*>(mFontData));
+		mFontData = nullptr;
 
 		throw std::runtime_error("TextSystem.cpp: Failed to load font");
 	}
