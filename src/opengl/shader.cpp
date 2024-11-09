@@ -11,7 +11,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
-#include <version>
+#include <vector>
 
 std::uint64_t crc32(const char* str, std::size_t len) {
 	len = len - 1;
@@ -119,6 +119,8 @@ GLint Shader::getUniform(const std::uint64_t name) const {
 		SDL_Log("\033[93mShader.cpp: Failed find uniform location with hash \"%" PRIu64
 			"\" for shader %s\033[0m",
 			name, mName.data());
+
+		return -1;
 	}
 
 	return mPositionCache[name];

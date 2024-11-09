@@ -12,11 +12,11 @@ class Level {
 	Level(const Level&) = delete;
 	Level& operator=(Level&&) = delete;
 	Level& operator=(const Level&) = delete;
-	~Level() = default;
+	~Level();
 
 	void create();
 	void load(const nlohmann::json& data);
-	nlohmann::json& save();
+	nlohmann::json save();
 
 	std::string getName() const { return mName; }
 	class Scene* getScene() const { return mScene; };
@@ -31,6 +31,8 @@ class Level {
 	const std::string mName;
 
 	nlohmann::json mData;
+
+	void createCommon();
 
 	class Game* mGame;
 	class Scene* mScene;

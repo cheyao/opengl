@@ -16,6 +16,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <SDL3/SDL.h>
+#include <cstddef>
 #include <memory>
 #include <span>
 #include <stdexcept>

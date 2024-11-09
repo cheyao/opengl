@@ -2,7 +2,6 @@
 
 #include "components.hpp"
 #include "game.hpp"
-#include "managers/entityManager.hpp"
 #include "managers/glManager.hpp"
 #include "managers/shaderManager.hpp"
 #include "managers/systemManager.hpp"
@@ -284,7 +283,8 @@ void RenderSystem::draw(Scene* scene) {
 	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
 		Shader* shader = texture.mShader ? texture.mShader : blockShader;
 
-		const Eigen::Vector2f offset = position.mPosition - playerPos.mPosition + Eigen::Vector2f(mWidth, mHeight) / 2;
+		const Eigen::Vector2f offset =
+			position.mPosition - playerPos.mPosition + Eigen::Vector2f(mWidth, mHeight) / 2;
 		shader->set("offset"_u, offset);
 		shader->set("size"_u, texture.mTexture->getSize());
 
@@ -320,15 +320,11 @@ void RenderSystem::draw(Scene* scene) {
 
 		for (const auto& [_, collision, position] :
 		     scene->view<Components::collision, Components::position>().each()) {
-			Eigen::Affine3f model = Eigen::Affine3f::Identity();
+			Eigen::Vector2f offset = position.mPosition + collision.mOffset - playerPos.mPosition +
+					      Eigen::Vector2f(mWidth, mHeight) / 2;
 
-			model.translate(
-				(Eigen::Vector3f() << (position.mPosition + collision.mOffset - playerPos.mPosition +
-						       Eigen::Vector2f(mWidth / 2, mHeight / 2)),
-				 0.0f)
-					.finished());
+			editorShader->set("offset"_u, offset);
 
-			editorShader->set("model"_u, model);
 			editorShader->set("size"_u, collision.mSize);
 
 			mMesh->draw(editorShader);

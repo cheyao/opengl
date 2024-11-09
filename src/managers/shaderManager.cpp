@@ -2,14 +2,14 @@
 
 #include "imgui.h"
 #include "opengl/shader.hpp"
-#include "utils.hpp"
 
 #include <SDL3/SDL.h>
-#include <algorithm>
 #include <cstddef>
+#include <vector>
 #include <stddef.h>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <version>
 

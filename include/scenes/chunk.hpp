@@ -21,7 +21,7 @@ class Chunk {
 	Chunk(const Chunk&) = delete;
 	Chunk& operator=(Chunk&&) = delete;
 	Chunk& operator=(const Chunk&) = delete;
-	~Chunk();
+	~Chunk() = default;
 
 	[[nodiscard]] nlohmann::json save(class Scene* scene);
 

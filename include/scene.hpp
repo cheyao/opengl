@@ -29,9 +29,6 @@ class Scene {
 	// This returns a UUID for a new entity
 	[[nodiscard]] EntityID newEntity() {
 		const EntityID entity = mEntityManager->getEntity();
-#ifdef IMGUI
-		mDebugEntities.emplace_back(entity);
-#endif
 		return entity;
 	}
 	// Adds a component to an entity
@@ -57,10 +54,6 @@ class Scene {
 	void erase(const EntityID entity) noexcept {
 		mComponentManager->erase(entity);
 		mEntityManager->releaseEntity(entity);
-
-#ifdef IMGUI
-		mDebugEntities.erase(std::find(mDebugEntities.begin(), mDebugEntities.end(), entity));
-#endif
 	}
 
 	[[nodiscard]] bool valid(const EntityID entity) noexcept { return mEntityManager->valid(entity); }
@@ -79,7 +72,4 @@ class Scene {
 	class ComponentManager* mComponentManager;
 
 	std::unordered_map<std::string, bool> mSignals;
-#ifdef IMGUI
-	std::vector<EntityID> mDebugEntities;
-#endif
 };

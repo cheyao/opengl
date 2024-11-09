@@ -2,16 +2,17 @@
 
 #include "components.hpp"
 #include "game.hpp"
+#include "managers/systemManager.hpp"
 #include "misc/sparse_set_view.hpp"
-#include "opengl/texture.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
-#include <array>
 #include <cstdint>
 #include <functional>
+#include <span>
 #include <unordered_map>
+#include <utility>
 
 InputSystem::InputSystem(Game* game) : mGame(game), mPressedX(0), mPressedY(0), mPressLength(0) {}
 
@@ -36,18 +37,18 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 	};
 
 	// From Topright
-	float x = 0, y = 0;
-	const SDL_MouseButtonFlags flags = SDL_GetMouseState(&x, &y);
+	float mouseZ = 0, mouseY = 0;
+	const SDL_MouseButtonFlags flags = SDL_GetMouseState(&mouseZ, &mouseY);
 
 	// Convert Y to opengl cords
 	const auto windowSize = mGame->getSystemManager()->getDemensions();
-	y = windowSize.y() - y;
+	mouseY = windowSize.y() - mouseY;
 
-	const bool leftClick = flags & SDL_BUTTON_MASK(1);
+	const bool leftClick = flags & SDL_BUTTON_LMASK;
 
 	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
-	const int realX = x + playerPos.x() - windowSize.x() / 2;
-	const int realY = y + playerPos.y() - windowSize.y() / 2;
+	const int realX = mouseZ + playerPos.x() - windowSize.x() / 2;
+	const int realY = mouseY + playerPos.y() - windowSize.y() / 2;
 	const Eigen::Vector2i blockPos{realX / Components::block::BLOCK_SIZE - (realX < 0),
 				       realY / Components::block::BLOCK_SIZE - (realY < 0)};
 
@@ -57,7 +58,6 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 		if (mPressLength >= LONG_PRESS_ACTIVATION_TIME) {
 			for (const auto [entity, block, texture] :
 			     scene->view<Components::block, Components::texture>().each()) {
-
 				if (block.mPosition == blockPos && (mPressLength * 20) >= BREAK_TIMES[block.mType]) {
 					scene->erase(entity);
 

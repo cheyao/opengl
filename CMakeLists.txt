@@ -37,7 +37,6 @@ set(SRC
 src/main.cpp
 src/game.cpp
 
-src/opengl/cubemap.cpp
 src/opengl/mesh.cpp
 src/opengl/shader.cpp
 src/opengl/texture.cpp
@@ -72,7 +71,6 @@ include/scene.hpp
 include/misc/sparse_set.hpp
 include/misc/sparse_set_view.hpp
 
-include/opengl/cubemap.hpp
 include/opengl/mesh.hpp
 include/opengl/shader.hpp
 include/opengl/texture.hpp
@@ -394,7 +392,6 @@ endif()
 
 # Generate locals
 add_custom_command(
-	POST_BUILD
 	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/en.json"
 	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/localize.py" ARGS "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/strings.csv"
 	DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/strings.csv"
@@ -404,7 +401,6 @@ add_custom_target(localize ALL DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets/strin
 # Copy assets
 if(DEBUG)
 	add_custom_command(
-		POST_BUILD
 		OUTPUT ${CMAKE_BINARY_DIR}/assets
 		COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_CURRENT_SOURCE_DIR}/assets" "${CMAKE_CURRENT_BINARY_DIR}/assets"
 		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets" "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/en.json"
@@ -437,7 +433,6 @@ endif()
 if(CHECKS STREQUAL ON)
 	set(IWYU       ON)
 	set(CLANG_TIDY ON)
-	set(CPPCHECK   ON)
 	set(ADDRESS    ON)
 	set(LEAK       ON)
 	set(UNDEFINED  ON)

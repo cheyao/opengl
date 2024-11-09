@@ -6,7 +6,6 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <string>
-#include <string_view>
 
 class Texture {
 	friend class TextureManager;

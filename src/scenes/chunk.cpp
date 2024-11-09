@@ -1,14 +1,16 @@
 #include "scenes/chunk.hpp"
 
-class Texture;
-
 #include "components.hpp"
 #include "game.hpp"
 #include "managers/entityManager.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
+#include "third_party/Eigen/Core" // for StorageOptions, DenseBase<>::I...
 #include "third_party/json.hpp"
 
+#include "managers/systemManager.hpp"
+#include <SDL3/SDL.h>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <vector>
@@ -25,7 +27,7 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 	// So the top block must go in last!
 
 	// Spawn blocks
-	Texture* stone = game->getSystemManager()->getTexture("stone.png", true);
+	Texture* stone = game->getSystemManager()->getTexture("blocks/stone.png", true);
 	for (auto y = 0; y < WATER_LEVEL; ++y) {
 		for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 			mBlocks[i].emplace_back(scene->newEntity());
@@ -39,7 +41,7 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 	}
 
 	// The second layer of grass
-	Texture* grass = game->getSystemManager()->getTexture("grass-block.png", true);
+	Texture* grass = game->getSystemManager()->getTexture("blocks/grass-block.png", true);
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		mBlocks[i].emplace_back(scene->newEntity());
 		const EntityID& entity = mBlocks[i].back();
@@ -63,8 +65,8 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 	// Load the things only when we need them
 	// FIXME: Better load on demand
 	const std::unordered_map<Components::block::BlockType, std::function<Texture*()>> blockToTexture = {
-		{Components::block::STONE, [&getTexture] { return getTexture("stone.png", true); }},
-		{Components::block::GRASS_BLOCK, [&getTexture] { return getTexture("grass-block.png", true); }},
+		{Components::block::STONE, [&getTexture] { return getTexture("blocks/stone.png", true); }},
+		{Components::block::GRASS_BLOCK, [&getTexture] { return getTexture("blocks/grass-block.png", true); }},
 	};
 
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
@@ -92,8 +94,6 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 	}
 }
 
-Chunk::~Chunk() {}
-
 nlohmann::json Chunk::save(Scene* scene) {
 	nlohmann::json chunk;
 
@@ -110,7 +110,6 @@ nlohmann::json Chunk::save(Scene* scene) {
 		}
 	}
 
-	// Only clear when assert is enabled
 	for (const auto& layer : mBlocks) {
 		for (const auto& block : layer) {
 			scene->erase(block);

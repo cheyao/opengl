@@ -9,13 +9,17 @@
 #include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
-#include <version>
+#include <functional>
 
 #ifdef IMGUI
 #include "imgui.h"
 
+#include <concepts>
 #include <cstdint>
 #include <format>
+#include <sstream>
+#include <string_view>
+#include <type_traits>
 
 template <typename EigenExprTypeT>
 concept EigenTypeMatExpr = requires(const EigenExprTypeT t) {
@@ -125,7 +129,7 @@ void SystemManager::update(Scene* scene, const float delta) {
 	scene->clearSignals();
 
 	mInputSystem->update(scene, delta);
-	mPhysicsSystem->update(scene, delta);  // 12.08%
+	mPhysicsSystem->update(scene, delta); // 12.08%
 
 	mPhysicsSystem->collide(scene); // 33.72%
 
@@ -159,6 +163,7 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 		ImGui::End();
 	}
 
+	/*
 	if (entityList) {
 		ImGui::Begin("Entity list");
 
@@ -176,8 +181,7 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 				if (scene->contains<Components::block>(entity)) {
 					ImGui::BulletText(
 						"Components::block %s",
-						std::format("pos {}",
-							    scene->get<Components::block>(entity).mPosition)
+						std::format("pos {}", scene->get<Components::block>(entity).mPosition)
 							.data());
 				}
 
@@ -239,5 +243,6 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 
 		ImGui::End();
 	}
+	*/
 #endif
 }

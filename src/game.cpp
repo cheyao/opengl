@@ -11,7 +11,9 @@
 #include <chrono>
 #include <cinttypes>
 #include <cstdint>
+#include <exception>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <string_view>
 

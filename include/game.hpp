@@ -1,9 +1,6 @@
 #pragma once
 
 #include "managers/entityManager.hpp"
-#include "managers/systemManager.hpp"
-#include "third_party/Eigen/Core"
-#include "utils.hpp"
 
 #include <SDL3/SDL.h>
 #include <cstddef>

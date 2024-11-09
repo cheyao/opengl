@@ -4,6 +4,7 @@
 #include "third_party/glad/glad.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <string_view>
 #include <unordered_map>

@@ -6,11 +6,13 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <vector>
 
 /*
  * A World shall consist of 3 fields:
