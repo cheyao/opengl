@@ -1,5 +1,9 @@
 #pragma once
 
+#include "opengl/mesh.hpp"
+
+#include <memory>
+
 class InputSystem {
       public:
 	InputSystem(class Game* game);
@@ -29,4 +33,6 @@ class InputSystem {
 	float mPressedX;
 	float mPressedY;
 	float mPressLength;
+
+	std::unique_ptr<class Mesh> mMesh;
 };

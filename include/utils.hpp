@@ -20,7 +20,12 @@ template <typename... Args> std::string string_format(const std::string& format,
 	return std::string(buf.get(), buf.get() + size - 1);
 }
 
-#define ERROR_BOX(msg) SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERROR", msg, nullptr)
+#define ERROR_BOX(msg)                                                                                                 \
+	{                                                                                                              \
+		if (!SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERROR", msg, nullptr)) {                          \
+			SDL_Log("Failed to show message box: %s", SDL_GetError());                                      \
+		}                                                                                                      \
+	}
 
 constexpr const static float PI = 3.14159265358979323846;
 

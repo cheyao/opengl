@@ -53,6 +53,7 @@ src/managers/entityManager.cpp
 src/managers/systemManager.cpp
 src/managers/storageManager.cpp
 
+src/systems/UISystem.cpp
 src/systems/textSystem.cpp
 src/systems/physicsSystem.cpp
 src/systems/renderSystem.cpp
@@ -89,6 +90,7 @@ include/managers/systemManager.hpp
 include/managers/componentManager.hpp
 include/managers/storageManager.hpp
 
+include/systems/UISystem.hpp
 include/systems/textSystem.hpp
 include/systems/physicsSystem.hpp
 include/systems/renderSystem.hpp

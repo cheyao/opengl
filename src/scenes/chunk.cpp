@@ -5,7 +5,7 @@
 #include "managers/entityManager.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
-#include "third_party/Eigen/Core" // for StorageOptions, DenseBase<>::I...
+#include "third_party/Eigen/Core"
 #include "third_party/json.hpp"
 
 #include "managers/systemManager.hpp"

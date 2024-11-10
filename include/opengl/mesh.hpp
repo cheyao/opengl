@@ -11,13 +11,13 @@
 
 class Mesh {
       public:
-	explicit Mesh(const std::span<const Vertex> vertices, const std::span<const GLuint> indices,
+	explicit Mesh(std::span<const Vertex> vertices, std::span<const GLuint> indices,
 		      const std::vector<std::pair<class Texture* const, TextureType>>& textures = {});
 	// Non-owning: no copy, uses subbuffer to construct data in place
 	// Spans fit into 2 registers (16 bytes) so no reference
 	// Vectors are 24 bytes (from cling) so by ref
-	explicit Mesh(const std::span<const float> positions, const std::span<const float> normals,
-		      const std::span<const float> texturePos, const std::span<const GLuint> indices,
+	explicit Mesh(std::span<const float> positions, std::span<const float> normals,
+		      std::span<const float> texturePos, std::span<const GLuint> indices,
 		      const std::vector<std::pair<class Texture* const, TextureType>>& textures = {});
 
 	Mesh(Mesh&&) = delete;

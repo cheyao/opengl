@@ -153,16 +153,16 @@ $ git clone --depth 1 https://github.com/libsdl-org/SDL.git
 $ cd SDL 
 $ mkdir build && cd build
 $ emcmake cmake ..
-$ emcmake cmake --build .
-$ emcmake cmake --install .
+$ cmake --build .
+$ cmake --install .
 ```
 
 Build assimp:
 ```bash
 $ git clone --depth 1 https://github.com/assimp/assimp && cd assimp
 $ mkdir build && cd build
-& emcmake cmake -DASSIMP_BUILD_ZLIB=ON ..
-$ emcmake cmake --build .
+& cmake -DASSIMP_BUILD_ZLIB=ON -DBUILD_SHARED_LIBS=OFF ..
+$ cmake --build .
 ```
 
 Build the project:
@@ -174,6 +174,8 @@ $ emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
 $ emcmake cmake --build .
 $ python3 -m http.server
 ```
+
+If you get the error `emcc: error: unable to create cache directory "{cachdir}"` run the build command with sudo
 
 ## Distribuing
 There are scripts in the cmake folder:
@@ -230,7 +232,7 @@ The linux save directory is `~/.local/share/cyao/opengl/`
 ## TODO
 
 - [x] In-game metrics & ms count
-    - [ ] ImGUI Menu
+    - [x] ImGUI Menu
 - [ ] Live edit shaders in-game
 - [ ] Fix MacOS bundle process https://github.com/libsdl-org/SDL/blob/main/docs/README-macos.md
 - [x] Game pause + resume things

@@ -56,9 +56,6 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	// glEnable(GL_STENCIL_TEST);
-	// glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }

@@ -4,17 +4,42 @@
 #include "game.hpp"
 #include "managers/systemManager.hpp"
 #include "misc/sparse_set_view.hpp"
+#include "opengl/mesh.hpp"
+#include "opengl/shader.hpp"
+#include "opengl/texture.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
+#include "third_party/glad/glad.h"
 
 #include <SDL3/SDL.h>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <span>
+#include <string>
 #include <unordered_map>
 #include <utility>
 
-InputSystem::InputSystem(Game* game) : mGame(game), mPressedX(0), mPressedY(0), mPressLength(0) {}
+InputSystem::InputSystem(Game* game) : mGame(game), mPressedX(0), mPressedY(0), mPressLength(0) {
+	constexpr const static float vertices[] = {
+		0.0f, 0.0f, 0.0f, // TL
+		0.0f, 1.0f, 0.0f, // BR
+		1.0f, 0.0f, 0.0f, // TR
+		1.0f, 1.0f, 0.0f  // BL
+	};
+
+	constexpr const static float texturePos[] = {
+		0.0f, 1.0f, // TR
+		0.0f, 0.0f, // BR
+		1.0f, 1.0f, // TL
+		1.0f, 0.0f  // BL
+	};
+
+	const static GLuint indices[] = {2, 1, 0,  // a
+					 1, 2, 3}; // b
+
+	mMesh = std::unique_ptr<Mesh>(new Mesh(vertices, {}, texturePos, indices, {}));
+}
 
 void InputSystem::update(Scene* scene, const float delta) {
 	const auto keystate = mGame->getKeystate();
@@ -46,41 +71,58 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 
 	const bool leftClick = flags & SDL_BUTTON_LMASK;
 
+	if (!leftClick) {
+		if (mPressLength > 0 && mPressLength < LONG_PRESS_ACTIVATION_TIME) {
+			// Short click
+		}
+
+		mPressLength = 0;
+
+		return;
+	}
+
 	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
 	const int realX = mouseZ + playerPos.x() - windowSize.x() / 2;
 	const int realY = mouseY + playerPos.y() - windowSize.y() / 2;
 	const Eigen::Vector2i blockPos{realX / Components::block::BLOCK_SIZE - (realX < 0),
 				       realY / Components::block::BLOCK_SIZE - (realY < 0)};
+	const auto systemManager = mGame->getSystemManager();
 
-	if (leftClick) {
-		mPressLength += delta;
+	mPressLength += delta;
 
-		if (mPressLength >= LONG_PRESS_ACTIVATION_TIME) {
-			for (const auto [entity, block, texture] :
-			     scene->view<Components::block, Components::texture>().each()) {
-				if (block.mPosition == blockPos && (mPressLength * 20) >= BREAK_TIMES[block.mType]) {
-					scene->erase(entity);
+	if (mPressLength < LONG_PRESS_ACTIVATION_TIME) {
+		return;
+	}
 
-					mPressLength = 0;
+	for (const auto [entity, block, texture] : scene->view<Components::block, Components::texture>().each()) {
+		if (block.mPosition == blockPos) {
+			if ((mPressLength * 20) >= BREAK_TIMES[block.mType]) {
+				scene->erase(entity);
 
-					break;
-				}
+				mPressLength = 0;
+
+				break;
 			}
+
+			Shader* shader = systemManager->getShader("block.vert", "block.frag");
+			Eigen::Vector2f cameraOffset = -playerPos + systemManager->getDemensions() / 2;
+
+			shader->activate();
+			shader->set("size"_u, (float)Components::block::BLOCK_SIZE,
+				    (float)Components::block::BLOCK_SIZE);
+			shader->set("texture_diffuse"_u, 0);
+			shader->set("offset"_u, cameraOffset);
+			shader->set("position"_u, block.mPosition);
+
+			int stage = ((mPressLength * 20) / BREAK_TIMES[block.mType]) * 10;
+
+			mGame->getSystemManager()
+				->getTexture("blocks/destroy_stage_" + std::to_string(stage) + ".png")
+				->activate(0);
+
+			mMesh->draw(shader);
+
+			break;
 		}
-	}
-
-	if (!leftClick && mPressLength > 0 && mPressLength < LONG_PRESS_ACTIVATION_TIME) {
-		// Short click
-	}
-
-	// TODO: Control options
-	// TODO: Pickaxe cursor
-
-	// shortclick = place
-	// longclick = brake
-
-	// Reset the length after processing
-	if (!leftClick) {
-		mPressLength = 0;
 	}
 }

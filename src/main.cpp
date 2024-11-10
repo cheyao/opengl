@@ -1,6 +1,10 @@
 #include "game.hpp"
 #include "utils.hpp"
 
+#ifdef IMGUI
+#include "imgui.h"
+#endif
+
 #include <SDL3/SDL.h>
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
@@ -81,6 +85,11 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 		return static_cast<Game*>(appstate)->iterate();
 	} catch (const std::runtime_error& error) {
 		SDL_Log("Main.cpp: Uncaught runtime error: %s", error.what());
+		ERROR_BOX(string_format("Runtime error %s", error.what()).data());
+
+#ifdef IMGUI
+		ImGui::EndFrame();
+#endif
 
 #ifdef DEBUG
 		static_cast<Game*>(appstate)->setPause(true);
@@ -89,6 +98,11 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 		return SDL_APP_CONTINUE;
 	} catch (const std::exception& error) {
 		SDL_Log("Main.cpp: Uncaught exception: %s", error.what());
+		ERROR_BOX(string_format("Exception %s", error.what()).data());
+
+#ifdef IMGUI
+		ImGui::EndFrame();
+#endif
 
 #ifdef DEBUG
 		static_cast<Game*>(appstate)->setPause(true);
@@ -97,6 +111,10 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 		return SDL_APP_CONTINUE;
 	} catch (...) {
 		SDL_Log("Main.cpp: Uncaught exception of unknown type");
+
+#ifdef IMGUI
+		ImGui::EndFrame();
+#endif
 
 		return SDL_APP_CONTINUE;
 	}

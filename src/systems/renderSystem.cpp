@@ -42,6 +42,7 @@ EM_JS(int, browserHeight, (), { return window.innerHeight; });
 EM_JS(int, browserWidth, (), { return window.innerWidth; });
 #endif
 
+// PERF: Use the other draw call
 RenderSystem::RenderSystem(Game* game)
 	: mGame(game), mWindow(nullptr), mCursor(nullptr), mGL(nullptr), mFramebuffer(nullptr), mMatricesUBO(nullptr),
 	  mTextures(std::make_unique<TextureManager>(mGame->getBasePath())),
@@ -201,8 +202,6 @@ RenderSystem::RenderSystem(Game* game)
 	const static GLuint indices[] = {2, 1, 0,  // a
 					 1, 2, 3}; // b
 
-	static_assert(sizeof(indices) == 6 * sizeof(GLuint) && "Just a square, why not 6 indices?");
-
 	mMesh = std::unique_ptr<Mesh>(new Mesh(vertices, {}, texturePos, indices, {}));
 
 #ifndef __ANDROID__
@@ -248,17 +247,14 @@ void RenderSystem::draw(Scene* scene) {
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	const auto playerID = scene->view<Components::input>();
-	SDL_assert(playerID.size() == 1);
-
-	const auto& playerPos = scene->get<Components::position>(*playerID.begin());
+	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
 
 	// Draw blocks
 	Shader* blockShader = this->getShader("block.vert", "block.frag");
 	blockShader->activate();
-	blockShader->set("size"_u, 112.0f, 112.0f);
+	blockShader->set("size"_u, (float)Components::block::BLOCK_SIZE, (float)Components::block::BLOCK_SIZE);
 	blockShader->set("texture_diffuse"_u, 0);
-	Eigen::Vector2f cameraOffset = -playerPos.mPosition + Eigen::Vector2f(mWidth / 2, mHeight / 2);
+	Eigen::Vector2f cameraOffset = -playerPos + Eigen::Vector2f(mWidth, mHeight) / 2;
 	blockShader->set("offset"_u, cameraOffset);
 	for (const auto& [_, texture, block] : scene->view<Components::texture, Components::block>().each()) {
 		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
@@ -283,8 +279,7 @@ void RenderSystem::draw(Scene* scene) {
 	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
 		Shader* shader = texture.mShader ? texture.mShader : blockShader;
 
-		const Eigen::Vector2f offset =
-			position.mPosition - playerPos.mPosition + Eigen::Vector2f(mWidth, mHeight) / 2;
+		const Eigen::Vector2f offset = position.mPosition - playerPos + Eigen::Vector2f(mWidth, mHeight) / 2;
 		shader->set("offset"_u, offset);
 		shader->set("size"_u, texture.mTexture->getSize());
 
@@ -294,6 +289,7 @@ void RenderSystem::draw(Scene* scene) {
 	}
 
 	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 #if defined(IMGUI) && !defined(GLES)
 	static bool hitbox = false;
@@ -320,8 +316,8 @@ void RenderSystem::draw(Scene* scene) {
 
 		for (const auto& [_, collision, position] :
 		     scene->view<Components::collision, Components::position>().each()) {
-			Eigen::Vector2f offset = position.mPosition + collision.mOffset - playerPos.mPosition +
-					      Eigen::Vector2f(mWidth, mHeight) / 2;
+			Eigen::Vector2f offset = position.mPosition + collision.mOffset - playerPos +
+						 Eigen::Vector2f(mWidth, mHeight) / 2;
 
 			editorShader->set("offset"_u, offset);
 

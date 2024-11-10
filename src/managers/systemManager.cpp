@@ -2,6 +2,7 @@
 
 #include "components.hpp"
 #include "scene.hpp"
+#include "systems/UISystem.hpp"
 #include "systems/inputSystem.hpp"
 #include "systems/physicsSystem.hpp"
 #include "systems/renderSystem.hpp"
@@ -10,6 +11,7 @@
 
 #include <SDL3/SDL.h>
 #include <functional>
+#include <memory>
 
 #ifdef IMGUI
 #include "imgui.h"
@@ -99,12 +101,10 @@ template <EigenTypeMatExpr MatT> std::ostream& operator<<(std::ostream& os, cons
 }
 #endif
 
-SystemManager::SystemManager(Game* game) : mGame(game) {
-	mPhysicsSystem = std::make_unique<PhysicsSystem>(mGame);
-	mRenderSystem = std::make_unique<RenderSystem>(mGame);
-	mTextSystem = std::make_unique<TextSystem>(mGame);
-	mInputSystem = std::make_unique<InputSystem>(mGame);
-}
+SystemManager::SystemManager(Game* game)
+	: mGame(game), mPhysicsSystem(std::make_unique<PhysicsSystem>(mGame)),
+	  mRenderSystem(std::make_unique<RenderSystem>(mGame)), mTextSystem(std::make_unique<TextSystem>(mGame)),
+	  mInputSystem(std::make_unique<InputSystem>(mGame)), mUISystem(std::make_unique<UISystem>(mGame)) {}
 
 SystemManager::~SystemManager() {}
 
@@ -128,13 +128,17 @@ void SystemManager::update(Scene* scene, const float delta) {
 
 	scene->clearSignals();
 
-	mInputSystem->update(scene, delta);
 	mPhysicsSystem->update(scene, delta); // 12.08%
 
 	mPhysicsSystem->collide(scene); // 33.72%
 
 	mRenderSystem->draw(scene); // 36.51%
+	
+	// Draws the block breaking textures
+	mInputSystem->update(scene, delta);
+
 	mTextSystem->draw(scene);
+	mUISystem->draw(scene);
 
 	printDebug(scene);
 

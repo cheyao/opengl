@@ -174,8 +174,9 @@ void Level::update() {
 			mRight = new Chunk(mGame, mScene, currentChunk + 1);
 		}
 	} else {
-		SDL_Log("\033[33mOut of boundary for chunk %d, loaded chunks: %ld %ld %ld\033[0m", currentChunk,
-			mLeft->getPosition(), mCenter->getPosition(), mRight->getPosition());
+		SDL_Log("\033[33mOut of boundary for chunk %d, loaded chunks: %" PRIu64 " %" PRIu64 " %" PRIu64
+			"\033[0m",
+			currentChunk, mLeft->getPosition(), mCenter->getPosition(), mRight->getPosition());
 		auto save = [this](Chunk* chunk) {
 			this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())] =
 				chunk->save(this->mScene);
