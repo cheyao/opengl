@@ -320,7 +320,6 @@ void RenderSystem::draw(Scene* scene) {
 						 Eigen::Vector2f(mWidth, mHeight) / 2;
 
 			editorShader->set("offset"_u, offset);
-
 			editorShader->set("size"_u, collision.mSize);
 
 			mMesh->draw(editorShader);

@@ -112,7 +112,9 @@ nlohmann::json Chunk::save(Scene* scene) {
 
 	for (const auto& layer : mBlocks) {
 		for (const auto& block : layer) {
-			scene->erase(block);
+			if (block != Components::block::AIR) {
+				scene->erase(block);
+			}
 		}
 	}
 

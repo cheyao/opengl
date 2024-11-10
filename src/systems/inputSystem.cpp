@@ -61,6 +61,8 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 		{Components::block::BlockType::STONE, 80},
 	};
 
+	mDestruction.render = false;
+
 	// From Topright
 	float mouseZ = 0, mouseY = 0;
 	const SDL_MouseButtonFlags flags = SDL_GetMouseState(&mouseZ, &mouseY);
@@ -86,7 +88,12 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 	const int realY = mouseY + playerPos.y() - windowSize.y() / 2;
 	const Eigen::Vector2i blockPos{realX / Components::block::BLOCK_SIZE - (realX < 0),
 				       realY / Components::block::BLOCK_SIZE - (realY < 0)};
-	const auto systemManager = mGame->getSystemManager();
+
+	if (mDestruction.pos != blockPos) {
+		mPressLength = 0;
+	}
+
+	mDestruction.pos = blockPos;
 
 	mPressLength += delta;
 
@@ -104,25 +111,33 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 				break;
 			}
 
-			Shader* shader = systemManager->getShader("block.vert", "block.frag");
-			Eigen::Vector2f cameraOffset = -playerPos + systemManager->getDemensions() / 2;
-
-			shader->activate();
-			shader->set("size"_u, (float)Components::block::BLOCK_SIZE,
-				    (float)Components::block::BLOCK_SIZE);
-			shader->set("texture_diffuse"_u, 0);
-			shader->set("offset"_u, cameraOffset);
-			shader->set("position"_u, block.mPosition);
+			mDestruction.render = true;
 
 			int stage = ((mPressLength * 20) / BREAK_TIMES[block.mType]) * 10;
-
-			mGame->getSystemManager()
-				->getTexture("blocks/destroy_stage_" + std::to_string(stage) + ".png")
-				->activate(0);
-
-			mMesh->draw(shader);
-
+			mDestruction.texture = mGame->getSystemManager()->getTexture("blocks/destroy_stage_" +
+										     std::to_string(stage) + ".png");
 			break;
 		}
 	}
+}
+
+void InputSystem::draw(class Scene* scene) {
+	if (!mDestruction.render) {
+		return;
+	}
+
+	const auto systemManager = mGame->getSystemManager();
+	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
+	const Eigen::Vector2f cameraOffset = -playerPos + systemManager->getDemensions() / 2;
+
+	Shader* shader = systemManager->getShader("block.vert", "block.frag");
+
+	shader->activate();
+	shader->set("size"_u, (float)Components::block::BLOCK_SIZE, (float)Components::block::BLOCK_SIZE);
+	shader->set("texture_diffuse"_u, 0);
+	shader->set("offset"_u, cameraOffset);
+	shader->set("position"_u, mDestruction.pos);
+
+	mDestruction.texture->activate(0);
+	mMesh->draw(shader);
 }

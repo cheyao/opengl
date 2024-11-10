@@ -128,15 +128,13 @@ void SystemManager::update(Scene* scene, const float delta) {
 
 	scene->clearSignals();
 
+	mInputSystem->update(scene, delta);
 	mPhysicsSystem->update(scene, delta); // 12.08%
 
 	mPhysicsSystem->collide(scene); // 33.72%
 
 	mRenderSystem->draw(scene); // 36.51%
-	
-	// Draws the block breaking textures
-	mInputSystem->update(scene, delta);
-
+	mInputSystem->draw(scene);
 	mTextSystem->draw(scene);
 	mUISystem->draw(scene);
 

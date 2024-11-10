@@ -52,6 +52,8 @@ class Scene {
 	}
 
 	void erase(const EntityID entity) noexcept {
+		SDL_assert(entity != 0);
+
 		mComponentManager->erase(entity);
 		mEntityManager->releaseEntity(entity);
 	}

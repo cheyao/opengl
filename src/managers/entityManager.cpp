@@ -1,5 +1,6 @@
 #include "managers/entityManager.hpp"
 
+#include <SDL3/SDL.h>
 #include <algorithm>
 
 EntityManager::EntityManager() : mNext(1) {}
@@ -14,7 +15,9 @@ EntityID EntityManager::getEntity() {
 	return mNext++;
 }
 
-void EntityManager::releaseEntity(EntityID entity) { mReleased.emplace_back(entity); }
+void EntityManager::releaseEntity(EntityID entity) {
+	mReleased.emplace_back(entity);
+}
 
 bool EntityManager::valid(const EntityID entity) const {
 	return entity != 0 && std::find(mReleased.begin(), mReleased.end(), entity) == mReleased.end() &&
