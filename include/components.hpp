@@ -65,6 +65,7 @@ struct misc {
 		CROSSHAIR = 0b100,
 	};
 	std::uint64_t mWhat;
+	void* container;
 
 	constexpr misc(const decltype(mWhat) what) noexcept : mWhat(what) {}
 };

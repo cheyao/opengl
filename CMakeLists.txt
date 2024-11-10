@@ -37,6 +37,8 @@ set(SRC
 src/main.cpp
 src/game.cpp
 
+src/components/inventory.cpp
+
 src/opengl/mesh.cpp
 src/opengl/shader.cpp
 src/opengl/texture.cpp
@@ -63,11 +65,16 @@ src/systems/worldSystem.cpp
 src/scenes/level.cpp
 src/scenes/chunk.cpp
 
+src/screens/screen.cpp
+src/screens/hud.cpp
+
 # Headers
 include/game.hpp
 include/utils.hpp
 include/components.hpp
 include/scene.hpp
+
+include/components/inventory.hpp
 
 include/misc/sparse_set.hpp
 include/misc/sparse_set_view.hpp
@@ -99,6 +106,9 @@ include/systems/worldSystem.hpp
 
 include/scenes/level.hpp
 include/scenes/chunk.hpp
+
+include/screens/screen.hpp
+include/screens/hud.hpp
 
 # External
 src/third_party/stb_image.c

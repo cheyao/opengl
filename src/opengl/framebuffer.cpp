@@ -86,8 +86,10 @@ void Framebuffer::swap() {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+#ifdef DEBUG
 	glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
+#endif
 
 	glDisable(GL_DEPTH_TEST);
 

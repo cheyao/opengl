@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 /*
  * The UI system
  *
@@ -14,8 +16,10 @@ class UISystem {
 	UISystem& operator=(const UISystem&) = delete;
 	~UISystem() = default;
 
+	void update(class Scene* scene, float delta);
 	void draw(class Scene* scene);
 
       private:
 	class Game* mGame;
+	std::vector<class Screen*> mScreenStack;
 };

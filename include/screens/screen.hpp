@@ -2,15 +2,16 @@
 
 class Screen {
       public:
-	Screen() = default;
+	explicit Screen(class Game* game);
 	Screen(Screen&&) = delete;
 	Screen(const Screen&) = delete;
 	Screen& operator=(Screen&&) = delete;
 	Screen& operator=(const Screen&) = delete;
-	~Screen() = default;
+	virtual ~Screen() = default;
 
-	void update();
-	void render();
+	virtual void update(class Scene* scene, float delta);
+	virtual void draw(class Scene* scene);
 
-      private:
+      protected:
+	class Game* mGame;
 };

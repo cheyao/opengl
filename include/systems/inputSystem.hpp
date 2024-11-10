@@ -31,7 +31,6 @@ class InputSystem {
 
 	class Game* mGame;
 
-	// FIXME: When xy changed, reset length
 	float mPressedX;
 	float mPressedY;
 	float mPressLength;

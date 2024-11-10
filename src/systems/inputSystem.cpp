@@ -113,7 +113,7 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 
 			mDestruction.render = true;
 
-			int stage = ((mPressLength * 20) / BREAK_TIMES[block.mType]) * 10;
+			const int stage = ((mPressLength * 20) / BREAK_TIMES[block.mType]) * 10;
 			mDestruction.texture = mGame->getSystemManager()->getTexture("blocks/destroy_stage_" +
 										     std::to_string(stage) + ".png");
 			break;
