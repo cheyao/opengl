@@ -114,8 +114,8 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 			mDestruction.render = true;
 
 			const int stage = ((mPressLength * 20) / BREAK_TIMES[block.mType]) * 10;
-			mDestruction.texture = mGame->getSystemManager()->getTexture("blocks/destroy_stage_" +
-										     std::to_string(stage) + ".png");
+			mDestruction.texture = mGame->getSystemManager()->getTexture(
+				"blocks/destroy_stage_" + std::to_string(stage) + ".png", true);
 			break;
 		}
 	}

@@ -21,9 +21,9 @@ class Texture {
 
 	virtual void activate(unsigned int num) const;
 
-	int getWidth() const { return mWidth * 0.7; };
-	int getHeight() const { return mHeight * 0.7; };
-	Eigen::Vector2f getSize() const { return Eigen::Vector2f(mWidth, mHeight) * 0.7; }
+	int getWidth() const { return mWidth * 7; };
+	int getHeight() const { return mHeight * 7; };
+	Eigen::Vector2f getSize() const { return Eigen::Vector2f(mWidth, mHeight) * 7; }
 
       protected:
 	virtual void load(bool srgb);
