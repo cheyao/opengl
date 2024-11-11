@@ -58,7 +58,7 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 
 	glEnable(GL_BLEND);
 
-	glBlendEquation(GL_FUNC_SUBTRACT);
+	glBlendEquation(GL_FUNC_ADD);
 	// SRC: crack
 	// DST: block
 	glBlendFunc(GL_SRC_COLOR, GL_SRC_COLOR);
