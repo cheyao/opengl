@@ -1,6 +1,7 @@
 #include "scenes/level.hpp"
 
 #include "components.hpp"
+#include "components/inventory.hpp"
 #include "game.hpp"
 #include "managers/entityManager.hpp"
 #include "managers/systemManager.hpp"
@@ -55,6 +56,7 @@ void Level::create() {
 	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
 	mScene->emplace<Components::position>(
 		player, Eigen::Vector2f(0.0f, (Chunk::WATER_LEVEL + 1) * Components::block::BLOCK_SIZE));
+	mScene->emplace<Components::inventory>(player, new Inventory(mGame, 36));
 
 	mLeft = new Chunk(mGame, mScene, -1);
 	mCenter = new Chunk(mGame, mScene, 0);
@@ -77,10 +79,7 @@ void Level::load(const nlohmann::json& data) {
 
 	mScene->emplace<Components::position>(player, mData[PLAYER_KEY]["position"].template get<Eigen::Vector2f>());
 	mScene->emplace<Components::velocity>(player, mData[PLAYER_KEY]["velocity"]);
-
-	const EntityID text = mScene->newEntity();
-	mScene->emplace<Components::text>(text, "controls");
-	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
+	mScene->emplace<Components::inventory>(player, new Inventory(mGame, mData[PLAYER_KEY]["inventory"]));
 
 	auto loadChunk = [this](Chunk*& chunk, const float playerPos) {
 		const auto sign = playerPos < 0;
@@ -112,6 +111,8 @@ nlohmann::json Level::save() {
 
 	mData[PLAYER_KEY]["position"] = mScene->get<Components::position>(playerID).mPosition;
 	mData[PLAYER_KEY]["velocity"] = mScene->get<Components::velocity>(playerID).mVelocity;
+	mData[PLAYER_KEY]["inventory"] = mScene->get<Components::inventory>(playerID).mInventory->save();
+	delete mScene->get<Components::inventory>(playerID).mInventory;
 
 	auto save = [this](Chunk* chunk) {
 		this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())] =
@@ -122,6 +123,8 @@ nlohmann::json Level::save() {
 	save(mLeft);
 	save(mCenter);
 	save(mRight);
+
+	mScene->erase(playerID);
 
 	return mData;
 }

@@ -92,6 +92,7 @@ void Framebuffer::swap() {
 #endif
 
 	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 
 	Shader* mShader = mOwner->getShader("framebuffer.vert", "framebuffer.frag");
 	mShader->activate();

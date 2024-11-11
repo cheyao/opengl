@@ -244,7 +244,6 @@ void RenderSystem::setDemensions(int width, int height) {
 void RenderSystem::draw(Scene* scene) {
 	glClearColor(0.470588235294f, 0.65490190784f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
 	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;

@@ -10,6 +10,7 @@
 // Android needs the constructers to be able to use emplace
 class Texture;
 class Shader;
+class Inventory;
 
 namespace Components {
 struct position {
@@ -65,7 +66,6 @@ struct misc {
 		CROSSHAIR = 0b100,
 	};
 	std::uint64_t mWhat;
-	void* container;
 
 	constexpr misc(const decltype(mWhat) what) noexcept : mWhat(what) {}
 };
@@ -83,5 +83,11 @@ struct block {
 		: mType(type), mPosition(position) {}
 
 	constexpr const static inline auto BLOCK_SIZE = 112;
+};
+
+struct inventory {
+	class Inventory* mInventory;
+
+	constexpr inventory(class Inventory* inv) noexcept : mInventory(inv) {}
 };
 } // namespace Components
