@@ -24,7 +24,7 @@ class EntityManager {
 
 	[[nodiscard]] EntityID getEntity();
 	void releaseEntity(EntityID entity);
-	[[nodiscard]] size_t getEntityCount() const { return mNext - mReleased.size(); }
+	[[nodiscard]] std::size_t getEntityCount() const { return mNext - mReleased.size(); }
 	[[nodiscard]] bool valid(const EntityID entity) const;
 
       private:

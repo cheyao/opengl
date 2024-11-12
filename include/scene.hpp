@@ -5,6 +5,7 @@
 #include "misc/sparse_set.hpp"
 #include "misc/sparse_set_view.hpp"
 
+#include <SDL3/SDL_assert.h>
 #include <string>
 #include <unordered_map>
 #include <vector>

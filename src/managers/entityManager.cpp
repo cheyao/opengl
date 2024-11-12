@@ -15,7 +15,7 @@ EntityID EntityManager::getEntity() {
 	return mNext++;
 }
 
-void EntityManager::releaseEntity(EntityID entity) {
+void EntityManager::releaseEntity(const EntityID entity) {
 	mReleased.emplace_back(entity);
 }
 

@@ -16,12 +16,7 @@
 #include <vector>
 
 // TODO: Backup
-Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(position) {
-	mBlocks.reserve(CHUNK_WIDTH);
-	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
-		mBlocks.emplace_back(std::vector<EntityID>());
-	}
-
+Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(position), mBlocks(CHUNK_WIDTH, std::vector<EntityID>()) {
 	// NOTE: The order is important!!!
 	// The save saves from the array in a lifo order
 	// So the top block must go in last!

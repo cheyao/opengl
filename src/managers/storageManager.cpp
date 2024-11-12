@@ -150,11 +150,11 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 	}
 
 	for (const auto& world : worlds["worlds"]) {
-		SDL_Log("Found world %s", world.get<std::string>().data());
-		SDL_assert(world.get<std::string>() != "worlds");
+		SDL_Log("Found world %s", world.template get<std::string>().data());
+		SDL_assert(world.template get<std::string>() != "worlds");
 	}
 
-	loadWorld(storage, worlds["worlds"][0].get<std::string>());
+	loadWorld(storage, worlds["worlds"][0].template get<std::string>());
 }
 
 void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& world) {
@@ -233,7 +233,7 @@ void StorageManager::saveState(SDL_Storage* storage) {
 	worlds["version"] = LATEST_WORLD_VERSION;
 
 	if (worlds.contains("worlds")) {
-		const auto& worldList = worlds["worlds"].get<std::vector<std::string_view>>();
+		const auto& worldList = worlds["worlds"].template get<std::vector<std::string_view>>();
 
 		if (std::find(worldList.begin(), worldList.end(), worldName) == worldList.end()) {
 			worlds["worlds"] += worldName;
