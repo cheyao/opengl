@@ -78,9 +78,10 @@ struct block {
 		STONE,
 	} mType;
 	Eigen::Vector2i mPosition;
+	bool mBreak;
 
 	block(const decltype(mType) type, const decltype(mPosition) position) noexcept
-		: mType(type), mPosition(position) {}
+		: mType(type), mPosition(position), mBreak(false) {}
 
 	constexpr const static inline auto BLOCK_SIZE = 112;
 };

@@ -255,7 +255,11 @@ void RenderSystem::draw(Scene* scene) {
 	blockShader->set("texture_diffuse"_u, 0);
 	Eigen::Vector2f cameraOffset = -playerPos + Eigen::Vector2f(mWidth, mHeight) / 2;
 	blockShader->set("offset"_u, cameraOffset);
-	for (const auto& [_, texture, block] : scene->view<Components::texture, Components::block>().each()) {
+	for (const auto& [entity, texture, block] : scene->view<Components::texture, Components::block>().each()) {
+		if (!block.mBreak) {
+			continue;
+		}
+
 		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
 
 		if (!texture.mShader) {
@@ -270,6 +274,8 @@ void RenderSystem::draw(Scene* scene) {
 		texture.mTexture->activate(0);
 
 		mMesh->draw(shader);
+
+		scene->get<Components::block>(entity).mBreak = false;
 	}
 
 	// Draw other textures

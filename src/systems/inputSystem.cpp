@@ -101,7 +101,7 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 		return;
 	}
 
-	for (const auto [entity, block, texture] : scene->view<Components::block, Components::texture>().each()) {
+	for (const auto& [entity, block, texture] : scene->view<Components::block, Components::texture>().each()) {
 		if (block.mPosition == blockPos) {
 			if ((mPressLength * 20) >= BREAK_TIMES[block.mType]) {
 				scene->erase(entity);

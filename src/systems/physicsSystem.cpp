@@ -3,7 +3,7 @@
 #include "components.hpp"
 #include "game.hpp"
 #include "managers/entityManager.hpp"
-#include "misc/sparse_set_view.hpp"
+#include "managers/systemManager.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
@@ -143,19 +143,16 @@ void PhysicsSystem::collide(Scene* scene) {
 #endif
 }
 
-bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID entity, const EntityID block) const {
-	const Eigen::Vector2f minA =
-		scene->get<Components::position>(entity).mPosition + scene->get<Components::collision>(entity).mOffset;
-	const Eigen::Vector2f maxA = minA + scene->get<Components::collision>(entity).mSize;
+bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID entityID, const EntityID blockID) const {
+	using namespace Components;
 
-	const auto& blockCollision = scene->get<Components::collision>(block);
-	const auto& blockTexture = scene->get<Components::texture>(block).mTexture;
-	const auto& blockPosition = scene->get<Components::block>(block).mPosition;
+	const Eigen::Vector2f minA = scene->get<position>(entityID).mPosition + scene->get<collision>(entityID).mOffset;
+	const Eigen::Vector2f maxA = minA + scene->get<collision>(entityID).mSize;
 
-	const Eigen::Vector2f minB =
-		Eigen::Vector2f(static_cast<float>(blockPosition.x()) * blockTexture->getWidth(),
-				static_cast<float>(blockPosition.y()) * blockTexture->getHeight()) +
-		blockCollision.mOffset;
+	const auto& blockCollision = scene->get<collision>(blockID);
+	Eigen::Vector2f minB = scene->get<block>(blockID).mPosition.template cast<float>() * block::BLOCK_SIZE;
+	minB += blockCollision.mOffset;
+
 	const Eigen::Vector2f maxB = minB + blockCollision.mSize;
 
 	// If one of these four are true, it means the cubes are not intersecting
@@ -168,20 +165,23 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID entity, const E
 	return !notIntercecting;
 }
 
-bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID entity, const EntityID block) const {
+bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID entityID, const EntityID blockID) const {
+	using namespace Components;
+
+	Eigen::Vector2f minBlock = scene->get<block>(blockID).mPosition.template cast<float>() * block::BLOCK_SIZE;
+	const Eigen::Vector2f minEntity = scene->get<position>(entityID).mPosition + scene->get<collision>(entityID).mOffset;
+
+	const auto screenSize = (mGame->getSystemManager()->getDemensions().maxCoeff() + 200.0f) / 2;
+	if ((minBlock - minEntity).squaredNorm() < screenSize * screenSize) {
+		scene->get<block>(blockID).mBreak = true;
+	}
+
 	// They are definetly not touching the ground when having a upwards velocity
-	const Eigen::Vector2f minEntity =
-		scene->get<Components::position>(entity).mPosition + scene->get<Components::collision>(entity).mOffset;
-	const Eigen::Vector2f maxEntity = minEntity + scene->get<Components::collision>(entity).mSize;
+	const Eigen::Vector2f maxEntity = minEntity + scene->get<collision>(entityID).mSize;
 
-	const auto& blockCollision = scene->get<Components::collision>(block);
-	const auto& blockTexture = scene->get<Components::texture>(block);
-	const auto& blockPosition = scene->get<Components::block>(block).mPosition;
+	const auto& blockCollision = scene->get<collision>(blockID);
+	minBlock += blockCollision.mOffset;
 
-	const Eigen::Vector2f minBlock =
-		Eigen::Vector2f(static_cast<float>(blockPosition.x()) * blockTexture.mTexture->getWidth(),
-				static_cast<float>(blockPosition.y()) * blockTexture.mTexture->getHeight()) +
-		blockCollision.mOffset;
 	const Eigen::Vector2f maxBlock = minBlock + blockCollision.mSize;
 
 	// on a x level
