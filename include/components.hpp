@@ -79,6 +79,7 @@ struct block {
 	} mType;
 	Eigen::Vector2i mPosition;
 	bool mBreak;
+	bool mClose;
 
 	block(const decltype(mType) type, const decltype(mPosition) position) noexcept
 		: mType(type), mPosition(position), mBreak(false) {}

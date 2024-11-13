@@ -44,6 +44,8 @@ PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
 void PhysicsSystem::update(Scene* scene, const float delta) {
 	constexpr const static float G = 1200.0f;
 	constexpr const static float jumpForce = 600.0f;
+	const auto screenSize = (mGame->getSystemManager()->getDemensions() / 1.5).squaredNorm();
+	const auto close = Eigen::Vector2f(Components::block::BLOCK_SIZE * 1.5, Components::block::BLOCK_SIZE * 1.5).squaredNorm();
 
 	/*
 	 * FIXME: Currently this is a mock up gravity impl
@@ -54,12 +56,30 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
 
+		for (const auto& block : blocks) {
+			const Eigen::Vector2f minBlock =
+				scene->get<Components::block>(block).mPosition.template cast<float>() *
+				Components::block::BLOCK_SIZE;
+			const Eigen::Vector2f minEntity = scene->get<Components::position>(entity).mPosition +
+							  scene->get<Components::collision>(entity).mOffset;
+
+			if ((minBlock - minEntity).squaredNorm() < screenSize) {
+				scene->get<Components::block>(block).mBreak = true;
+			}
+
+			if ((minBlock - minEntity).squaredNorm() < close) {
+				scene->get<Components::block>(block).mClose = true;
+			}
+		}
+
 		if (scene->get<Components::velocity>(entity).mVelocity.y() < 1.0f) {
 			for (const auto& block : blocks) {
+				if (!scene->get<Components::block>(block).mClose) {
+					continue;
+				}
+
 				if (collidingBellow(scene, entity, block)) {
 					onGround = true;
-
-					break;
 				}
 			}
 		}
@@ -94,6 +114,10 @@ void PhysicsSystem::collide(Scene* scene) {
 	// Multithreading this will result in worse performance :(
 	for (const auto& entity : entities) {
 		for (const auto& block : blocks) {
+			if (!scene->get<Components::block>(block).mClose) {
+				continue;
+			}
+
 			if (AABBxAABB(scene, entity, block)) {
 				pushBack(scene, entity, block);
 			}
@@ -168,19 +192,16 @@ bool PhysicsSystem::AABBxAABB(const Scene* scene, const EntityID entityID, const
 bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID entityID, const EntityID blockID) const {
 	using namespace Components;
 
-	Eigen::Vector2f minBlock = scene->get<block>(blockID).mPosition.template cast<float>() * block::BLOCK_SIZE;
-	const Eigen::Vector2f minEntity = scene->get<position>(entityID).mPosition + scene->get<collision>(entityID).mOffset;
-
-	const auto screenSize = (mGame->getSystemManager()->getDemensions().maxCoeff() + 200.0f) / 2;
-	if ((minBlock - minEntity).squaredNorm() < screenSize * screenSize) {
-		scene->get<block>(blockID).mBreak = true;
-	}
+	const Eigen::Vector2f minEntity =
+		scene->get<position>(entityID).mPosition + scene->get<collision>(entityID).mOffset;
 
 	// They are definetly not touching the ground when having a upwards velocity
 	const Eigen::Vector2f maxEntity = minEntity + scene->get<collision>(entityID).mSize;
 
 	const auto& blockCollision = scene->get<collision>(blockID);
-	minBlock += blockCollision.mOffset;
+	const Eigen::Vector2f minBlock =
+		scene->get<block>(blockID).mPosition.template cast<float>() * block::BLOCK_SIZE +
+		blockCollision.mOffset;
 
 	const Eigen::Vector2f maxBlock = minBlock + blockCollision.mSize;
 
