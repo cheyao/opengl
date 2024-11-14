@@ -19,6 +19,7 @@ class PhysicsSystem {
 	bool AABBxAABB(const class Scene* scene, const EntityID entity, const EntityID block) const;
 	bool collidingBellow(const class Scene* scene, const EntityID entity, const EntityID block) const;
 	void pushBack(class Scene* scene, const EntityID entity, EntityID block);
+	void markDirty(class Scene* scene);
 
 	class Game* mGame;
 };

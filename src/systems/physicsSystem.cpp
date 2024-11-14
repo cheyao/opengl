@@ -44,8 +44,8 @@ PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
 void PhysicsSystem::update(Scene* scene, const float delta) {
 	constexpr const static float G = 1200.0f;
 	constexpr const static float jumpForce = 600.0f;
-	const auto screenSize = (mGame->getSystemManager()->getDemensions() / 1.5).squaredNorm();
-	const auto close = Eigen::Vector2f(Components::block::BLOCK_SIZE * 1.5, Components::block::BLOCK_SIZE * 1.5).squaredNorm();
+
+	markDirty(scene);
 
 	/*
 	 * FIXME: Currently this is a mock up gravity impl
@@ -55,22 +55,6 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 	const auto blocks = scene->view<Components::collision, Components::block>();
 	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
-
-		for (const auto& block : blocks) {
-			const Eigen::Vector2f minBlock =
-				scene->get<Components::block>(block).mPosition.template cast<float>() *
-				Components::block::BLOCK_SIZE;
-			const Eigen::Vector2f minEntity = scene->get<Components::position>(entity).mPosition +
-							  scene->get<Components::collision>(entity).mOffset;
-
-			if ((minBlock - minEntity).squaredNorm() < screenSize) {
-				scene->get<Components::block>(block).mBreak = true;
-			}
-
-			if ((minBlock - minEntity).squaredNorm() < close) {
-				scene->get<Components::block>(block).mClose = true;
-			}
-		}
 
 		if (scene->get<Components::velocity>(entity).mVelocity.y() < 1.0f) {
 			for (const auto& block : blocks) {
@@ -99,6 +83,28 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 
 		scene->get<Components::position>(entity).mPosition += velocity * delta;
 		velocity.x() *= 0.7;
+	}
+}
+
+void PhysicsSystem::markDirty(Scene* scene) {
+	const float screenSize = (mGame->getSystemManager()->getDemensions() / 1.5).squaredNorm();
+	const float close =
+		Eigen::Vector2f(Components::block::BLOCK_SIZE * 1.5, Components::block::BLOCK_SIZE * 1.5).squaredNorm();
+	const Eigen::Vector2f playerPos = (scene->get<Components::position>(mGame->getPlayerID()).mPosition +
+					   scene->get<Components::collision>(mGame->getPlayerID()).mOffset);
+
+	for (const auto block : scene->view<Components::collision, Components::block>()) {
+		const float dist = ((scene->get<Components::block>(block).mPosition.template cast<float>() *
+				     Components::block::BLOCK_SIZE) - playerPos)
+					   .squaredNorm();
+
+		if (dist < screenSize) {
+			scene->get<Components::block>(block).mBreak = true;
+		}
+
+		if (dist < close) {
+			scene->get<Components::block>(block).mClose = true;
+		}
 	}
 }
 

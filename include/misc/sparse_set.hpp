@@ -139,6 +139,7 @@ class sparse_set_interface {
 	virtual ~sparse_set_interface() = 0;
 	[[nodiscard]] virtual bool contains(EntityID entity) const noexcept = 0;
 	virtual void erase(const EntityID entity) noexcept = 0;
+	virtual void clear() = 0;
 	[[nodiscard]] virtual std::size_t size() const noexcept = 0;
 	[[nodiscard]] virtual EntityID* data() noexcept = 0;
 
@@ -232,6 +233,12 @@ template <typename Component> class sparse_set : public sparse_set_interface {
 
 	[[nodiscard]] EntityID* data() noexcept override { return mPackedContainer.data(); }
 
+	constexpr void clear() override {
+		mPackedContainer.clear();
+		mSparseContainer.clear();
+		mComponents.clear();
+	}
+
 	void erase(const EntityID entity) noexcept override {
 		// https://gist.github.com/dakom/82551fff5d2b843cbe1601bbaff2acbf
 		mSparseContainer[mPackedContainer.back()] = mSparseContainer[entity];
@@ -251,8 +258,6 @@ template <typename Component> class sparse_set : public sparse_set_interface {
 	std::vector<EntityID> mPackedContainer;
 	// The real values
 	std::vector<Component> mComponents;
-	// The component storage
-	std::size_t mHead;
 };
 
 } // namespace utils
