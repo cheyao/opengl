@@ -25,15 +25,12 @@ class Game {
 	~Game();
 
 	static Game* getInstance() {
-		static Game* instance = new Game();
-		return instance;
+		static Game instance;
+		return &instance;
 	}
 
 	[[nodiscard]] SDL_AppResult iterate();
 	[[nodiscard]] SDL_AppResult event(const union SDL_Event& event);
-
-	void setPause(bool val) { mPaused = val; }
-	[[nodiscard]] bool isPaused() const { return mPaused; }
 
 	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager; }
 	[[nodiscard]] class SystemManager* getSystemManager() const { return mSystemManager; }
@@ -57,7 +54,6 @@ class Game {
 
 	std::uint64_t mTicks;
 	std::string mBasePath;
-	bool mPaused;
 	EntityID mPlayer;
 
 	class Level* mCurrentLevel;

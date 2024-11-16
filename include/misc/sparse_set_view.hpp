@@ -5,8 +5,8 @@
 
 #include <SDL3/SDL.h>
 #include <algorithm>
-#include <concepts>
 #include <cstddef>
+#include <iterator>
 #include <memory>
 #include <span>
 #include <tuple>
@@ -75,7 +75,7 @@ concept is_emplace_constructible = requires(std::allocator<T> m, T* p, T args) {
 
 template <typename... ComponentTypes>
 	requires((std::is_move_assignable<ComponentTypes>::value && ...) &&
-		 (is_emplace_constructible<ComponentTypes> && ...))
+		 (utils::is_emplace_constructible<ComponentTypes> && ...))
 class sparse_set_view {
       public:
 	using iterator = std::vector<EntityID>::iterator;
@@ -87,11 +87,19 @@ class sparse_set_view {
 		// This first part makes a array of all the sizes of the that we loop through
 		const std::array<utils::sparse_set_interface*, sizeof...(ComponentTypes)> sets = {
 			mComponentManager->getPool<ComponentTypes>()...};
-		const auto& smallest = **std::ranges::min_element(
-			sets, [](const auto& a, const auto& b) { return a->size() < b->size(); });
 
-		for (const auto id : std::span<const EntityID>(smallest)) {
-			// This creates a vector of bools for every pool which represent if the pool contains the entity
+		std::size_t smallest = 0;
+		std::size_t smallest_size = sets[0]->size();
+		for (std::size_t i = 0; i < sizeof...(ComponentTypes); ++i) {
+			if (sets[i]->size() < smallest_size) {
+				smallest = i;
+				smallest_size = sets[i]->size();
+			}
+		}
+
+		mEntities.reserve(smallest_size);
+
+		for (const auto id : std::span<EntityID>(*sets[smallest])) {
 			if ((... && (mComponentManager->getPool<ComponentTypes>()->contains(id)))) {
 				mEntities.emplace_back(id);
 			}

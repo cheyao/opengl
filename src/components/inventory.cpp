@@ -1,6 +1,9 @@
 #include "components/inventory.hpp"
 
+#include "game.hpp"
+#include "managers/systemManager.hpp"
 #include "screens/screen.hpp"
+#include "systems/UISystem.hpp"
 #include "third_party/json.hpp"
 
 #include <cstddef>
@@ -17,3 +20,8 @@ nlohmann::json Inventory::save() {
 
 	return contents;
 }
+
+void Inventory::update(class Scene* scene, float delta) {(void)scene;(void)delta;}
+void Inventory::draw(class Scene* scene) {(void)scene;}
+
+void Inventory::close() { mGame->getSystemManager()->getUISystem()->pop(); }

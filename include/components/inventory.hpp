@@ -20,7 +20,12 @@ class Inventory : public Screen {
 	void load(const nlohmann::json& contents);
 	nlohmann::json save();
 
+	void update(class Scene* scene, float delta) override;
+	void draw(class Scene* scene) override;
+
       private:
+	void close();
+
 	constexpr const static inline char* const SIZE_KEY = "size";
 	constexpr const static inline char* const CONTENTS_KEY = "contents";
 

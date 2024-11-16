@@ -25,6 +25,8 @@ class SystemManager {
 	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
 					      const std::string& geom = "");
 
+	[[nodiscard]] class UISystem* getUISystem() const { return mUISystem; }
+
       private:
 	void printDebug(class Scene* scene);
 
@@ -35,5 +37,5 @@ class SystemManager {
 	std::unique_ptr<class RenderSystem> mRenderSystem;
 	std::unique_ptr<class TextSystem> mTextSystem;
 	std::unique_ptr<class InputSystem> mInputSystem;
-	std::unique_ptr<class UISystem> mUISystem;
+	class UISystem* mUISystem;
 };

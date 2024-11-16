@@ -27,15 +27,6 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 
 			mKeys[event.key.scancode] = true;
 
-			// Debugging logs for bluetooth keyboard
-			// Left: 80
-			// Right: 79
-			// Up: 82
-			// Up, right, left, no right: 74!? ()
-			// Up, left, right, no lect: 77??? (End)
-			// Macos: Normal....
-			// Bruh my bluetooth keyboard is bad :(
-
 			break;
 		}
 
@@ -94,13 +85,12 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 SDL_AppResult EventManager::manageKeyboardEvent(const SDL_Event& event) {
 	switch (event.key.key) {
 		case SDLK_F3: {
-			mGame->setPause(!mGame->isPaused());
-
 			break;
 		}
 
-		default:
+		default: {
 			break;
+		}
 	}
 
 	return SDL_APP_CONTINUE;

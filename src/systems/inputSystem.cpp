@@ -8,6 +8,7 @@
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
+#include "systems/UISystem.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
 
@@ -42,6 +43,10 @@ InputSystem::InputSystem(Game* game) : mGame(game), mPressedX(0), mPressedY(0), 
 }
 
 void InputSystem::update(Scene* scene, const float delta) {
+	if (!mGame->getSystemManager()->getUISystem()->empty()) {
+		return;
+	}
+
 	const auto keystate = mGame->getKeystate();
 
 	for (const auto& [entity, input] : scene->view<Components::input>().each()) {

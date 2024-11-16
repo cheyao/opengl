@@ -91,10 +91,6 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 		ImGui::EndFrame();
 #endif
 
-#ifdef DEBUG
-		static_cast<Game*>(appstate)->setPause(true);
-#endif
-
 		return SDL_APP_CONTINUE;
 	} catch (const std::exception& error) {
 		SDL_Log("Main.cpp: Uncaught exception: %s", error.what());
@@ -102,10 +98,6 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 
 #ifdef IMGUI
 		ImGui::EndFrame();
-#endif
-
-#ifdef DEBUG
-		static_cast<Game*>(appstate)->setPause(true);
 #endif
 
 		return SDL_APP_CONTINUE;
@@ -120,11 +112,7 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 	}
 }
 
-void SDL_AppQuit(void* appstate, const SDL_AppResult result) {
-	if (appstate != nullptr) {
-		delete static_cast<Game*>(appstate);
-	}
-
+void SDL_AppQuit(void*, const SDL_AppResult result) {
 	SDL_Quit();
 
 	if (result == SDL_APP_SUCCESS) {

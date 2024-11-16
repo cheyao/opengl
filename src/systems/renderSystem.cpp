@@ -246,15 +246,17 @@ void RenderSystem::draw(Scene* scene) {
 	glClear(GL_COLOR_BUFFER_BIT);
 	glDisable(GL_BLEND);
 
-	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
+	const Eigen::Vector2f cameraOffset = -scene->get<Components::position>(mGame->getPlayerID()).mPosition +
+					     Eigen::Vector2f(mWidth, mHeight) / 2;
 
 	// Draw blocks
 	Shader* blockShader = this->getShader("block.vert", "block.frag");
 	blockShader->activate();
 	blockShader->set("size"_u, (float)Components::block::BLOCK_SIZE, (float)Components::block::BLOCK_SIZE);
 	blockShader->set("texture_diffuse"_u, 0);
-	Eigen::Vector2f cameraOffset = -playerPos + Eigen::Vector2f(mWidth, mHeight) / 2;
 	blockShader->set("offset"_u, cameraOffset);
+
+	// PERF: Use some lists to send the data
 	for (const auto& [entity, texture, block] : scene->view<Components::texture, Components::block>().each()) {
 		if (!block.mBreak) {
 			continue;
@@ -284,7 +286,7 @@ void RenderSystem::draw(Scene* scene) {
 	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
 		Shader* shader = texture.mShader ? texture.mShader : blockShader;
 
-		const Eigen::Vector2f offset = position.mPosition - playerPos + Eigen::Vector2f(mWidth, mHeight) / 2;
+		const Eigen::Vector2f offset = position.mPosition + cameraOffset;
 		shader->set("offset"_u, offset);
 		shader->set("size"_u, texture.mTexture->getSize());
 
@@ -320,8 +322,7 @@ void RenderSystem::draw(Scene* scene) {
 
 		for (const auto& [_, collision, position] :
 		     scene->view<Components::collision, Components::position>().each()) {
-			Eigen::Vector2f offset = position.mPosition + collision.mOffset - playerPos +
-						 Eigen::Vector2f(mWidth, mHeight) / 2;
+			const Eigen::Vector2f offset = position.mPosition + collision.mOffset + cameraOffset;
 
 			editorShader->set("offset"_u, offset);
 			editorShader->set("size"_u, collision.mSize);

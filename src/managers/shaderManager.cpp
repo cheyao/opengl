@@ -116,6 +116,7 @@ void ShaderManager::reload() {
 			Shader* newTexture = new Shader(vert, frag, geom);
 
 			delete shader;
+			shader = nullptr;
 
 			shader = newTexture;
 		} catch (const std::runtime_error& error) {
@@ -126,6 +127,7 @@ void ShaderManager::reload() {
 #else
 		try {
 			delete shader;
+			shader = nullptr;
 
 			Shader* newTexture = new Shader(vert, frag, geom);
 
@@ -157,7 +159,7 @@ void ShaderManager::debugGui() {
 		const std::size_t pos2 = names.find(':', pos + 1);
 		const std::string vert = names.substr(0, pos);
 		const std::string frag = names.substr(pos + 1, pos2 - pos - 1);
-		std::string geom = names.substr(pos2 + 1, names.size() - pos);
+		const std::string geom = names.substr(pos2 + 1, names.size() - pos);
 
 		shaders.emplace_back(vert);
 		shaders.emplace_back(frag);

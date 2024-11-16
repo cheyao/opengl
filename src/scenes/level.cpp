@@ -8,6 +8,7 @@
 #include "opengl/texture.hpp"
 #include "scene.hpp"
 #include "scenes/chunk.hpp"
+#include "systems/UISystem.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/json.hpp"
 
@@ -204,7 +205,7 @@ void Level::createCommon() {
 	mScene->emplace<Components::collision>(player, Eigen::Vector2f(0.0f, 0.0f), playerTexture->getSize());
 	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
 	mScene->emplace<Components::input>(
-		player, [](class Scene* scene, const EntityID entity, const auto scancodes, const float) {
+		player, [this](class Scene* scene, const EntityID entity, const auto scancodes, const float) {
 			Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;
 
 			if (scancodes[SDL_SCANCODE_D] && vel.x() < 220) {
@@ -213,6 +214,12 @@ void Level::createCommon() {
 
 			if (scancodes[SDL_SCANCODE_A] && vel.x() > -220) {
 				vel.x() -= 70;
+			}
+
+			// Open inv
+			if (scancodes[SDL_SCANCODE_E]) {
+				this->mGame->getSystemManager()->getUISystem()->addScreen(
+					scene->get<Components::inventory>(entity).mInventory);
 			}
 		});
 

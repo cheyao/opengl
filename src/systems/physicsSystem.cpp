@@ -6,6 +6,7 @@
 #include "managers/systemManager.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
+#include "systems/UISystem.hpp"
 #include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
@@ -18,8 +19,6 @@
 
 #include <format>
 #endif
-
-// FIXME: Big bottleneck
 
 // The physicsSystem is in charge of the collision and mouvements
 PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
@@ -46,6 +45,10 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 	constexpr const static float jumpForce = 600.0f;
 
 	markDirty(scene);
+
+	if (!mGame->getSystemManager()->getUISystem()->empty()) {
+		return;
+	}
 
 	/*
 	 * FIXME: Currently this is a mock up gravity impl
@@ -95,7 +98,8 @@ void PhysicsSystem::markDirty(Scene* scene) {
 
 	for (const auto block : scene->view<Components::collision, Components::block>()) {
 		const float dist = ((scene->get<Components::block>(block).mPosition.template cast<float>() *
-				     Components::block::BLOCK_SIZE) - playerPos)
+				     Components::block::BLOCK_SIZE) -
+				    playerPos)
 					   .squaredNorm();
 
 		if (dist < screenSize) {

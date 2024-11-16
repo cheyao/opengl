@@ -104,9 +104,9 @@ template <EigenTypeMatExpr MatT> std::ostream& operator<<(std::ostream& os, cons
 SystemManager::SystemManager(Game* game)
 	: mGame(game), mPhysicsSystem(std::make_unique<PhysicsSystem>(mGame)),
 	  mRenderSystem(std::make_unique<RenderSystem>(mGame)), mTextSystem(std::make_unique<TextSystem>(mGame)),
-	  mInputSystem(std::make_unique<InputSystem>(mGame)), mUISystem(std::make_unique<UISystem>(mGame)) {}
+	  mInputSystem(std::make_unique<InputSystem>(mGame)), mUISystem(new UISystem(mGame)) {}
 
-SystemManager::~SystemManager() {}
+SystemManager::~SystemManager() { delete mUISystem; }
 
 void SystemManager::setDemensions(const int width, const int height) { mRenderSystem->setDemensions(width, height); }
 

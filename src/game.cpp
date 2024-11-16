@@ -25,7 +25,7 @@
 
 Game::Game()
 	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mStorageManager(nullptr), mTicks(0),
-	  mBasePath(""), mPaused(false), mCurrentLevel(nullptr) {
+	  mBasePath(""), mCurrentLevel(nullptr) {
 	const auto begin = std::chrono::high_resolution_clock::now();
 
 	const char* basepath = SDL_GetBasePath();

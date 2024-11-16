@@ -19,6 +19,11 @@ class UISystem {
 	void update(class Scene* scene, float delta);
 	void draw(class Scene* scene);
 
+	void addScreen(class Screen* screen) { mScreenStack.emplace_back(screen); }
+	void pop() { mScreenStack.pop_back(); }
+
+	bool empty() const { return mScreenStack.empty(); }
+
       private:
 	class Game* mGame;
 	std::vector<class Screen*> mScreenStack;
