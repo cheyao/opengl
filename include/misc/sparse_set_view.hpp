@@ -1,12 +1,13 @@
 #pragma once
 
-#include "imgui.h"
 #include "managers/componentManager.hpp"
 #include "managers/entityManager.hpp"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
+#include <concepts>
 #include <cstddef>
+#include <memory>
 #include <span>
 #include <tuple>
 #include <type_traits>
@@ -67,24 +68,29 @@ template <typename... ComponentTypes>
 	return !(lhs == rhs);
 }
 
-template <typename... ComponentTypes> class sparse_set_view {
+template <typename T>
+concept is_emplace_constructible = requires(std::allocator<T> m, T* p, T args) {
+	std::allocator_traits<std::allocator<T>>::construct(m, p, args);
+};
+
+template <typename... ComponentTypes>
+	requires((std::is_move_assignable<ComponentTypes>::value && ...) &&
+		 (is_emplace_constructible<ComponentTypes> && ...))
+class sparse_set_view {
       public:
 	using iterator = std::vector<EntityID>::iterator;
 	using const_iterator = std::vector<EntityID>::const_iterator;
 	using tuple_iterator = sparse_set_view_tuple_iterator<ComponentTypes...>;
 	using iterable = iterable_adaptor<sparse_set_view_tuple_iterator<ComponentTypes...>>;
 
-	// Please don't touch this, took a long time to figure out
 	sparse_set_view(ComponentManager* componentManager) : mComponentManager(componentManager) {
-		SDL_COMPILE_TIME_ASSERT(sizeof...(ComponentTypes) != 0, "No empty views!");
-
 		// This first part makes a array of all the sizes of the that we loop through
 		const std::array<utils::sparse_set_interface*, sizeof...(ComponentTypes)> sets = {
 			mComponentManager->getPool<ComponentTypes>()...};
 		const auto& smallest = **std::ranges::min_element(
 			sets, [](const auto& a, const auto& b) { return a->size() < b->size(); });
 
-		for (const auto& id : std::span<const EntityID>(smallest)) {
+		for (const auto id : std::span<const EntityID>(smallest)) {
 			// This creates a vector of bools for every pool which represent if the pool contains the entity
 			if ((... && (mComponentManager->getPool<ComponentTypes>()->contains(id)))) {
 				mEntities.emplace_back(id);
@@ -94,6 +100,7 @@ template <typename... ComponentTypes> class sparse_set_view {
 		// mEntities (doesn't count in addition and deletion)
 	}
 
+	// Copy
 	sparse_set_view(const sparse_set_view& other) noexcept
 		: mComponentManager(other.mComponentManager), mEntities(other.mEntities) {}
 	sparse_set_view& operator=(const sparse_set_view& other) noexcept {
@@ -101,6 +108,7 @@ template <typename... ComponentTypes> class sparse_set_view {
 		mEntities = other.mEntities;
 	}
 
+	// Move
 	sparse_set_view(sparse_set_view&& other) noexcept
 		: mComponentManager(other.mComponentManager), mEntities(std::move(other.mEntities)) {}
 	sparse_set_view& operator=(sparse_set_view&& other) noexcept {
