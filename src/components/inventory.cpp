@@ -21,7 +21,16 @@ nlohmann::json Inventory::save() {
 	return contents;
 }
 
-void Inventory::update(class Scene* scene, float delta) {(void)scene;(void)delta;}
-void Inventory::draw(class Scene* scene) {(void)scene;}
+void Inventory::update(class Scene* scene, float delta) {
+	// Handle mouse
+	(void)scene;
+	(void)delta;
+}
+
+void Inventory::draw(class Scene* scene) { 
+	// Draw the inventory
+
+	(void)scene; 
+}
 
 void Inventory::close() { mGame->getSystemManager()->getUISystem()->pop(); }

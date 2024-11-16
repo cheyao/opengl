@@ -9,16 +9,13 @@ layout(std140) uniform Matrices {
 	mat4 proj;
 	mat4 view;
 };
-// uniform mat4 model;
 uniform vec2 offset;
 uniform vec2 size;
 
 uniform ivec2 position;
 
 void main() {
-	vec2 pos = vec2(aPos.x * size.x, aPos.y * size.y) + offset;
-	pos.x += float(position.x) * size.x;
-	pos.y += float(position.y) * size.y;
+	vec2 pos = (aPos + position) * size + offset;
 	gl_Position = proj * vec4(pos, 0.0f, 1.0f);
 
 	vTexPos = aTexPos;
