@@ -9,8 +9,4 @@ uniform sampler2D texture_diffuse;
 
 void main() {
 	color = texture(texture_diffuse, vTexPos);
-
-	if (color.a < 0.1) {
-		discard;
-	}
 } 

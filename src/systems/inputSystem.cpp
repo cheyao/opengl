@@ -59,11 +59,10 @@ void InputSystem::update(Scene* scene, const float delta) {
 }
 
 void InputSystem::updateMouse(Scene* scene, const float delta) {
-	static std::unordered_map<Components::block::BlockType, std::uint64_t> BREAK_TIMES = {
-		{Components::block::BlockType::AIR, 0},
-		{Components::block::BlockType::DIRT, 20},
-		{Components::block::BlockType::GRASS_BLOCK, 20},
-		{Components::block::BlockType::STONE, 80},
+	const static std::unordered_map<Components::Item, std::uint64_t> BREAK_TIMES = {
+		{Components::Item::AIR, 0},
+		{Components::Item::GRASS_BLOCK, 20},
+		{Components::Item::STONE, 80},
 	};
 
 	mDestruction.render = false;
@@ -108,7 +107,7 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 
 	for (const auto& [entity, block, texture] : scene->view<Components::block, Components::texture>().each()) {
 		if (block.mPosition == blockPos) {
-			if ((mPressLength * 20) >= BREAK_TIMES[block.mType]) {
+			if ((mPressLength * 20) >= BREAK_TIMES.at(block.mType)) {
 				scene->erase(entity);
 
 				mPressLength = 0;
@@ -118,7 +117,7 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 
 			mDestruction.render = true;
 
-			const int stage = ((mPressLength * 20) / BREAK_TIMES[block.mType]) * 10;
+			const int stage = ((mPressLength * 20) / BREAK_TIMES.at(block.mType)) * 10;
 			mDestruction.texture = mGame->getSystemManager()->getTexture(
 				"blocks/destroy_stage_" + std::to_string(stage) + ".png", true);
 

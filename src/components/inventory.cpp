@@ -11,6 +11,7 @@
 #include "third_party/Eigen/Core"
 #include "third_party/json.hpp"
 
+#include <SDL3/SDL.h>
 #include <cstddef>
 
 Inventory::Inventory(class Game* game, const std::size_t size, EntityID entity)
@@ -27,10 +28,16 @@ nlohmann::json Inventory::save() {
 	return contents;
 }
 
-void Inventory::update(class Scene* scene, float delta) {
-	// Handle mouse
+void Inventory::update(class Scene* scene, float) {
+	// Handle mouse and keys
+	const auto keystate = mGame->getKeystate();
+
+	// Quit menu
+	if (keystate[SDL_SCANCODE_ESCAPE]) {
+		mGame->getSystemManager()->getUISystem()->pop();
+	}
+
 	(void)scene;
-	(void)delta;
 }
 
 void Inventory::draw(class Scene*) {

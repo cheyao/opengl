@@ -22,13 +22,13 @@ UISystem::UISystem(Game* game) : mGame(game), mMesh(nullptr) {
 
 	const static GLuint indices[] = {2, 1, 0,  // a
 					 1, 2, 3}; // b
-	
+
 	mMesh = new Mesh(vertices, {}, texturePos, indices, {});
 }
 
 void UISystem::update(Scene* scene, const float delta) {
-	for (const auto& screen : mScreenStack) {
-		screen->update(scene, delta);
+	if (!mScreenStack.empty()) {
+		mScreenStack.back()->update(scene, delta);
 	}
 }
 

@@ -70,13 +70,14 @@ struct misc {
 	constexpr misc(const decltype(mWhat) what) noexcept : mWhat(what) {}
 };
 
+enum Item : std::uint64_t {
+	AIR = 0,
+	GRASS_BLOCK,
+	STONE,
+};
+
 struct block {
-	enum BlockType : std::uint64_t {
-		AIR = 0,
-		GRASS_BLOCK,
-		DIRT,
-		STONE,
-	} mType;
+	Item mType;
 	Eigen::Vector2i mPosition;
 	bool mBreak;
 	bool mClose;

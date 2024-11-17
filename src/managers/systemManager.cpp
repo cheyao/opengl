@@ -128,6 +128,7 @@ void SystemManager::update(Scene* scene, const float delta) {
 
 	scene->clearSignals();
 
+	mUISystem->update(scene,delta);
 	mInputSystem->update(scene, delta);
 	mPhysicsSystem->update(scene, delta); // 12.08%
 
