@@ -108,9 +108,15 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 	for (const auto& [entity, block, texture] : scene->view<Components::block, Components::texture>().each()) {
 		if (block.mPosition == blockPos) {
 			if ((mPressLength * 20) >= BREAK_TIMES.at(block.mType)) {
-				scene->erase(entity);
+				const auto item = scene->newEntity();
+				scene->emplace<Components::position>(
+					item, scene->get<Components::block>(entity).mPosition.template cast<float>() *
+						      Components::block::BLOCK_SIZE);
+				scene->emplace<Components::item>(item, scene->get<Components::block>(entity).mType);
 
 				mPressLength = 0;
+
+				scene->erase(entity);
 
 				break;
 			}

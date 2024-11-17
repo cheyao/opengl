@@ -37,12 +37,8 @@ struct collision {
 
 struct texture {
 	class Texture* mTexture;
-	float mScale = 1.0f;
-	class Shader* mShader = nullptr;
 
-	texture(const decltype(mTexture) tex, const decltype(mScale) scale = 1.0f,
-		const decltype(mShader) shader = nullptr) noexcept
-		: mTexture(tex), mScale(scale), mShader(shader) {}
+	texture(const decltype(mTexture) tex) noexcept : mTexture(tex) {}
 };
 
 struct input {
@@ -92,5 +88,9 @@ struct inventory {
 	class Inventory* mInventory;
 
 	constexpr inventory(class Inventory* inv) noexcept : mInventory(inv) {}
+};
+
+struct item {
+	Item mType;
 };
 } // namespace Components

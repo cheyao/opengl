@@ -250,25 +250,16 @@ void RenderSystem::draw(Scene* scene) {
 					     Eigen::Vector2f(mWidth, mHeight) / 2;
 
 	// Draw blocks
-	Shader* blockShader = this->getShader("block.vert", "block.frag");
-	blockShader->activate();
-	blockShader->set("size"_u, (float)Components::block::BLOCK_SIZE, (float)Components::block::BLOCK_SIZE);
-	blockShader->set("texture_diffuse"_u, 0);
-	blockShader->set("offset"_u, cameraOffset);
+	Shader* shader = this->getShader("block.vert", "block.frag");
+	shader->activate();
+	shader->set("size"_u, (float)Components::block::BLOCK_SIZE, (float)Components::block::BLOCK_SIZE);
+	shader->set("texture_diffuse"_u, 0);
+	shader->set("offset"_u, cameraOffset);
 
 	// PERF: Use some lists to send the data
 	for (const auto& [entity, texture, block] : scene->view<Components::texture, Components::block>().each()) {
 		if (!block.mBreak) {
 			continue;
-		}
-
-		Shader* shader = texture.mShader == nullptr ? blockShader : texture.mShader;
-
-		if (!texture.mShader) {
-			shader->activate();
-			shader->set("size"_u, texture.mTexture->getSize());
-
-			shader->set("texture_diffuse"_u, 0);
 		}
 
 		shader->set("position"_u, block.mPosition);
@@ -281,11 +272,8 @@ void RenderSystem::draw(Scene* scene) {
 	}
 
 	// Draw other textures
-	blockShader->activate();
-	blockShader->set("position"_u, 0, 0);
+	shader->set("position"_u, 0, 0);
 	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
-		Shader* shader = texture.mShader ? texture.mShader : blockShader;
-
 		const Eigen::Vector2f offset = position.mPosition + cameraOffset;
 		shader->set("offset"_u, offset);
 		shader->set("size"_u, texture.mTexture->getSize());
