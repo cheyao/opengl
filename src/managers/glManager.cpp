@@ -56,12 +56,7 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	glEnable(GL_BLEND);
-
 	glBlendEquation(GL_FUNC_ADD);
-	// SRC: crack
-	// DST: block
-	glBlendFunc(GL_SRC_COLOR, GL_SRC_COLOR);
 }
 
 GLManager::~GLManager() { SDL_GL_DestroyContext(mContext); }

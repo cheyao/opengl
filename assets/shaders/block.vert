@@ -7,7 +7,6 @@ out vec2 vTexPos;
 
 layout(std140) uniform Matrices {
 	mat4 proj;
-	mat4 view;
 };
 uniform vec2 offset;
 uniform vec2 size;

@@ -1,5 +1,6 @@
 #include "opengl/framebuffer.hpp"
 
+#include "game.hpp"
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "systems/renderSystem.hpp"

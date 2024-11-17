@@ -23,8 +23,10 @@ class UISystem {
 	void pop() { mScreenStack.pop_back(); }
 
 	bool empty() const { return mScreenStack.empty(); }
+	class Mesh* getMesh() const { return mMesh; }
 
       private:
 	class Game* mGame;
+	class Mesh* mMesh;
 	std::vector<class Screen*> mScreenStack;
 };

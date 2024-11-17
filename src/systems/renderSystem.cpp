@@ -295,8 +295,6 @@ void RenderSystem::draw(Scene* scene) {
 		mMesh->draw(shader);
 	}
 
-	glEnable(GL_BLEND);
-
 #if defined(IMGUI) && !defined(GLES)
 	static bool hitbox = false;
 	static bool vector = false;

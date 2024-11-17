@@ -57,7 +57,7 @@ void Level::create() {
 	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
 	mScene->emplace<Components::position>(
 		player, Eigen::Vector2f(0.0f, (Chunk::WATER_LEVEL + 1) * Components::block::BLOCK_SIZE));
-	mScene->emplace<Components::inventory>(player, new Inventory(mGame, 36));
+	mScene->emplace<Components::inventory>(player, new Inventory(mGame, 36, player));
 
 	mLeft = new Chunk(mGame, mScene, -1);
 	mCenter = new Chunk(mGame, mScene, 0);
@@ -80,7 +80,7 @@ void Level::load(const nlohmann::json& data) {
 
 	mScene->emplace<Components::position>(player, mData[PLAYER_KEY]["position"].template get<Eigen::Vector2f>());
 	mScene->emplace<Components::velocity>(player, mData[PLAYER_KEY]["velocity"]);
-	mScene->emplace<Components::inventory>(player, new Inventory(mGame, mData[PLAYER_KEY]["inventory"]));
+	mScene->emplace<Components::inventory>(player, new Inventory(mGame, mData[PLAYER_KEY]["inventory"], player));
 
 	auto loadChunk = [this](Chunk*& chunk, const float playerPos) {
 		const auto sign = playerPos < 0;

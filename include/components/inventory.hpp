@@ -9,8 +9,8 @@
 
 class Inventory : public Screen {
       public:
-	explicit Inventory(class Game* game, std::size_t size);
-	explicit Inventory(class Game* game, const nlohmann::json& contents);
+	explicit Inventory(class Game* game, std::size_t size, EntityID entity = 0);
+	explicit Inventory(class Game* game, const nlohmann::json& contents, EntityID entity = 0);
 	Inventory(Inventory&&) = delete;
 	Inventory(const Inventory&) = delete;
 	Inventory& operator=(Inventory&&) = delete;
@@ -29,6 +29,7 @@ class Inventory : public Screen {
 	constexpr const static inline char* const SIZE_KEY = "size";
 	constexpr const static inline char* const CONTENTS_KEY = "contents";
 
+	const EntityID mEntity;
 	std::size_t mSize;
 	std::vector<EntityID> mVector;
 };

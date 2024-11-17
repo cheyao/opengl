@@ -132,6 +132,9 @@ void InputSystem::draw(class Scene* scene) {
 		return;
 	}
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_COLOR, GL_SRC_COLOR);
+
 	const auto systemManager = mGame->getSystemManager();
 	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
 	const Eigen::Vector2f cameraOffset = -playerPos + systemManager->getDemensions() / 2;
