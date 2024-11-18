@@ -295,7 +295,7 @@ void RenderSystem::draw(Scene* scene) {
 	ImGui::End();
 
 	// Debug layer rendering
-	if (scene->getSignal("collisionEditor") || hitbox) {
+	if (scene->getSignal("collisionEditor"_u) || hitbox) {
 		GLint mode[2];
 		if (hitbox && glPolygonMode != nullptr) {
 			glGetIntegerv(GL_POLYGON_MODE, mode);

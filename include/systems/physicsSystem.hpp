@@ -4,6 +4,7 @@
 #include "opengl/shader.hpp"
 
 #include <cstdint>
+#include <unordered_map>
 
 class PhysicsSystem {
       public:
@@ -28,4 +29,9 @@ class PhysicsSystem {
 	void itemPhysics(class Scene* scene);
 
 	class Game* mGame;
+
+	// Collision cache
+	struct {
+		std::unordered_map<EntityID, EntityID> lastAbove;
+	} mCache;
 };

@@ -60,13 +60,18 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 		bool onGround = false;
 
 		if (scene->get<Components::velocity>(entity).mVelocity.y() < 1.0f) {
-			for (const auto& block : blocks) {
-				if (!scene->get<Components::block>(block).mClose) {
-					continue;
-				}
+			// Look cache for bellow block
+			if (!mCache.lastAbove.contains(entity) ||
+			    !(onGround = collidingBellow(scene, entity, mCache.lastAbove[entity]))) {
+				for (const auto& block : blocks) {
+					if (!scene->get<Components::block>(block).mClose) {
+						continue;
+					}
 
-				if (collidingBellow(scene, entity, block)) {
-					onGround = true;
+					if (collidingBellow(scene, entity, block)) {
+						onGround = true;
+						mCache.lastAbove[entity] = block;
+					}
 				}
 			}
 		}
@@ -144,7 +149,7 @@ void PhysicsSystem::collide(Scene* scene) {
 	ImGui::End();
 
 	if (editor) {
-		scene->getSignal("collisionEditor") = true;
+		scene->getSignal("collisionEditor"_u) = true;
 
 		ImGui::Begin("Collision editor");
 
@@ -303,6 +308,8 @@ void PhysicsSystem::itemPhysics(class Scene* scene) {
 
 	const auto blocks = scene->view<Components::collision, Components::block>();
 	for (auto& item : scene->view<Components::position, Components::item>()) {
-
+		// Soo test the blocks with items, only if it's close?
+		(void)item;
+		(void)blocks;
 	}
 }
