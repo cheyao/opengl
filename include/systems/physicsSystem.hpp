@@ -1,9 +1,14 @@
 #pragma once
 
 #include "managers/entityManager.hpp"
+#include "opengl/shader.hpp"
+
+#include <cstdint>
 
 class PhysicsSystem {
       public:
+	constexpr const static inline std::uint64_t PHYSICS_DIRTY_SIGNAL = "physics_dirty"_u;
+
 	explicit PhysicsSystem(class Game* game);
 	PhysicsSystem(PhysicsSystem&&) = delete;
 	PhysicsSystem(const PhysicsSystem&) = delete;
@@ -20,6 +25,7 @@ class PhysicsSystem {
 	bool collidingBellow(const class Scene* scene, const EntityID entity, const EntityID block) const;
 	void pushBack(class Scene* scene, const EntityID entity, EntityID block);
 	void markDirty(class Scene* scene);
+	void itemPhysics(class Scene* scene);
 
 	class Game* mGame;
 };

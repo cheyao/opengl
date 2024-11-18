@@ -9,6 +9,7 @@
 #include "opengl/texture.hpp"
 #include "scene.hpp"
 #include "systems/UISystem.hpp"
+#include "systems/physicsSystem.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
 
@@ -110,14 +111,17 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 			if ((mPressLength * 20) >= BREAK_TIMES.at(block.mType)) {
 				const auto item = scene->newEntity();
 				scene->emplace<Components::position>(
-					item, scene->get<Components::block>(entity).mPosition.template cast<float>() *
+					item, (scene->get<Components::block>(entity).mPosition.template cast<float>() +
+					       Eigen::Vector2f(0.40f, 0.40f)) *
 						      Components::block::BLOCK_SIZE);
 				scene->emplace<Components::item>(item, scene->get<Components::block>(entity).mType);
-				scene->emplace<Components::texture>(item, scene->get<Components::texture>(entity).mTexture, 0.3f);
+				scene->emplace<Components::texture>(
+					item, scene->get<Components::texture>(entity).mTexture, 0.3f);
 
 				mPressLength = 0;
 
 				scene->erase(entity);
+				scene->getSignal(PhysicsSystem::PHYSICS_DIRTY_SIGNAL) = true;
 
 				break;
 			}

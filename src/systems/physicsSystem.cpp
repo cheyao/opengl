@@ -56,7 +56,7 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 	 * To fix it we need to add a acceleration vector(Wow school knowladge has usages)
 	 */
 	const auto blocks = scene->view<Components::collision, Components::block>();
-	for (const auto& entity : scene->view<Components::position, Components::velocity>()) {
+	for (const auto entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;
 
 		if (scene->get<Components::velocity>(entity).mVelocity.y() < 1.0f) {
@@ -87,6 +87,8 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 		scene->get<Components::position>(entity).mPosition += velocity * delta;
 		velocity.x() *= 0.7;
 	}
+
+	itemPhysics(scene);
 }
 
 void PhysicsSystem::markDirty(Scene* scene) {
@@ -291,5 +293,16 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID entity, EntityID
 		scene->get<Components::position>(entity).mPosition.x() += depth.x();
 	} else {
 		scene->get<Components::position>(entity).mPosition.y() += depth.y();
+	}
+}
+
+void PhysicsSystem::itemPhysics(class Scene* scene) {
+	if (!scene->getSignal(PHYSICS_DIRTY_SIGNAL)) {
+		return;
+	}
+
+	const auto blocks = scene->view<Components::collision, Components::block>();
+	for (auto& item : scene->view<Components::position, Components::item>()) {
+
 	}
 }

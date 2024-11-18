@@ -61,7 +61,7 @@ class Scene {
 
 	[[nodiscard]] bool valid(const EntityID entity) noexcept { return mEntityManager->valid(entity); }
 
-	[[nodiscard]] bool& getSignal(const std::string& signal) noexcept {
+	[[nodiscard]] bool& getSignal(const std::uint64_t signal) noexcept {
 		if (!mSignals.contains(signal)) {
 			mSignals[signal] = false;
 		}
@@ -74,5 +74,5 @@ class Scene {
 	class EntityManager* mEntityManager;
 	class ComponentManager* mComponentManager;
 
-	std::unordered_map<std::string, bool> mSignals;
+	std::unordered_map<std::uint64_t, bool> mSignals;
 };
