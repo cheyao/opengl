@@ -37,8 +37,9 @@ struct collision {
 
 struct texture {
 	class Texture* mTexture;
+	float mScale;
 
-	texture(const decltype(mTexture) tex) noexcept : mTexture(tex) {}
+	texture(const decltype(mTexture) tex, const float scale = 1.0f) noexcept : mTexture(tex), mScale(scale) {}
 };
 
 struct input {

@@ -10,11 +10,12 @@ layout(std140) uniform Matrices {
 };
 uniform vec2 offset;
 uniform vec2 size;
+uniform float scale;
 
 uniform ivec2 position;
 
 void main() {
-	vec2 pos = (aPos + position) * size + offset;
+	vec2 pos = (aPos * scale + position) * size + offset;
 	gl_Position = proj * vec4(pos, 0.0f, 1.0f);
 
 	vTexPos = aTexPos;

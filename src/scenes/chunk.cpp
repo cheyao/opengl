@@ -93,14 +93,16 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 nlohmann::json Chunk::save(Scene* scene) {
 	nlohmann::json chunk;
 
+	// FIXME:Get blocks from scene instead of vector
 	chunk["position"] = mPosition;
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		for (std::size_t j = 0; j < mBlocks[i].size(); ++j) {
-			if (!scene->valid(mBlocks[i][j])) {
+			if (!scene->valid(mBlocks[i][j]) || !scene->contains<Components::block>(mBlocks[i][j])) {
 				chunk["blocks"][i][j] = Components::Item::AIR;
 				continue;
 			}
 
+			// Hmm
 			chunk["blocks"][i][j] =
 				static_cast<std::uint64_t>(scene->get<Components::block>(mBlocks[i][j]).mType);
 		}

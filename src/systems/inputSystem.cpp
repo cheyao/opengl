@@ -113,6 +113,7 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 					item, scene->get<Components::block>(entity).mPosition.template cast<float>() *
 						      Components::block::BLOCK_SIZE);
 				scene->emplace<Components::item>(item, scene->get<Components::block>(entity).mType);
+				scene->emplace<Components::texture>(item, scene->get<Components::texture>(entity).mTexture, 0.3f);
 
 				mPressLength = 0;
 
@@ -151,6 +152,7 @@ void InputSystem::draw(class Scene* scene) {
 	shader->set("texture_diffuse"_u, 0);
 	shader->set("offset"_u, cameraOffset);
 	shader->set("position"_u, mDestruction.pos);
+	shader->set("scale"_u, 1.0f);
 
 	mDestruction.texture->activate(0);
 	mMesh->draw(shader);
