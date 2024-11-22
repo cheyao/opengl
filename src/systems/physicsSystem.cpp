@@ -313,7 +313,7 @@ void PhysicsSystem::itemPhysics(class Scene* scene) {
 			if ((scene->get<Components::position>(item).mPosition -
 			     scene->get<Components::position>(entity).mPosition)
 				    .squaredNorm() < PICK_UP_RANGE_SQ) {
-				if (scene->get<Components::inventory>(entity).mInventory->tryPick(item)) {
+				if (scene->get<Components::inventory>(entity).mInventory->tryPick(scene, item)) {
 					scene->erase(item);
 
 					break;

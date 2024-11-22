@@ -6,24 +6,28 @@
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
+#include "scene.hpp"
 #include "screens/screen.hpp"
 #include "systems/UISystem.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/json.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_assert.h>
 #include <cstddef>
 
 Inventory::Inventory(class Game* game, const std::size_t size, EntityID entity)
-	: Screen(game), mEntity(entity), mSize(size), mVector(size) {}
+	: Screen(game), mEntity(entity), mSize(size), mItems(size), mCount(size) {}
 Inventory::Inventory(class Game* game, const nlohmann::json& contents, EntityID entity)
-	: Screen(game), mEntity(entity), mSize(contents[SIZE_KEY]), mVector(contents[CONTENTS_KEY]) {}
+	: Screen(game), mEntity(entity), mSize(contents[SIZE_KEY]), mItems(contents[ITEMS_KEY]),
+	  mCount(contents[COUNT_KEY]) {}
 
 nlohmann::json Inventory::save() {
 	nlohmann::json contents;
 
 	contents[SIZE_KEY] = mSize;
-	contents[CONTENTS_KEY] = mVector;
+	contents[ITEMS_KEY] = mItems;
+	contents[COUNT_KEY] = mCount;
 
 	return contents;
 }
@@ -81,10 +85,22 @@ void Inventory::draw(class Scene*) {
 
 void Inventory::close() { mGame->getSystemManager()->getUISystem()->pop(); }
 
-bool Inventory::tryPick(const EntityID item) {
-	(void)item;
+bool Inventory::tryPick(Scene* scene, const EntityID item) {
+	for (std::size_t i = 0; i < mItems.size(); ++i) {
+		if (mItems[i] == 0 || mItems[i] == scene->get<Components::item>(item).mType) {
+			pickUp(scene, item, i);
+		}
 
-	SDL_Log("picking up");
+		return true;
+	}
 
 	return false;
+}
+
+// Pick da item up to the slot n
+void Inventory::pickUp(Scene* scene, const EntityID item, const std::size_t index) {
+	SDL_assert((mCount[index] == 0 || mItems[index] == scene->get<Components::item>(item).mType));
+
+	mItems[index] = scene->get<Components::item>(item).mType;
+	mCount[index]++;
 }

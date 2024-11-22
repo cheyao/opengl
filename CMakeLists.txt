@@ -36,6 +36,7 @@ set(SRC
 # Sources
 src/main.cpp
 src/game.cpp
+src/registers.cpp
 
 src/components/inventory.cpp
 
@@ -73,6 +74,7 @@ include/game.hpp
 include/utils.hpp
 include/components.hpp
 include/scene.hpp
+include/registers.cpp
 
 include/components/inventory.hpp
 
