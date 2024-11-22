@@ -1,6 +1,7 @@
 #include "systems/physicsSystem.hpp"
 
 #include "components.hpp"
+#include "components/inventory.hpp"
 #include "game.hpp"
 #include "managers/entityManager.hpp"
 #include "managers/systemManager.hpp"
@@ -62,6 +63,7 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 		if (scene->get<Components::velocity>(entity).mVelocity.y() < 1.0f) {
 			// Look cache for bellow block
 			if (!mCache.lastAbove.contains(entity) ||
+			    !scene->contains<Components::block>(mCache.lastAbove[entity]) ||
 			    !(onGround = collidingBellow(scene, entity, mCache.lastAbove[entity]))) {
 				for (const auto& block : blocks) {
 					if (!scene->get<Components::block>(block).mClose) {
@@ -302,14 +304,23 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID entity, EntityID
 }
 
 void PhysicsSystem::itemPhysics(class Scene* scene) {
-	if (!scene->getSignal(PHYSICS_DIRTY_SIGNAL)) {
-		return;
+	const auto blocks = scene->view<Components::collision, Components::block>();
+	const auto players = scene->view<Components::position, Components::inventory>();
+	for (const auto item : scene->view<Components::position, Components::item>()) {
+		// Soo test the blocks with items, only if it's close?
+		// Picking the stuff up
+		for (const auto entity : players) {
+			if ((scene->get<Components::position>(item).mPosition -
+			     scene->get<Components::position>(entity).mPosition)
+				    .squaredNorm() < PICK_UP_RANGE_SQ) {
+				if (scene->get<Components::inventory>(entity).mInventory->tryPick(item)) {
+					scene->erase(item);
+
+					break;
+				}
+			}
+		}
 	}
 
-	const auto blocks = scene->view<Components::collision, Components::block>();
-	for (auto& item : scene->view<Components::position, Components::item>()) {
-		// Soo test the blocks with items, only if it's close?
-		(void)item;
-		(void)blocks;
-	}
+	(void)blocks;
 }

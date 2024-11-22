@@ -103,7 +103,7 @@ void Level::load(const nlohmann::json& data) {
 	const auto playerPos = mData[PLAYER_KEY]["position"].template get<Eigen::Vector2f>().x();
 
 	loadChunk(mCenter, playerPos);
-	loadChunk(mLeft, playerPos - Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE + 1);
+	loadChunk(mLeft, playerPos - Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE);
 	loadChunk(mRight, playerPos + Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE);
 }
 

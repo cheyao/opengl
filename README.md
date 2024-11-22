@@ -27,10 +27,6 @@ Dependencies:
 - SDL3
 - Freetype 2
 
-FIXME:
-1. chunk 0 offset
-2. break no contain?
-
 ### MacOS and Linux
 
 Install `assimp` and `freetype` with your package manager

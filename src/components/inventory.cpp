@@ -80,3 +80,11 @@ void Inventory::draw(class Scene*) {
 }
 
 void Inventory::close() { mGame->getSystemManager()->getUISystem()->pop(); }
+
+bool Inventory::tryPick(const EntityID item) {
+	(void)item;
+
+	SDL_Log("picking up");
+
+	return false;
+}

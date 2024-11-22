@@ -129,10 +129,12 @@ void SystemManager::update(Scene* scene, const float delta) {
 	scene->clearSignals();
 
 	mUISystem->update(scene,delta);
-	mInputSystem->update(scene, delta);
 	mPhysicsSystem->update(scene, delta); // 12.08%
 
 	mPhysicsSystem->collide(scene); // 33.72%
+	
+	// This is after since it will delete stuff
+	mInputSystem->update(scene, delta);
 
 	mRenderSystem->draw(scene); // 36.51%
 	mInputSystem->draw(scene);

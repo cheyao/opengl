@@ -100,8 +100,12 @@ class sparse_set_view {
 		mEntities.reserve(smallest_size);
 
 		for (const auto id : std::span<EntityID>(*sets[smallest])) {
-			if ((... && (mComponentManager->getPool<ComponentTypes>()->contains(id)))) {
+			if constexpr (sizeof...(ComponentTypes) == 1) {
 				mEntities.emplace_back(id);
+			} else {
+				if ((... && (mComponentManager->getPool<ComponentTypes>()->contains(id)))) {
+					mEntities.emplace_back(id);
+				}
 			}
 		}
 		// Now at the end of the program, all the entites that are present in all the components are present in

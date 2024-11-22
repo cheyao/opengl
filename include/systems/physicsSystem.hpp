@@ -21,11 +21,16 @@ class PhysicsSystem {
 	void collide(class Scene* scene);
 
       private:
+	constexpr const static inline std::uint64_t PICK_UP_RANGE = 150;
+	constexpr const static inline std::uint64_t PICK_UP_RANGE_SQ = PICK_UP_RANGE * PICK_UP_RANGE;
+
 	// Collision tests
 	bool AABBxAABB(const class Scene* scene, const EntityID entity, const EntityID block) const;
 	bool collidingBellow(const class Scene* scene, const EntityID entity, const EntityID block) const;
 	void pushBack(class Scene* scene, const EntityID entity, EntityID block);
+	// Marks dirty items that we need to repaint/collide with
 	void markDirty(class Scene* scene);
+	// Manages the falling and picking of items
 	void itemPhysics(class Scene* scene);
 
 	class Game* mGame;

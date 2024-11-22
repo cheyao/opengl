@@ -22,6 +22,8 @@ class Inventory : public Screen {
 
 	void update(class Scene* scene, float delta) override;
 	void draw(class Scene* scene) override;
+	// Sees if the entity can pick the item up, true if picked false otherwise
+	virtual bool tryPick(EntityID item);
 
       private:
 	void close();
