@@ -74,7 +74,7 @@ include/game.hpp
 include/utils.hpp
 include/components.hpp
 include/scene.hpp
-include/registers.cpp
+include/registers.hpp
 
 include/components/inventory.hpp
 

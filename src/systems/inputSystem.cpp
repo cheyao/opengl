@@ -7,6 +7,7 @@
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
+#include "registers.hpp"
 #include "scene.hpp"
 #include "systems/UISystem.hpp"
 #include "systems/physicsSystem.hpp"
@@ -15,7 +16,6 @@
 
 #include <SDL3/SDL.h>
 #include <cstddef>
-#include <cstdint>
 #include <functional>
 #include <span>
 #include <string>
@@ -37,8 +37,8 @@ InputSystem::InputSystem(Game* game) : mGame(game), mPressedX(0), mPressedY(0), 
 		1.0f, 0.0f  // BL
 	};
 
-	const static GLuint indices[] = {2, 1, 0,  // a
-					 1, 2, 3}; // b
+	constexpr const static GLuint indices[] = {2, 1, 0,  // a
+						   1, 2, 3}; // b
 
 	mMesh = std::unique_ptr<Mesh>(new Mesh(vertices, {}, texturePos, indices, {}));
 }
@@ -60,12 +60,6 @@ void InputSystem::update(Scene* scene, const float delta) {
 }
 
 void InputSystem::updateMouse(Scene* scene, const float delta) {
-	const static std::unordered_map<Components::Item, std::uint64_t> BREAK_TIMES = {
-		{Components::Item::AIR, 0},
-		{Components::Item::GRASS_BLOCK, 20},
-		{Components::Item::STONE, 80},
-	};
-
 	mDestruction.render = false;
 
 	// From Topright
@@ -108,7 +102,7 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 
 	for (const auto& [entity, block, texture] : scene->view<Components::block, Components::texture>().each()) {
 		if (block.mPosition == blockPos) {
-			if ((mPressLength * 20) >= BREAK_TIMES.at(block.mType)) {
+			if ((mPressLength * 20) >= registers::BREAK_TIMES.at(block.mType)) {
 				const auto item = scene->newEntity();
 				scene->emplace<Components::position>(
 					item, (scene->get<Components::block>(entity).mPosition.template cast<float>() +
@@ -128,7 +122,7 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 
 			mDestruction.render = true;
 
-			const int stage = ((mPressLength * 20) / BREAK_TIMES.at(block.mType)) * 10;
+			const int stage = ((mPressLength * 20) / registers::BREAK_TIMES.at(block.mType)) * 10;
 			mDestruction.texture = mGame->getSystemManager()->getTexture(
 				"blocks/destroy_stage_" + std::to_string(stage) + ".png", true);
 

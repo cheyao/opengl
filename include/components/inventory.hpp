@@ -27,16 +27,28 @@ class Inventory : public Screen {
 	// Sees if the entity can pick the item up, true if picked false otherwise
 	virtual bool tryPick(Scene* scene, EntityID item);
 
-      private:
-	void close();
-	void pickUp(Scene* scene, EntityID item, std::size_t index);
-
-	constexpr const static inline char* const SIZE_KEY = "size";
-	constexpr const static inline char* const ITEMS_KEY = "items";
-	constexpr const static inline char* const COUNT_KEY = "count";
-
+      protected:
 	const EntityID mEntity;
 	std::size_t mSize;
 	std::vector<Components::Item> mItems;
 	std::vector<std::uint64_t> mCount;
+
+      private:
+	void drawItems();
+	void close();
+	void pickUp(Scene* scene, EntityID item, std::size_t index);
+
+	constexpr const static inline auto SIZE_KEY = "size";
+	constexpr const static inline auto ITEMS_KEY = "items";
+	constexpr const static inline auto COUNT_KEY = "count";
+
+	constexpr const static inline auto INVENTORY_SPRITE_FILE = "ui/inventory.png";
+	constexpr const static inline auto INVENTORY_TEXTURE_WIDTH = 176.0f;
+	constexpr const static inline auto INVENTORY_TEXTURE_HEIGHT = 166.0f;
+	constexpr const static inline auto INVENTORY_SLOTS_OFFSET_X = 8.0f;
+	constexpr const static inline auto INVENTORY_SLOTS_OFFSET_Y = 8.0f;
+	constexpr const static inline auto INVENTORY_INV_SCALE = 15;
+	constexpr const static inline auto INVENTORY_SLOT_X = 18.0f;
+	constexpr const static inline auto INVENTORY_SLOT_Y = 18.0f;
+
 };

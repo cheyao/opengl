@@ -4,6 +4,7 @@
 #include "game.hpp"
 #include "managers/entityManager.hpp"
 #include "opengl/texture.hpp"
+#include "registers.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/json.hpp"
@@ -55,17 +56,8 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 		mBlocks.emplace_back(std::vector<EntityID>());
 	}
 
-	auto systemManager = game->getSystemManager();
-	static auto getTexture = [systemManager](const std::string& name) {
-		return systemManager->getTexture(name, true);
-	};
-
 	// Load the things only when we need them
 	// FIXME: Better load on demand
-	const static std::unordered_map<Components::Item, std::function<Texture*()>> BLOCK_TO_TEXTURE = {
-		{Components::Item::GRASS_BLOCK, [] { return getTexture("blocks/grass-block.png"); }},
-		{Components::Item::STONE, [] { return getTexture("blocks/stone.png"); }},
-	};
 
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		for (std::size_t j = 0; j < data["blocks"][i].size(); ++j) {
@@ -76,9 +68,9 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 				continue;
 			}
 
-			SDL_assert(BLOCK_TO_TEXTURE.contains(block));
+			SDL_assert(registers::TEXTURES.contains(block));
 
-			Texture* texture = BLOCK_TO_TEXTURE.at(block)();
+			Texture* texture = game->getSystemManager()->getTexture(registers::TEXTURES.at(block), true);
 
 			mBlocks[i].emplace_back(scene->newEntity());
 
