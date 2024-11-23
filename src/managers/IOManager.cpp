@@ -110,9 +110,5 @@ Assimp::IOStream* GameIOSystem::Open(const char* pFile, const char* pMode) {
 }
 
 void GameIOSystem::Close(Assimp::IOStream* pFile) {
-	GameIOStream* IO = dynamic_cast<GameIOStream*>(pFile);
-
-	[[unlikely]] if (IO == nullptr) { throw std::runtime_error("Assimp IO Close dynamic cast failed"); }
-
-	delete IO;
+	delete static_cast<GameIOStream*>(pFile);
 }

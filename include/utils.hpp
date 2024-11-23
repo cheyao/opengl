@@ -23,7 +23,7 @@ template <typename... Args> std::string string_format(const std::string& format,
 #define ERROR_BOX(msg)                                                                                                 \
 	{                                                                                                              \
 		if (!SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERROR", msg, nullptr)) {                          \
-			SDL_Log("Failed to show message box: %s", SDL_GetError());                                      \
+			SDL_Log("Failed to show message box: %s", SDL_GetError());                                     \
 		}                                                                                                      \
 	}
 
@@ -66,3 +66,9 @@ inline constexpr bool nearZero(const float number, const float epsilon = 0.001f)
 			throw 1;                                                                                       \
 		}                                                                                                      \
 	}
+
+#ifdef __EMSCRIPTEN__
+#define loadFile SDL_LoadFile
+#else
+#define loadFile SDL_LoadFile
+#endif

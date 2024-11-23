@@ -177,6 +177,8 @@ $ python3 -m http.server
 
 If you get the error `emcc: error: unable to create cache directory "{cachdir}"` run the build command with sudo
 
+Currently the web build fetches the resources on demand
+
 ## Distribuing
 There are scripts in the cmake folder:
 ```

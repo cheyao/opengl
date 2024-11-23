@@ -37,6 +37,7 @@ set(SRC
 src/main.cpp
 src/game.cpp
 src/registers.cpp
+src/utils.cpp
 
 src/components/inventory.cpp
 
@@ -136,7 +137,7 @@ external/imgui/backends/imgui_impl_opengl3.cpp
 )
 
 set(ASSETS_EMBED_WEB
---preload-file=assets@assets
+--embed-file=assets@assets
 )
 
 if(ANDROID STREQUAL ON) 

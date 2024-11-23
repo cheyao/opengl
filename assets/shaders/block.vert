@@ -15,7 +15,7 @@ uniform float scale;
 uniform ivec2 position;
 
 void main() {
-	vec2 pos = (aPos * scale + position) * size + offset;
+	vec2 pos = (aPos * scale + vec2(position)) * size + offset;
 	gl_Position = proj * vec4(pos, 0.0f, 1.0f);
 
 	vTexPos = aTexPos;

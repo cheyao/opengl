@@ -9,6 +9,7 @@ build/
 rel/
 web/
 webrel/
+webdeb/
 nogui/
 gcc/
 and/

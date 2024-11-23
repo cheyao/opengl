@@ -14,11 +14,12 @@
 
 GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 	SDL_assert(window != nullptr && "Forgot to init window?");
-	SDL_assert(mContext == nullptr);
 
+	// Uhh fetch breaks this?
 	mContext = SDL_GL_CreateContext(window);
 	if (mContext == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mGLManager.cpp: Failed to create window: %s\033[0m", SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mGLManager.cpp: Failed to create window: %s\033[0m",
+				SDL_GetError());
 		ERROR_BOX("Failed to initialize OpenGL Context, there is something "
 			  "wrong with your OpenGL");
 
@@ -38,13 +39,14 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 	if (version == 0) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "\033[31mGLManager.cpp: Failed to init GL glad!\033[0m");
 #endif
-	
+
 		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL installation");
 
 		throw std::runtime_error("GLManager.cpp: Failed to init glad");
 	}
 
-	SDL_Log("\033[32mGLManager.cpp: Successfully loaded glad OpenGL %d.%d\033[0m", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
+	SDL_Log("\033[32mGLManager.cpp: Successfully loaded glad OpenGL %d.%d\033[0m", GLAD_VERSION_MAJOR(version),
+		GLAD_VERSION_MINOR(version));
 
 	if (!SDL_GL_SetSwapInterval(1)) {
 		SDL_Log("\033[31mGLManager.cpp: Failed to enable VSync\033[0m");

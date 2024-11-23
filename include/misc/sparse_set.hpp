@@ -188,11 +188,13 @@ template <typename Component> class sparse_set : public sparse_set_interface {
 	[[nodiscard]] Component& get(const EntityID entity) noexcept {
 #ifdef DEBUG
 		if (!contains(entity)) {
+#ifndef __EMSCRIPTEN__ // No typeid
 			SDL_LogCritical(
 				SDL_LOG_CATEGORY_VIDEO,
 				"\x1B[31msparse_set.hpp: Error! Accessing invalid component %s for entity %" PRIu64
 				"\033[0m",
 				typeid(Component).name(), entity);
+#endif
 
 			SDL_assert(contains(entity) && "Hey! This sparse set doesn't contain this entity");
 		}
