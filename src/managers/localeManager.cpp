@@ -121,9 +121,9 @@ void LocaleManager::loadLocale() {
 	}
 
 	// Prefer specialized locale to generalized one
-	char* localeData = static_cast<char*>(SDL_LoadFile((mLocaleDir + mLocale + ".json").data(), nullptr));
+	char* localeData = static_cast<char*>(loadFile((mLocaleDir + mLocale + ".json").data(), nullptr));
 	if (localeData == nullptr) {
-		localeData = static_cast<char*>(SDL_LoadFile((mLocaleDir + main + ".json").data(), nullptr));
+		localeData = static_cast<char*>(loadFile((mLocaleDir + main + ".json").data(), nullptr));
 
 		if (localeData == nullptr) {
 			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,

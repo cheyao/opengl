@@ -137,7 +137,7 @@ external/imgui/backends/imgui_impl_opengl3.cpp
 )
 
 set(ASSETS_EMBED_WEB
---embed-file=assets@assets
+--preload-file=assets@assets
 )
 
 if(ANDROID STREQUAL ON) 

@@ -99,7 +99,7 @@ class sparse_set_view {
 
 		mEntities.reserve(smallest_size);
 
-		for (const auto id : std::span<EntityID>(*sets[smallest])) {
+		for (const auto id : *sets[smallest]) {
 			if constexpr (sizeof...(ComponentTypes) == 1) {
 				mEntities.emplace_back(id);
 			} else {

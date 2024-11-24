@@ -131,10 +131,10 @@ canvas.emscripten { border: 0px none; }
           }
           statusElement.innerHTML = text;
         },
-        totalDependencies: 0,
+        totalDependencies: 1,
         monitorRunDependencies: (left) => {
           this.totalDependencies = Math.max(this.totalDependencies, left);
-          Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+          Module.setStatus(left ? 'Downloading wasm binary' : 'All downloads complete.');
         }
       };
       Module.setStatus('Downloading...');

@@ -214,7 +214,7 @@ template <typename Component> class sparse_set : public sparse_set_interface {
 	[[nodiscard]] std::size_t size() const noexcept override { return mPackedContainer.size(); }
 
 	[[nodiscard]] iterator begin() noexcept override {
-		return iterator{*mPackedContainer.data(), mPackedContainer.size()};
+		return iterator{*mPackedContainer.data(), 0};
 	}
 	[[nodiscard]] const_iterator begin() const noexcept override {
 		return const_iterator{*mPackedContainer.data(), 0};
@@ -223,7 +223,7 @@ template <typename Component> class sparse_set : public sparse_set_interface {
 		return const_iterator{*mPackedContainer.data(), 0};
 	}
 
-	[[nodiscard]] iterator end() noexcept override { return iterator{*mPackedContainer.data(), 0}; }
+	[[nodiscard]] iterator end() noexcept override { return iterator{*mPackedContainer.data(), mPackedContainer.size()}; }
 	[[nodiscard]] const_iterator end() const noexcept override {
 		return const_iterator{*mPackedContainer.data(), mPackedContainer.size()};
 	}

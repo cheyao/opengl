@@ -1,5 +1,5 @@
 #include "utils.hpp"
 
-#ifdef __EMSCRIPTEN__
+#include <SDL3/SDL.h>
 
-#endif // __EMSCRIPTEN__
+void* loadFile(const char* file, size_t* datasize) { return SDL_LoadFile(file, datasize); }

@@ -67,8 +67,4 @@ inline constexpr bool nearZero(const float number, const float epsilon = 0.001f)
 		}                                                                                                      \
 	}
 
-#ifdef __EMSCRIPTEN__
-#define loadFile SDL_LoadFile
-#else
-#define loadFile SDL_LoadFile
-#endif
+void* loadFile(const char* file, size_t* datasize);

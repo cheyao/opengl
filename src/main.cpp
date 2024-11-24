@@ -20,9 +20,9 @@
 SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
 	SDL_srand(0);
 
-	SDL_Log("Initializing cyao engine v0.2\n");
+	SDL_Log("Initializing cyao engine v0.4\n");
 
-	SDL_SetAppMetadata("Cyao", "0.2", "com.cyao.opengl");
+	SDL_SetAppMetadata("Cyao", "0.4", "com.cyao.opengl");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, "Cyao's opengl Game Engine");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_URL_STRING, "https://github.com/cheyao/opengl");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_TYPE_STRING, "game");

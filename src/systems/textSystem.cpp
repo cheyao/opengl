@@ -93,8 +93,8 @@ TextSystem::~TextSystem() {
 void TextSystem::loadFont(const std::string& name) {
 	SDL_assert(mLibrary != nullptr);
 
-	std::size_t size = 0;
-	FT_Byte* newFontData = static_cast<FT_Byte*>(SDL_LoadFile((mPath + name).data(), &size));
+	std::size_t size;
+	FT_Byte* newFontData = static_cast<FT_Byte*>(loadFile((mPath + name).data(), &size));
 	if (newFontData == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mTextSystem.cpp: SDL failed to load file %s: %s",
 				(mPath + name).data(), SDL_GetError());

@@ -173,7 +173,7 @@ void Shader::bind(const std::string_view name, const GLuint index) const {
 }
 
 GLuint Shader::compile(const std::string_view fileName, const GLenum type) {
-	char* shaderSource = static_cast<char*>(SDL_LoadFile(fileName.data(), nullptr));
+	char* shaderSource = static_cast<char*>(loadFile(fileName.data(), nullptr));
 
 	[[unlikely]] if (shaderSource == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to read shader shource %s: %s\n",
