@@ -178,7 +178,7 @@ void Game::gui() {
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::Text("%.3f ms %.1f FPS", (1000.f / io.Framerate), io.Framerate);
 
-		const char* locales[] = {"en", "fr", "zh-CN", "es"};
+		const char* locales[] = {"en", "fr", "zh-CN"};
 		static int current = 0;
 		if (ImGui::Combo("language", &current, locales, IM_ARRAYSIZE(locales))) {
 			mLocaleManager->changeLocale(locales[current]);

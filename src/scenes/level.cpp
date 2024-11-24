@@ -225,6 +225,6 @@ void Level::createCommon() {
 		});
 
 	const EntityID text = mScene->newEntity();
-	mScene->emplace<Components::text>(text, "controls");
+	mScene->emplace<Components::text>(text, "ref");
 	mScene->emplace<Components::position>(text, Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::infinity()));
 }
