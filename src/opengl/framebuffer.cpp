@@ -92,7 +92,6 @@ void Framebuffer::swap() {
 	glClear(GL_COLOR_BUFFER_BIT);
 #endif
 
-	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
 	Shader* mShader = mOwner->getShader("framebuffer.vert", "framebuffer.frag");
@@ -116,7 +115,6 @@ void Framebuffer::swap() {
 	mOwner->swapWindow();
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
-	glEnable(GL_DEPTH_TEST);
 
 	if (glPolygonMode) {
 		glPolygonMode(GL_FRONT_AND_BACK, mode[0]);

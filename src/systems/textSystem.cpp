@@ -9,6 +9,7 @@
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
+#include "third_party/Eigen/Core"
 #include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
 #include "utils.hpp"
@@ -232,17 +233,38 @@ TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
 }
 
 void TextSystem::draw(Scene* scene) {
-	glDisable(GL_DEPTH_TEST);
-
 	Shader* shader = mGame->getSystemManager()->getShader("text.vert", "text.frag");
 	shader->activate();
 	shader->set("letter"_u, 0);
-	shader->set("textColor"_u, 1.0f, 1.0f, 1.0f);
+	shader->set("textColor"_u, color);
 
 	for (const auto& [_, text, position] : scene->view<Components::text, Components::position>().each()) {
 		auto offset = position.mPosition;
 
 		for (const auto c : mGame->getLocaleManager()->get(text.mID)) {
+			drawGlyph(c, shader, offset);
+
+			offset += getGlyph(c).advance;
+		}
+	}
+}
+
+void TextSystem::draw(const std::string_view str, const Eigen::Vector2f& o, const bool translate) {
+	Shader* shader = mGame->getSystemManager()->getShader("text.vert", "text.frag");
+	shader->activate();
+	shader->set("letter"_u, 0);
+	shader->set("textColor"_u, color);
+
+	Eigen::Vector2f offset = o;
+
+	if (translate) {
+		for (const auto c : mGame->getLocaleManager()->get(str)) {
+			drawGlyph(c, shader, offset);
+
+			offset += getGlyph(c).advance;
+		}
+	} else {
+		for (const auto c : str) {
 			drawGlyph(c, shader, offset);
 
 			offset += getGlyph(c).advance;

@@ -52,7 +52,6 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 		SDL_Log("\033[31mGLManager.cpp: Failed to enable VSync\033[0m");
 	}
 
-	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
 	glEnable(GL_CULL_FACE);
@@ -82,8 +81,8 @@ void GLManager::printInfo() const {
 	}
 	SDL_Log("Extensions  : %s\n", extensions.data());
 
-	GLint maj = 0;
-	GLint min = 0;
+	GLint maj;
+	GLint min;
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &maj);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &min);
 	SDL_Log("Context     : %d.%d\n", maj, min);
@@ -122,4 +121,6 @@ void GLManager::printInfo() const {
 	glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &value);
 	SDL_Log("Maximum number of fragment uniform blocks: %d\n", value);
 #endif
+
+	SDL_Log("\n");
 }

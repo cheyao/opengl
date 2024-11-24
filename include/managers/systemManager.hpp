@@ -1,5 +1,6 @@
 #pragma once
 
+#include "systems/textSystem.hpp"
 #include "third_party/Eigen/Core"
 
 #include <memory>
@@ -26,6 +27,7 @@ class SystemManager {
 					      const std::string& geom = "");
 
 	[[nodiscard]] class UISystem* getUISystem() const { return mUISystem; }
+	[[nodiscard]] class TextSystem* getTextSystem() const { return mTextSystem; }
 
       private:
 	void printDebug(class Scene* scene);
@@ -35,7 +37,7 @@ class SystemManager {
 	// The order of the systems shall be listed by the order they are updated
 	std::unique_ptr<class PhysicsSystem> mPhysicsSystem;
 	std::unique_ptr<class RenderSystem> mRenderSystem;
-	std::unique_ptr<class TextSystem> mTextSystem;
 	std::unique_ptr<class InputSystem> mInputSystem;
+	class TextSystem* mTextSystem;
 	class UISystem* mUISystem;
 };

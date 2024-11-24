@@ -16,6 +16,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_assert.h>
 #include <cstddef>
+#include <string>
 
 Inventory::Inventory(class Game* game, const std::size_t size, EntityID entity)
 	: Screen(game), mEntity(entity), mSize(size), mItems(size), mCount(size) {}
@@ -126,6 +127,17 @@ void Inventory::drawItems() {
 			    oy + static_cast<int>(i / 9) * INVENTORY_SLOT_Y * scale);
 
 		mesh->draw(shader);
+
+		if (mCount[i] > 1) {
+			mGame->getSystemManager()->getTextSystem()->draw(
+				std::to_string(mCount[i]),
+				Eigen::Vector2f(ox + i % 9 * INVENTORY_SLOT_X * scale + INVENTORY_SLOT_X / 2 * scale -
+							2,
+						oy + static_cast<int>(i / 9) * INVENTORY_SLOT_Y * scale - 5),
+				false);
+		}
+
+		shader->activate();
 	}
 }
 

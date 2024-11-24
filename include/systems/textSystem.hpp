@@ -3,6 +3,7 @@
 #include "third_party/Eigen/Core"
 
 #include <ft2build.h>
+#include <string_view>
 #include FT_FREETYPE_H
 #include <memory>
 #include <string>
@@ -21,10 +22,14 @@ class TextSystem {
 	// Size in 1/64 of a pixel
 	void setFontSize(const unsigned int size);
 	void draw(class Scene* scene);
+	void draw(std::string_view str, const Eigen::Vector2f& offset, bool translate);
 
       private:
+	const static inline Eigen::Vector3f color = Eigen::Vector3f(0.0f, 0.0f, 0.0f);
+
 	struct Glyph {
 		class Texture* texture;
+
 		Eigen::Vector2f size;
 		Eigen::Vector2f bearing;
 		Eigen::Vector2f advance;

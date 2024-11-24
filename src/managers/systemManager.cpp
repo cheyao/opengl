@@ -103,10 +103,13 @@ template <EigenTypeMatExpr MatT> std::ostream& operator<<(std::ostream& os, cons
 
 SystemManager::SystemManager(Game* game)
 	: mGame(game), mPhysicsSystem(std::make_unique<PhysicsSystem>(mGame)),
-	  mRenderSystem(std::make_unique<RenderSystem>(mGame)), mTextSystem(std::make_unique<TextSystem>(mGame)),
-	  mInputSystem(std::make_unique<InputSystem>(mGame)), mUISystem(new UISystem(mGame)) {}
+	  mRenderSystem(std::make_unique<RenderSystem>(mGame)), mInputSystem(std::make_unique<InputSystem>(mGame)),
+	  mTextSystem(new TextSystem(mGame)), mUISystem(new UISystem(mGame)) {}
 
-SystemManager::~SystemManager() { delete mUISystem; }
+SystemManager::~SystemManager() {
+	delete mTextSystem;
+	delete mUISystem;
+}
 
 void SystemManager::setDemensions(const int width, const int height) { mRenderSystem->setDemensions(width, height); }
 
@@ -128,11 +131,11 @@ void SystemManager::update(Scene* scene, const float delta) {
 
 	scene->clearSignals();
 
-	mUISystem->update(scene,delta);
+	mUISystem->update(scene, delta);
 	mPhysicsSystem->update(scene, delta); // 12.08%
 
 	mPhysicsSystem->collide(scene); // 33.72%
-	
+
 	// This is after since it will delete stuff
 	mInputSystem->update(scene, delta);
 
