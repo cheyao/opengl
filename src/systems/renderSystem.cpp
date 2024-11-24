@@ -2,6 +2,7 @@
 
 #include "components.hpp"
 #include "components/inventory.hpp"
+#include "components/playerInventory.hpp"
 #include "game.hpp"
 #include "managers/glManager.hpp"
 #include "managers/shaderManager.hpp"
@@ -445,8 +446,20 @@ void RenderSystem::drawHUD(Scene* scene) {
 
 	mMesh->draw(shader);
 
-	//Texture* selectTexture = systemManager->getTexture("ui/hotbar_selection.png");
+	// Draw the selection
+	Texture* selectTexture = systemManager->getTexture("ui/hotbar_selection.png");
+	std::size_t select =
+		static_cast<PlayerInventory*>(scene->get<Components::inventory>(mGame->getPlayerID()).mInventory)
+			->getSelection();
 
+	shader->set("size"_u, y, y);
+	shader->set("offset"_u, offset.x() + x / 9 * select, 0.0f);
+
+	selectTexture->activate(0);
+
+	mMesh->draw(shader);
+
+	// Draw the items
 	glDisable(GL_BLEND);
 
 	float size = y / 2;

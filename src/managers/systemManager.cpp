@@ -1,6 +1,8 @@
 #include "managers/systemManager.hpp"
 
 #include "components.hpp"
+#include "components/playerInventory.hpp"
+#include "game.hpp"
 #include "scene.hpp"
 #include "systems/UISystem.hpp"
 #include "systems/inputSystem.hpp"
@@ -10,14 +12,12 @@
 #include "third_party/Eigen/Core"
 
 #include <SDL3/SDL.h>
-#include <functional>
 #include <memory>
 
 #ifdef IMGUI
 #include "imgui.h"
 
 #include <concepts>
-#include <cstdint>
 #include <format>
 #include <sstream>
 #include <string_view>
@@ -135,6 +135,8 @@ void SystemManager::update(Scene* scene, const float delta) {
 	mPhysicsSystem->update(scene, delta); // 12.08%
 
 	mPhysicsSystem->collide(scene); // 33.72%
+	
+	updatePlayer(scene);
 
 	// This is after since it will delete stuff
 	mInputSystem->update(scene, delta);
@@ -150,6 +152,28 @@ void SystemManager::update(Scene* scene, const float delta) {
 }
 
 void SystemManager::registerClick(const float x, const float y) { mInputSystem->registerClick(x, y); }
+
+void SystemManager::updatePlayer(Scene* scene) {
+	// We handle some player's logic here
+	const auto keystate = mGame->getKeystate();
+	const auto select = [this, scene, keystate](SDL_Scancode s, std::size_t n) {
+		if (keystate[s]) {
+			static_cast<PlayerInventory*>(
+				scene->get<Components::inventory>(this->mGame->getPlayerID()).mInventory)
+				->select(n);
+		}
+	};
+
+	select(SDL_SCANCODE_1, 0);
+	select(SDL_SCANCODE_2, 1);
+	select(SDL_SCANCODE_3, 2);
+	select(SDL_SCANCODE_4, 3);
+	select(SDL_SCANCODE_5, 4);
+	select(SDL_SCANCODE_6, 5);
+	select(SDL_SCANCODE_7, 6);
+	select(SDL_SCANCODE_8, 7);
+	select(SDL_SCANCODE_9, 8);
+}
 
 void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 #ifdef IMGUI

@@ -14,7 +14,6 @@
 #include "third_party/json.hpp"
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_assert.h>
 #include <cstddef>
 #include <string>
 

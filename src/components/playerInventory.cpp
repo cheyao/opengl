@@ -20,21 +20,4 @@ void PlayerInventory::update(class Scene*, float) {
 	if (keystate[SDL_SCANCODE_ESCAPE]) {
 		mGame->getSystemManager()->getUISystem()->pop();
 	}
-
-	const auto select = [this, keystate](SDL_Scancode s, std::size_t n) {
-		if (keystate[s]) {
-			this->mSelect = n;
-		}
-	};
-
-	select(SDL_SCANCODE_1, 0);
-	select(SDL_SCANCODE_2, 1);
-	select(SDL_SCANCODE_3, 2);
-	select(SDL_SCANCODE_4, 3);
-	select(SDL_SCANCODE_5, 4);
-	select(SDL_SCANCODE_6, 5);
-	select(SDL_SCANCODE_7, 6);
-	select(SDL_SCANCODE_8, 7);
-	select(SDL_SCANCODE_9, 8);
-	select(SDL_SCANCODE_0, 9);
 }

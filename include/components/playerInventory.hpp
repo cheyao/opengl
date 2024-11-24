@@ -2,6 +2,7 @@
 
 #include "components/inventory.hpp"
 
+#include <SDL3/SDL_assert.h>
 #include <cstddef>
 
 class PlayerInventory : public Inventory {
@@ -15,6 +16,11 @@ class PlayerInventory : public Inventory {
 	~PlayerInventory() override = default;
 
 	void update(class Scene* scene, float delta) override;
+	void select(std::size_t cell) {
+		SDL_assert(cell < 9 && cell >= 0);
+		mSelect = cell;
+	}
+	std::size_t getSelection() const { return mSelect; }
 
       private:
 	std::size_t mSelect;

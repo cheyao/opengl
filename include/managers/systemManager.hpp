@@ -32,6 +32,7 @@ class SystemManager {
 
       private:
 	void printDebug(class Scene* scene);
+	void updatePlayer(class Scene* scene);
 
 	class Game* mGame;
 
