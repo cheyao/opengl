@@ -20,7 +20,7 @@ class Inventory : public Screen {
 	Inventory(const Inventory&) = delete;
 	Inventory& operator=(Inventory&&) = delete;
 	Inventory& operator=(const Inventory&) = delete;
-	~Inventory() = default;
+	~Inventory() override = default;
 
 	void load(const nlohmann::json& contents);
 	nlohmann::json save();

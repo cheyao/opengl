@@ -34,15 +34,7 @@ nlohmann::json Inventory::save() {
 	return contents;
 }
 
-void Inventory::update(class Scene*, float) {
-	// Handle mouse and keys
-	const auto keystate = mGame->getKeystate();
-
-	// Quit menu
-	if (keystate[SDL_SCANCODE_ESCAPE]) {
-		mGame->getSystemManager()->getUISystem()->pop();
-	}
-}
+void Inventory::update(class Scene*, float) {}
 
 void Inventory::draw(class Scene*) {
 	// Draw the inventory
