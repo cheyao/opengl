@@ -1,6 +1,7 @@
 #include "systems/renderSystem.hpp"
 
 #include "components.hpp"
+#include "components/inventory.hpp"
 #include "game.hpp"
 #include "managers/glManager.hpp"
 #include "managers/shaderManager.hpp"
@@ -12,12 +13,14 @@
 #include "opengl/shader.hpp"
 #include "opengl/texture.hpp"
 #include "opengl/ubo.hpp"
+#include "registers.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <cstddef>
 #include <memory>
 #include <span>
 #include <stdexcept>
@@ -285,7 +288,7 @@ void RenderSystem::draw(Scene* scene) {
 		mMesh->draw(shader);
 	}
 
-	drawHUD();
+	drawHUD(scene);
 
 #if defined(IMGUI) && !defined(GLES)
 	static bool hitbox = false;
@@ -405,7 +408,7 @@ void RenderSystem::setPersp() const {
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), projectionMatrix);
 }
 
-void RenderSystem::drawHUD() {
+void RenderSystem::drawHUD(Scene* scene) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -418,15 +421,58 @@ void RenderSystem::drawHUD() {
 	shader->set("texture_diffuse"_u, 0);
 	texture->activate(0);
 
-	float x = dimensions.x() / 5 * 4;
-	float y = x / texture->getWidth() * texture->getHeight();
+	float x;
+	float y;
+	float scale;
+
+	if (dimensions.x() <= dimensions.y()) {
+		x = dimensions.x() / 5 * 4;
+		y = x / texture->getWidth() * texture->getHeight();
+
+		scale = x / texture->getWidth();
+	} else {
+		y = dimensions.y() / 8 * 1;
+		x = y / texture->getHeight() * texture->getWidth();
+
+		scale = y / texture->getHeight();
+	}
+	(void)scale;
+
+	Eigen::Vector2f offset = Eigen::Vector2f((dimensions.x() - x) / 2, 0.0f);
 
 	shader->set("size"_u, x, y);
-	shader->set("offset"_u, x / 4.0f / 2.0f, 0.0f);
+	shader->set("offset"_u, offset);
 
 	mMesh->draw(shader);
 
+	// Texture* selectTexture = systemManager->getTexture("ui/hotbar_selection.png");
+
 	glDisable(GL_BLEND);
+
+	float size = y / 2;
+	shader->set("size"_u, size, size);
+
+	Inventory* inventory = scene->get<Components::inventory>(mGame->getPlayerID()).mInventory;
+	for (std::size_t i = 0; i < 9; ++i) {
+		if (inventory->mCount[i] == 0) {
+			continue;
+		}
+
+		Texture* itemTexture = systemManager->getTexture(registers::TEXTURES.at(inventory->mItems[i]));
+		itemTexture->activate(0);
+
+		shader->set("offset"_u, offset.x() + i * x / 9 + y / 4, y / 4);
+
+		mMesh->draw(shader);
+
+		if (inventory->mCount[i] > 1) {
+			mGame->getSystemManager()->getTextSystem()->draw(
+				std::to_string(inventory->mCount[i]),
+				Eigen::Vector2f(offset.x() + i * x / 9 + y / 4 * 3, 5), false);
+		}
+
+		shader->activate();
+	}
 }
 
 void RenderSystem::setOrtho() const {

@@ -3,6 +3,7 @@
 #include "components.hpp"
 #include "managers/entityManager.hpp"
 #include "screens/screen.hpp"
+#include "systems/renderSystem.hpp"
 #include "third_party/json.hpp"
 
 #include <cstddef>
@@ -10,6 +11,8 @@
 #include <vector>
 
 class Inventory : public Screen {
+	friend class RenderSystem;
+
       public:
 	explicit Inventory(class Game* game, std::size_t size, EntityID entity = 0);
 	explicit Inventory(class Game* game, const nlohmann::json& contents, EntityID entity = 0);
@@ -50,5 +53,4 @@ class Inventory : public Screen {
 	constexpr const static inline auto INVENTORY_INV_SCALE = 15;
 	constexpr const static inline auto INVENTORY_SLOT_X = 18.0f;
 	constexpr const static inline auto INVENTORY_SLOT_Y = 18.0f;
-
 };

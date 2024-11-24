@@ -222,8 +222,4 @@ void Level::createCommon() {
 					scene->get<Components::inventory>(entity).mInventory);
 			}
 		});
-
-	const EntityID text = mScene->newEntity();
-	mScene->emplace<Components::text>(text, "controls");
-	mScene->emplace<Components::position>(text, Eigen::Vector2f(10.0f, 10.0f));
 }

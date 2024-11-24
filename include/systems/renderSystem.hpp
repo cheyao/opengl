@@ -31,7 +31,7 @@ class RenderSystem {
 	void setLights(class Shader* shader) const;
 	void setOrtho() const;
 	void setPersp() const;
-	void drawHUD();
+	void drawHUD(class Scene* scene);
 
 	class Game* mGame;
 
