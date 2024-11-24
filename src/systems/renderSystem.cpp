@@ -445,7 +445,7 @@ void RenderSystem::drawHUD(Scene* scene) {
 
 	mMesh->draw(shader);
 
-	// Texture* selectTexture = systemManager->getTexture("ui/hotbar_selection.png");
+	//Texture* selectTexture = systemManager->getTexture("ui/hotbar_selection.png");
 
 	glDisable(GL_BLEND);
 

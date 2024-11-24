@@ -98,6 +98,7 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 	itemPhysics(scene);
 }
 
+// Somehow this is taking 50% of the CPU?
 void PhysicsSystem::markDirty(Scene* scene) {
 	const float screenSize = (mGame->getSystemManager()->getDemensions() / 1.5).squaredNorm();
 	const float close =
@@ -111,12 +112,11 @@ void PhysicsSystem::markDirty(Scene* scene) {
 				    playerPos)
 					   .squaredNorm();
 
-		if (dist < screenSize) {
-			scene->get<Components::block>(block).mBreak = true;
-		}
-
 		if (dist < close) {
 			scene->get<Components::block>(block).mClose = true;
+			scene->get<Components::block>(block).mBreak = true;
+		} else if (dist < screenSize) {
+			scene->get<Components::block>(block).mBreak = true;
 		}
 	}
 }

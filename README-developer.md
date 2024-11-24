@@ -23,3 +23,10 @@ From discord:
 It's generally recommended to const-ref objects of which size extends 2 * sizeof(std::uintmax_t) aka 16 bytes
 
 https://stackoverflow.com/questions/2071621/how-to-do-opengl-live-text-rendering-for-a-gui
+
+## Web
+I need to decrease the file size...
+
+You can profile the code with Firefox
+
+You can't enable lto for the linking step, only when compiling or libs break

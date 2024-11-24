@@ -83,6 +83,7 @@ class sparse_set_view {
 	using tuple_iterator = sparse_set_view_tuple_iterator<ComponentTypes...>;
 	using iterable = iterable_adaptor<sparse_set_view_tuple_iterator<ComponentTypes...>>;
 
+	// PERF: Large bottleneck
 	sparse_set_view(ComponentManager* componentManager) : mComponentManager(componentManager) {
 		// This first part makes a array of all the sizes of the that we loop through
 		const std::array<utils::sparse_set_interface*, sizeof...(ComponentTypes)> sets = {

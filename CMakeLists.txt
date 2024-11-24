@@ -40,6 +40,7 @@ src/registers.cpp
 src/utils.cpp
 
 src/components/inventory.cpp
+src/components/playerInventory.cpp
 
 src/opengl/mesh.cpp
 src/opengl/shader.cpp
@@ -78,6 +79,7 @@ include/scene.hpp
 include/registers.hpp
 
 include/components/inventory.hpp
+include/components/playerInventory.hpp
 
 include/misc/sparse_set.hpp
 include/misc/sparse_set_view.hpp
@@ -245,17 +247,20 @@ elseif(WINDOWS)
 elseif(WEB)
 	add_executable(${BUILD_NAME} ${SRC})
 
-	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -DGLES -sNO_DISABLE_EXCEPTION_CATCHING)
+	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -DGLES -sNO_DISABLE_EXCEPTION_CATCHING -fno-rtti)
 	target_compile_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
-	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sALLOW_MEMORY_GROWTH -sNO_DISABLE_EXCEPTION_CATCHING)
+	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sALLOW_MEMORY_GROWTH -sNO_DISABLE_EXCEPTION_CATCHING -fno-rtti)
 	target_link_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
 
 	if(DEBUG)
-		target_compile_options(${BUILD_NAME} PRIVATE -gsource-map)
-		target_link_options(${BUILD_NAME} PRIVATE -gsource-map)
+		target_compile_options(${BUILD_NAME} PRIVATE -gsource-map --profiling)
+		target_link_options(${BUILD_NAME} PRIVATE -gsource-map --profiling)
 
 		add_custom_target(WebCopySrc ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../src ${CMAKE_BINARY_DIR}/src)
 		add_custom_target(WebCopyInclude ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ../include ${CMAKE_BINARY_DIR}/include)
+	else()
+		target_compile_options(${BUILD_NAME} PRIVATE -flto)
+		target_link_options(${BUILD_NAME} PRIVATE)
 	endif()
 else()
 	add_executable(${BUILD_NAME} ${SRC})
@@ -407,7 +412,7 @@ endif()
 
 # Generate locals
 add_custom_command(
-	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/en.json"
+	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/enjson"
 	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/localize.py" ARGS "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/strings.csv"
 	DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/strings.csv"
 )
