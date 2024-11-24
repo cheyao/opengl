@@ -466,9 +466,11 @@ void RenderSystem::drawHUD(Scene* scene) {
 		mMesh->draw(shader);
 
 		if (inventory->mCount[i] > 1) {
+			// Adjust the offset according to number of digits
+			float yoffset = inventory->mCount[i] >= 10 ? (y / 5 * 3) : (y / 4 * 3);
 			mGame->getSystemManager()->getTextSystem()->draw(
 				std::to_string(inventory->mCount[i]),
-				Eigen::Vector2f(offset.x() + i * x / 9 + y / 4 * 3, 5), false);
+				Eigen::Vector2f(offset.x() + i * x / 9 + yoffset, y / 9), false);
 		}
 
 		shader->activate();

@@ -13,6 +13,7 @@
 #include "third_party/json.hpp"
 
 #include <SDL3/SDL.h>
+#include <limits>
 #include <utility>
 
 namespace Eigen {
@@ -222,4 +223,8 @@ void Level::createCommon() {
 					scene->get<Components::inventory>(entity).mInventory);
 			}
 		});
+
+	const EntityID text = mScene->newEntity();
+	mScene->emplace<Components::text>(text, "controls");
+	mScene->emplace<Components::position>(text, Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::infinity()));
 }

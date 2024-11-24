@@ -14,6 +14,7 @@
 #include "third_party/glad/glad.h"
 #include "utils.hpp"
 
+#include <SDL3/SDL_stdinc.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <SDL3/SDL.h>
@@ -234,12 +235,49 @@ TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
 
 void TextSystem::draw(Scene* scene) {
 	Shader* shader = mGame->getSystemManager()->getShader("text.vert", "text.frag");
+	const Eigen::Vector2f dimensions = mGame->getSystemManager()->getDemensions();
 	shader->activate();
 	shader->set("letter"_u, 0);
 	shader->set("textColor"_u, color);
 
 	for (const auto& [_, text, position] : scene->view<Components::text, Components::position>().each()) {
 		auto offset = position.mPosition;
+
+		if (offset.x() == std::numeric_limits<float>::infinity()) {
+			float len = 0;
+			for (const auto c : mGame->getLocaleManager()->get(text.mID)) {
+				len += getGlyph(c).advance.x();
+			}
+
+			offset.x() = dimensions.x() - len;
+		}
+
+		if (SDL_isnan(offset.x())) {
+			float len = 0;
+			for (const auto c : mGame->getLocaleManager()->get(text.mID)) {
+				len += getGlyph(c).advance.x();
+			}
+
+			offset.x() = dimensions.x() / 2 - len / 2;
+		}
+
+		if (offset.y() == std::numeric_limits<float>::infinity()) {
+			float height = 0;
+			for (const auto c : mGame->getLocaleManager()->get(text.mID)) {
+				height = SDL_max(height, getGlyph(c).size.y());
+			}
+
+			offset.y() = dimensions.y() - height;
+		}
+
+		if (SDL_isnan(offset.y())) {
+			float height = 0;
+			for (const auto c : mGame->getLocaleManager()->get(text.mID)) {
+				height = SDL_max(height, getGlyph(c).size.y());
+			}
+
+			offset.y() = dimensions.y() / 2 - height / 2;
+		}
 
 		for (const auto c : mGame->getLocaleManager()->get(text.mID)) {
 			drawGlyph(c, shader, offset);
