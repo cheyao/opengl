@@ -22,6 +22,7 @@ class SystemManager {
 	void registerClick(const float x, const float y);
 
 	[[nodiscard]] Eigen::Vector2f getDemensions() const;
+	// Gets texture relative to the asset texture folder
 	[[nodiscard]] class Texture* getTexture(const std::string& name, const bool srgb = false);
 	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
 					      const std::string& geom = "");

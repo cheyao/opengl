@@ -285,6 +285,8 @@ void RenderSystem::draw(Scene* scene) {
 		mMesh->draw(shader);
 	}
 
+	drawHUD();
+
 #if defined(IMGUI) && !defined(GLES)
 	static bool hitbox = false;
 	static bool vector = false;
@@ -401,6 +403,30 @@ void RenderSystem::setPersp() const {
 	projectionMatrix(3, 3) = 0;
 
 	mMatricesUBO->set(0 * sizeof(Eigen::Affine3f), projectionMatrix);
+}
+
+void RenderSystem::drawHUD() {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	SystemManager* systemManager = mGame->getSystemManager();
+	Texture* texture = systemManager->getTexture("ui/hotbar.png");
+	Shader* shader = systemManager->getShader("ui.vert", "ui.frag");
+	const Eigen::Vector2f dimensions = systemManager->getDemensions();
+
+	shader->activate();
+	shader->set("texture_diffuse"_u, 0);
+	texture->activate(0);
+
+	float x = dimensions.x() / 5 * 4;
+	float y = x / texture->getWidth() * texture->getHeight();
+
+	shader->set("size"_u, x, y);
+	shader->set("offset"_u, x / 4.0f / 2.0f, 0.0f);
+
+	mMesh->draw(shader);
+
+	glDisable(GL_BLEND);
 }
 
 void RenderSystem::setOrtho() const {
