@@ -424,20 +424,14 @@ void RenderSystem::drawHUD(Scene* scene) {
 
 	float x;
 	float y;
-	float scale;
 
 	if (dimensions.x() <= dimensions.y()) {
 		x = dimensions.x() / 5 * 4;
 		y = x / texture->getWidth() * texture->getHeight();
-
-		scale = x / texture->getWidth();
 	} else {
-		y = dimensions.y() / 8 * 1;
+		y = dimensions.y() / 10 * 1;
 		x = y / texture->getHeight() * texture->getWidth();
-
-		scale = y / texture->getHeight();
 	}
-	(void)scale;
 
 	Eigen::Vector2f offset = Eigen::Vector2f((dimensions.x() - x) / 2, 0.0f);
 

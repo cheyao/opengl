@@ -100,16 +100,15 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 
 // Somehow this is taking 50% of the CPU?
 void PhysicsSystem::markDirty(Scene* scene) {
-	const float screenSize = (mGame->getSystemManager()->getDemensions() / 1.5).squaredNorm();
-	const float close =
-		Eigen::Vector2f(Components::block::BLOCK_SIZE * 1.5, Components::block::BLOCK_SIZE * 1.5).squaredNorm();
+	const float screenSize = (mGame->getSystemManager()->getDemensions() / 1.5 / Components::block::BLOCK_SIZE).squaredNorm();
+	const float close = Eigen::Vector2f(1.5, 1.5).squaredNorm();
 	const Eigen::Vector2f playerPos = (scene->get<Components::position>(mGame->getPlayerID()).mPosition +
-					   scene->get<Components::collision>(mGame->getPlayerID()).mOffset);
+					   scene->get<Components::collision>(mGame->getPlayerID()).mOffset) /
+					  Components::block::BLOCK_SIZE;
 
+	// TODO: Use block grid as unit
 	for (const auto block : scene->view<Components::collision, Components::block>()) {
-		const float dist = ((scene->get<Components::block>(block).mPosition.template cast<float>() *
-				     Components::block::BLOCK_SIZE) -
-				    playerPos)
+		const float dist = ((scene->get<Components::block>(block).mPosition.template cast<float>()) - playerPos)
 					   .squaredNorm();
 
 		if (dist < close) {
