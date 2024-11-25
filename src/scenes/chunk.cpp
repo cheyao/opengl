@@ -3,32 +3,25 @@
 #include "components.hpp"
 #include "game.hpp"
 #include "managers/entityManager.hpp"
+#include "managers/systemManager.hpp"
 #include "opengl/texture.hpp"
 #include "registers.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/json.hpp"
 
-#include "managers/systemManager.hpp"
 #include <SDL3/SDL.h>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <vector>
 
 // TODO: Backup
-Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position)
-	: mPosition(position), mBlocks(CHUNK_WIDTH, std::vector<EntityID>()) {
-	// NOTE: The order is important!!!
-	// The save saves from the array in a lifo order
-	// So the top block must go in last!
-
+Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(position) {
 	// Spawn blocks
 	Texture* stone = game->getSystemManager()->getTexture("blocks/stone.png", true);
 	for (auto y = 0; y < WATER_LEVEL; ++y) {
 		for (auto i = 0; i < CHUNK_WIDTH; ++i) {
-			mBlocks[i].emplace_back(scene->newEntity());
-			const EntityID& entity = mBlocks[i].back();
+			const EntityID entity = scene->newEntity();
 			scene->emplace<Components::block>(entity, Components::Item::STONE,
 							  Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, y));
 			scene->emplace<Components::texture>(entity, stone);
@@ -37,11 +30,10 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position)
 		}
 	}
 
-	// The second layer of grass
+	// The top layer of grass
 	Texture* grass = game->getSystemManager()->getTexture("blocks/grass-block.png", true);
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
-		mBlocks[i].emplace_back(scene->newEntity());
-		const EntityID& entity = mBlocks[i].back();
+		const EntityID entity = scene->newEntity();
 		scene->emplace<Components::block>(entity, Components::Item::GRASS_BLOCK,
 						  Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, WATER_LEVEL));
 		scene->emplace<Components::texture>(entity, grass);
@@ -50,64 +42,41 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position)
 }
 
 // Loading from save
-Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(data["position"]) {
-	mBlocks.reserve(CHUNK_WIDTH);
-	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
-		mBlocks.emplace_back(std::vector<EntityID>());
-	}
+Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(data[POSITION_KEY]) {
 
-	// Load the things only when we need them
-	// FIXME: Better load on demand
+	for (const auto& it : data[CONTENTS_KEY]) {
+		const auto block = static_cast<Components::Item>(it[0]);
 
-	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
-		for (std::size_t j = 0; j < data["blocks"][i].size(); ++j) {
-			const auto& block = static_cast<Components::Item>(data["blocks"][i][j]);
+		SDL_assert(registers::TEXTURES.contains(block));
 
-			if (block == Components::Item::AIR) {
-				mBlocks[i].emplace_back(0);
-				continue;
-			}
+		Texture* texture = game->getSystemManager()->getTexture(registers::TEXTURES.at(block), true);
 
-			SDL_assert(registers::TEXTURES.contains(block));
-
-			Texture* texture = game->getSystemManager()->getTexture(registers::TEXTURES.at(block), true);
-
-			mBlocks[i].emplace_back(scene->newEntity());
-
-			const EntityID& entity = mBlocks[i].back();
-			scene->emplace<Components::block>(entity, block,
-							  Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, j));
-			scene->emplace<Components::texture>(entity, texture);
-			scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(),
-							      true);
-		}
+		const EntityID entity = scene->newEntity();
+		scene->emplace<Components::block>(
+			entity, block,
+			Eigen::Vector2i(static_cast<std::int64_t>(it[1][0]) + mPosition * CHUNK_WIDTH, it[1][1]));
+		scene->emplace<Components::texture>(entity, texture);
+		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(), true);
 	}
 }
 
 nlohmann::json Chunk::save(Scene* scene) {
 	nlohmann::json chunk;
 
-	// FIXME:Get blocks from scene instead of vector
-	chunk["position"] = mPosition;
-	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
-		for (std::size_t j = 0; j < mBlocks[i].size(); ++j) {
-			if (!scene->valid(mBlocks[i][j]) || !scene->contains<Components::block>(mBlocks[i][j])) {
-				chunk["blocks"][i][j] = Components::Item::AIR;
-				continue;
-			}
-
-			// Hmm
-			chunk["blocks"][i][j] =
-				static_cast<std::uint64_t>(scene->get<Components::block>(mBlocks[i][j]).mType);
+	chunk[POSITION_KEY] = mPosition;
+	for (const auto block : scene->view<Components::block>()) {
+		// Not in the chunk
+		if (scene->get<Components::block>(block).mPosition.x() / CHUNK_WIDTH -
+			    (scene->get<Components::block>(block).mPosition.x() < 0) !=
+		    mPosition) {
+			continue;
 		}
-	}
 
-	for (const auto& layer : mBlocks) {
-		for (const auto& block : layer) {
-			if (block != Components::Item::AIR) {
-				scene->erase(block);
-			}
-		}
+		// Here we store the block as type pos pos
+		chunk[CONTENTS_KEY].push_back({static_cast<std::uint64_t>(scene->get<Components::block>(block).mType),
+					       scene->get<Components::block>(block).mPosition});
+
+		scene->erase(block);
 	}
 
 	return chunk;

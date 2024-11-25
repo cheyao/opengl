@@ -1,10 +1,9 @@
 #pragma once
 
-#include "managers/entityManager.hpp"
+#include "third_party/Eigen/Core"
 #include "third_party/json.hpp"
 
 #include <cstdint>
-#include <vector>
 
 // TODO: Random noise
 class Chunk {
@@ -28,6 +27,13 @@ class Chunk {
 	[[nodiscard]] std::int64_t getPosition() const { return mPosition; }
 
       private:
+	constexpr const static inline char* const POSITION_KEY = "position";
+	constexpr const static inline char* const CONTENTS_KEY = "blocks";
+
+	struct storage {
+		std::uint64_t type;
+		Eigen::Vector2i pos;
+	};
+
 	const std::int64_t mPosition;
-	std::vector<std::vector<EntityID>> mBlocks;
 };
