@@ -21,7 +21,9 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_timer.h>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <span>
 #include <stdexcept>
@@ -278,8 +280,15 @@ void RenderSystem::draw(Scene* scene) {
 
 	// Draw other textures
 	shader->set("position"_u, 0, 0);
-	for (const auto& [_, texture, position] : scene->view<Components::texture, Components::position>().each()) {
-		const Eigen::Vector2f offset = position.mPosition + cameraOffset;
+	float time = SDL_sin(SDL_GetTicks() / 1000.0f);
+	for (const auto& [entity, texture, position] :
+	     scene->view<Components::texture, Components::position>().each()) {
+		Eigen::Vector2f offset = position.mPosition + cameraOffset;
+
+		if (scene->contains<Components::item>(entity)) {
+			offset.y() += 40 * time;
+		}
+
 		shader->set("offset"_u, offset);
 		shader->set("size"_u, texture.mTexture->getSize());
 		shader->set("scale"_u, texture.mScale);

@@ -74,6 +74,8 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 						onGround = true;
 						mCache.lastAbove[entity] = block;
 					}
+
+					scene->get<Components::block>(block).mClose = false;
 				}
 			}
 		}
@@ -100,7 +102,8 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 
 // Somehow this is taking 50% of the CPU?
 void PhysicsSystem::markDirty(Scene* scene) {
-	const float screenSize = (mGame->getSystemManager()->getDemensions() / 1.5 / Components::block::BLOCK_SIZE).squaredNorm();
+	const float screenSize =
+		(mGame->getSystemManager()->getDemensions() / 1.5 / Components::block::BLOCK_SIZE).squaredNorm();
 	const float close = Eigen::Vector2f(1.5, 1.5).squaredNorm();
 	const Eigen::Vector2f playerPos = (scene->get<Components::position>(mGame->getPlayerID()).mPosition +
 					   scene->get<Components::collision>(mGame->getPlayerID()).mOffset) /
