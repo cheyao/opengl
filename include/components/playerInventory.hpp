@@ -15,7 +15,7 @@ class PlayerInventory : public Inventory {
 	PlayerInventory& operator=(const PlayerInventory&) = delete;
 	~PlayerInventory() override = default;
 
-	void update(class Scene* scene, float delta) override;
+	bool update(class Scene* scene, float delta) override;
 	void select(std::size_t cell) {
 		SDL_assert(cell < 9 && cell >= 0);
 		mSelect = cell;

@@ -3,6 +3,6 @@
 Crafting::Crafting(class Game* game, std::uint64_t row, std::uint64_t col)
 	: Screen(game), mGame(game), mGrid(row * col) {}
 
-bool Crafting::update(class Scene* scene, float delta) {}
+bool Crafting::update(class Scene*, float) { return false; }
 
-void Crafting::draw(class Scene* scene) {}
+void Crafting::draw(class Scene*) { (void)mGame; }

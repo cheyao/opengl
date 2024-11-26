@@ -13,6 +13,7 @@
 #include <SDL3/SDL.h>
 #include <cstddef>
 #include <cstdint>
+#include <stdexcept>
 #include <vector>
 
 // TODO: Backup
@@ -43,6 +44,9 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 
 // Loading from save
 Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(data[POSITION_KEY]) {
+	if (!data.contains(CONTENTS_KEY)) {
+		throw std::runtime_error("Not a chunk!");
+	}
 
 	for (const auto& it : data[CONTENTS_KEY]) {
 		const auto block = static_cast<Components::Item>(it[0]);
@@ -52,9 +56,7 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 		Texture* texture = game->getSystemManager()->getTexture(registers::TEXTURES.at(block), true);
 
 		const EntityID entity = scene->newEntity();
-		scene->emplace<Components::block>(
-			entity, block,
-			Eigen::Vector2i(static_cast<std::int64_t>(it[1][0]) + mPosition * CHUNK_WIDTH, it[1][1]));
+		scene->emplace<Components::block>(entity, block, Eigen::Vector2i(it[1][0], it[1][1]));
 		scene->emplace<Components::texture>(entity, texture);
 		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(), true);
 	}

@@ -33,7 +33,7 @@ nlohmann::json Inventory::save() {
 	return contents;
 }
 
-void Inventory::update(class Scene*, float) {}
+bool Inventory::update(class Scene*, float) { return true; }
 
 void Inventory::draw(class Scene*) {
 	// Draw the inventory

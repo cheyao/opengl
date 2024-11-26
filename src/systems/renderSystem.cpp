@@ -287,7 +287,7 @@ void RenderSystem::draw(Scene* scene) {
 		Eigen::Vector2f offset = position.mPosition + cameraOffset;
 
 		// Not so performant but let's do it for each entity
-		float time = SDL_sin(SDL_GetTicks() / 1000.0f + offset.sum());
+		float time = SDL_sin(SDL_GetTicks() / 1000.0f + position.mPosition.sum());
 
 		if (scene->contains<Components::item>(entity)) {
 			offset.y() += 40 * time;

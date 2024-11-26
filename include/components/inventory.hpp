@@ -25,7 +25,7 @@ class Inventory : public Screen {
 	void load(const nlohmann::json& contents);
 	nlohmann::json save();
 
-	void update(class Scene* scene, float delta) override;
+	bool update(class Scene* scene, float delta) override;
 	void draw(class Scene* scene) override;
 	// Sees if the entity can pick the item up, true if picked up false otherwise
 	virtual bool tryPick(Scene* scene, EntityID item);

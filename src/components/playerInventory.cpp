@@ -12,7 +12,7 @@ PlayerInventory::PlayerInventory(class Game* game, std::size_t size, EntityID en
 PlayerInventory::PlayerInventory(class Game* game, const nlohmann::json& contents, EntityID entity)
 	: Inventory(game, contents, entity), mSelect(0) {}
 
-void PlayerInventory::update(class Scene*, float) {
+bool PlayerInventory::update(class Scene*, float) {
 	// Handle mouse and keys
 	const auto keystate = mGame->getKeystate();
 
@@ -20,4 +20,6 @@ void PlayerInventory::update(class Scene*, float) {
 	if (keystate[SDL_SCANCODE_ESCAPE]) {
 		mGame->getSystemManager()->getUISystem()->pop();
 	}
+
+	return true;
 }
