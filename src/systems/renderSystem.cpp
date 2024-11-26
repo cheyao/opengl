@@ -248,6 +248,7 @@ void RenderSystem::setDemensions(int width, int height) {
 }
 
 void RenderSystem::draw(Scene* scene) {
+	// Values *borrowed* from minecraft wiki
 	glClearColor(0.470588235294f, 0.65490190784f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glDisable(GL_BLEND);
@@ -263,7 +264,8 @@ void RenderSystem::draw(Scene* scene) {
 	shader->set("offset"_u, cameraOffset);
 	shader->set("scale"_u, 1.0f);
 
-	// PERF: Use some lists to send the data
+	// PERF: Use some VEB to send the data
+	// PERF: Culling & stuff
 	for (const auto& [entity, texture, block] : scene->view<Components::texture, Components::block>().each()) {
 		if (!block.mBreak) {
 			continue;
@@ -283,6 +285,7 @@ void RenderSystem::draw(Scene* scene) {
 	for (const auto& [entity, texture, position] :
 	     scene->view<Components::texture, Components::position>().each()) {
 		Eigen::Vector2f offset = position.mPosition + cameraOffset;
+
 		// Not so performant but let's do it for each entity
 		float time = SDL_sin(SDL_GetTicks() / 1000.0f + offset.sum());
 

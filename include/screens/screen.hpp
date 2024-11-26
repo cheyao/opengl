@@ -9,7 +9,8 @@ class Screen {
 	Screen& operator=(const Screen&) = delete;
 	virtual ~Screen() = default;
 
-	virtual void update(class Scene* scene, float delta);
+	// Returns false if we should also update the other thing
+	virtual bool update(class Scene* scene, float delta);
 	virtual void draw(class Scene* scene);
 
       protected:

@@ -4,6 +4,7 @@
 #include "opengl/mesh.hpp"
 #include "scene.hpp"
 #include "screens/screen.hpp"
+#include <cstddef>
 
 UISystem::UISystem(Game* game) : mGame(game), mMesh(nullptr) {
 	constexpr const static float vertices[] = {
@@ -28,7 +29,11 @@ UISystem::UISystem(Game* game) : mGame(game), mMesh(nullptr) {
 
 void UISystem::update(Scene* scene, const float delta) {
 	if (!mScreenStack.empty()) {
-		mScreenStack.back()->update(scene, delta);
+		for (std::size_t i = 0; i < mScreenStack.size(); ++i) {
+			if ((mScreenStack.back() - i)->update(scene, delta)) {
+				break;
+			}
+		}
 	}
 }
 
