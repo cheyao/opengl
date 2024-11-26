@@ -280,10 +280,11 @@ void RenderSystem::draw(Scene* scene) {
 
 	// Draw other textures
 	shader->set("position"_u, 0, 0);
-	float time = SDL_sin(SDL_GetTicks() / 1000.0f);
 	for (const auto& [entity, texture, position] :
 	     scene->view<Components::texture, Components::position>().each()) {
 		Eigen::Vector2f offset = position.mPosition + cameraOffset;
+		// Not so performant but let's do it for each entity
+		float time = SDL_sin(SDL_GetTicks() / 1000.0f + offset.sum());
 
 		if (scene->contains<Components::item>(entity)) {
 			offset.y() += 40 * time;

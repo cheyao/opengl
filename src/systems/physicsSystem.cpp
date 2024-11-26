@@ -306,10 +306,9 @@ void PhysicsSystem::pushBack(class Scene* scene, const EntityID entity, EntityID
 }
 
 void PhysicsSystem::itemPhysics(class Scene* scene) {
-	const auto blocks = scene->view<Components::collision, Components::block>();
 	const auto players = scene->view<Components::position, Components::inventory>();
 	for (const auto item : scene->view<Components::position, Components::item>()) {
-		// Soo test the blocks with items, only if it's close?
+		// Soo test the blocks with items, only if it's close
 		// Picking the stuff up
 		for (const auto entity : players) {
 			if ((scene->get<Components::position>(item).mPosition -
@@ -323,6 +322,4 @@ void PhysicsSystem::itemPhysics(class Scene* scene) {
 			}
 		}
 	}
-
-	(void)blocks;
 }
