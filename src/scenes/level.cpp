@@ -121,6 +121,7 @@ nlohmann::json Level::save() {
 	auto save = [this](Chunk* chunk) {
 		this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())] =
 			chunk->save(this->mScene);
+
 		delete chunk;
 	};
 

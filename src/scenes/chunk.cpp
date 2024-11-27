@@ -65,6 +65,22 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 nlohmann::json Chunk::save(Scene* scene) {
 	nlohmann::json chunk;
 
+	for (const auto item : scene->view<Components::item>()) {
+		// 0 runs??
+		SDL_Log("Item");
+		// Not in the chunk
+		if ((scene->get<Components::position>(item).mPosition.x() / Components::block::BLOCK_SIZE /
+			     CHUNK_WIDTH -
+		     (scene->get<Components::position>(item).mPosition.x() < 0)) != mPosition) {
+			continue;
+		}
+
+		chunk[ITEMS_KEY].push_back({static_cast<std::uint64_t>(scene->get<Components::item>(item).mType),
+					    scene->get<Components::position>(item).mPosition});
+
+		scene->erase(item);
+	}
+
 	chunk[POSITION_KEY] = mPosition;
 	for (const auto block : scene->view<Components::block>()) {
 		// Not in the chunk
@@ -78,23 +94,6 @@ nlohmann::json Chunk::save(Scene* scene) {
 					     scene->get<Components::block>(block).mPosition});
 
 		scene->erase(block);
-	}
-
-	for (const auto item : scene->view<Components::item>()) {
-		SDL_Log("Item");
-		// Not in the chunk
-		if ((scene->get<Components::position>(item).mPosition.x() / Components::block::BLOCK_SIZE /
-			     CHUNK_WIDTH -
-		     (scene->get<Components::position>(item).mPosition.x() < 0)) != mPosition) {
-			continue;
-		SDL_Log("Itema");
-		}
-		SDL_Log("Itemb");
-
-		chunk[ITEMS_KEY].push_back({static_cast<std::uint64_t>(scene->get<Components::item>(item).mType),
-					    scene->get<Components::position>(item).mPosition});
-
-		scene->erase(item);
 	}
 
 	return chunk;

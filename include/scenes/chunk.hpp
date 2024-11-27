@@ -1,6 +1,5 @@
 #pragma once
 
-#include "third_party/Eigen/Core"
 #include "third_party/json.hpp"
 
 #include <cstdint>
@@ -30,11 +29,6 @@ class Chunk {
 	constexpr const static inline char* const POSITION_KEY = "position";
 	constexpr const static inline char* const BLOCKS_KEY = "blocks";
 	constexpr const static inline char* const ITEMS_KEY = "items";
-
-	struct storage {
-		std::uint64_t type;
-		Eigen::Vector2i pos;
-	};
 
 	const std::int64_t mPosition;
 };
