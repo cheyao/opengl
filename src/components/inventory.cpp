@@ -34,45 +34,7 @@ nlohmann::json Inventory::save() {
 	return contents;
 }
 
-bool Inventory::update(class Scene*, float) {
-	float x, y;
-	SDL_GetMouseState(&x, &y);
-
-	float sx, sy;
-	float ox, oy;
-	float scale;
-
-	SystemManager* systemManager = mGame->getSystemManager();
-	const Eigen::Vector2f dimensions = systemManager->getDemensions();
-
-	if (dimensions.x() <= dimensions.y()) {
-		sx = dimensions.x() / 4 * 3;
-		sy = sx / INVENTORY_TEXTURE_WIDTH * INVENTORY_TEXTURE_HEIGHT;
-		ox = sx / 6;
-		oy = (dimensions.y() - sy) / 2;
-
-		scale = x / INVENTORY_TEXTURE_WIDTH;
-	} else {
-		sy = dimensions.y() / 4 * 3;
-		sx = sy / INVENTORY_TEXTURE_HEIGHT * INVENTORY_TEXTURE_WIDTH;
-		ox = (dimensions.x() - sx) / 2;
-		oy = sy / 6;
-
-		scale = y / INVENTORY_TEXTURE_HEIGHT;
-	}
-
-	ox += INVENTORY_SLOTS_OFFSET_X * scale - (INVENTORY_SLOT_X * scale / 2 - x / INVENTORY_INV_SCALE);
-	oy += INVENTORY_SLOTS_OFFSET_Y * scale - (INVENTORY_SLOT_Y * scale / 2 - y / INVENTORY_INV_SCALE);
-
-	// Not inside the space
-	if (x < ox || y < oy || x > (ox + 9 * INVENTORY_SLOT_X * scale) || y > (oy + 9 * INVENTORY_SLOT_Y * scale)) {
-		return true;
-	}
-
-	SDL_Log("In");
-
-	return true;
-}
+bool Inventory::update(class Scene*, float) { return true; }
 
 void Inventory::draw(class Scene*) {
 	// Draw the inventory

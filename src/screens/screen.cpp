@@ -4,6 +4,6 @@
 
 Screen::Screen(Game* game) : mGame(game) {}
 
-bool Screen::update([[maybe_unused]] class Scene* scene, [[maybe_unused]] float delta) { return true; }
+bool Screen::update(class Scene*, float) { return true; }
 
-void Screen::draw([[maybe_unused]] class Scene* scene) {}
+void Screen::draw(class Scene*) {}

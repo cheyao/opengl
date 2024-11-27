@@ -29,8 +29,8 @@ UISystem::UISystem(Game* game) : mGame(game), mMesh(nullptr) {
 
 void UISystem::update(Scene* scene, const float delta) {
 	if (!mScreenStack.empty()) {
-		for (std::size_t i = 0; i < mScreenStack.size(); ++i) {
-			if ((mScreenStack.back() - i)->update(scene, delta)) {
+		for (auto it = mScreenStack.rbegin(); it != mScreenStack.rend(); ++it) {
+			if ((*it)->update(scene, delta)) {
 				break;
 			}
 		}
