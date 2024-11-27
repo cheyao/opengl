@@ -1,5 +1,6 @@
 #pragma once
 
+#include "components.hpp"
 #include "managers/componentManager.hpp"
 #include "managers/entityManager.hpp"
 #include "misc/sparse_set.hpp"
@@ -69,6 +70,10 @@ class Scene {
 		return mSignals[signal];
 	}
 	void clearSignals() noexcept { mSignals.clear(); }
+
+	struct {
+		Components::Item item = Components::Item::AIR;
+	} mMouse;
 
       private:
 	class EntityManager* mEntityManager;

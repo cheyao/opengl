@@ -5,7 +5,6 @@ Crafting::Crafting(class Game* game, std::uint64_t row, std::uint64_t col)
 
 bool Crafting::update(class Scene*, float) {
 	// Solve the mouse
-
 	return false;
 }
 
