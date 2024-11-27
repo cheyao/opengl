@@ -28,7 +28,8 @@ class Chunk {
 
       private:
 	constexpr const static inline char* const POSITION_KEY = "position";
-	constexpr const static inline char* const CONTENTS_KEY = "blocks";
+	constexpr const static inline char* const BLOCKS_KEY = "blocks";
+	constexpr const static inline char* const ITEMS_KEY = "items";
 
 	struct storage {
 		std::uint64_t type;

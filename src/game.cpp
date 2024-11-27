@@ -100,6 +100,7 @@ Game::~Game() {
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
 #endif
+
 	// Save state
 	delete mStorageManager;
 

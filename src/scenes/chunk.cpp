@@ -44,11 +44,11 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 
 // Loading from save
 Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(data[POSITION_KEY]) {
-	if (!data.contains(CONTENTS_KEY)) {
+	if (!data.contains(BLOCKS_KEY)) {
 		throw std::runtime_error("Not a chunk!");
 	}
 
-	for (const auto& it : data[CONTENTS_KEY]) {
+	for (const auto& it : data[BLOCKS_KEY]) {
 		const auto block = static_cast<Components::Item>(it[0]);
 
 		SDL_assert(registers::TEXTURES.contains(block));
@@ -68,17 +68,33 @@ nlohmann::json Chunk::save(Scene* scene) {
 	chunk[POSITION_KEY] = mPosition;
 	for (const auto block : scene->view<Components::block>()) {
 		// Not in the chunk
-		if (scene->get<Components::block>(block).mPosition.x() / CHUNK_WIDTH -
-			    (scene->get<Components::block>(block).mPosition.x() < 0) !=
-		    mPosition) {
+		if ((scene->get<Components::block>(block).mPosition.x() / CHUNK_WIDTH -
+		     (scene->get<Components::block>(block).mPosition.x() < 0)) != mPosition) {
 			continue;
 		}
 
 		// Here we store the block as type pos pos
-		chunk[CONTENTS_KEY].push_back({static_cast<std::uint64_t>(scene->get<Components::block>(block).mType),
-					       scene->get<Components::block>(block).mPosition});
+		chunk[BLOCKS_KEY].push_back({static_cast<std::uint64_t>(scene->get<Components::block>(block).mType),
+					     scene->get<Components::block>(block).mPosition});
 
 		scene->erase(block);
+	}
+
+	for (const auto item : scene->view<Components::item>()) {
+		SDL_Log("Item");
+		// Not in the chunk
+		if ((scene->get<Components::position>(item).mPosition.x() / Components::block::BLOCK_SIZE /
+			     CHUNK_WIDTH -
+		     (scene->get<Components::position>(item).mPosition.x() < 0)) != mPosition) {
+			continue;
+		SDL_Log("Itema");
+		}
+		SDL_Log("Itemb");
+
+		chunk[ITEMS_KEY].push_back({static_cast<std::uint64_t>(scene->get<Components::item>(item).mType),
+					    scene->get<Components::position>(item).mPosition});
+
+		scene->erase(item);
 	}
 
 	return chunk;
