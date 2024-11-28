@@ -40,7 +40,7 @@ class Inventory : public Screen {
 	constexpr const static inline auto INVENTORY_TEXTURE_HEIGHT = 166.0f;
 	constexpr const static inline auto INVENTORY_SLOTS_OFFSET_X = 7.5f;
 	constexpr const static inline auto INVENTORY_SLOTS_OFFSET_Y = 8.5f;
-	constexpr const static inline auto INVENTORY_INV_SCALE = 15;
+	constexpr const static inline auto INVENTORY_INV_SCALE = 15.0f;
 	constexpr const static inline auto INVENTORY_SLOT_X = 18.0f;
 	constexpr const static inline auto INVENTORY_SLOT_Y = 18.0f;
 

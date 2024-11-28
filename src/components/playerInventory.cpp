@@ -1,7 +1,12 @@
 #include "components/playerInventory.hpp"
 
+#include "components.hpp"
 #include "game.hpp"
+#include "managers/eventManager.hpp"
 #include "managers/systemManager.hpp"
+#include "opengl/mesh.hpp"
+#include "opengl/texture.hpp"
+#include "registers.hpp"
 #include "scene.hpp"
 #include "systems/UISystem.hpp"
 
@@ -12,7 +17,6 @@ PlayerInventory::PlayerInventory(class Game* game, std::size_t size, EntityID en
 	: Inventory(game, size, entity), mSelect(0) {}
 PlayerInventory::PlayerInventory(class Game* game, const nlohmann::json& contents, EntityID entity)
 	: Inventory(game, contents, entity), mSelect(0) {}
-
 bool PlayerInventory::update(class Scene* scene, float delta) {
 	Inventory::update(scene, delta);
 
@@ -69,5 +73,39 @@ bool PlayerInventory::update(class Scene* scene, float delta) {
 	int slot =
 		static_cast<int>(x / (INVENTORY_SLOT_X * scale)) + static_cast<int>(y / (INVENTORY_SLOT_Y * scale)) * 9;
 
+	SDL_Log("%d! %b", slot, scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL));
+	if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mCount[slot] != 0) {
+		scene->mMouse.item = mItems[slot];
+		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+		SDL_Log("Yes!");
+	}
+
 	return true;
+}
+
+void PlayerInventory::draw(class Scene* scene) {
+	Inventory::draw(scene);
+
+	if (scene->mMouse.item == Components::Item::AIR) {
+		return;
+	}
+
+	SystemManager* systemManager = mGame->getSystemManager();
+	Shader* shader = systemManager->getShader("ui.vert", "ui.frag");
+	Mesh* mesh = systemManager->getUISystem()->getMesh();
+	const Eigen::Vector2f dimensions = systemManager->getDemensions();
+
+	float mx, my;
+	SDL_GetMouseState(&mx, &my);
+	my = dimensions.y() - my;
+
+	shader->set("texture_diffuse"_u, 0);
+
+	Texture* texture = systemManager->getTexture(registers::TEXTURES.at(scene->mMouse.item));
+	shader->set("size"_u, static_cast<Eigen::Vector2f>(texture->getSize() / Inventory::INVENTORY_INV_SCALE));
+
+	texture->activate(0);
+	shader->set("offset"_u, mx - texture->getWidth() / Inventory::INVENTORY_INV_SCALE / 2,
+		    my - texture->getHeight() / Inventory::INVENTORY_INV_SCALE / 2);
+	mesh->draw(shader);
 }
