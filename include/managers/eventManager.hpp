@@ -1,12 +1,17 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <cstddef>
 #include <array>
+#include <cstddef>
 #include <span>
+
+#include "opengl/shader.hpp"
 
 class EventManager {
       public:
+	constexpr const static inline auto LEFT_CLICK_DOWN_SIGNAL = "left_down_signal"_u;
+	constexpr const static inline auto LEFT_CLICK_UP_SIGNAL = "left_up_signal"_u;
+
 	explicit EventManager(class Game* game);
 	EventManager(EventManager&&) = delete;
 	EventManager(const EventManager&) = delete;

@@ -43,6 +43,8 @@ class Game {
 	void setPlayerID(const EntityID id) { mPlayer = id; }
 	[[nodiscard]] EntityID getPlayerID() const { return mPlayer; }
 
+	class Level* getLevel() const { return mCurrentLevel; }
+
       private:
 	void gui();
 

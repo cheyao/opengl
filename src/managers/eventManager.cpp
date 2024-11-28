@@ -2,6 +2,8 @@
 
 #include "game.hpp"
 #include "managers/systemManager.hpp"
+#include "scene.hpp"
+#include "scenes/level.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -32,6 +34,10 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 
 		case SDL_EVENT_KEY_UP: {
 			mKeys[event.key.scancode] = false;
+
+			if (event.button.button == SDL_BUTTON_LEFT) {
+				mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = true;
+			}
 
 			break;
 		}
@@ -70,6 +76,7 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 		case SDL_EVENT_MOUSE_BUTTON_DOWN: {
 			if (event.button.button == SDL_BUTTON_LEFT) {
 				mGame->getSystemManager()->registerClick(event.button.x, event.button.y);
+				mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = true;
 			}
 
 			break;

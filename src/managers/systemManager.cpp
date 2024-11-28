@@ -151,7 +151,9 @@ void SystemManager::update(Scene* scene, const float delta) {
 	mRenderSystem->present();
 }
 
-void SystemManager::registerClick(const float x, const float y) { mInputSystem->registerClick(x, y); }
+void SystemManager::registerClick(const float x, const float y) { 
+	mInputSystem->registerClick(x, y);
+}
 
 void SystemManager::updatePlayer(Scene* scene) {
 	// We handle some player's logic here

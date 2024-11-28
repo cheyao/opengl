@@ -30,6 +30,14 @@ bool PlayerInventory::update(class Scene* scene, float delta) {
 
 	SystemManager* systemManager = mGame->getSystemManager();
 	const Eigen::Vector2f dimensions = systemManager->getDemensions();
+	float x, y;
+	auto buttons = SDL_GetMouseState(&x, &y);
+
+	if (!(buttons & SDL_BUTTON_LMASK)) {
+		return true;
+	}
+
+	y = dimensions.y() - y;
 
 	if (dimensions.x() <= dimensions.y()) {
 		sx = dimensions.x() / 4 * 3;
@@ -50,16 +58,16 @@ bool PlayerInventory::update(class Scene* scene, float delta) {
 	ox += INVENTORY_SLOTS_OFFSET_X * scale - (INVENTORY_SLOT_X * scale / 2 - ox / INVENTORY_INV_SCALE);
 	oy += INVENTORY_SLOTS_OFFSET_Y * scale - (INVENTORY_SLOT_Y * scale / 2 - oy / INVENTORY_INV_SCALE);
 
-	float x, y;
-	SDL_GetMouseState(&x, &y);
-	y = dimensions.y() - y;
-
 	// Not inside the space
 	if (x < ox || y < oy || x > (ox + 9 * INVENTORY_SLOT_X * scale) || y > (oy + 4 * INVENTORY_SLOT_Y * scale)) {
 		return true;
 	}
 
-	SDL_Log("In %f %f", x, y);
+	x -= ox;
+	y -= oy;
+
+	int slot =
+		static_cast<int>(x / (INVENTORY_SLOT_X * scale)) + static_cast<int>(y / (INVENTORY_SLOT_Y * scale)) * 9;
 
 	return true;
 }
