@@ -24,9 +24,6 @@ bool PlayerInventory::update(class Scene* scene, float delta) {
 		mGame->getSystemManager()->getUISystem()->pop();
 	}
 
-	float x, y;
-	SDL_GetMouseState(&x, &y);
-
 	float sx, sy;
 	float ox, oy;
 	float scale;
@@ -40,25 +37,29 @@ bool PlayerInventory::update(class Scene* scene, float delta) {
 		ox = sx / 6;
 		oy = (dimensions.y() - sy) / 2;
 
-		scale = x / INVENTORY_TEXTURE_WIDTH;
+		scale = sx / INVENTORY_TEXTURE_WIDTH;
 	} else {
 		sy = dimensions.y() / 4 * 3;
 		sx = sy / INVENTORY_TEXTURE_HEIGHT * INVENTORY_TEXTURE_WIDTH;
 		ox = (dimensions.x() - sx) / 2;
 		oy = sy / 6;
 
-		scale = y / INVENTORY_TEXTURE_HEIGHT;
+		scale = sy / INVENTORY_TEXTURE_HEIGHT;
 	}
 
-	ox += INVENTORY_SLOTS_OFFSET_X * scale - (INVENTORY_SLOT_X * scale / 2 - x / INVENTORY_INV_SCALE);
-	oy += INVENTORY_SLOTS_OFFSET_Y * scale - (INVENTORY_SLOT_Y * scale / 2 - y / INVENTORY_INV_SCALE);
+	ox += INVENTORY_SLOTS_OFFSET_X * scale - (INVENTORY_SLOT_X * scale / 2 - ox / INVENTORY_INV_SCALE);
+	oy += INVENTORY_SLOTS_OFFSET_Y * scale - (INVENTORY_SLOT_Y * scale / 2 - oy / INVENTORY_INV_SCALE);
+
+	float x, y;
+	SDL_GetMouseState(&x, &y);
+	y = dimensions.y() - y;
 
 	// Not inside the space
-	if (x < ox || y < oy || x > (ox + 9 * INVENTORY_SLOT_X * scale) || y > (oy + 9 * INVENTORY_SLOT_Y * scale)) {
+	if (x < ox || y < oy || x > (ox + 9 * INVENTORY_SLOT_X * scale) || y > (oy + 4 * INVENTORY_SLOT_Y * scale)) {
 		return true;
 	}
 
-	SDL_Log("In");
+	SDL_Log("In %f %f", x, y);
 
 	return true;
 }
