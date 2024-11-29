@@ -102,10 +102,22 @@ void PlayerInventory::draw(class Scene* scene) {
 	shader->set("texture_diffuse"_u, 0);
 
 	Texture* texture = systemManager->getTexture(registers::TEXTURES.at(scene->mMouse.item));
-	shader->set("size"_u, static_cast<Eigen::Vector2f>(texture->getSize() / Inventory::INVENTORY_INV_SCALE));
+	float x, y;
+
+	if (dimensions.x() <= dimensions.y()) {
+		x = dimensions.x() / 4 * 3;
+		y = x / INVENTORY_TEXTURE_WIDTH * INVENTORY_TEXTURE_HEIGHT;
+	} else {
+		y = dimensions.y() / 4 * 3;
+		x = y / INVENTORY_TEXTURE_HEIGHT * INVENTORY_TEXTURE_WIDTH;
+	}
+
+	shader->set("size"_u, x / Inventory::INVENTORY_INV_SCALE, y / Inventory::INVENTORY_INV_SCALE);
 
 	texture->activate(0);
-	shader->set("offset"_u, mx - texture->getWidth() / Inventory::INVENTORY_INV_SCALE / 2,
-		    my - texture->getHeight() / Inventory::INVENTORY_INV_SCALE / 2);
+
+	shader->set("offset"_u, mx - x / Inventory::INVENTORY_INV_SCALE / 2,
+		    my - y / Inventory::INVENTORY_INV_SCALE / 2);
+
 	mesh->draw(shader);
 }
