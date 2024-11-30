@@ -28,20 +28,12 @@ bool PlayerInventory::update(class Scene* scene, float delta) {
 		mGame->getSystemManager()->getUISystem()->pop();
 	}
 
+	SystemManager* systemManager = mGame->getSystemManager();
+	const Eigen::Vector2f dimensions = systemManager->getDemensions();
+
 	float sx, sy;
 	float ox, oy;
 	float scale;
-
-	SystemManager* systemManager = mGame->getSystemManager();
-	const Eigen::Vector2f dimensions = systemManager->getDemensions();
-	float x, y;
-	auto buttons = SDL_GetMouseState(&x, &y);
-
-	if (!(buttons & SDL_BUTTON_LMASK)) {
-		return true;
-	}
-
-	y = dimensions.y() - y;
 
 	if (dimensions.x() <= dimensions.y()) {
 		sx = dimensions.x() / 4 * 3;
@@ -59,25 +51,37 @@ bool PlayerInventory::update(class Scene* scene, float delta) {
 		scale = sy / INVENTORY_TEXTURE_HEIGHT;
 	}
 
-	ox += INVENTORY_SLOTS_OFFSET_X * scale - (INVENTORY_SLOT_X * scale / 2 - ox / INVENTORY_INV_SCALE);
-	oy += INVENTORY_SLOTS_OFFSET_Y * scale - (INVENTORY_SLOT_Y * scale / 2 - oy / INVENTORY_INV_SCALE);
+	ox += INVENTORY_SLOTS_OFFSET_X * scale - (INVENTORY_SLOT_X * scale / 2 - sx / INVENTORY_INV_SCALE);
+	oy += INVENTORY_SLOTS_OFFSET_Y * scale - (INVENTORY_SLOT_Y * scale / 2 - sy / INVENTORY_INV_SCALE);
+
+	float mouseX, mouseY;
+	auto buttons = SDL_GetMouseState(&mouseX, &mouseY);
+
+	if (!(buttons & SDL_BUTTON_LMASK)) {
+		return true;
+	}
+	mouseY = dimensions.y() - mouseY;
 
 	// Not inside the space
-	if (x < ox || y < oy || x > (ox + 9 * INVENTORY_SLOT_X * scale) || y > (oy + 4 * INVENTORY_SLOT_Y * scale)) {
+	if (mouseX < ox || mouseY < oy || mouseX > (ox + 9 * INVENTORY_SLOT_X * scale) ||
+	    mouseY > (oy + 4 * INVENTORY_SLOT_Y * scale)) {
 		return true;
 	}
 
-	x -= ox;
-	y -= oy;
+	mouseX -= ox;
+	mouseY -= oy;
 
-	int slot =
-		static_cast<int>(x / (INVENTORY_SLOT_X * scale)) + static_cast<int>(y / (INVENTORY_SLOT_Y * scale)) * 9;
+	int slot = static_cast<int>(mouseX / (INVENTORY_SLOT_X * scale)) +
+		   static_cast<int>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
 
-	SDL_Log("%d! %b", slot, scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL));
 	if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mCount[slot] != 0) {
 		scene->mMouse.item = mItems[slot];
+		scene->mMouse.count = mCount[slot];
+
+		mItems[slot] = Components::Item::AIR;
+		mCount[slot] = 0;
+
 		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
-		SDL_Log("Yes!");
 	}
 
 	return true;

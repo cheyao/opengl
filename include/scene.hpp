@@ -7,6 +7,7 @@
 #include "misc/sparse_set_view.hpp"
 
 #include <SDL3/SDL_assert.h>
+#include <cstddef>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -73,6 +74,7 @@ class Scene {
 
 	struct {
 		Components::Item item = Components::Item::AIR;
+		std::size_t count = 0;
 	} mMouse;
 
       private:
