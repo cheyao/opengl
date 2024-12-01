@@ -28,7 +28,7 @@ class Inventory : public Screen {
 	bool update(class Scene* scene, float delta) override;
 	void draw(class Scene* scene) override;
 	// Sees if the entity can pick the item up, true if picked up false otherwise
-	virtual bool tryPick(Scene* scene, EntityID item);
+	virtual bool tryPick(class Scene* scene, EntityID item);
 
       protected:
 	const EntityID mEntity;
@@ -47,7 +47,8 @@ class Inventory : public Screen {
       private:
 	void drawItems();
 	void close();
-	void pickUp(Scene* scene, EntityID item, std::size_t index);
+	void pickUp(class Scene* scene, EntityID item, std::size_t index);
+	void drawMouse(class Scene* scene);
 
 	constexpr const static inline auto SIZE_KEY = "size";
 	constexpr const static inline auto ITEMS_KEY = "items";

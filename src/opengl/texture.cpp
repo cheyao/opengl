@@ -11,8 +11,10 @@
 #include <stdexcept>
 #include <string_view>
 
+// Load on demand
 Texture::Texture(const std::string_view path) : name(path), mWidth(0), mHeight(0) {}
 
+// PERF: Use compiled texture format
 Texture::Texture(const FT_Bitmap& bitmap)
 	: name(string_format("from freetype bitmap %ux%u", bitmap.width, bitmap.rows)), mWidth(bitmap.width),
 	  mHeight(bitmap.rows) {

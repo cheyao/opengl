@@ -75,11 +75,10 @@ void Level::load(const nlohmann::json& data) {
 		try {
 			chunk = new Chunk(this->mGame, this->mScene,
 					  this->mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(centerChunk)]);
-		} catch (const nlohmann::json::exception& error) {
-			SDL_LogCritical(
-				SDL_LOG_CATEGORY_VIDEO,
-				"\033[31mGenerating new chunk: Failed to parse json for chunk %d: id %d %s\033[0m",
-				centerChunk, error.id, error.what());
+		} catch (const std::exception& error) {
+			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
+					"\033[31mGenerating new chunk: Failed to parse json for chunk %d: id %s\033[0m",
+					centerChunk, error.what());
 
 			chunk = new Chunk(this->mGame, this->mScene, centerChunk);
 		}
@@ -88,8 +87,8 @@ void Level::load(const nlohmann::json& data) {
 	const auto playerPos = mData[PLAYER_KEY]["position"].template get<Eigen::Vector2f>().x();
 
 	loadChunk(mCenter, playerPos);
-	loadChunk(mLeft, playerPos - Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE + 0.01);
-	loadChunk(mRight, playerPos + Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE - 0.01);
+	loadChunk(mLeft, playerPos - Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE + 0.1);
+	loadChunk(mRight, playerPos + Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE + 0.1);
 }
 
 nlohmann::json Level::save() {
@@ -209,6 +208,7 @@ void Level::createCommon() {
 			}
 		});
 
+	// TODO: Rolling text
 	const EntityID text = mScene->newEntity();
 	mScene->emplace<Components::text>(text, "ref");
 	mScene->emplace<Components::position>(

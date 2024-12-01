@@ -71,10 +71,10 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 	// TODO: Non-hardcoded attrib pointer strides
 	// TODO: Prettier
 	glBindVertexArray(mVAO);
+	glEnableVertexAttribArray(0); // Enable no matter what https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#always_enable_vertex_attrib_0_as_an_array
 	if (!positions.empty()) {
 		glBufferSubData(GL_ARRAY_BUFFER, offset, positions.size() * sizeof(float), positions.data());
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
-		glEnableVertexAttribArray(0);
 
 		offset += positions.size() * sizeof(float);
 	} else {

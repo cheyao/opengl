@@ -25,6 +25,8 @@ Dependencies:
 - Freetype 2
 - Assimp (Not really used)
 
+- TODO: Top banner text change with time
+
 ### MacOS and Linux
 
 Install `assimp` and `freetype` with your package manager

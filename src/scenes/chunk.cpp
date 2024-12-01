@@ -44,7 +44,7 @@ Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(
 // Loading from save
 Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(data[POSITION_KEY]) {
 	if (!data.contains(BLOCKS_KEY)) {
-		throw std::runtime_error("Not a chunk!");
+		throw std::runtime_error("Invalid chunk");
 	}
 
 	for (const auto& it : data[BLOCKS_KEY]) {
