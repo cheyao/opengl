@@ -17,30 +17,6 @@
 #include <limits>
 #include <utility>
 
-namespace Eigen {
-void to_json(nlohmann::json& j, const Vector3i& vec) { j = {{"X", vec.x()}, {"Y", vec.y()}, {"Z", vec.z()}}; }
-
-void from_json(const nlohmann::json& j, Vector3i& vec) {
-	j.at("X").get_to(vec.x());
-	j.at("Y").get_to(vec.y());
-	j.at("Z").get_to(vec.z());
-}
-
-void to_json(nlohmann::json& j, const Vector2f& vec) { j = {{"X", vec.x()}, {"Y", vec.y()}}; }
-
-void from_json(const nlohmann::json& j, Vector2f& vec) {
-	j.at("X").get_to(vec.x());
-	j.at("Y").get_to(vec.y());
-}
-
-void to_json(nlohmann::json& j, const Vector2i& vec) { j = {{"X", vec.x()}, {"Y", vec.y()}}; }
-
-void from_json(const nlohmann::json& j, Vector2i& vec) {
-	j.at("X").get_to(vec.x());
-	j.at("Y").get_to(vec.y());
-}
-} // namespace Eigen
-
 Level::Level(class Game* game, const std::string& name)
 	: mName(name), mGame(game), mLeft(nullptr), mCenter(nullptr), mRight(nullptr) {}
 
@@ -90,6 +66,12 @@ void Level::load(const nlohmann::json& data) {
 		const auto centerChunk =
 			static_cast<int>(playerPos) / Components::block::BLOCK_SIZE / Chunk::CHUNK_WIDTH - sign;
 
+		if (this->mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(centerChunk)] == nullptr) {
+			chunk = new Chunk(this->mGame, this->mScene, centerChunk);
+
+			return;
+		}
+
 		try {
 			chunk = new Chunk(this->mGame, this->mScene,
 					  this->mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(centerChunk)]);
@@ -106,8 +88,8 @@ void Level::load(const nlohmann::json& data) {
 	const auto playerPos = mData[PLAYER_KEY]["position"].template get<Eigen::Vector2f>().x();
 
 	loadChunk(mCenter, playerPos);
-	loadChunk(mLeft, playerPos - Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE);
-	loadChunk(mRight, playerPos + Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE);
+	loadChunk(mLeft, playerPos - Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE + 0.01);
+	loadChunk(mRight, playerPos + Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE - 0.01);
 }
 
 nlohmann::json Level::save() {

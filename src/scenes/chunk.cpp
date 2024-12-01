@@ -14,7 +14,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
-#include <vector>
 
 // TODO: Backup
 Chunk::Chunk(Game* game, Scene* scene, const std::int64_t position) : mPosition(position) {
@@ -56,7 +55,7 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 		Texture* texture = game->getSystemManager()->getTexture(registers::TEXTURES.at(block), true);
 
 		const EntityID entity = scene->newEntity();
-		scene->emplace<Components::block>(entity, block, Eigen::Vector2i(it[1][0], it[1][1]));
+		scene->emplace<Components::block>(entity, block, it[1].template get<Eigen::Vector2i>());
 		scene->emplace<Components::texture>(entity, texture);
 		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(), true);
 	}
@@ -75,23 +74,25 @@ nlohmann::json Chunk::save(Scene* scene) {
 			continue;
 		}
 
-		chunk[ITEMS_KEY].push_back({static_cast<std::uint64_t>(scene->get<Components::item>(item).mType),
-					    scene->get<Components::position>(item).mPosition});
+		chunk[ITEMS_KEY].push_back(
+			{static_cast<std::uint64_t>(scene->template get<Components::item>(item).mType),
+			 scene->template get<Components::position>(item).mPosition});
 
 		scene->erase(item);
 	}
 
 	chunk[POSITION_KEY] = mPosition;
-	for (const auto block : scene->view<Components::block>()) {
+	for (const auto block : scene->template view<Components::block>()) {
 		// Not in the chunk
-		if ((scene->get<Components::block>(block).mPosition.x() / CHUNK_WIDTH -
-		     (scene->get<Components::block>(block).mPosition.x() < 0)) != mPosition) {
+		if ((scene->template get<Components::block>(block).mPosition.x() / CHUNK_WIDTH -
+		     (scene->template get<Components::block>(block).mPosition.x() < 0)) != mPosition) {
 			continue;
 		}
 
 		// Here we store the block as type pos pos
-		chunk[BLOCKS_KEY].push_back({static_cast<std::uint64_t>(scene->get<Components::block>(block).mType),
-					     scene->get<Components::block>(block).mPosition});
+		chunk[BLOCKS_KEY].push_back(
+			{static_cast<std::uint64_t>(scene->template get<Components::block>(block).mType),
+			 scene->template get<Components::block>(block).mPosition});
 
 		scene->erase(block);
 	}

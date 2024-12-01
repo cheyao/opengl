@@ -24766,6 +24766,15 @@ inline void swap(nlohmann::NLOHMANN_BASIC_JSON_TPL& j1, nlohmann::NLOHMANN_BASIC
 #undef JSON_HEDLEY_WARN_UNUSED_RESULT_MSG
 #undef JSON_HEDLEY_FALL_THROUGH
 
+#include <third_party/Eigen/Core>
 
+namespace Eigen {
+void to_json(nlohmann::json& j, const Vector3i& vec);
+void from_json(const nlohmann::json& j, Vector3i& vec);
+void to_json(nlohmann::json& j, const Vector2f& vec);
+void from_json(const nlohmann::json& j, Vector2f& vec);
+void to_json(nlohmann::json& j, const Vector2i& vec);
+void from_json(const nlohmann::json& j, Vector2i& vec);
+} // namespace Eigen
 
 #endif  // INCLUDE_NLOHMANN_JSON_HPP_
