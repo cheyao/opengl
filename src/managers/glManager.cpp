@@ -58,6 +58,8 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 	glCullFace(GL_BACK);
 
 	glBlendEquation(GL_FUNC_ADD);
+
+	glClearColor(0.470588235294f, 0.65490190784f, 1.0f, 1.0f);
 }
 
 GLManager::~GLManager() { SDL_GL_DestroyContext(mContext); }

@@ -247,9 +247,15 @@ void RenderSystem::setDemensions(int width, int height) {
 	setOrtho();
 }
 
+/*
+ * Some notes:
+ * https://community.khronos.org/t/most-efficient-way-to-use-multiple-textures-with-instancing/75255/5
+ *
+ * Hmm maybe fustrum culling & occlusion culling
+ */
+
 void RenderSystem::draw(Scene* scene) {
 	// Values *borrowed* from minecraft wiki
-	glClearColor(0.470588235294f, 0.65490190784f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glDisable(GL_BLEND);
 

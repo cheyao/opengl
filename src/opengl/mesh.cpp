@@ -54,7 +54,6 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
-	// SDL_Log("%zu", mIndicesCount);
 
 	glGenVertexArrays(1, &mVAO);
 
@@ -62,13 +61,8 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 	glBufferData(GL_ARRAY_BUFFER, (positions.size() + normals.size() + texturePos.size()) * sizeof(float), nullptr,
 		     GL_STATIC_DRAW);
 
-	static_assert(std::is_same_v<decltype(positions[0]), decltype(normals[0])>);
-	static_assert(std::is_same_v<decltype(texturePos[0]), decltype(normals[0])>);
-	static_assert(std::is_same_v<decltype(texturePos[0]), const float&>);
-
 	std::size_t offset = 0;
 
-	// TODO: Non-hardcoded attrib pointer strides
 	// TODO: Prettier
 	glBindVertexArray(mVAO);
 	glEnableVertexAttribArray(0); // Enable no matter what https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#always_enable_vertex_attrib_0_as_an_array
@@ -78,7 +72,7 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 
 		offset += positions.size() * sizeof(float);
 	} else {
-		SDL_Log("\033[33mMesh.cpp: Normals empty, ignored\033[0m");
+		SDL_Log("\033[33mMesh.cpp: Positions empty, ignored\033[0m");
 	}
 
 	if (!normals.empty()) {
