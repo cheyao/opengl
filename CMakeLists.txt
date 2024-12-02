@@ -34,6 +34,7 @@ option(CPPCHECK 	"Run cppcheck" OFF)
 
 set(SRC
 # Sources
+src/components.cpp
 src/main.cpp
 src/game.cpp
 src/registers.cpp

@@ -46,9 +46,9 @@ class Inventory : public Screen {
 
       private:
 	void drawItems();
+	void drawMouse(class Scene* scene);
 	void close();
 	void pickUp(class Scene* scene, EntityID item, std::size_t index);
-	void drawMouse(class Scene* scene);
 
 	constexpr const static inline auto SIZE_KEY = "size";
 	constexpr const static inline auto ITEMS_KEY = "items";

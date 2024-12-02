@@ -48,7 +48,7 @@ Chunk::Chunk(Game* game, Scene* scene, const nlohmann::json& data) : mPosition(d
 	}
 
 	for (const auto& it : data[BLOCKS_KEY]) {
-		const auto block = static_cast<Components::Item>(it[0]);
+		const Components::Item block = it[0];
 
 		SDL_assert(registers::TEXTURES.contains(block));
 
@@ -74,9 +74,8 @@ nlohmann::json Chunk::save(Scene* scene) {
 			continue;
 		}
 
-		chunk[ITEMS_KEY].push_back(
-			{static_cast<std::uint64_t>(scene->template get<Components::item>(item).mType),
-			 scene->template get<Components::position>(item).mPosition});
+		chunk[ITEMS_KEY].push_back({etoi(scene->template get<Components::item>(item).mType),
+					    scene->template get<Components::position>(item).mPosition});
 
 		scene->erase(item);
 	}
@@ -90,9 +89,8 @@ nlohmann::json Chunk::save(Scene* scene) {
 		}
 
 		// Here we store the block as type pos pos
-		chunk[BLOCKS_KEY].push_back(
-			{static_cast<std::uint64_t>(scene->template get<Components::block>(block).mType),
-			 scene->template get<Components::block>(block).mPosition});
+		chunk[BLOCKS_KEY].push_back({etoi(scene->template get<Components::block>(block).mType),
+					     scene->template get<Components::block>(block).mPosition});
 
 		scene->erase(block);
 	}

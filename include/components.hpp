@@ -6,11 +6,21 @@
 #include <cstdint>
 #include <functional>
 #include <span>
+#include <type_traits>
 
 // Android needs the constructers to be able to use emplace
 class Texture;
 class Shader;
 class Inventory;
+
+template <typename T>
+concept isEnum = requires(T e) { std::is_enum_v<T>; };
+
+template <typename T>
+	requires isEnum<T>
+consteval auto etoi(T e) {
+	return static_cast<std::underlying_type_t<T>>(e);
+}
 
 namespace Components {
 struct position {
@@ -67,7 +77,7 @@ struct misc {
 	constexpr misc(const decltype(mWhat) what) noexcept : mWhat(what) {}
 };
 
-enum Item : std::uint64_t {
+enum class Item : std::uint64_t {
 	AIR = 0,
 	GRASS_BLOCK,
 	STONE,

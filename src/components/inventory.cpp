@@ -90,9 +90,14 @@ bool Inventory::update(class Scene* scene, float) {
 	int slot = static_cast<int>(mouseX / (INVENTORY_SLOT_X * scale)) +
 		   static_cast<int>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
 
-	if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mCount[slot] != 0) {
-		scene->mMouse.item = mItems[slot];
-		scene->mMouse.count = mCount[slot];
+	if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mCount[slot] != 0 &&
+	    (scene->mMouse.count == 0 || (scene->mMouse.item == mItems[slot] && scene->mMouse.count != 0))) {
+		if (scene->mMouse.count != 0 && scene->mMouse.item == mItems[slot]) {
+			scene->mMouse.count += mCount[slot];
+		} else {
+			scene->mMouse.item = mItems[slot];
+			scene->mMouse.count = mCount[slot];
+		}
 
 		mItems[slot] = Components::Item::AIR;
 		mCount[slot] = 0;
@@ -139,44 +144,6 @@ void Inventory::draw(class Scene* scene) {
 
 	drawItems();
 	drawMouse(scene);
-}
-
-void Inventory::drawMouse(Scene* scene) {
-	// Draw Hand
-	if (scene->mMouse.item == Components::Item::AIR) {
-		return;
-	}
-
-	SystemManager* systemManager = mGame->getSystemManager();
-	Shader* shader = systemManager->getShader("ui.vert", "ui.frag");
-	Mesh* mesh = systemManager->getUISystem()->getMesh();
-	const Eigen::Vector2f dimensions = systemManager->getDemensions();
-
-	float mx, my;
-	SDL_GetMouseState(&mx, &my);
-	my = dimensions.y() - my;
-
-	shader->set("texture_diffuse"_u, 0);
-
-	Texture* texture = systemManager->getTexture(registers::TEXTURES.at(scene->mMouse.item));
-	float x, y;
-
-	if (dimensions.x() <= dimensions.y()) {
-		x = dimensions.x() / 4 * 3;
-		y = x / INVENTORY_TEXTURE_WIDTH * INVENTORY_TEXTURE_HEIGHT;
-	} else {
-		y = dimensions.y() / 4 * 3;
-		x = y / INVENTORY_TEXTURE_HEIGHT * INVENTORY_TEXTURE_WIDTH;
-	}
-
-	shader->set("size"_u, x / Inventory::INVENTORY_INV_SCALE, y / Inventory::INVENTORY_INV_SCALE);
-
-	texture->activate(0);
-
-	shader->set("offset"_u, mx - x / Inventory::INVENTORY_INV_SCALE / 2,
-		    my - y / Inventory::INVENTORY_INV_SCALE / 2);
-
-	mesh->draw(shader);
 }
 
 void Inventory::drawItems() {
@@ -235,6 +202,50 @@ void Inventory::drawItems() {
 		}
 
 		shader->activate();
+	}
+}
+
+void Inventory::drawMouse(Scene* scene) {
+	// Draw Hand
+	if (scene->mMouse.item == Components::Item::AIR) {
+		return;
+	}
+
+	SystemManager* systemManager = mGame->getSystemManager();
+	Shader* shader = systemManager->getShader("ui.vert", "ui.frag");
+	Mesh* mesh = systemManager->getUISystem()->getMesh();
+	const Eigen::Vector2f dimensions = systemManager->getDemensions();
+
+	float mx, my;
+	SDL_GetMouseState(&mx, &my);
+	my = dimensions.y() - my;
+
+	shader->set("texture_diffuse"_u, 0);
+
+	Texture* texture = systemManager->getTexture(registers::TEXTURES.at(scene->mMouse.item));
+	float x, y;
+
+	if (dimensions.x() <= dimensions.y()) {
+		x = dimensions.x() / 4 * 3;
+		y = x / INVENTORY_TEXTURE_WIDTH * INVENTORY_TEXTURE_HEIGHT;
+	} else {
+		y = dimensions.y() / 4 * 3;
+		x = y / INVENTORY_TEXTURE_HEIGHT * INVENTORY_TEXTURE_WIDTH;
+	}
+
+	shader->set("size"_u, x / Inventory::INVENTORY_INV_SCALE, y / Inventory::INVENTORY_INV_SCALE);
+
+	texture->activate(0);
+	mx -= x / Inventory::INVENTORY_INV_SCALE / 2;
+	my -= y / Inventory::INVENTORY_INV_SCALE / 2;
+	shader->set("offset"_u, mx, my);
+
+	mesh->draw(shader);
+
+	if (scene->mMouse.count > 1) {
+		mGame->getSystemManager()->getTextSystem()->draw(
+			std::to_string(scene->mMouse.count),
+			Eigen::Vector2f(mx + x / Inventory::INVENTORY_INV_SCALE - 2, my - 5), false);
 	}
 }
 
