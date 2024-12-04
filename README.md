@@ -291,3 +291,5 @@ The linux save directory is `~/.local/share/cyao/opengl/`
     - [ ] [Real time collision detection](https://www.amazon.com/dp/1558607323)
 
 # :3
+
+NOT AN OFFICIAL MINECRAFT SPINOFF. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT
