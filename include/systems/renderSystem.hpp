@@ -38,6 +38,7 @@ class RenderSystem {
 	// These are pointers managed by RenderSystem
 	struct SDL_Window* mWindow;
 	struct SDL_Cursor* mCursor;
+	struct SDL_Surface* mIcon;
 
 	std::unique_ptr<class GLManager> mGL;
 	std::unique_ptr<class Framebuffer> mFramebuffer;

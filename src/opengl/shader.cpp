@@ -65,7 +65,7 @@ Shader::Shader(const std::string_view vertName, const std::string_view fragName,
 
 		log[len] = 0;
 
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to link shader: \n%s\n", log);
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mShader.cpp: Failed to link shader: \n%s\n\033[0m", log);
 		ERROR_BOX("Failed to link shader");
 
 		delete[] log;

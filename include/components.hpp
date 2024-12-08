@@ -18,7 +18,7 @@ concept isEnum = requires(T e) { std::is_enum_v<T>; };
 
 template <typename T>
 	requires isEnum<T>
-consteval auto etoi(T e) {
+constexpr auto etoi(T e) {
 	return static_cast<std::underlying_type_t<T>>(e);
 }
 
@@ -86,11 +86,10 @@ enum class Item : std::uint64_t {
 struct block {
 	Item mType;
 	Eigen::Vector2i mPosition;
-	bool mBreak;
 	bool mClose;
 
 	block(const decltype(mType) type, const decltype(mPosition) position) noexcept
-		: mType(type), mPosition(position), mBreak(false) {}
+		: mType(type), mPosition(position) {}
 
 	constexpr const static inline auto BLOCK_SIZE = 112;
 };

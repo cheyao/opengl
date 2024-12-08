@@ -43,9 +43,6 @@ Game::Game()
 	mSystemManager = new SystemManager(this);
 	mLocaleManager = new LocaleManager(mBasePath);
 
-	// TODO: Icon
-	// SDL_SetWindowIcon(mWindow, icon);
-
 	mStorageManager = new StorageManager(this);
 
 	try {

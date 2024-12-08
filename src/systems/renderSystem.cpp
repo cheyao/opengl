@@ -21,9 +21,10 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_oldnames.h>
+#include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_timer.h>
 #include <cstddef>
-#include <cstdint>
 #include <memory>
 #include <span>
 #include <stdexcept>
@@ -50,8 +51,8 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 
 // PERF: Use the other draw call
 RenderSystem::RenderSystem(Game* game)
-	: mGame(game), mWindow(nullptr), mCursor(nullptr), mGL(nullptr), mFramebuffer(nullptr), mMatricesUBO(nullptr),
-	  mTextures(std::make_unique<TextureManager>(mGame->getBasePath())),
+	: mGame(game), mWindow(nullptr), mCursor(nullptr), mIcon(nullptr), mGL(nullptr), mFramebuffer(nullptr),
+	  mMatricesUBO(nullptr), mTextures(std::make_unique<TextureManager>(mGame->getBasePath())),
 	  mShaders(std::make_unique<ShaderManager>(mGame->getBasePath())), mWidth(0), mHeight(0) {
 	const SDL_DisplayMode* const DM = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
 
@@ -105,10 +106,16 @@ RenderSystem::RenderSystem(Game* game)
 #endif
 	);
 	if (mWindow == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Game.cpp: Failed to create window: %s\n", SDL_GetError());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033]31mFailed to create window: %s\n\033]0m", SDL_GetError());
 		ERROR_BOX("Failed to make SDL window, there is something wrong with your system/SDL installation");
 
 		throw std::runtime_error("Game.cpp: Failed to create SDL window");
+	}
+
+	mIcon = SDL_LoadBMP((mGame->getBasePath() + "assets/textures/icon.bmp").data());
+	if (!SDL_SetWindowIcon(mWindow, mIcon)) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033]31mFailed to set window icon: %s\n\033]0m",
+				SDL_GetError());
 	}
 
 #ifdef __EMSCRIPTEN__
@@ -232,6 +239,7 @@ RenderSystem::RenderSystem(Game* game)
 RenderSystem::~RenderSystem() {
 	SDL_DestroyWindow(mWindow);
 	SDL_DestroyCursor(mCursor);
+	SDL_DestroySurface(mIcon);
 }
 
 void RenderSystem::setDemensions(int width, int height) {
@@ -256,6 +264,7 @@ void RenderSystem::setDemensions(int width, int height) {
 
 void RenderSystem::draw(Scene* scene) {
 	// Values *borrowed* from minecraft wiki
+	glClearColor(0.470588235294f, 0.65490190784f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glDisable(GL_BLEND);
 
@@ -270,20 +279,31 @@ void RenderSystem::draw(Scene* scene) {
 	shader->set("offset"_u, cameraOffset);
 	shader->set("scale"_u, 1.0f);
 
+	const Eigen::Vector2f screenSize = mGame->getSystemManager()->getDemensions() / Components::block::BLOCK_SIZE;
+	const Eigen::Vector2f playerBlockPos = (scene->get<Components::position>(mGame->getPlayerID()).mPosition +
+						scene->get<Components::collision>(mGame->getPlayerID()).mOffset) /
+					       Components::block::BLOCK_SIZE;
+
+	// Screen top, bottom...
+	float sb = playerBlockPos.y() - screenSize.y() / 2 - 1;
+	float st = playerBlockPos.y() + screenSize.y() / 2;
+	float sl = playerBlockPos.x() - screenSize.x() / 2 - 1;
+	float sr = playerBlockPos.x() + screenSize.x() / 2;
+
 	// PERF: Use some VEB to send the data
 	// PERF: Culling & stuff
-	for (const auto& [entity, texture, block] : scene->view<Components::texture, Components::block>().each()) {
-		if (!block.mBreak) {
+	for (const auto& [_, texture, block] : scene->view<Components::texture, Components::block>().each()) {
+		const auto& pos = block.mPosition;
+
+		if (!(pos.y() >= sb && pos.y() <= st && pos.x() <= sr && pos.x() >= sl)) {
 			continue;
 		}
 
-		shader->set("position"_u, block.mPosition);
+		shader->set("position"_u, pos);
 
 		texture.mTexture->activate(0);
 
 		mMesh->draw(shader);
-
-		scene->get<Components::block>(entity).mBreak = false;
 	}
 
 	// Draw other textures

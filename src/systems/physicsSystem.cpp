@@ -102,23 +102,21 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 
 // Somehow this is taking 50% of the CPU?
 void PhysicsSystem::markDirty(Scene* scene) {
-	const float screenSize =
-		(mGame->getSystemManager()->getDemensions() / 1.5 / Components::block::BLOCK_SIZE).squaredNorm();
-	const float close = Eigen::Vector2f(1.5, 1.5).squaredNorm();
+	// Get the person's pos
 	const Eigen::Vector2f playerPos = (scene->get<Components::position>(mGame->getPlayerID()).mPosition +
 					   scene->get<Components::collision>(mGame->getPlayerID()).mOffset) /
 					  Components::block::BLOCK_SIZE;
 
-	// TODO: Use block grid as unit
-	for (const auto block : scene->view<Components::collision, Components::block>()) {
-		const float dist = ((scene->get<Components::block>(block).mPosition.template cast<float>()) - playerPos)
-					   .squaredNorm();
+	float cb = playerPos.y() - 1;
+	float ct = playerPos.y() + 1;
+	float cl = playerPos.x() - 1;
+	float cr = playerPos.x() + 1;
 
-		if (dist < close) {
+	for (const auto block : scene->view<Components::collision, Components::block>()) {
+		const auto& pos = scene->get<Components::block>(block).mPosition;
+
+		if (pos.y() >= cb && pos.y() <= ct && pos.x() <= cr && pos.x() >= cl) {
 			scene->get<Components::block>(block).mClose = true;
-			scene->get<Components::block>(block).mBreak = true;
-		} else if (dist < screenSize) {
-			scene->get<Components::block>(block).mBreak = true;
 		}
 	}
 }
@@ -130,7 +128,8 @@ void PhysicsSystem::collide(Scene* scene) {
 	const auto blocks = scene->view<Components::collision, Components::block>();
 
 	// Iterate over all pairs of colliders
-	// PERF: Use some nice trees https://gamedev.stackexchange.com/questions/26501/how-does-a-collision-engine-work
+	// PERF: Use some nice trees
+	// https://gamedev.stackexchange.com/questions/26501/how-does-a-collision-engine-work
 
 	// Multithreading this will result in worse performance :(
 	for (const auto& entity : entities) {
@@ -247,7 +246,8 @@ bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID ent
 // https://gamedev.stackexchange.com/questions/38891/making-an-efficient-collision-detection-system/38893#38893
 // TODO: Read
 // https://gamedev.stackexchange.com/questions/38613/how-do-i-detect-collision-between-movie-clips/38635#38635
-// Corners: https://gamedev.stackexchange.com/questions/17502/how-to-deal-with-corner-collisions-in-2d?noredirect=1&lq=1
+// Corners:
+// https://gamedev.stackexchange.com/questions/17502/how-to-deal-with-corner-collisions-in-2d?noredirect=1&lq=1
 // https://gamedev.stackexchange.com/questions/29371/how-do-i-prevent-my-platformers-character-from-clipping-on-wall-tiles?noredirect=1&lq=1
 /*
  * Here we first calculate the positions of the squares
@@ -265,7 +265,8 @@ bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID ent
 void PhysicsSystem::pushBack(class Scene* scene, const EntityID entity, EntityID block) {
 	/*
 	 * Thx stack https://gamedev.stackexchange.com/questions/18302/2d-platformer-collisions
-	 * See https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/Player.cs
+	 * See
+	 * https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/Player.cs
 	 * https://github.com/MonoGame/MonoGame.Samples/blob/3.8.2/Platformer2D/Platformer2D.Core/Game/RectangleExtensions.cs#L30
 	 */
 
