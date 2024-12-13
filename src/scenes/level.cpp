@@ -18,7 +18,7 @@
 #include <utility>
 
 Level::Level(class Game* game, const std::string& name)
-	: mName(name), mGame(game), mLeft(nullptr), mCenter(nullptr), mRight(nullptr) {}
+	: mName(name), mTextID(0), mLeft(nullptr), mCenter(nullptr), mRight(nullptr), mGame(game) {}
 
 Level::~Level() { delete mScene; }
 
@@ -115,7 +115,14 @@ nlohmann::json Level::save() {
 	return mData;
 }
 
-void Level::update() {
+void Level::update(const float delta) {
+	mLastTime += delta * 1000;
+	if (mLastTime / ROLL_TIME >= 4) {
+		mLastTime = 0;
+	}
+
+	mScene->get<Components::text>(mTextID).mID = "AD" + std::to_string(mLastTime / ROLL_TIME);
+
 	const auto playerID = mGame->getPlayerID();
 
 	const auto playerX = static_cast<int>(mScene->get<Components::position>(playerID).mPosition.x());
@@ -208,9 +215,8 @@ void Level::createCommon() {
 			}
 		});
 
-	// TODO: Rolling text
-	const EntityID text = mScene->newEntity();
-	mScene->emplace<Components::text>(text, "ref");
-	mScene->emplace<Components::position>(
-		text, Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::infinity()));
+	mTextID = mScene->newEntity();
+	mScene->emplace<Components::text>(mTextID, "AD0");
+	mScene->emplace<Components::position>(mTextID, Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(),
+								       std::numeric_limits<float>::infinity()));
 }

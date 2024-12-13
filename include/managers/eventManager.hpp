@@ -11,6 +11,8 @@ class EventManager {
       public:
 	constexpr const static inline auto LEFT_CLICK_DOWN_SIGNAL = "left_down_signal"_u;
 	constexpr const static inline auto LEFT_CLICK_UP_SIGNAL = "left_up_signal"_u;
+	constexpr const static inline auto RIGHT_CLICK_DOWN_SIGNAL = "right_down_signal"_u;
+	constexpr const static inline auto RIGHT_CLICK_UP_SIGNAL = "right_up_signal"_u;
 
 	explicit EventManager(class Game* game);
 	EventManager(EventManager&&) = delete;

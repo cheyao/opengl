@@ -226,8 +226,8 @@ bool PhysicsSystem::collidingBellow(const class Scene* scene, const EntityID ent
 	const Eigen::Vector2f maxBlock = minBlock + blockCollision.mSize;
 
 	// on a x level
-	const bool notIntercecting = maxEntity.x() <= minBlock.x()    // entity to the left of b
-				     || maxBlock.x() <= minEntity.x() // b to the left of main
+	const bool notIntercecting = maxEntity.x() - 6 <= minBlock.x()	  // entity to the left of b
+				     || maxBlock.x() - 6 <= minEntity.x() // b to the left of main
 				     || maxEntity.y() <= minBlock.y();
 
 	if (notIntercecting) {

@@ -415,7 +415,7 @@ endif()
 
 # Generate locals
 add_custom_command(
-	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/enjson"
+	OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/en.json"
 	COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/cmake/localize.py" ARGS "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/strings.csv"
 	DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/strings.csv"
 )

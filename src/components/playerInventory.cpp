@@ -11,3 +11,12 @@ PlayerInventory::PlayerInventory(class Game* game, std::size_t size, EntityID en
 PlayerInventory::PlayerInventory(class Game* game, const nlohmann::json& contents, EntityID entity)
 	: Inventory(game, contents, entity), mSelect(0) {}
 
+
+void PlayerInventory::tryPlace(class Scene* scene, const Eigen::Vector2i& pos) {
+	if (mItems[mSelect] == Components::Item::AIR) {
+		return;
+	}
+
+	(void) scene;
+	(void) pos;
+}

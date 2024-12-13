@@ -28,6 +28,7 @@ class InputSystem {
 	constexpr const static float LONG_PRESS_ACTIVATION_TIME = 0.1f;
 
 	void updateMouse(class Scene* scene, const float delta);
+	void tryPlace(class Scene* scene, const Eigen::Vector2i& pos);
 
 	class Game* mGame;
 

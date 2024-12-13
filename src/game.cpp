@@ -110,15 +110,15 @@ SDL_AppResult Game::iterate() {
 	const auto begin = std::chrono::high_resolution_clock::now();
 
 	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
-	if (delta > 0.05f) {
-		delta = 0.05f;
+	if (delta > 0.1f) {
+		delta = 0.1f;
 
-		SDL_Log("\033[33mDelta > 0.5f, cutting frame short\033[0m");
+		SDL_Log("\033[33mDelta > 0.1f, cutting frame short\033[0m");
 	}
 	mTicks = SDL_GetTicks();
 
 	gui();
-	mCurrentLevel->update();
+	mCurrentLevel->update(delta);
 	mSystemManager->update(mCurrentLevel->getScene(), delta);
 
 	const auto end = std::chrono::high_resolution_clock::now();

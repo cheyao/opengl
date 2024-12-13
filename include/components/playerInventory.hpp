@@ -20,6 +20,7 @@ class PlayerInventory : public Inventory {
 		mSelect = cell;
 	}
 	std::size_t getSelection() const { return mSelect; }
+	void tryPlace(class Scene* scene, const Eigen::Vector2i& pos);
 
       private:
 	std::size_t mSelect;

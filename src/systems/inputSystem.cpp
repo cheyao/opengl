@@ -1,7 +1,10 @@
 #include "systems/inputSystem.hpp"
 
 #include "components.hpp"
+#include "components/inventory.hpp"
+#include "components/playerInventory.hpp"
 #include "game.hpp"
+#include "managers/eventManager.hpp"
 #include "managers/systemManager.hpp"
 #include "misc/sparse_set_view.hpp"
 #include "opengl/mesh.hpp"
@@ -70,23 +73,30 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 	const auto windowSize = mGame->getSystemManager()->getDemensions();
 	mouseY = windowSize.y() - mouseY;
 
+	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
+	const int realX = mouseZ + playerPos.x() - windowSize.x() / 2;
+	const int realY = mouseY + playerPos.y() - windowSize.y() / 2;
+	const Eigen::Vector2i blockPos{realX / Components::block::BLOCK_SIZE - (realX < 0),
+				       realY / Components::block::BLOCK_SIZE - (realY < 0)};
+
+	if (scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL)) {
+		scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) = false;
+
+		tryPlace(scene, blockPos.cast<int>());
+	}
+
 	const bool leftClick = flags & SDL_BUTTON_LMASK;
 
 	if (!leftClick) {
 		if (mPressLength > 0 && mPressLength < LONG_PRESS_ACTIVATION_TIME) {
 			// Short click
+			// TODO: Open stuff here
 		}
 
 		mPressLength = 0;
 
 		return;
 	}
-
-	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
-	const int realX = mouseZ + playerPos.x() - windowSize.x() / 2;
-	const int realY = mouseY + playerPos.y() - windowSize.y() / 2;
-	const Eigen::Vector2i blockPos{realX / Components::block::BLOCK_SIZE - (realX < 0),
-				       realY / Components::block::BLOCK_SIZE - (realY < 0)};
 
 	if (mDestruction.pos != blockPos) {
 		mPressLength = 0;
@@ -154,4 +164,17 @@ void InputSystem::draw(class Scene* scene) {
 
 	mDestruction.texture->activate(0);
 	mMesh->draw(shader);
+}
+
+void InputSystem::tryPlace(class Scene* scene, const Eigen::Vector2i& pos) {
+	auto* inv = static_cast<PlayerInventory*>(scene->get<Components::inventory>(mGame->getPlayerID()).mInventory);
+	if (inv->getSelection()) {
+		for (const auto& block : scene->view<Components::block>()) {
+			if (scene->get<Components::block>(block).mPosition == pos) {
+				return;
+			}
+		}
+	}
+
+	inv->tryPlace(scene, pos);
 }

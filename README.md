@@ -12,7 +12,6 @@
 
 <h3 align="center"><a href="https://cyao.hackclub.app">Try out web version now!</a></h3>
 
-<h3 align="center">Debug mode</h3>
 <div align="center">
     <img src="https://cloud-l0r4ps4t3-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
 </div>

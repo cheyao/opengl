@@ -31,6 +31,9 @@ for i in range(len(langs[2:])):
     data = {"version": 100};
 
     for row in strings:
+        if (row == ""):
+            continue;
+
         data[row[0]] = row[i+2];
 
     with open(outDir + "/" + langs[i+2] + ".json", "w") as output:
