@@ -105,6 +105,23 @@ bool Inventory::update(class Scene* scene, float) {
 		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 	}
 
+	if (scene->mMouse.count != 0 && scene->mMouse.item != Components::Item::AIR &&
+	    scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) &&
+	    (mCount[slot] == 0 || mItems[slot] == scene->mMouse.item)) {
+		if (mItems[slot] == scene->mMouse.item) {
+			mCount[slot] += scene->mMouse.count;
+		} else {
+			mCount[slot] = scene->mMouse.count;
+		}
+
+		mItems[slot] = scene->mMouse.item;
+
+		scene->mMouse.item = Components::Item::AIR;
+		scene->mMouse.count = 0;
+
+		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+	}
+
 	return true;
 }
 
@@ -184,11 +201,13 @@ void Inventory::drawItems() {
 			continue;
 		}
 
+		float yoff = i >= 9 ? 4 * scale : 0;
+
 		Texture* texture = systemManager->getTexture(registers::TEXTURES.at(mItems[i]));
 		texture->activate(0);
 
 		shader->set("offset"_u, ox + i % 9 * INVENTORY_SLOT_X * scale,
-			    oy + static_cast<int>(i / 9) * INVENTORY_SLOT_Y * scale);
+			    oy + static_cast<int>(i / 9) * INVENTORY_SLOT_Y * scale + yoff);
 
 		mesh->draw(shader);
 
@@ -197,7 +216,7 @@ void Inventory::drawItems() {
 				std::to_string(mCount[i]),
 				Eigen::Vector2f(ox + i % 9 * INVENTORY_SLOT_X * scale + INVENTORY_SLOT_X / 2 * scale -
 							2,
-						oy + static_cast<int>(i / 9) * INVENTORY_SLOT_Y * scale - 5),
+						oy + static_cast<int>(i / 9) * INVENTORY_SLOT_Y * scale - 5 + yoff),
 				false);
 		}
 

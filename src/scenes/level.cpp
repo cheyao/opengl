@@ -14,6 +14,7 @@
 #include "third_party/json.hpp"
 
 #include <SDL3/SDL.h>
+#include <cstddef>
 #include <limits>
 #include <utility>
 
@@ -85,6 +86,8 @@ void Level::load(const nlohmann::json& data) {
 	};
 
 	const auto playerPos = mData[PLAYER_KEY]["position"].template get<Eigen::Vector2f>().x();
+	mScene->mMouse.count = mData[PLAYER_KEY]["mcount"].template get<std::size_t>();
+	mScene->mMouse.item = static_cast<Components::Item>(mData[PLAYER_KEY]["mitem"].template get<std::uint64_t>());
 
 	loadChunk(mCenter, playerPos);
 	loadChunk(mLeft, playerPos - Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE + 0.1);
@@ -97,6 +100,8 @@ nlohmann::json Level::save() {
 	mData[PLAYER_KEY]["position"] = mScene->get<Components::position>(playerID).mPosition;
 	mData[PLAYER_KEY]["velocity"] = mScene->get<Components::velocity>(playerID).mVelocity;
 	mData[PLAYER_KEY]["inventory"] = mScene->get<Components::inventory>(playerID).mInventory->save();
+	mData[PLAYER_KEY]["mcount"] = mScene->mMouse.count;
+	mData[PLAYER_KEY]["mitem"] = static_cast<std::uint64_t>(mScene->mMouse.item);
 	delete mScene->get<Components::inventory>(playerID).mInventory;
 
 	auto save = [this](Chunk* chunk) {
