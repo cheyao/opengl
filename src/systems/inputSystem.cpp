@@ -82,7 +82,7 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 	if (scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL)) {
 		scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) = false;
 
-		tryPlace(scene, blockPos.cast<int>());
+		tryPlace(scene, blockPos.template cast<int>());
 	}
 
 	const bool leftClick = flags & SDL_BUTTON_LMASK;
