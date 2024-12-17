@@ -168,11 +168,9 @@ void InputSystem::draw(class Scene* scene) {
 
 void InputSystem::tryPlace(class Scene* scene, const Eigen::Vector2i& pos) {
 	auto* inv = static_cast<PlayerInventory*>(scene->get<Components::inventory>(mGame->getPlayerID()).mInventory);
-	if (inv->getSelection()) {
-		for (const auto& block : scene->view<Components::block>()) {
-			if (scene->get<Components::block>(block).mPosition == pos) {
-				return;
-			}
+	for (const auto& block : scene->view<Components::block>()) {
+		if (scene->get<Components::block>(block).mPosition == pos) {
+			return;
 		}
 	}
 
