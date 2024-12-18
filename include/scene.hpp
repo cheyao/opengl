@@ -70,8 +70,8 @@ class Scene {
 	void clearSignals() noexcept { mSignals.clear(); }
 
 	struct {
-		Components::Item item;
-		std::size_t count;
+		Components::Item item = static_cast<Components::Item>(0);
+		std::size_t count = 0;
 	} mMouse;
 
       private:
