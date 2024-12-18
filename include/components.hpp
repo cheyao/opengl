@@ -77,11 +77,7 @@ struct misc {
 	constexpr misc(const decltype(mWhat) what) noexcept : mWhat(what) {}
 };
 
-enum class Item : std::uint64_t {
-	AIR = 0,
-	GRASS_BLOCK,
-	STONE,
-};
+enum class Item : std::uint64_t;
 
 struct block {
 	Item mType;

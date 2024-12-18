@@ -3,14 +3,12 @@
 #include "components.hpp"
 #include "managers/componentManager.hpp"
 #include "managers/entityManager.hpp"
-#include "misc/sparse_set.hpp"
 #include "misc/sparse_set_view.hpp"
+#include "registers.hpp"
 
 #include <SDL3/SDL_assert.h>
 #include <cstddef>
-#include <string>
 #include <unordered_map>
-#include <vector>
 
 class Scene {
 #ifdef IMGUI
