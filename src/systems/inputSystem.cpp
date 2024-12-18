@@ -174,5 +174,29 @@ void InputSystem::tryPlace(class Scene* scene, const Eigen::Vector2i& pos) {
 		}
 	}
 
+	// Can't place on entity
+	using namespace Components;
+
+	const Eigen::Vector2f minB = pos.template cast<float>() * block::BLOCK_SIZE + Eigen::Vector2f(5, 5);
+	const Texture* stone = mGame->getSystemManager()->getTexture("blocks/stone.png", true);
+	const Eigen::Vector2f maxB = minB + stone->getSize() * 0.9;
+
+	for (const auto& entity : scene->view<Components::position, Components::collision>()) {
+		const Eigen::Vector2f minA =
+			scene->get<position>(entity).mPosition + scene->get<collision>(entity).mOffset;
+		const Eigen::Vector2f maxA = minA + scene->get<collision>(entity).mSize;
+
+		// If one of these four are true, it means the cubes are not intersecting
+		const bool notIntercecting = maxA.x() <= minB.x()     // Amax to the left of Bmin
+					     || maxA.y() <= minB.y()  // Amax to the bottom of Bmin
+					     || maxB.x() <= minA.x()  // Bmax to the left of Amax
+					     || maxB.y() <= minA.y(); // Bmax to the bottom of Amin
+
+		// So return the inverse of not intersecting
+		if (!notIntercecting) {
+			return;
+		}
+	}
+
 	inv->tryPlace(scene, pos);
 }

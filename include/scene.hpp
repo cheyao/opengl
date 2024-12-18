@@ -4,7 +4,6 @@
 #include "managers/componentManager.hpp"
 #include "managers/entityManager.hpp"
 #include "misc/sparse_set_view.hpp"
-#include "registers.hpp"
 
 #include <SDL3/SDL_assert.h>
 #include <cstddef>
@@ -71,8 +70,8 @@ class Scene {
 	void clearSignals() noexcept { mSignals.clear(); }
 
 	struct {
-		Components::Item item = Components::Item::AIR;
-		std::size_t count = 0;
+		Components::Item item;
+		std::size_t count;
 	} mMouse;
 
       private:
