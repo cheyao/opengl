@@ -21,10 +21,10 @@ UISystem::UISystem(Game* game) : mGame(game), mMesh(nullptr) {
 		1.0f, 0.0f  // BL
 	};
 
-	const static GLuint indices[] = {2, 1, 0,  // a
-					 1, 2, 3}; // b
+	constexpr const static GLuint indices[] = {2, 1, 0,  // a
+						   1, 2, 3}; // b
 
-	mMesh = new Mesh(vertices, {}, texturePos, indices, {});
+	mMesh.reset(new Mesh(vertices, {}, texturePos, indices, {}));
 }
 
 void UISystem::update(Scene* scene, const float delta) {

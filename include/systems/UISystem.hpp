@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 /*
@@ -23,10 +24,10 @@ class UISystem {
 	void pop() { mScreenStack.pop_back(); }
 
 	bool empty() const { return mScreenStack.empty(); }
-	class Mesh* getMesh() const { return mMesh; }
+	class Mesh* getMesh() const { return mMesh.get(); }
 
       private:
 	class Game* mGame;
-	class Mesh* mMesh;
+	std::unique_ptr<class Mesh> mMesh;
 	std::vector<class Screen*> mScreenStack;
 };

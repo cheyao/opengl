@@ -1,5 +1,6 @@
 #pragma once
 
+#include <SDL3/SDL_video.h>
 #include <memory>
 #include <string>
 
@@ -36,9 +37,9 @@ class RenderSystem {
 	class Game* mGame;
 
 	// These are pointers managed by RenderSystem
-	struct SDL_Window* mWindow;
-	struct SDL_Cursor* mCursor;
-	struct SDL_Surface* mIcon;
+	std::unique_ptr<struct SDL_Window, void (*)(SDL_Window*)> mWindow;
+	std::unique_ptr<struct SDL_Cursor, void (*)(SDL_Cursor*)> mCursor;
+	std::unique_ptr<struct SDL_Surface, void (*)(SDL_Surface*)> mIcon;
 
 	std::unique_ptr<class GLManager> mGL;
 	std::unique_ptr<class Framebuffer> mFramebuffer;

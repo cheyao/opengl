@@ -133,7 +133,7 @@ void SystemManager::update(Scene* scene, const float delta) {
 	mPhysicsSystem->update(scene, delta); // 12.08%
 
 	mPhysicsSystem->collide(scene); // 33.72%
-	
+
 	updatePlayer(scene);
 
 	// This is after since it will delete stuff
@@ -149,9 +149,7 @@ void SystemManager::update(Scene* scene, const float delta) {
 	mRenderSystem->present();
 }
 
-void SystemManager::registerClick(const float x, const float y) { 
-	mInputSystem->registerClick(x, y);
-}
+void SystemManager::registerClick(const float x, const float y) { mInputSystem->registerClick(x, y); }
 
 void SystemManager::updatePlayer(Scene* scene) {
 	// We handle some player's logic here

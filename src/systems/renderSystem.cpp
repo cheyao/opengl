@@ -21,9 +21,7 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_surface.h>
-#include <SDL3/SDL_timer.h>
 #include <cstddef>
 #include <memory>
 #include <span>
@@ -51,9 +49,10 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 
 // PERF: Use the other draw call
 RenderSystem::RenderSystem(Game* game)
-	: mGame(game), mWindow(nullptr), mCursor(nullptr), mIcon(nullptr), mGL(nullptr), mFramebuffer(nullptr),
-	  mMatricesUBO(nullptr), mTextures(std::make_unique<TextureManager>(mGame->getBasePath())),
-	  mShaders(std::make_unique<ShaderManager>(mGame->getBasePath())), mWidth(0), mHeight(0) {
+	: mGame(game), mWindow(nullptr, SDL_DestroyWindow), mCursor(nullptr, SDL_DestroyCursor),
+	  mIcon(nullptr, SDL_DestroySurface), mGL(nullptr), mFramebuffer(nullptr), mMatricesUBO(nullptr),
+	  mTextures(std::make_unique<TextureManager>(mGame->getBasePath())),
+	  mShaders(std::make_unique<ShaderManager>(mGame->getBasePath())), mMesh(nullptr), mWidth(0), mHeight(0) {
 	const SDL_DisplayMode* const DM = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
 
 	SDL_Log("\n");
@@ -96,24 +95,25 @@ RenderSystem::RenderSystem(Game* game)
 	mHeight = 768;
 #endif
 
-	mWindow = SDL_CreateWindow("OpenGL", mWidth, mHeight,
-				   SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
+	mWindow.reset(SDL_CreateWindow("OpenGL", mWidth, mHeight,
+				       SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE
 #ifdef ANDROID
-					   | SDL_WINDOW_FULLSCREEN
+					       | SDL_WINDOW_FULLSCREEN
 #endif
 #ifdef HIDPI
-					   | SDL_WINDOW_HIGH_PIXEL_DENSITY
+					       | SDL_WINDOW_HIGH_PIXEL_DENSITY
 #endif
-	);
-	if (mWindow == nullptr) {
+				       ));
+
+	if (!mWindow) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033]31mFailed to create window: %s\n\033]0m", SDL_GetError());
 		ERROR_BOX("Failed to make SDL window, there is something wrong with your system/SDL installation");
 
 		throw std::runtime_error("Game.cpp: Failed to create SDL window");
 	}
 
-	mIcon = SDL_LoadBMP((mGame->getBasePath() + "assets/textures/icon.bmp").data());
-	if (!SDL_SetWindowIcon(mWindow, mIcon)) {
+	mIcon.reset(SDL_LoadBMP((mGame->getBasePath() + "assets/textures/icon.bmp").data()));
+	if (!SDL_SetWindowIcon(mWindow.get(), mIcon.get())) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033]31mFailed to set window icon: %s\n\033]0m",
 				SDL_GetError());
 	}
@@ -122,14 +122,14 @@ RenderSystem::RenderSystem(Game* game)
 	mWidth = browserWidth();
 	mHeight = browserHeight();
 
-	SDL_SetWindowSize(mWindow, mWidth, mHeight);
+	SDL_SetWindowSize(mWindow.get(), mWidth, mHeight);
 #endif
 
 #if !defined(ANDROID) && !defined(__EMSCRIPTEN__)
-	SDL_SetWindowMinimumSize(mWindow, 480, 320);
+	SDL_SetWindowMinimumSize(mWindow.get(), 480, 320);
 #endif
 
-	mGL = std::make_unique<GLManager>(mWindow);
+	mGL = std::make_unique<GLManager>(mWindow.get());
 
 	SDL_assert(mGL->getContext() != nullptr);
 
@@ -173,7 +173,7 @@ RenderSystem::RenderSystem(Game* game)
 			break;
 	}
 
-	ImGui_ImplSDL3_InitForOpenGL(mWindow, mGL->getContext());
+	ImGui_ImplSDL3_InitForOpenGL(mWindow.get(), mGL->getContext());
 #ifdef GLES
 	ImGui_ImplOpenGL3_Init("#version 300 es  ");
 #else
@@ -183,7 +183,7 @@ RenderSystem::RenderSystem(Game* game)
 	SDL_Log("Finished Initializing ImGUI");
 #endif
 
-	SDL_GetWindowSize(mWindow, &mWidth, &mHeight);
+	SDL_GetWindowSize(mWindow.get(), &mWidth, &mHeight);
 
 	mFramebuffer = std::make_unique<Framebuffer>(this);
 	// NOTE: Uncomment if testing framebuffer module
@@ -215,17 +215,16 @@ RenderSystem::RenderSystem(Game* game)
 	const static GLuint indices[] = {2, 1, 0,  // a
 					 1, 2, 3}; // b
 
-	mMesh = std::unique_ptr<Mesh>(new Mesh(vertices, {}, texturePos, indices, {}));
+	mMesh.reset(new Mesh(vertices, {}, texturePos, indices, {}));
 
 #ifndef __ANDROID__
-	SDL_Surface* cursorSurface = SDL_LoadBMP((mGame->getBasePath() + "assets/textures/crosshair.bmp").data());
+	std::unique_ptr<SDL_Surface, void (*)(SDL_Surface*)> cursorSurface(
+		SDL_LoadBMP((mGame->getBasePath() + "assets/textures/crosshair.bmp").data()), SDL_DestroySurface);
 
 	if (cursorSurface) {
-		mCursor = SDL_CreateColorCursor(cursorSurface, 8, 8);
+		mCursor.reset(SDL_CreateColorCursor(cursorSurface.get(), 8, 8));
 
-		SDL_DestroySurface(cursorSurface);
-
-		if (mCursor && SDL_SetCursor(mCursor)) {
+		if (mCursor && SDL_SetCursor(mCursor.get())) {
 			SDL_Log("\033[32mSuccesfully set cursor\033[0m");
 		} else {
 			SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to set cursor: %s\033[0m", SDL_GetError());
@@ -236,18 +235,14 @@ RenderSystem::RenderSystem(Game* game)
 #endif
 }
 
-RenderSystem::~RenderSystem() {
-	SDL_DestroyWindow(mWindow);
-	SDL_DestroyCursor(mCursor);
-	SDL_DestroySurface(mIcon);
-}
+RenderSystem::~RenderSystem() {}
 
 void RenderSystem::setDemensions(int width, int height) {
 	mWidth = width;
 	mHeight = height;
 
 	int w, h;
-	SDL_GetWindowSizeInPixels(mWindow, &w, &h);
+	SDL_GetWindowSizeInPixels(mWindow.get(), &w, &h);
 
 	glViewport(0, 0, w, h);
 	mFramebuffer->setDemensions(w, h);
@@ -418,7 +413,7 @@ void RenderSystem::draw(Scene* scene) {
 
 void RenderSystem::present() const { mFramebuffer->swap(); }
 
-void RenderSystem::swapWindow() const { SDL_GL_SwapWindow(mWindow); }
+void RenderSystem::swapWindow() const { SDL_GL_SwapWindow(mWindow.get()); }
 
 Texture* RenderSystem::getTexture(const std::string& name, const bool srgb) { return mTextures->get(name, srgb); }
 
