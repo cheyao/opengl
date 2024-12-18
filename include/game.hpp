@@ -32,8 +32,8 @@ class Game {
 	[[nodiscard]] SDL_AppResult iterate();
 	[[nodiscard]] SDL_AppResult event(const union SDL_Event& event);
 
-	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager; }
-	[[nodiscard]] class SystemManager* getSystemManager() const { return mSystemManager; }
+	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager.get(); }
+	[[nodiscard]] class SystemManager* getSystemManager() const { return mSystemManager.get(); }
 
 	[[nodiscard]] inline std::string getBasePath() const { return mBasePath; }
 
@@ -50,9 +50,9 @@ class Game {
 
 	std::unique_ptr<class EventManager> mEventManager;
 
-	class SystemManager* mSystemManager;
-	class LocaleManager* mLocaleManager;
-	class StorageManager* mStorageManager;
+	std::unique_ptr<class SystemManager> mSystemManager;
+	std::unique_ptr<class LocaleManager> mLocaleManager;
+	std::unique_ptr<class StorageManager> mStorageManager;
 
 	std::uint64_t mTicks;
 	std::string mBasePath;

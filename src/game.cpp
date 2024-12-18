@@ -40,10 +40,10 @@ Game::Game()
 	// First initialize these subsystems because the other ones need it
 	mEventManager = std::make_unique<EventManager>(this);
 
-	mSystemManager = new SystemManager(this);
-	mLocaleManager = new LocaleManager(mBasePath);
+	mSystemManager = std::make_unique<SystemManager>(this);
+	mLocaleManager = std::make_unique<LocaleManager>(mBasePath);
 
-	mStorageManager = new StorageManager(this);
+	mStorageManager = std::make_unique<StorageManager>(this);
 
 	try {
 		mStorageManager->restore();
@@ -59,8 +59,7 @@ Game::Game()
 	mTicks = SDL_GetTicks();
 
 	const auto end = std::chrono::high_resolution_clock::now();
-	std::stringstream time;
-	time << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() << "ns ("
+	std::stringstream time; time << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() << "ns ("
 	     << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "milis)";
 	SDL_Log("Startup took %s", time.str().data());
 
@@ -97,13 +96,6 @@ Game::~Game() {
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
 #endif
-
-	// Save state
-	delete mStorageManager;
-
-	delete mLocaleManager;
-	delete mSystemManager;
-	delete mCurrentLevel;
 }
 
 SDL_AppResult Game::iterate() {
