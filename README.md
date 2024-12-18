@@ -24,7 +24,6 @@ Dependencies:
 - Freetype 2
 - Assimp (Not really used)
 
-- TODO: Top banner text change with time
 - PERF: Biggest bottleneck is at GPU now, only 60% single-cpu usage at 600FPS
 
 ### MacOS and Linux

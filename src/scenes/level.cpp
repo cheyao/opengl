@@ -2,6 +2,7 @@
 
 #include "components.hpp"
 #include "components/inventory.hpp"
+#include "components/noise.hpp"
 #include "components/playerInventory.hpp"
 #include "game.hpp"
 #include "managers/entityManager.hpp"
@@ -19,7 +20,8 @@
 #include <utility>
 
 Level::Level(class Game* game, const std::string& name)
-	: mName(name), mTextID(0), mLeft(nullptr), mCenter(nullptr), mRight(nullptr), mGame(game) {}
+	: mName(name), mTextID(0), mLeft(nullptr), mCenter(nullptr), mRight(nullptr), mGame(game),
+	  mNoise(new NoiseGenerator()) {}
 
 Level::~Level() { delete mScene; }
 
@@ -35,12 +37,12 @@ void Level::create() {
 
 	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
 	mScene->emplace<Components::position>(
-		player, Eigen::Vector2f(0.0f, (Chunk::WATER_LEVEL + 1) * Components::block::BLOCK_SIZE));
+		player, Eigen::Vector2f(0.0f, (Chunk::WATER_LEVEL + 1) * Components::block::BLOCK_SIZE + 5 * mNoise->getNoise(0)));
 	mScene->emplace<Components::inventory>(player, new PlayerInventory(mGame, 36, player));
 
-	mLeft = new Chunk(mGame, mScene, -1);
-	mCenter = new Chunk(mGame, mScene, 0);
-	mRight = new Chunk(mGame, mScene, 1);
+	mLeft = new Chunk(mGame, mScene, mNoise.get(), -1);
+	mCenter = new Chunk(mGame, mScene, mNoise.get(), 0);
+	mRight = new Chunk(mGame, mScene, mNoise.get(), 1);
 
 	mData[CHUNK_KEY]["-"];
 	mData[CHUNK_KEY]["+"];
@@ -68,20 +70,20 @@ void Level::load(const nlohmann::json& data) {
 			static_cast<int>(playerPos) / Components::block::BLOCK_SIZE / Chunk::CHUNK_WIDTH - sign;
 
 		if (this->mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(centerChunk)] == nullptr) {
-			chunk = new Chunk(this->mGame, this->mScene, centerChunk);
+			chunk = new Chunk(this->mGame, this->mScene, mNoise.get(), centerChunk);
 
 			return;
 		}
 
 		try {
-			chunk = new Chunk(this->mGame, this->mScene,
-					  this->mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(centerChunk)]);
+			chunk = new Chunk(this->mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(centerChunk)], this->mGame,
+					  this->mScene);
 		} catch (const std::exception& error) {
 			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
 					"\033[31mGenerating new chunk: Failed to parse json for chunk %d: id %s\033[0m",
 					centerChunk, error.what());
 
-			chunk = new Chunk(this->mGame, this->mScene, centerChunk);
+			chunk = new Chunk(this->mGame, this->mScene, mNoise.get(), centerChunk);
 		}
 	};
 
@@ -122,7 +124,7 @@ nlohmann::json Level::save() {
 
 void Level::update(const float delta) {
 	mLastTime += delta * 1000;
-	if (mLastTime / ROLL_TIME >= 4) {
+	if (mLastTime / ROLL_TIME >= 5) {
 		mLastTime = 0;
 	}
 
@@ -148,13 +150,13 @@ void Level::update(const float delta) {
 		mCenter = mLeft;
 
 		try {
-			mLeft = new Chunk(mGame, mScene, mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(currentChunk - 1)]);
+			mLeft = new Chunk(mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(currentChunk - 1)], mGame, mScene);
 		} catch (const nlohmann::json::exception& error) {
 			SDL_LogInfo(SDL_LOG_CATEGORY_CUSTOM,
 				    "\033[31mGenerating new chunk: Failed to parse json for chunk %d: id %d %s\033[0m",
 				    currentChunk, error.id, error.what());
 
-			mLeft = new Chunk(mGame, mScene, currentChunk - 1);
+			mLeft = new Chunk(mGame, mScene, mNoise.get(), currentChunk - 1);
 		}
 	} else if (currentChunk == mRight->getPosition()) {
 		mData[CHUNK_KEY][mLeft->getPosition() < 0 ? "-" : "+"][SDL_abs(mLeft->getPosition())] =
@@ -166,13 +168,13 @@ void Level::update(const float delta) {
 
 		try {
 			mRight =
-				new Chunk(mGame, mScene, mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(currentChunk + 1)]);
+				new Chunk(mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(currentChunk + 1)], mGame, mScene);
 		} catch (const nlohmann::json::exception& error) {
 			SDL_LogInfo(SDL_LOG_CATEGORY_CUSTOM,
 				    "\033[31mGenerating new chunk: Failed to parse json for chunk %d: id %d %s\033[0m",
 				    currentChunk, error.id, error.what());
 
-			mRight = new Chunk(mGame, mScene, currentChunk + 1);
+			mRight = new Chunk(mGame, mScene, mNoise.get(), currentChunk + 1);
 		}
 	} else {
 		SDL_Log("\033[33mOut of boundary for chunk %d, loaded chunks: %" PRIu64 " %" PRIu64 " %" PRIu64
@@ -189,9 +191,9 @@ void Level::update(const float delta) {
 		save(mCenter);
 		save(mRight);
 
-		mLeft = new Chunk(mGame, mScene, currentChunk - 1);
-		mCenter = new Chunk(mGame, mScene, currentChunk);
-		mRight = new Chunk(mGame, mScene, currentChunk + 1);
+		mLeft = new Chunk(mGame, mScene, mNoise.get(), currentChunk - 1);
+		mCenter = new Chunk(mGame, mScene, mNoise.get(), currentChunk);
+		mRight = new Chunk(mGame, mScene, mNoise.get(), currentChunk + 1);
 	}
 }
 

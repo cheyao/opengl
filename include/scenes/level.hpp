@@ -4,6 +4,7 @@
 #include "third_party/json.hpp"
 
 #include <cstdint>
+#include <memory>
 #include <string>
 
 // Something important
@@ -46,4 +47,6 @@ class Level {
 
 	class Game* mGame;
 	class Scene* mScene;
+
+	std::unique_ptr<class NoiseGenerator> mNoise;
 };

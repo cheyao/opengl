@@ -12,9 +12,10 @@ class Chunk {
 	inline constexpr const static int WATER_LEVEL = 16;
 
 	// Generate a chunk from scratch
-	Chunk(class Game* game, class Scene* scene, const std::int64_t position);
+	explicit Chunk(class Game* game, class Scene* scene, const class NoiseGenerator* const noise,
+		       const std::int64_t position);
 	// Load from json
-	Chunk(class Game* game, class Scene* scene, const nlohmann::json& data);
+	explicit Chunk(const nlohmann::json& data, class Game* game, class Scene* scene);
 	Chunk(Chunk&&) = delete;
 	Chunk(const Chunk&) = delete;
 	Chunk& operator=(Chunk&&) = delete;

@@ -406,7 +406,7 @@ void RenderSystem::draw(Scene* scene) {
 		mWidth = browserWidth();
 		mHeight = browserHeight();
 
-		SDL_SetWindowSize(mWindow, mWidth, mHeight);
+		SDL_SetWindowSize(mWindow.get(), mWidth, mHeight);
 	}
 #endif
 }

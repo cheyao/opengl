@@ -8,6 +8,7 @@
   font-family: arial;
   margin: 0;
   padding: none;
+  background-color: #9fcfff;
 }
 
 .emscripten { padding-right: 0; display: block; }
@@ -35,7 +36,7 @@ canvas.emscripten { border: 0px none; }
   border-top: 5px solid rgb(120, 120, 120);
 
   border-radius: 100%;
-  background-color: rgb(189, 215, 46);
+  background-color: #64A0D7 !important; 
 }
 
 @-webkit-keyframes rotation {
