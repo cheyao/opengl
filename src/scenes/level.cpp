@@ -37,7 +37,8 @@ void Level::create() {
 
 	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
 	mScene->emplace<Components::position>(
-		player, Eigen::Vector2f(0.0f, (Chunk::WATER_LEVEL + 1) * Components::block::BLOCK_SIZE + 5 * mNoise->getNoise(0)));
+		player, Eigen::Vector2f(0.0f, (Chunk::WATER_LEVEL + 1) * Components::block::BLOCK_SIZE +
+						      5 * mNoise->getNoise(0)));
 	mScene->emplace<Components::inventory>(player, new PlayerInventory(mGame, 36, player));
 
 	mLeft = new Chunk(mGame, mScene, mNoise.get(), -1);
@@ -56,6 +57,8 @@ void Level::load(const nlohmann::json& data) {
 	mScene = new Scene();
 	const EntityID player = mScene->newEntity();
 	mGame->setPlayerID(player);
+
+	mNoise->setSeed(mData[CHUNK_KEY]["seed"]);
 
 	createCommon();
 
@@ -105,6 +108,7 @@ nlohmann::json Level::save() {
 	mData[PLAYER_KEY]["mcount"] = mScene->mMouse.count;
 	mData[PLAYER_KEY]["mitem"] = static_cast<std::uint64_t>(mScene->mMouse.item);
 	delete mScene->get<Components::inventory>(playerID).mInventory;
+	mData[CHUNK_KEY]["seed"] = mNoise->getSeed();
 
 	auto save = [this](Chunk* chunk) {
 		this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())] =

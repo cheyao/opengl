@@ -15,6 +15,8 @@ class NoiseGenerator {
 	~NoiseGenerator() = default;
 
 	double getNoise(std::int64_t x) const;
+	std::uint64_t getSeed() const { return mSeed; }
+	void setSeed(std::uint64_t seed) { mSeed = seed; }
 
       private:
 	std::uint64_t mSeed;
