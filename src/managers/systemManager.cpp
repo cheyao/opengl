@@ -175,7 +175,7 @@ void SystemManager::printDebug([[maybe_unused]] Scene* scene) {
 	// Print out signals
 	static bool signalList = false;
 	static bool entityList = false;
-	ImGui::Begin("Main menu");
+	ImGui::Begin("Developer menu");
 	ImGui::Checkbox("List of signals", &signalList);
 	ImGui::Checkbox("List of entities", &entityList);
 	ImGui::End();

@@ -163,7 +163,7 @@ void Game::gui() {
 	static bool demo = false;
 
 	/* Main menu */ {
-		ImGui::Begin("Main menu");
+		ImGui::Begin("Developer menu");
 
 		ImGuiIO& io = ImGui::GetIO();
 		ImGui::Text("%.3f ms %.1f FPS", (1000.f / io.Framerate), io.Framerate);

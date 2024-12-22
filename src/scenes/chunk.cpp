@@ -12,20 +12,26 @@
 #include "third_party/json.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_stdinc.h>
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
 
 // TODO: Backup
 Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const std::int64_t position)
-	: mPosition(position) {
+	: mPosition(position), mGame(game) {
 
 	// Spawn blocks
 	Texture* stone = game->getSystemManager()->getTexture("blocks/stone.png", true);
 	Texture* grass = game->getSystemManager()->getTexture("blocks/grass-block.png", true);
+
+	SDL_srand(noise->getSeed());
+
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		double height = noise->getNoise(i + position * CHUNK_WIDTH);
 		std::uint64_t block_height = WATER_LEVEL + 5 * height;
+		mHeightMap[i] = block_height;
 
 		for (std::uint64_t y = 0; y < block_height; ++y) {
 			const EntityID entity = scene->newEntity();
@@ -41,11 +47,21 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 						  Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, block_height));
 		scene->emplace<Components::texture>(entity, grass);
 		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), grass->getSize(), true);
+
+		// Spawn structures
+		for (const auto& [chance, structure] : registers::SURFACE_STRUCTURES) {
+			float roll = SDL_randf();
+
+			if (roll < chance) {
+				spawnStructure(Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, block_height + 1),
+					       structure, scene);
+			}
+		}
 	}
 }
 
 // Loading from save
-Chunk::Chunk(const nlohmann::json& data, Game* game, Scene* scene) : mPosition(data[POSITION_KEY]) {
+Chunk::Chunk(const nlohmann::json& data, Game* game, Scene* scene) : mPosition(data[POSITION_KEY]), mGame(game) {
 	if (!data.contains(BLOCKS_KEY)) {
 		throw std::runtime_error("Invalid chunk");
 	}
@@ -71,6 +87,7 @@ nlohmann::json Chunk::save(Scene* scene) {
 	for (const auto item : scene->view<Components::item>()) {
 		// 0 runs??
 		SDL_Log("Item");
+
 		// Not in the chunk
 		if ((scene->get<Components::position>(item).mPosition.x() / Components::block::BLOCK_SIZE /
 			     CHUNK_WIDTH -
@@ -99,4 +116,30 @@ nlohmann::json Chunk::save(Scene* scene) {
 	}
 
 	return chunk;
+}
+
+void Chunk::spawnStructure(const Eigen::Vector2i& pos,
+			   const std::vector<std::pair<Components::Item, Eigen::Vector2i>> structure, Scene* scene) {
+	const auto& blocks = scene->view<Components::block>();
+	for (const auto& [blockType, offset] : structure) {
+		const Eigen::Vector2i position = offset + pos;
+
+		bool occupied = false;
+		for (const auto block : blocks) {
+			if (scene->get<Components::block>(block).mPosition == position) {
+				occupied = true;
+				break;
+			}
+		}
+
+		if (occupied) {
+			continue;
+		}
+
+		Texture* texture = mGame->getSystemManager()->getTexture(registers::TEXTURES.at(blockType), true);
+		const EntityID entity = scene->newEntity();
+		scene->emplace<Components::block>(entity, blockType, position);
+		scene->emplace<Components::texture>(entity, texture);
+		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(), true);
+	}
 }

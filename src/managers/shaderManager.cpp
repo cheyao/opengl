@@ -144,7 +144,7 @@ void ShaderManager::reload() {
 #ifdef IMGUI
 void ShaderManager::debugGui() {
 	static bool liveEdit = false;
-	ImGui::Begin("Main menu");
+	ImGui::Begin("Developer menu");
 	ImGui::Checkbox("Shader Editor", &liveEdit);
 	ImGui::End();
 

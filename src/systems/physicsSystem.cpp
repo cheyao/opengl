@@ -147,7 +147,7 @@ void PhysicsSystem::collide(Scene* scene) {
 	// Debug editor
 #if defined(IMGUI) && defined(DEBUG)
 	static bool editor = false;
-	ImGui::Begin("Main menu");
+	ImGui::Begin("Developer menu");
 	ImGui::Checkbox("Collision box editor", &editor);
 	ImGui::End();
 

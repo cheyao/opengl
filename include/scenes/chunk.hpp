@@ -1,5 +1,6 @@
 #pragma once
 
+#include "components.hpp"
 #include "third_party/json.hpp"
 
 #include <cstdint>
@@ -31,5 +32,11 @@ class Chunk {
 	constexpr const static inline char* const BLOCKS_KEY = "blocks";
 	constexpr const static inline char* const ITEMS_KEY = "items";
 
+	void spawnStructure(const Eigen::Vector2i& pos,
+			    const std::vector<std::pair<Components::Item, Eigen::Vector2i>> structure,
+			    class Scene* scene);
+
 	const std::int64_t mPosition;
+	std::array<std::uint64_t, CHUNK_WIDTH> mHeightMap;
+	Game* mGame;
 };

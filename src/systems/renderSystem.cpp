@@ -329,7 +329,7 @@ void RenderSystem::draw(Scene* scene) {
 	static bool hitbox = false;
 	static bool vector = false;
 
-	ImGui::Begin("Main menu");
+	ImGui::Begin("Developer menu");
 	ImGui::Checkbox("Show hitboxes", &hitbox);
 	ImGui::Checkbox("Show velocity vectors", &vector);
 	ImGui::End();
@@ -366,7 +366,7 @@ void RenderSystem::draw(Scene* scene) {
 	if (vector) {
 		// See https://stackoverflow.com/questions/3484260/opengl-line-width
 		static float magnitude = 1.0f;
-		ImGui::Begin("Main menu");
+		ImGui::Begin("Developer menu");
 		ImGui::SliderFloat("magnitude", &magnitude, 0, 3.0f);
 		ImGui::End();
 
