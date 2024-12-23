@@ -111,25 +111,12 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 	}
 
 	for (const auto& [entity, block, texture] : scene->view<Components::block, Components::texture>().each()) {
-		if (block.mPosition == blockPos) {
-			if ((mPressLength * 20) >= registers::BREAK_TIMES.at(block.mType)) {
-				const auto item = scene->newEntity();
-				scene->emplace<Components::position>(
-					item, (scene->get<Components::block>(entity).mPosition.template cast<float>() +
-					       Eigen::Vector2f(0.40f, 0.40f)) *
-						      Components::block::BLOCK_SIZE);
-				scene->emplace<Components::item>(item, scene->get<Components::block>(entity).mType);
-				scene->emplace<Components::texture>(
-					item, scene->get<Components::texture>(entity).mTexture, 0.3f);
+		if (block.mPosition != blockPos) {
+			continue;
+		}
 
-				mPressLength = 0;
-
-				scene->erase(entity);
-				scene->getSignal(PhysicsSystem::PHYSICS_DIRTY_SIGNAL) = true;
-
-				break;
-			}
-
+		// Not enough time passed since press
+		if ((mPressLength * 20) < registers::BREAK_TIMES.at(block.mType)) {
 			mDestruction.render = true;
 
 			const int stage = ((mPressLength * 20) / registers::BREAK_TIMES.at(block.mType)) * 10;
@@ -138,6 +125,37 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 
 			break;
 		}
+
+		std::vector<std::pair<float, Components::Item>> loot;
+
+		if (registers::LOOT_TABLES.contains(block.mType)) {
+			loot = registers::LOOT_TABLES.at(block.mType);
+		} else {
+			loot.emplace_back(1.0f, block.mType);
+		}
+
+		for (const auto [chance, type] : loot) {
+			const float roll = SDL_randf();
+			if (roll >= chance) {
+				continue;
+			}
+
+			const auto item = scene->newEntity();
+			scene->emplace<Components::position>(
+				item, (scene->get<Components::block>(entity).mPosition.template cast<float>() +
+				       Eigen::Vector2f(0.40f, 0.40f)) *
+					      Components::block::BLOCK_SIZE);
+			scene->emplace<Components::item>(item, type);
+			scene->emplace<Components::texture>(
+				item, mGame->getSystemManager()->getTexture(registers::TEXTURES.at(type)), 0.3f);
+		}
+
+		scene->erase(entity);
+		scene->getSignal(PhysicsSystem::PHYSICS_DIRTY_SIGNAL) = true;
+
+		mPressLength = 0;
+
+		break;
 	}
 }
 

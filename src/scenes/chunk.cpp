@@ -26,8 +26,6 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 	Texture* stone = game->getSystemManager()->getTexture("blocks/stone.png", true);
 	Texture* grass = game->getSystemManager()->getTexture("blocks/grass-block.png", true);
 
-	SDL_srand(noise->getSeed());
-
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		double height = noise->getNoise(i + position * CHUNK_WIDTH);
 		std::uint64_t block_height = WATER_LEVEL + 5 * height;
@@ -50,7 +48,7 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 
 		// Spawn structures
 		for (const auto& [chance, structure] : registers::SURFACE_STRUCTURES) {
-			float roll = SDL_randf();
+			const float roll = SDL_randf();
 
 			if (roll < chance) {
 				spawnStructure(Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, block_height + 1),
