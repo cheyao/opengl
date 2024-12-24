@@ -23,7 +23,7 @@ class SystemManager {
 
 	[[nodiscard]] Eigen::Vector2f getDemensions() const;
 	// Gets texture relative to the asset texture folder
-	[[nodiscard]] class Texture* getTexture(const std::string& name, const bool srgb = false);
+	[[nodiscard]] class Texture* getTexture(const std::string& name, const bool srgb = true);
 	[[nodiscard]] class Shader* getShader(const std::string& vert, const std::string& frag,
 					      const std::string& geom = "");
 

@@ -13,7 +13,6 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_stdinc.h>
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
@@ -23,8 +22,8 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 	: mPosition(position), mGame(game) {
 
 	// Spawn blocks
-	Texture* stone = game->getSystemManager()->getTexture("blocks/stone.png", true);
-	Texture* grass = game->getSystemManager()->getTexture("blocks/grass-block.png", true);
+	Texture* stone = game->getSystemManager()->getTexture("blocks/stone.png");
+	Texture* grass = game->getSystemManager()->getTexture("blocks/grass-block.png");
 
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		double height = noise->getNoise(i + position * CHUNK_WIDTH);
@@ -69,7 +68,7 @@ Chunk::Chunk(const nlohmann::json& data, Game* game, Scene* scene) : mPosition(d
 
 		SDL_assert(registers::TEXTURES.contains(block));
 
-		Texture* texture = game->getSystemManager()->getTexture(registers::TEXTURES.at(block), true);
+		Texture* texture = game->getSystemManager()->getTexture(registers::TEXTURES.at(block));
 
 		const EntityID entity = scene->newEntity();
 		scene->emplace<Components::block>(entity, block, it[1].template get<Eigen::Vector2i>());
@@ -134,7 +133,7 @@ void Chunk::spawnStructure(const Eigen::Vector2i& pos,
 			continue;
 		}
 
-		Texture* texture = mGame->getSystemManager()->getTexture(registers::TEXTURES.at(blockType), true);
+		Texture* texture = mGame->getSystemManager()->getTexture(registers::TEXTURES.at(blockType));
 		const EntityID entity = scene->newEntity();
 		scene->emplace<Components::block>(entity, blockType, position);
 		scene->emplace<Components::texture>(entity, texture);

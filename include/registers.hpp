@@ -9,7 +9,8 @@
 #include <vector>
 
 namespace Components {
-enum class Item : std::uint64_t { AIR = 0, GRASS_BLOCK, STONE, OAK_LOG, OAK_LEAVES };
+// Only append! Don't change order to conserve backwards compatability
+enum class Item : std::uint64_t { AIR = 0, GRASS_BLOCK, STONE, OAK_LOG, OAK_LEAVES, OAK_PLANKS };
 }
 
 namespace registers {
