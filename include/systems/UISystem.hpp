@@ -22,6 +22,7 @@ class UISystem {
 
 	void addScreen(class Screen* screen) { mScreenStack.emplace_back(screen); }
 	void pop() { mScreenStack.pop_back(); }
+	class Screen* top() { return mScreenStack.back(); }
 
 	bool empty() const { return mScreenStack.empty(); }
 	class Mesh* getMesh() const { return mMesh.get(); }

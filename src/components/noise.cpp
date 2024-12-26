@@ -13,7 +13,11 @@ NoiseGenerator::NoiseGenerator(const std::uint64_t seed) : mSeed(seed) {}
 
 double NoiseGenerator::getNoise(std::int64_t x) const {
 	x ^= mSeed;
-	double d = static_cast<double>(x); // Oh well...
+	const double d = static_cast<double>(x); // Oh well...
 
-	return 0.4 * (1.0 * SDL_sin(0.2 * d) - 0.0 * SDL_sin(-0.9 * EULER * d) + 0.9 * SDL_sin(0.1 * PI * d));
+	return 0.4 * (1.0 * SDL_sin(0.2 * d)		// Random 1
+		      - 0.0 * SDL_sin(-0.9 * EULER * d) // Random 2
+		      + 0.9 * SDL_sin(0.1 * PI * d));	// Ransom 3
+	//
+	// We are only using 2 degrees of randomness
 }

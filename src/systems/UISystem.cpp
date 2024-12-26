@@ -28,11 +28,13 @@ UISystem::UISystem(Game* game) : mGame(game), mMesh(nullptr) {
 }
 
 void UISystem::update(Scene* scene, const float delta) {
-	if (!mScreenStack.empty()) {
-		for (auto it = mScreenStack.rbegin(); it != mScreenStack.rend(); ++it) {
-			if ((*it)->update(scene, delta)) {
-				break;
-			}
+	if (mScreenStack.empty()) {
+		return;
+	}
+
+	for (auto it = mScreenStack.rbegin(); it != mScreenStack.rend(); ++it) {
+		if ((*it)->update(scene, delta)) {
+			break;
 		}
 	}
 }

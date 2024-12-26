@@ -1,6 +1,7 @@
 #include "scenes/level.hpp"
 
 #include "components.hpp"
+#include "components/crafting.hpp"
 #include "components/inventory.hpp"
 #include "components/noise.hpp"
 #include "components/playerInventory.hpp"

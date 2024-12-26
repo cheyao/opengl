@@ -12,9 +12,14 @@
 #include <cstddef>
 
 PlayerInventory::PlayerInventory(class Game* game, std::size_t size, EntityID entity)
-	: Inventory(game, size, entity), mSelect(0) {}
+	: CraftingInventory(game, size, entity, 2, 2), mSelect(0) {}
+
 PlayerInventory::PlayerInventory(class Game* game, const nlohmann::json& contents, EntityID entity)
-	: Inventory(game, contents, entity), mSelect(0) {}
+	: CraftingInventory(game, contents, entity, 2, 2), mSelect(0) {}
+
+bool PlayerInventory::update(class Scene* scene, float delta) { return CraftingInventory::update(scene, delta); }
+
+void PlayerInventory::draw(class Scene* scene) { CraftingInventory::draw(scene); }
 
 void PlayerInventory::tryPlace(class Scene* scene, const Eigen::Vector2i& pos) {
 	if (mItems[mSelect] == Components::Item::AIR || mCount[mSelect] == 0) {
