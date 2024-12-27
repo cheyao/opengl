@@ -1,5 +1,6 @@
 #include "components/crafting.hpp"
 #include "managers/entityManager.hpp"
+#include "third_party/rapidjson/fwd.h"
 
 #include <SDL3/SDL.h>
 #include <cstdint>
@@ -8,7 +9,7 @@ CraftingInventory::CraftingInventory(class Game* game, std::uint64_t size, Entit
 				     std::uint64_t col)
 	: Inventory(game, size, entity), mRows(row), mCols(col) {}
 
-CraftingInventory::CraftingInventory(class Game* game, const nlohmann::json& contents, EntityID entity,
+CraftingInventory::CraftingInventory(class Game* game, const rapidjson::Value& contents, EntityID entity,
 				     std::uint64_t row, std::uint64_t col)
 	: Inventory(game, contents, entity), mRows(row), mCols(col) {}
 

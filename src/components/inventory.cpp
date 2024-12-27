@@ -20,7 +20,8 @@
 
 Inventory::Inventory(class Game* game, const std::size_t size, EntityID entity)
 	: Screen(game), mEntity(entity), mSize(size), mItems(size), mCount(size) {}
-Inventory::Inventory(class Game* game, const rapidjson::Document& contents, EntityID entity)
+
+Inventory::Inventory(class Game* game, const rapidjson::Value& contents, EntityID entity)
 	: Screen(game), mEntity(entity) {
 	SDL_assert(contents[SIZE_KEY].IsUint64());
 	mSize = contents[SIZE_KEY].GetUint64();

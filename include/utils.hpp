@@ -64,7 +64,7 @@ inline constexpr bool nearZero(const float number, const float epsilon = 0.001f)
 					break;                                                                         \
 			}                                                                                              \
 			SDL_Log("Check thrown");                                                                       \
-			throw 1;                                                                                       \
+			throw std::runtime_error("OpenGL error thrown! (Check logs)");                                 \
 		}                                                                                                      \
 	}
 

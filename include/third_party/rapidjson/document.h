@@ -3052,4 +3052,11 @@ inline constexpr static Eigen::Vector2f getVector2f(rapidjson::Value& v) {
 	return Eigen::Vector2f(v[0].GetFloat(), v[1].GetFloat());
 }
 
+inline constexpr static Eigen::Vector2i getVector2i(rapidjson::Value& v) {
+	SDL_assert(v.IsArray());
+	SDL_assert(v.Size() == 2);
+
+	return Eigen::Vector2i(v[0].GetInt(), v[1].GetInt());
+}
+
 #endif // RAPIDJSON_DOCUMENT_H_

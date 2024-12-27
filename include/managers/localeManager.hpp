@@ -1,6 +1,6 @@
 #pragma once
 
-#include "third_party/json.hpp"
+#include "third_party/rapidjson/document.h"
 
 #include <string>
 #include <string_view>
@@ -27,5 +27,5 @@ class LocaleManager {
 	const std::string mLocaleDir;
 	std::string mLocale;
 
-	nlohmann::json mLocaleData;
+	rapidjson::Document mLocaleData;
 };

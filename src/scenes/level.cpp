@@ -13,7 +13,8 @@
 #include "scenes/chunk.hpp"
 #include "systems/UISystem.hpp"
 #include "third_party/Eigen/Core"
-#include "third_party/json.hpp"
+#include "third_party/rapidjson/allocators.h"
+#include "third_party/rapidjson/document.h"
 
 #include <SDL3/SDL.h>
 #include <cstddef>
@@ -50,7 +51,7 @@ void Level::create() {
 	mData[CHUNK_KEY]["+"];
 }
 
-void Level::load(const rapidjson::Value& data) {
+void Level::load(rapidjson::Value& data) {
 	SDL_assert(data.HasMember("player"));
 
 	mData = std::move(data);
@@ -59,16 +60,16 @@ void Level::load(const rapidjson::Value& data) {
 	const EntityID player = mScene->newEntity();
 	mGame->setPlayerID(player);
 
-	mNoise->setSeed(mData[CHUNK_KEY]["seed"].getUInt64());
+	mNoise->setSeed(mData[CHUNK_KEY]["seed"].GetUint64());
 
 	createCommon();
 
-	mScene->emplace<Components::position>(player, mData[PLAYER_KEY]["position"].template get<Eigen::Vector2f>());
-	mScene->emplace<Components::velocity>(player, mData[PLAYER_KEY]["velocity"].template get<Eigen::Vector2f>());
+	mScene->emplace<Components::position>(player, getVector2f(mData[PLAYER_KEY]["position"]));
+	mScene->emplace<Components::velocity>(player, getVector2f(mData[PLAYER_KEY]["velocity"]));
 	mScene->emplace<Components::inventory>(player,
 					       new PlayerInventory(mGame, mData[PLAYER_KEY]["inventory"], player));
 
-	auto loadChunk = [this](Chunk*& chunk, const float playerPos) {
+	const auto loadChunk = [this](Chunk*& chunk, const float playerPos) {
 		const auto sign = playerPos < 0;
 		const auto centerChunk =
 			static_cast<int>(playerPos) / Components::block::BLOCK_SIZE / Chunk::CHUNK_WIDTH - sign;
@@ -92,28 +93,29 @@ void Level::load(const rapidjson::Value& data) {
 	};
 
 	const auto playerPos = getVector2f(mData[PLAYER_KEY]["position"]).x();
-	mScene->mMouse.count = mData[PLAYER_KEY]["mcount"].template get<std::size_t>();
-	mScene->mMouse.item = static_cast<Components::Item>(mData[PLAYER_KEY]["mitem"].GetUInt64());
+	mScene->mMouse.count = mData[PLAYER_KEY]["mcount"].GetUint64();
+	mScene->mMouse.item = static_cast<Components::Item>(mData[PLAYER_KEY]["mitem"].GetUint64());
 
 	loadChunk(mCenter, playerPos);
 	loadChunk(mLeft, playerPos - Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE + 0.1);
 	loadChunk(mRight, playerPos + Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE + 0.1);
 }
 
-nlohmann::json Level::save() {
+void Level::save(rapidjson::Value& data, rapidjson::MemoryPoolAllocator<>& allocator) {
 	const auto playerID = mGame->getPlayerID();
 
 	mData[PLAYER_KEY]["position"] = mScene->get<Components::position>(playerID).mPosition;
 	mData[PLAYER_KEY]["velocity"] = mScene->get<Components::velocity>(playerID).mVelocity;
-	mData[PLAYER_KEY]["inventory"] = mScene->get<Components::inventory>(playerID).mInventory->save();
+	mScene->get<Components::inventory>(playerID).mInventory->save(mData[PLAYER_KEY]["inventory"], allocator);
 	mData[PLAYER_KEY]["mcount"] = mScene->mMouse.count;
 	mData[PLAYER_KEY]["mitem"] = static_cast<std::uint64_t>(mScene->mMouse.item);
 	delete mScene->get<Components::inventory>(playerID).mInventory;
 	mData[CHUNK_KEY]["seed"] = mNoise->getSeed();
 
-	auto save = [this](Chunk* chunk) {
-		this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())] =
-			chunk->save(this->mScene);
+	auto save = [this, &allocator](Chunk* chunk) {
+		chunk->save(this->mScene,
+			    this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())],
+			    allocator);
 
 		delete chunk;
 	};
@@ -124,7 +126,7 @@ nlohmann::json Level::save() {
 
 	mScene->erase(playerID);
 
-	return mData;
+	data = std::move(mData);
 }
 
 void Level::update(const float delta) {
@@ -147,8 +149,9 @@ void Level::update(const float delta) {
 	}
 
 	if (currentChunk == mLeft->getPosition()) {
-		mData[CHUNK_KEY][mRight->getPosition() < 0 ? "-" : "+"][SDL_abs(mRight->getPosition())] =
-			mRight->save(mScene);
+		mRight->save(mScene,
+			     mData[CHUNK_KEY][mRight->getPosition() < 0 ? "-" : "+"][SDL_abs(mRight->getPosition())],
+			     allocator);
 		delete mRight;
 
 		mRight = mCenter;

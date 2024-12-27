@@ -5,7 +5,6 @@
 
 #include <cstdint>
 
-// TODO: Random noise
 class Chunk {
       public:
 	inline constexpr const static int MAX_HEIGHT = 128;
@@ -16,14 +15,15 @@ class Chunk {
 	explicit Chunk(class Game* game, class Scene* scene, const class NoiseGenerator* const noise,
 		       const std::int64_t position);
 	// Load from json
-	explicit Chunk(const nlohmann::json& data, class Game* game, class Scene* scene);
+	explicit Chunk(const rapidjson::Value& data, class Game* game, class Scene* scene);
+
 	Chunk(Chunk&&) = delete;
 	Chunk(const Chunk&) = delete;
 	Chunk& operator=(Chunk&&) = delete;
 	Chunk& operator=(const Chunk&) = delete;
 	~Chunk() = default;
 
-	[[nodiscard]] nlohmann::json save(class Scene* scene);
+	void save(class Scene* scene, rapidjson::Value& chunk, rapidjson::MemoryPoolAllocator<>& allocator);
 
 	[[nodiscard]] std::int64_t getPosition() const { return mPosition; }
 

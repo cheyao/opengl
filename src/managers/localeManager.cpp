@@ -1,6 +1,7 @@
 #include "managers/localeManager.hpp"
 
-#include "third_party/json.hpp"
+#include "third_party/rapidjson/document.h"
+#include "third_party/rapidjson/error/en.h"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
@@ -90,18 +91,18 @@ std::u32string LocaleManager::U8toU32(const std::string_view& u8) const {
 }
 
 std::u32string LocaleManager::get(const std::string_view& id) const {
-	if (!mLocaleData.contains(id)) {
+	if (!mLocaleData.HasMember(id.data())) {
 		SDL_Log("\x1B[31mLocaleManager.cpp: Error! Unknown id %s\033[0m", id.data());
 
 #ifdef DEBUG
 		throw std::runtime_error("LocaleManager.cpp: Unknown id!");
 #endif
 
-		return U"";
+		return U"NAN";
 	}
 
 	// Maybe https://wiki.libsdl.org/SDL3/SDL_iconv
-	return U8toU32(mLocaleData[id].get<std::string>());
+	return U8toU32(mLocaleData[id.data()].GetString());
 }
 
 void LocaleManager::loadLocale() {
@@ -121,11 +122,14 @@ void LocaleManager::loadLocale() {
 	}
 
 	// Prefer specialized locale to generalized one
-	char* localeData = static_cast<char*>(loadFile((mLocaleDir + mLocale + ".json").data(), nullptr));
-	if (localeData == nullptr) {
-		localeData = static_cast<char*>(loadFile((mLocaleDir + main + ".json").data(), nullptr));
+	auto f = [](char* c) { SDL_free(c); };
+	std::unique_ptr<char[], decltype(f)> localeData(
+		static_cast<char*>(loadFile((mLocaleDir + mLocale + ".json").data(), nullptr)));
 
-		if (localeData == nullptr) {
+	if (!localeData) {
+		localeData.reset(static_cast<char*>(loadFile((mLocaleDir + main + ".json").data(), nullptr)));
+
+		if (!localeData) {
 			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
 					"LocaleManager.cpp: Failed to find/read locale shource %s: %s\n",
 					(mLocaleDir + mLocale + ".json").data(), SDL_GetError());
@@ -134,20 +138,17 @@ void LocaleManager::loadLocale() {
 		}
 	}
 
-	try {
-		mLocaleData = nlohmann::json::parse(localeData);
-	} catch (...) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
-				"\x1B[31mLocaleManager.cpp: Failed to parse json with unknown exception!");
-
+	if (mLocaleData.ParseInsitu(localeData.get()).HasParseError()) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json (offset %u): %s\033[0m",
+				(unsigned)mLocaleData.GetErrorOffset(),
+				rapidjson::GetParseError_En(mLocaleData.GetParseError()));
+		ERROR_BOX("Failed to load save file");
 		ERROR_BOX("Failed to read locale, reinstall assets");
 
-		throw std::runtime_error("LocaleManager.cpp: Failed to read locale");
+		throw std::runtime_error("StorageManager.cpp: Failed to parse json");
 	}
 
-	SDL_free(localeData);
-
-	SDL_Log("LocaleManager.cpp: Found locale %s version %d", mLocale.data(), mLocaleData["version"].get<int>());
+	SDL_Log("LocaleManager.cpp: Found locale %s version %d", mLocale.data(), mLocaleData["version"].GetInt());
 
 	SDL_Log("LocaleManager.cpp: Successfully loaded locale %s", mLocale.data());
 }

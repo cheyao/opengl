@@ -15,7 +15,7 @@ class Inventory : public Screen {
 
       public:
 	explicit Inventory(class Game* game, std::size_t size, EntityID entity = 0);
-	explicit Inventory(class Game* game, const rapidjson::Document& contents, EntityID entity);
+	explicit Inventory(class Game* game, const rapidjson::Value& contents, EntityID entity);
 	Inventory(Inventory&&) = delete;
 	Inventory(const Inventory&) = delete;
 	Inventory& operator=(Inventory&&) = delete;

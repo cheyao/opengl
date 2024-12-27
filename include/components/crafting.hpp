@@ -3,6 +3,7 @@
 #include "components.hpp"
 #include "components/inventory.hpp"
 #include "screens/screen.hpp"
+#include "third_party/rapidjson/fwd.h"
 
 #include <cstdint>
 
@@ -10,7 +11,7 @@ class CraftingInventory : public Inventory {
       public:
 	explicit CraftingInventory(class Game* game, std::uint64_t size, EntityID entity, std::uint64_t row,
 				   std::uint64_t col);
-	explicit CraftingInventory(class Game* game, const nlohmann::json& contents, EntityID entity, std::uint64_t row,
+	explicit CraftingInventory(class Game* game, const rapidjson::Value& contents, EntityID entity, std::uint64_t row,
 				   std::uint64_t col);
 	CraftingInventory(CraftingInventory&&) = delete;
 	CraftingInventory(const CraftingInventory&) = delete;

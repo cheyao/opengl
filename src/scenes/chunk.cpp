@@ -9,6 +9,7 @@
 #include "registers.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
+#include "third_party/rapidjson/allocators.h"
 #include "third_party/rapidjson/document.h"
 
 #include <SDL3/SDL.h>
@@ -58,29 +59,29 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 }
 
 // Loading from save
-Chunk::Chunk(const nlohmann::json& data, Game* game, Scene* scene) : mPosition(data[POSITION_KEY]), mGame(game) {
-	if (!data.contains(BLOCKS_KEY)) {
+Chunk::Chunk(const rapidjson::Value& data, Game* game, Scene* scene) : mPosition(data[POSITION_KEY].GetInt64()), mGame(game) {
+	if (!data.HasMember(BLOCKS_KEY)) {
 		throw std::runtime_error("Invalid chunk");
 	}
 
-	for (const auto& it : data[BLOCKS_KEY]) {
-		const Components::Item block = it[0].template get<Components::Item>();
+	for (rapidjson::SizeType i = 0; i < data[BLOCKS_KEY].Size(); i++) {
+		const Components::Item block = static_cast<Components::Item>(data[i][0].GetUint64());
 
 		SDL_assert(registers::TEXTURES.contains(block));
 
 		Texture* texture = game->getSystemManager()->getTexture(registers::TEXTURES.at(block));
 
 		const EntityID entity = scene->newEntity();
-		scene->emplace<Components::block>(entity, block, it[1].template get<Eigen::Vector2i>());
+		scene->emplace<Components::block>(entity, block, getVector2i(data[i][1]));
 		scene->emplace<Components::texture>(entity, texture);
 		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(), true);
 	}
 }
 
-nlohmann::json Chunk::save(Scene* scene) {
-	nlohmann::json chunk;
+void Chunk::save(class Scene* scene, rapidjson::Value& chunk, rapidjson::MemoryPoolAllocator<>& allocator) {
 	chunk[POSITION_KEY] = mPosition;
 
+	/*
 	for (const auto item : scene->view<Components::item>()) {
 		// 0 runs??
 		SDL_Log("Item");
@@ -92,11 +93,12 @@ nlohmann::json Chunk::save(Scene* scene) {
 			continue;
 		}
 
-		chunk[ITEMS_KEY].push_back({etoi(scene->template get<Components::item>(item).mType),
+		chunk[ITEMS_KEY].PushBack({etoi(scene->template get<Components::item>(item).mType),
 					    scene->template get<Components::position>(item).mPosition});
 
 		scene->erase(item);
 	}
+	*/
 
 	for (const auto block : scene->template view<Components::block>()) {
 		// Not in the chunk
@@ -106,13 +108,12 @@ nlohmann::json Chunk::save(Scene* scene) {
 		}
 
 		// Here we store the block as type pos pos
-		chunk[BLOCKS_KEY].push_back({etoi(scene->template get<Components::block>(block).mType),
-					     scene->template get<Components::block>(block).mPosition});
+		chunk[BLOCKS_KEY].PushBack({etoi(scene->template get<Components::block>(block).mType),
+					    scene->template get<Components::block>(block).mPosition},
+					   allocator);
 
 		scene->erase(block);
 	}
-
-	return chunk;
 }
 
 void Chunk::spawnStructure(const Eigen::Vector2i& pos,

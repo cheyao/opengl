@@ -4,18 +4,14 @@
 #include "scenes/level.hpp"
 #include "third_party/rapidjson/document.h"
 #include "third_party/rapidjson/error/en.h"
-#include "third_party/rapidjson/fwd.h"
+#include "third_party/rapidjson/writer.h"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
-#include <algorithm>
 #include <cstddef>
-#include <cstdint>
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include <string_view>
-#include <vector>
 
 /*
  * A World shall consist of 3 fields:
@@ -224,10 +220,10 @@ void StorageManager::saveState(SDL_Storage* storage) {
 	}
 
 	rapidjson::StringBuffer sb;
-	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
-	document.Accept(writer);
-	puts(sb.GetString());
-	SDL_WriteStorageFile(storage, "worlds.json", worlds.Dump().data(), worlds.dump().size());
+	rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+	worlds.Accept(writer);
+
+	SDL_WriteStorageFile(storage, "worlds.json", sb.GetString(), sb.GetSize());
 
 	saveWorld(storage, worldName);
 }
@@ -240,11 +236,15 @@ void StorageManager::saveWorld(struct SDL_Storage* storage, const std::string& w
 		}
 	}
 
-	nlohmann::json level;
+	rapidjson::Document level;
 
 	level["version"] = LATEST_LEVEL_VERSION;
 	level["name"] = mGame->mCurrentLevel->getName(); // TODO: More option
-	level["data"] = mGame->mCurrentLevel->save();
+	mGame->mCurrentLevel->save(level["data"], level.GetAllocator());
 
-	SDL_WriteStorageFile(storage, (world + ".json").data(), level.dump().data(), level.dump().size());
+	rapidjson::StringBuffer sb;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+	level.Accept(writer);
+
+	SDL_WriteStorageFile(storage, (world + ".json").data(), sb.GetString(), sb.GetSize());
 }

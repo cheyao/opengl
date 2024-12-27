@@ -18,8 +18,8 @@ class Level {
 	~Level();
 
 	void create();
-	void load(const rapidjson::Value& data);
-	rapidjson::Document save();
+	void load(rapidjson::Value& data);
+	void save(rapidjson::Value& data, rapidjson::MemoryPoolAllocator<>& allocator);
 
 	std::string getName() const { return mName; }
 	class Scene* getScene() const { return mScene; };
@@ -38,7 +38,7 @@ class Level {
 	EntityID mTextID;
 	uint64_t mLastTime;
 
-	rapidjson::Document mData;
+	rapidjson::Value mData;
 
 	// We only need three chunks max loaded at once
 	class Chunk* mLeft;

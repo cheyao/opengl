@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components/crafting.hpp"
+#include "third_party/rapidjson/fwd.h"
 
 #include <SDL3/SDL.h>
 #include <cstddef>
@@ -8,7 +9,7 @@
 class PlayerInventory : public CraftingInventory {
       public:
 	explicit PlayerInventory(class Game* game, std::size_t size, EntityID entity = 0);
-	explicit PlayerInventory(class Game* game, const nlohmann::json& contents, EntityID entity = 0);
+	explicit PlayerInventory(class Game* game, const rapidjson::Value& contents, EntityID entity = 0);
 	PlayerInventory(PlayerInventory&&) = delete;
 	PlayerInventory(const PlayerInventory&) = delete;
 	PlayerInventory& operator=(PlayerInventory&&) = delete;

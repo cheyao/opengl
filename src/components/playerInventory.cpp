@@ -7,14 +7,15 @@
 #include "registers.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
+#include "third_party/rapidjson/fwd.h"
 
 #include <SDL3/SDL.h>
 #include <cstddef>
 
-PlayerInventory::PlayerInventory(class Game* game, std::size_t size, EntityID entity)
+PlayerInventory::PlayerInventory(class Game* game, const std::size_t size, const EntityID entity)
 	: CraftingInventory(game, size, entity, 2, 2), mSelect(0) {}
 
-PlayerInventory::PlayerInventory(class Game* game, const nlohmann::json& contents, EntityID entity)
+PlayerInventory::PlayerInventory(class Game* game, const rapidjson::Value& contents, const EntityID entity)
 	: CraftingInventory(game, contents, entity, 2, 2), mSelect(0) {}
 
 bool PlayerInventory::update(class Scene* scene, float delta) { return CraftingInventory::update(scene, delta); }
