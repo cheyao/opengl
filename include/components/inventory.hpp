@@ -4,7 +4,7 @@
 #include "managers/entityManager.hpp"
 #include "screens/screen.hpp"
 #include "systems/renderSystem.hpp"
-#include "third_party/json.hpp"
+#include "third_party/rapidjson/document.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -15,15 +15,15 @@ class Inventory : public Screen {
 
       public:
 	explicit Inventory(class Game* game, std::size_t size, EntityID entity = 0);
-	explicit Inventory(class Game* game, const nlohmann::json& contents, EntityID entity = 0);
+	explicit Inventory(class Game* game, const rapidjson::Document& contents, EntityID entity);
 	Inventory(Inventory&&) = delete;
 	Inventory(const Inventory&) = delete;
 	Inventory& operator=(Inventory&&) = delete;
 	Inventory& operator=(const Inventory&) = delete;
 	~Inventory() override = default;
 
-	void load(const nlohmann::json& contents);
-	nlohmann::json save();
+	void load(const rapidjson::Document& contents);
+	void save(rapidjson::Value& contents, rapidjson::Document::AllocatorType& allocator);
 
 	virtual bool update(class Scene* scene, float delta) override;
 	virtual void draw(class Scene* scene) override;
@@ -32,7 +32,7 @@ class Inventory : public Screen {
 
       protected:
 	const EntityID mEntity;
-	std::size_t mSize;
+	std::uint64_t mSize;
 	std::vector<Components::Item> mItems;
 	std::vector<std::uint64_t> mCount;
 

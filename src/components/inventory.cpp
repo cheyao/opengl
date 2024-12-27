@@ -12,27 +12,37 @@
 #include "screens/screen.hpp"
 #include "systems/UISystem.hpp"
 #include "third_party/Eigen/Core"
-#include "third_party/json.hpp"
+#include "third_party/rapidjson/document.h"
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_mouse.h>
 #include <cstddef>
 #include <string>
 
 Inventory::Inventory(class Game* game, const std::size_t size, EntityID entity)
 	: Screen(game), mEntity(entity), mSize(size), mItems(size), mCount(size) {}
-Inventory::Inventory(class Game* game, const nlohmann::json& contents, EntityID entity)
-	: Screen(game), mEntity(entity), mSize(contents[SIZE_KEY]), mItems(contents[ITEMS_KEY]),
-	  mCount(contents[COUNT_KEY]) {}
+Inventory::Inventory(class Game* game, const rapidjson::Document& contents, EntityID entity)
+	: Screen(game), mEntity(entity) {
+	SDL_assert(contents[SIZE_KEY].IsUint64());
+	mSize = contents[SIZE_KEY].GetUint64();
 
-nlohmann::json Inventory::save() {
-	nlohmann::json contents;
+	SDL_assert(contents[ITEMS_KEY].Size() == contents[COUNT_KEY].Size());
+	for (rapidjson::SizeType i = 0; i < contents[ITEMS_KEY].Size(); i++) {
+		SDL_assert(!contents[ITEMS_KEY][i].IsUint64());
+		SDL_assert(!contents[COUNT_KEY][i].IsUint64());
 
+		mItems.emplace_back(static_cast<Components::Item>(contents[ITEMS_KEY][i].GetUint64()));
+		mCount.emplace_back(contents[COUNT_KEY][i].GetUint64());
+	}
+}
+
+void Inventory::save(rapidjson::Value& contents, rapidjson::Document::AllocatorType& allocator) {
 	contents[SIZE_KEY] = mSize;
-	contents[ITEMS_KEY] = mItems;
-	contents[COUNT_KEY] = mCount;
-
-	return contents;
+	rapidjson::Value& items = contents[ITEMS_KEY];
+	rapidjson::Value& count = contents[COUNT_KEY];
+	for (std::size_t i = 0; i < mItems.size(); ++i) {
+		items.PushBack(static_cast<std::uint64_t>(mItems[i]), allocator);
+		count.PushBack(mCount[i], allocator);
+	}
 }
 
 bool Inventory::update(class Scene* scene, float) {

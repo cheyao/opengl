@@ -1,7 +1,7 @@
 #pragma once
 
 #include "components.hpp"
-#include "third_party/json.hpp"
+#include "third_party/rapidjson/document.h"
 
 #include <cstdint>
 

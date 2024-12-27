@@ -6,7 +6,7 @@
 
 CraftingInventory::CraftingInventory(class Game* game, std::uint64_t size, EntityID entity, std::uint64_t row,
 				     std::uint64_t col)
-	: Inventory(game, size + row * col, entity), mRows(row), mCols(col) {}
+	: Inventory(game, size, entity), mRows(row), mCols(col) {}
 
 CraftingInventory::CraftingInventory(class Game* game, const nlohmann::json& contents, EntityID entity,
 				     std::uint64_t row, std::uint64_t col)

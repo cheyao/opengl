@@ -50,8 +50,8 @@ void Level::create() {
 	mData[CHUNK_KEY]["+"];
 }
 
-void Level::load(const nlohmann::json& data) {
-	SDL_assert(data.contains("player"));
+void Level::load(const rapidjson::Value& data) {
+	SDL_assert(data.HasMember("player"));
 
 	mData = std::move(data);
 
@@ -59,7 +59,7 @@ void Level::load(const nlohmann::json& data) {
 	const EntityID player = mScene->newEntity();
 	mGame->setPlayerID(player);
 
-	mNoise->setSeed(mData[CHUNK_KEY]["seed"].template get<std::uint64_t>());
+	mNoise->setSeed(mData[CHUNK_KEY]["seed"].getUInt64());
 
 	createCommon();
 
@@ -91,9 +91,9 @@ void Level::load(const nlohmann::json& data) {
 		}
 	};
 
-	const auto playerPos = mData[PLAYER_KEY]["position"].template get<Eigen::Vector2f>().x();
+	const auto playerPos = getVector2f(mData[PLAYER_KEY]["position"]).x();
 	mScene->mMouse.count = mData[PLAYER_KEY]["mcount"].template get<std::size_t>();
-	mScene->mMouse.item = static_cast<Components::Item>(mData[PLAYER_KEY]["mitem"].template get<std::uint64_t>());
+	mScene->mMouse.item = static_cast<Components::Item>(mData[PLAYER_KEY]["mitem"].GetUInt64());
 
 	loadChunk(mCenter, playerPos);
 	loadChunk(mLeft, playerPos - Chunk::CHUNK_WIDTH * Components::block::BLOCK_SIZE + 0.1);

@@ -9,7 +9,7 @@
 #include "registers.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
-#include "third_party/json.hpp"
+#include "third_party/rapidjson/document.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_stdinc.h>

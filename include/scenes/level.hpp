@@ -1,7 +1,7 @@
 #pragma once
 
 #include "managers/entityManager.hpp"
-#include "third_party/json.hpp"
+#include "third_party/rapidjson/document.h"
 
 #include <cstdint>
 #include <memory>
@@ -18,8 +18,8 @@ class Level {
 	~Level();
 
 	void create();
-	void load(const nlohmann::json& data);
-	nlohmann::json save();
+	void load(const rapidjson::Value& data);
+	rapidjson::Document save();
 
 	std::string getName() const { return mName; }
 	class Scene* getScene() const { return mScene; };
@@ -38,7 +38,7 @@ class Level {
 	EntityID mTextID;
 	uint64_t mLastTime;
 
-	nlohmann::json mData;
+	rapidjson::Document mData;
 
 	// We only need three chunks max loaded at once
 	class Chunk* mLeft;

@@ -2,13 +2,16 @@
 
 #include "game.hpp"
 #include "scenes/level.hpp"
-#include "third_party/json.hpp"
+#include "third_party/rapidjson/document.h"
+#include "third_party/rapidjson/error/en.h"
+#include "third_party/rapidjson/fwd.h"
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -48,15 +51,15 @@ StorageManager::~StorageManager() {
 		}
 	}
 
-	try {
-		saveState(storage);
-	} catch (const nlohmann::json::parse_error& error) {
+	saveState(storage);
+
+	/*
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s at %zu\033[0m",
 				error.id, error.what(), error.byte);
 		ERROR_BOX("Failed to parse json");
 
 		return;
-	}
+	*/
 
 	SDL_CloseStorage(storage);
 
@@ -89,17 +92,7 @@ void StorageManager::restore() {
 		}
 	}
 
-	try {
-		restoreState(storage);
-	} catch (const nlohmann::json::parse_error& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s at %zu\033[0m",
-				error.id, error.what(), error.byte);
-		ERROR_BOX("Failed to parse level file");
-
-		SDL_CloseStorage(storage);
-
-		throw std::runtime_error("StorageManager.cpp: Failed to parse json");
-	}
+	restoreState(storage);
 
 	SDL_CloseStorage(storage);
 
@@ -117,22 +110,17 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 	SDL_PathInfo info;
 	SDL_GetStoragePathInfo(storage, "worlds.json", &info);
 
-	std::uint8_t* buffer = new std::uint8_t[info.size + 1];
-	SDL_ReadStorageFile(storage, "worlds.json", buffer, info.size);
+	std::unique_ptr<char[]> buffer(new char[info.size + 1]);
+	SDL_ReadStorageFile(storage, "worlds.json", buffer.get(), info.size);
 	buffer[info.size] = 0; // Ensure null terminasion
 
-	nlohmann::json worlds;
-	try {
-		worlds = nlohmann::json::parse(buffer);
+	rapidjson::Document worlds;
+	if (worlds.ParseInsitu(buffer.get()).HasParseError()) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json (offset %u): %s\033[0m",
+				(unsigned)worlds.GetErrorOffset(), rapidjson::GetParseError_En(worlds.GetParseError()));
+		ERROR_BOX("Failed to load save file");
 
-		delete[] buffer;
-	} catch (const nlohmann::json::exception& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s\033[0m", error.id,
-				error.what());
-
-		delete[] buffer;
-
-		throw error;
+		throw std::runtime_error("StorageManager.cpp: Failed to parse json");
 	}
 
 	if (worlds["version"] != LATEST_WORLD_VERSION) {
@@ -143,18 +131,17 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 		throw std::runtime_error("StorageManager.cpp: Failed to read wrong version save file");
 	}
 
-	if (worlds["worlds"].empty()) {
+	if (worlds["worlds"].Empty()) {
 		SDL_Log("\033[31mWorlds empty! Returning\033[0m");
 
 		return;
 	}
 
-	for (const auto& world : worlds["worlds"]) {
-		SDL_Log("Found world %s", world.template get<std::string>().data());
-		SDL_assert(world.template get<std::string>() != "worlds");
+	for (rapidjson::SizeType i = 0; i < worlds["worlds"].Size(); ++i) {
+		SDL_Log("Found world %s", worlds[i].GetString());
 	}
 
-	loadWorld(storage, worlds["worlds"][0].template get<std::string>());
+	loadWorld(storage, worlds["worlds"][0].GetString());
 }
 
 void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& world) {
@@ -168,22 +155,17 @@ void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& w
 	SDL_PathInfo info;
 	SDL_GetStoragePathInfo(storage, (world + ".json").data(), &info);
 
-	std::uint8_t* buffer = new std::uint8_t[info.size + 1];
-	SDL_ReadStorageFile(storage, (world + ".json").data(), buffer, info.size);
+	std::unique_ptr<char[]> buffer(new char[info.size + 1]);
+	SDL_ReadStorageFile(storage, (world + ".json").data(), buffer.get(), info.size);
 	buffer[info.size] = 0; // Ensure null terminasion
 
-	nlohmann::json level;
-	try {
-		level = nlohmann::json::parse(buffer);
+	rapidjson::Document level;
+	if (level.ParseInsitu(buffer.get()).HasParseError()) {
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json (offset %u): %s\033[0m",
+				(unsigned)level.GetErrorOffset(), rapidjson::GetParseError_En(level.GetParseError()));
+		ERROR_BOX("Failed to load save file");
 
-		delete[] buffer;
-	} catch (const nlohmann::json::parse_error& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json %s: id %d %s at %zu\033[0m",
-				world.data(), error.id, error.what(), error.byte);
-
-		delete[] buffer;
-
-		throw error;
+		throw std::runtime_error("StorageManager.cpp: Failed to parse json");
 	}
 
 	if (level["version"] != LATEST_LEVEL_VERSION) {
@@ -201,7 +183,7 @@ void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& w
 }
 
 void StorageManager::saveState(SDL_Storage* storage) {
-	nlohmann::json worlds;
+	rapidjson::Document worlds;
 	bool oldWorlds = false;
 
 	// If there is already level data
@@ -211,18 +193,18 @@ void StorageManager::saveState(SDL_Storage* storage) {
 		SDL_PathInfo info;
 		SDL_GetStoragePathInfo(storage, "worlds.json", &info);
 
-		std::uint8_t* buffer = new std::uint8_t[info.size + 1];
-		SDL_ReadStorageFile(storage, "worlds.json", buffer, info.size);
+		std::unique_ptr<char[]> buffer(new char[info.size + 1]);
+		SDL_ReadStorageFile(storage, "worlds.json", buffer.get(), info.size);
 		buffer[info.size] = 0; // Ensure null terminasion
 
-		try {
-			worlds = nlohmann::json::parse(buffer);
-		} catch (const nlohmann::json::parse_error& error) {
-			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json: id %d %s at %zu\033[0m",
-					error.id, error.what(), error.byte);
-		}
+		if (worlds.ParseInsitu(buffer.get()).HasParseError()) {
+			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json (offset %u): %s\033[0m",
+					(unsigned)worlds.GetErrorOffset(),
+					rapidjson::GetParseError_En(worlds.GetParseError()));
+			ERROR_BOX("Failed to load old save file");
 
-		delete[] buffer;
+			throw std::runtime_error("StorageManager.cpp: Failed to parse json");
+		}
 	}
 
 	// FIXME: Non-hard writted world name, ask for user input
@@ -232,14 +214,8 @@ void StorageManager::saveState(SDL_Storage* storage) {
 	// TODO: Self-recovery incase of corrupted world save
 	worlds["version"] = LATEST_WORLD_VERSION;
 
-	if (worlds.contains("worlds")) {
-		const auto& worldList = worlds["worlds"].template get<std::vector<std::string_view>>();
-
-		if (std::find(worldList.begin(), worldList.end(), worldName) == worldList.end()) {
-			worlds["worlds"] += worldName;
-		}
-	} else {
-		worlds["worlds"] = {worldName};
+	if (!worlds.HasMember("worlds") || worlds["worlds"].FindMember(worldName) == worlds["worlds"].MemberEnd()) {
+		worlds["worlds"].PushBack(std::string(worldName), worlds.GetAllocator());
 	}
 
 	if (oldWorlds && !SDL_RenameStoragePath(storage, "worlds.json", "worlds.json.old")) {
@@ -247,7 +223,11 @@ void StorageManager::saveState(SDL_Storage* storage) {
 			SDL_GetError());
 	}
 
-	SDL_WriteStorageFile(storage, "worlds.json", worlds.dump().data(), worlds.dump().size());
+	rapidjson::StringBuffer sb;
+	rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
+	document.Accept(writer);
+	puts(sb.GetString());
+	SDL_WriteStorageFile(storage, "worlds.json", worlds.Dump().data(), worlds.dump().size());
 
 	saveWorld(storage, worldName);
 }
