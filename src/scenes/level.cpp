@@ -59,12 +59,12 @@ void Level::load(const nlohmann::json& data) {
 	const EntityID player = mScene->newEntity();
 	mGame->setPlayerID(player);
 
-	mNoise->setSeed(mData[CHUNK_KEY]["seed"]);
+	mNoise->setSeed(mData[CHUNK_KEY]["seed"].template get<std::uint64_t>());
 
 	createCommon();
 
 	mScene->emplace<Components::position>(player, mData[PLAYER_KEY]["position"].template get<Eigen::Vector2f>());
-	mScene->emplace<Components::velocity>(player, mData[PLAYER_KEY]["velocity"]);
+	mScene->emplace<Components::velocity>(player, mData[PLAYER_KEY]["velocity"].template get<Eigen::Vector2f>());
 	mScene->emplace<Components::inventory>(player,
 					       new PlayerInventory(mGame, mData[PLAYER_KEY]["inventory"], player));
 

@@ -22,5 +22,6 @@ class CraftingInventory : public Inventory {
 	void draw(class Scene* scene) override;
 
       private:
-	std::vector<Components::Item> mGrid;
+	std::uint64_t mRows;
+	std::uint64_t mCols;
 };

@@ -64,7 +64,7 @@ Chunk::Chunk(const nlohmann::json& data, Game* game, Scene* scene) : mPosition(d
 	}
 
 	for (const auto& it : data[BLOCKS_KEY]) {
-		const Components::Item block = it[0];
+		const Components::Item block = it[0].template get<Components::Item>();
 
 		SDL_assert(registers::TEXTURES.contains(block));
 

@@ -20,6 +20,7 @@
 
 #include <SDL3/SDL.h>
 #define JSON_ASSERT(x) SDL_assert(x)
+#define JSON_USE_IMPLICIT_CONVERSIONS 0
 
 #define JSON_NO_IO
 

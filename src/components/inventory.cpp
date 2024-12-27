@@ -41,7 +41,6 @@ bool Inventory::update(class Scene* scene, float) {
 
 	// Quit menu
 	if (keystate[SDL_SCANCODE_ESCAPE]) {
-		// Twice since we got the crafing menu 2
 		mGame->getSystemManager()->getUISystem()->pop();
 	}
 

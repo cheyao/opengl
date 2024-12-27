@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <SDL3/SDL.h>
 
 /*
  * The UI system
@@ -21,7 +22,7 @@ class UISystem {
 	void draw(class Scene* scene);
 
 	void addScreen(class Screen* screen) { mScreenStack.emplace_back(screen); }
-	void pop() { mScreenStack.pop_back(); }
+	void pop() { SDL_assert(!mScreenStack.empty()); mScreenStack.pop_back(); }
 	class Screen* top() { return mScreenStack.back(); }
 
 	bool empty() const { return mScreenStack.empty(); }
