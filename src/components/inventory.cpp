@@ -13,6 +13,7 @@
 #include "systems/UISystem.hpp"
 #include "third_party/Eigen/Core"
 #include "third_party/rapidjson/document.h"
+#include "third_party/rapidjson/rapidjson.h"
 
 #include <SDL3/SDL.h>
 #include <cstddef>
@@ -37,13 +38,18 @@ Inventory::Inventory(class Game* game, const rapidjson::Value& contents, EntityI
 }
 
 void Inventory::save(rapidjson::Value& contents, rapidjson::Document::AllocatorType& allocator) {
-	contents[SIZE_KEY] = mSize;
-	rapidjson::Value& items = contents[ITEMS_KEY];
-	rapidjson::Value& count = contents[COUNT_KEY];
+	contents.AddMember(rapidjson::StringRef(SIZE_KEY), mSize, allocator);
+
+	rapidjson::Value items(rapidjson::kArrayType);
+	rapidjson::Value count(rapidjson::kArrayType);
+
 	for (std::size_t i = 0; i < mItems.size(); ++i) {
 		items.PushBack(static_cast<std::uint64_t>(mItems[i]), allocator);
 		count.PushBack(mCount[i], allocator);
 	}
+
+	contents.AddMember(rapidjson::StringRef(ITEMS_KEY), std::move(items.Move()), allocator);
+	contents.AddMember(rapidjson::StringRef(COUNT_KEY), std::move(count.Move()), allocator);
 }
 
 bool Inventory::update(class Scene* scene, float) {

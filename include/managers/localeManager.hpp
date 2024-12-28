@@ -28,4 +28,5 @@ class LocaleManager {
 	std::string mLocale;
 
 	rapidjson::Document mLocaleData;
+	std::unique_ptr<char[], std::function<void(char*)>> mLocaleDataS;
 };

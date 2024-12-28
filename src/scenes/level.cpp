@@ -18,6 +18,8 @@
 
 #include <SDL3/SDL.h>
 #include <cstddef>
+#include <cstdint>
+#include <cstdlib>
 #include <limits>
 #include <utility>
 
@@ -48,7 +50,8 @@ void Level::create() {
 	mCenter = new Chunk(mGame, mScene, mNoise.get(), 0);
 	mRight = new Chunk(mGame, mScene, mNoise.get(), 1);
 
-	mData.AddMember(rapidjson::StringRef(CHUNK_KEY), rapidjson::Value(rapidjson::kObjectType), mData.GetAllocator());
+	mData.AddMember(rapidjson::StringRef(CHUNK_KEY), rapidjson::Value(rapidjson::kObjectType),
+			mData.GetAllocator());
 	mData[CHUNK_KEY].AddMember("-", rapidjson::Value(rapidjson::kArrayType), mData.GetAllocator());
 	mData[CHUNK_KEY].AddMember("+", rapidjson::Value(rapidjson::kArrayType), mData.GetAllocator());
 }
@@ -106,18 +109,32 @@ void Level::load(rapidjson::Value& data) {
 void Level::save(rapidjson::Value& data, rapidjson::MemoryPoolAllocator<>& allocator) {
 	const auto playerID = mGame->getPlayerID();
 
-	mData[PLAYER_KEY]["position"] =
-		fromVector2f(mScene->get<Components::position>(playerID).mPosition, mData.GetAllocator());
-	mData[PLAYER_KEY]["velocity"] =
-		fromVector2f(mScene->get<Components::velocity>(playerID).mVelocity, mData.GetAllocator());
+	mData.AddMember(rapidjson::StringRef(PLAYER_KEY), rapidjson::Value(rapidjson::kObjectType).Move(),
+			mData.GetAllocator());
+
+	mData[PLAYER_KEY].AddMember(
+		"position",
+		fromVector2f(mScene->get<Components::position>(playerID).mPosition, mData.GetAllocator()).Move(),
+		mData.GetAllocator());
+	mData[PLAYER_KEY].AddMember(
+		"velocity",
+		fromVector2f(mScene->get<Components::velocity>(playerID).mVelocity, mData.GetAllocator()).Move(),
+		mData.GetAllocator());
+	mData[PLAYER_KEY].AddMember("inventory", rapidjson::Value(rapidjson::kObjectType).Move(), mData.GetAllocator());
 	mScene->get<Components::inventory>(playerID).mInventory->save(mData[PLAYER_KEY]["inventory"],
 								      mData.GetAllocator());
-	mData[PLAYER_KEY]["mcount"] = mScene->mMouse.count;
-	mData[PLAYER_KEY]["mitem"] = static_cast<std::uint64_t>(mScene->mMouse.item);
+
+	mData[PLAYER_KEY].AddMember("mcount", mScene->mMouse.count, mData.GetAllocator());
+	mData[PLAYER_KEY].AddMember("mitem", static_cast<std::uint64_t>(mScene->mMouse.item), mData.GetAllocator());
 	delete mScene->get<Components::inventory>(playerID).mInventory;
-	mData[CHUNK_KEY]["seed"] = mNoise->getSeed();
+	mData[CHUNK_KEY].AddMember("seed", mNoise->getSeed(), mData.GetAllocator());
 
 	auto save = [this](Chunk* chunk) {
+		while (this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"].Size() <= std::llabs(position)) {
+			this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"].PushBack(
+				rapidjson::Value(rapidjson::kArrayType).SetObject().Move(), this->mData.GetAllocator());
+		}
+
 		chunk->save(this->mScene,
 			    this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())],
 			    this->mData.GetAllocator());
@@ -154,7 +171,16 @@ void Level::update(const float delta) {
 		return;
 	}
 
-	auto save = [this](Chunk* chunk) {
+	auto pad = [this](std::int64_t position) {
+		while (this->mData[CHUNK_KEY][position < 0 ? "-" : "+"].Size() <= std::llabs(position)) {
+			this->mData[CHUNK_KEY][position < 0 ? "-" : "+"].PushBack(
+				rapidjson::Value(rapidjson::kArrayType).SetObject().Move(), this->mData.GetAllocator());
+		}
+	};
+
+	auto save = [this, &pad](Chunk* chunk) {
+		pad(chunk->getPosition());
+
 		chunk->save(this->mScene,
 			    this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())],
 			    this->mData.GetAllocator());
@@ -168,7 +194,8 @@ void Level::update(const float delta) {
 		mRight = mCenter;
 		mCenter = mLeft;
 
-		const auto& chunkData = mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(currentChunk - 1)];
+		pad(currentChunk - 1);
+		const auto& chunkData = mData[CHUNK_KEY][(currentChunk - 1) < 0 ? "-" : "+"][SDL_abs(currentChunk - 1)];
 		if (chunkData.IsNull() || !chunkData.HasMember("blocks")) {
 			SDL_LogInfo(SDL_LOG_CATEGORY_CUSTOM, "\033[31mGenerating new chunk for chunk %d\033[0m",
 				    currentChunk - 1);
@@ -183,7 +210,8 @@ void Level::update(const float delta) {
 		mLeft = mCenter;
 		mCenter = mRight;
 
-		const auto& chunkData = mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(currentChunk + 1)];
+		pad(currentChunk + 1);
+		const auto& chunkData = mData[CHUNK_KEY][(currentChunk + 1) < 0 ? "-" : "+"][SDL_abs(currentChunk + 1)];
 		if (chunkData.IsNull() || !chunkData.HasMember("blocks")) {
 			SDL_LogInfo(SDL_LOG_CATEGORY_CUSTOM, "\033[31mGenerating new chunk for chunk %d\033[0m",
 				    currentChunk + 1);

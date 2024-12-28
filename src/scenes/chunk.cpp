@@ -62,6 +62,7 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 // Loading from save
 Chunk::Chunk(const rapidjson::Value& data, Game* game, Scene* scene)
 	: mPosition(data[POSITION_KEY].GetInt64()), mGame(game) {
+
 	for (rapidjson::SizeType i = 0; i < data[BLOCKS_KEY].Size(); i++) {
 		const Components::Item block = static_cast<Components::Item>(data[i][0].GetUint64());
 
@@ -77,7 +78,8 @@ Chunk::Chunk(const rapidjson::Value& data, Game* game, Scene* scene)
 }
 
 void Chunk::save(class Scene* scene, rapidjson::Value& chunk, rapidjson::MemoryPoolAllocator<>& allocator) {
-	chunk[POSITION_KEY] = mPosition;
+	chunk.AddMember(rapidjson::StringRef(POSITION_KEY), rapidjson::Value(mPosition).Move(), allocator);
+	chunk.AddMember(rapidjson::StringRef(BLOCKS_KEY), rapidjson::Value(rapidjson::kArrayType).Move(), allocator);
 
 	/*
 	for (const auto item : scene->view<Components::item>()) {
@@ -112,7 +114,7 @@ void Chunk::save(class Scene* scene, rapidjson::Value& chunk, rapidjson::MemoryP
 		i.PushBack(scene->template get<Components::block>(block).mPosition.x(), allocator);
 		i.PushBack(scene->template get<Components::block>(block).mPosition.y(), allocator);
 
-		chunk[BLOCKS_KEY].PushBack(i, allocator);
+		chunk[BLOCKS_KEY].PushBack(i.Move(), allocator);
 
 		scene->erase(block);
 	}

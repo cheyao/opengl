@@ -4,6 +4,7 @@
 #include "scenes/level.hpp"
 #include "third_party/rapidjson/document.h"
 #include "third_party/rapidjson/error/en.h"
+#include "third_party/rapidjson/rapidjson.h"
 #include "third_party/rapidjson/writer.h"
 #include "utils.hpp"
 
@@ -134,7 +135,7 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 	}
 
 	for (rapidjson::SizeType i = 0; i < worlds["worlds"].Size(); ++i) {
-		SDL_Log("Found world %s", worlds[i].GetString());
+		SDL_Log("Found world %s", worlds["worlds"][i].GetString());
 	}
 
 	loadWorld(storage, worlds["worlds"][0].GetString());
@@ -201,6 +202,8 @@ void StorageManager::saveState(SDL_Storage* storage) {
 
 			throw std::runtime_error("StorageManager.cpp: Failed to parse json");
 		}
+	} else {
+		worlds.SetObject();
 	}
 
 	// FIXME: Non-hard writted world name, ask for user input
@@ -208,10 +211,15 @@ void StorageManager::saveState(SDL_Storage* storage) {
 
 	// TODO: Save some more world info
 	// TODO: Self-recovery incase of corrupted world save
-	worlds["version"].SetUint64(LATEST_WORLD_VERSION);
+	worlds.AddMember("version", rapidjson::Value().SetUint64(LATEST_WORLD_VERSION).Move(), worlds.GetAllocator());
 
 	if (!worlds.HasMember("worlds") || worlds["worlds"].FindMember(worldName) == worlds["worlds"].MemberEnd()) {
-		worlds["worlds"].PushBack(rapidjson::Value(worldName, worlds.GetAllocator()), worlds.GetAllocator());
+		if (!worlds.HasMember("worlds")) {
+			worlds.AddMember("worlds", rapidjson::Value(rapidjson::kArrayType).Move(),
+					 worlds.GetAllocator());
+		}
+
+		worlds["worlds"].PushBack(rapidjson::Value(worldName, worlds.GetAllocator()).Move(), worlds.GetAllocator());
 	}
 
 	if (oldWorlds && !SDL_RenameStoragePath(storage, "worlds.json", "worlds.json.old")) {
@@ -237,9 +245,13 @@ void StorageManager::saveWorld(struct SDL_Storage* storage, const std::string& w
 	}
 
 	rapidjson::Document level;
+	level.SetObject();
 
-	level["version"].SetUint64(LATEST_LEVEL_VERSION);
-	level["name"].SetString(mGame->mCurrentLevel->getName().data(), level.GetAllocator()); // TODO: More option
+	level.AddMember("version", rapidjson::Value().SetUint64(LATEST_LEVEL_VERSION).Move(), level.GetAllocator());
+	level.AddMember("name", rapidjson::Value(mGame->mCurrentLevel->getName().data(), level.GetAllocator()).Move(),
+			level.GetAllocator()); // TODO: More options
+
+	level.AddMember("data", rapidjson::Value(rapidjson::kObjectType).Move(), level.GetAllocator());
 	mGame->mCurrentLevel->save(level["data"], level.GetAllocator());
 
 	rapidjson::StringBuffer sb;

@@ -13,7 +13,7 @@
 #include <version>
 
 // TODO: Handle SDL_EVENT_LOCALE_CHANGED
-LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "assets/strings/") {
+LocaleManager::LocaleManager(const std::string& path) : mLocaleDir(path + "assets/strings/"), mLocaleDataS(nullptr, SDL_free) {
 	int c = 0;
 	SDL_Locale** const loc = SDL_GetPreferredLocales(&c);
 	std::string locList = "";
@@ -122,15 +122,12 @@ void LocaleManager::loadLocale() {
 	}
 
 	// Prefer specialized locale to generalized one
-	auto f = [](char* c) { SDL_free(c); };
+	mLocaleDataS.reset(static_cast<char*>(loadFile((mLocaleDir + mLocale + ".json").data(), nullptr)));
 
-	std::unique_ptr<char[], decltype(f)> localeData(
-		static_cast<char*>(loadFile((mLocaleDir + mLocale + ".json").data(), nullptr)));
+	if (!mLocaleDataS) {
+		mLocaleDataS.reset(static_cast<char*>(loadFile((mLocaleDir + main + ".json").data(), nullptr)));
 
-	if (!localeData) {
-		localeData.reset(static_cast<char*>(loadFile((mLocaleDir + main + ".json").data(), nullptr)));
-
-		if (!localeData) {
+		if (!mLocaleDataS) {
 			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
 					"LocaleManager.cpp: Failed to find/read locale shource %s: %s\n",
 					(mLocaleDir + mLocale + ".json").data(), SDL_GetError());
@@ -139,7 +136,7 @@ void LocaleManager::loadLocale() {
 		}
 	}
 
-	if (mLocaleData.ParseInsitu(localeData.get()).HasParseError()) {
+	if (mLocaleData.ParseInsitu(mLocaleDataS.get()).HasParseError()) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json (offset %u): %s\033[0m",
 				(unsigned)mLocaleData.GetErrorOffset(),
 				rapidjson::GetParseError_En(mLocaleData.GetParseError()));
