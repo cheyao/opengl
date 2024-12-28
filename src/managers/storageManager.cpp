@@ -119,7 +119,7 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 		throw std::runtime_error("StorageManager.cpp: Failed to parse json");
 	}
 
-	if (worlds["version"] != LATEST_WORLD_VERSION) {
+	if (worlds["version"].GetUint64() != LATEST_WORLD_VERSION) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
 				"\033[31mERROR! The save file version is not for this game engine version\033[0m");
 		ERROR_BOX("ERROR! The save file version is not for this game engine version");
@@ -164,7 +164,7 @@ void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& w
 		throw std::runtime_error("StorageManager.cpp: Failed to parse json");
 	}
 
-	if (level["version"] != LATEST_LEVEL_VERSION) {
+	if (level["version"].GetUint64() != LATEST_LEVEL_VERSION) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
 				"\033[31mERROR! The save file version is not for this game engine version\033[0m");
 		ERROR_BOX("ERROR! The save file version is not for this game engine version");
@@ -208,10 +208,10 @@ void StorageManager::saveState(SDL_Storage* storage) {
 
 	// TODO: Save some more world info
 	// TODO: Self-recovery incase of corrupted world save
-	worlds["version"] = LATEST_WORLD_VERSION;
+	worlds["version"].SetUint64(LATEST_WORLD_VERSION);
 
 	if (!worlds.HasMember("worlds") || worlds["worlds"].FindMember(worldName) == worlds["worlds"].MemberEnd()) {
-		worlds["worlds"].PushBack(std::string(worldName), worlds.GetAllocator());
+		worlds["worlds"].PushBack(rapidjson::Value(worldName, worlds.GetAllocator()), worlds.GetAllocator());
 	}
 
 	if (oldWorlds && !SDL_RenameStoragePath(storage, "worlds.json", "worlds.json.old")) {
@@ -238,8 +238,8 @@ void StorageManager::saveWorld(struct SDL_Storage* storage, const std::string& w
 
 	rapidjson::Document level;
 
-	level["version"] = LATEST_LEVEL_VERSION;
-	level["name"] = mGame->mCurrentLevel->getName(); // TODO: More option
+	level["version"].SetUint64(LATEST_LEVEL_VERSION);
+	level["name"].SetString(mGame->mCurrentLevel->getName().data(), level.GetAllocator()); // TODO: More option
 	mGame->mCurrentLevel->save(level["data"], level.GetAllocator());
 
 	rapidjson::StringBuffer sb;

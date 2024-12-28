@@ -11,6 +11,7 @@
 #include "third_party/Eigen/Core"
 #include "third_party/rapidjson/allocators.h"
 #include "third_party/rapidjson/document.h"
+#include "third_party/rapidjson/rapidjson.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_stdinc.h>
@@ -59,11 +60,8 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 }
 
 // Loading from save
-Chunk::Chunk(const rapidjson::Value& data, Game* game, Scene* scene) : mPosition(data[POSITION_KEY].GetInt64()), mGame(game) {
-	if (!data.HasMember(BLOCKS_KEY)) {
-		throw std::runtime_error("Invalid chunk");
-	}
-
+Chunk::Chunk(const rapidjson::Value& data, Game* game, Scene* scene)
+	: mPosition(data[POSITION_KEY].GetInt64()), mGame(game) {
 	for (rapidjson::SizeType i = 0; i < data[BLOCKS_KEY].Size(); i++) {
 		const Components::Item block = static_cast<Components::Item>(data[i][0].GetUint64());
 
@@ -108,9 +106,13 @@ void Chunk::save(class Scene* scene, rapidjson::Value& chunk, rapidjson::MemoryP
 		}
 
 		// Here we store the block as type pos pos
-		chunk[BLOCKS_KEY].PushBack({etoi(scene->template get<Components::block>(block).mType),
-					    scene->template get<Components::block>(block).mPosition},
-					   allocator);
+		rapidjson::Value i(rapidjson::kArrayType);
+
+		i.PushBack(etoi(scene->template get<Components::block>(block).mType), allocator);
+		i.PushBack(scene->template get<Components::block>(block).mPosition.x(), allocator);
+		i.PushBack(scene->template get<Components::block>(block).mPosition.y(), allocator);
+
+		chunk[BLOCKS_KEY].PushBack(i, allocator);
 
 		scene->erase(block);
 	}

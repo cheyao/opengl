@@ -123,6 +123,7 @@ void LocaleManager::loadLocale() {
 
 	// Prefer specialized locale to generalized one
 	auto f = [](char* c) { SDL_free(c); };
+
 	std::unique_ptr<char[], decltype(f)> localeData(
 		static_cast<char*>(loadFile((mLocaleDir + mLocale + ".json").data(), nullptr)));
 
