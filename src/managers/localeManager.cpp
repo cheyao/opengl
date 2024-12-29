@@ -91,6 +91,10 @@ std::u32string LocaleManager::U8toU32(const std::string_view& u8) const {
 }
 
 std::u32string LocaleManager::get(const std::string_view& id) const {
+	if (id[0] == '!') {
+		return U8toU32(&id[1]);
+	}
+
 	if (!mLocaleData.HasMember(id.data())) {
 		SDL_Log("\x1B[31mLocaleManager.cpp: Error! Unknown id %s\033[0m", id.data());
 

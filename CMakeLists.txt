@@ -123,7 +123,6 @@ include/screens/hud.hpp
 # External
 src/third_party/stb_image.c
 include/third_party/stb_image.h
-include/third_party/json.hpp
 
 # Glad
 src/third_party/glad.c 

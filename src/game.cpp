@@ -4,6 +4,7 @@
 #include "managers/localeManager.hpp"
 #include "managers/storageManager.hpp"
 #include "managers/systemManager.hpp"
+#include "scene.hpp"
 #include "scenes/level.hpp"
 #include "third_party/glad/glad.h"
 
@@ -59,7 +60,8 @@ Game::Game()
 	mTicks = SDL_GetTicks();
 
 	const auto end = std::chrono::high_resolution_clock::now();
-	std::stringstream time; time << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() << "ns ("
+	std::stringstream time;
+	time << std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count() << "ns ("
 	     << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "milis)";
 	SDL_Log("Startup took %s", time.str().data());
 
@@ -119,9 +121,25 @@ SDL_AppResult Game::iterate() {
 	static std::uint64_t count = 0;
 	framerate += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 	count++;
+
+	auto l = [this]() {
+		const auto tid = this->mCurrentLevel->getScene()->newEntity();
+		this->mCurrentLevel->getScene()->emplace<Components::text>(tid, "!Average framerate: 100FPS");
+		this->mCurrentLevel->getScene()->emplace<Components::position>(
+			tid, Eigen::Vector2f(0, std::numeric_limits<float>::infinity()));
+		return tid;
+	};
+	static EntityID tid = l();
+
 	if (count == 100) {
 		SDL_Log("Average draw time (last 100 frames): %" PRIu64 "ns",
 			static_cast<std::uint64_t>(framerate) / count);
+
+		mCurrentLevel->getScene()->get<Components::text>(tid).mID =
+			"!Average framerate: " +
+			std::to_string(static_cast<std::uint64_t>(
+				10e8 / (static_cast<double>(static_cast<std::uint64_t>(framerate)) / count)));
+
 		framerate = 0;
 		count = 0;
 	}

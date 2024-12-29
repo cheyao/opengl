@@ -3375,14 +3375,14 @@ RAPIDJSON_DIAG_POP
 #include "third_party/Eigen/Core"
 #include <SDL3/SDL.h>
 
-inline constexpr static Eigen::Vector2f getVector2f(const rapidjson::Value& v) {
+inline static Eigen::Vector2f getVector2f(const rapidjson::Value& v) {
 	SDL_assert(v.IsArray());
 	SDL_assert(v.Size() == 2);
 
 	return Eigen::Vector2f(v[0].GetFloat(), v[1].GetFloat());
 }
 
-inline constexpr static Eigen::Vector2i getVector2i(const rapidjson::Value& v) {
+inline static Eigen::Vector2i getVector2i(const rapidjson::Value& v) {
 	SDL_assert(v.IsArray());
 	SDL_assert(v.Size() == 2);
 

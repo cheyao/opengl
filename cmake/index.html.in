@@ -81,6 +81,7 @@ canvas.emscripten { border: 0px none; }
     <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
 
     <script type='text/javascript'>
+      window.alert("Download native versions at https://github.com/cheyao/opengl/releases for better performance");
       var statusElement = document.getElementById('status');
       var progressElement = document.getElementById('progress');
       var spinnerElement = document.getElementById('spinner');
