@@ -44,6 +44,8 @@ class Inventory : public Screen {
 	constexpr const static inline auto INVENTORY_SLOT_X = 18.0f;
 	constexpr const static inline auto INVENTORY_SLOT_Y = 18.0f;
 
+	void handleKeys();
+
       private:
 	void drawItems();
 	void drawMouse(class Scene* scene);

@@ -53,15 +53,9 @@ void Inventory::save(rapidjson::Value& contents, rapidjson::Document::AllocatorT
 }
 
 bool Inventory::update(class Scene* scene, float) {
-	// Handle mouse and keys
-	const auto keystate = mGame->getKeystate();
+	handleKeys();
 
-	// Quit menu
-	if (keystate[SDL_SCANCODE_ESCAPE]) {
-		mGame->getSystemManager()->getUISystem()->pop();
-	}
-
-	SystemManager* systemManager = mGame->getSystemManager();
+	SystemManager* const systemManager = mGame->getSystemManager();
 	const Eigen::Vector2f dimensions = systemManager->getDemensions();
 
 	float sx, sy;
@@ -84,16 +78,17 @@ bool Inventory::update(class Scene* scene, float) {
 		scale = sy / INVENTORY_TEXTURE_HEIGHT;
 	}
 
+	// Add the offset of the inv texture. and substract the size of half a slot minus something
 	ox += INVENTORY_SLOTS_OFFSET_X * scale - (INVENTORY_SLOT_X * scale / 2 - sx / INVENTORY_INV_SCALE);
 	oy += INVENTORY_SLOTS_OFFSET_Y * scale - (INVENTORY_SLOT_Y * scale / 2 - sy / INVENTORY_INV_SCALE);
 
 	float mouseX, mouseY;
 	auto buttons = SDL_GetMouseState(&mouseX, &mouseY);
+	mouseY = dimensions.y() - mouseY;
 
 	if (!(buttons & SDL_BUTTON_LMASK)) {
 		return true;
 	}
-	mouseY = dimensions.y() - mouseY;
 
 	// Not inside the space
 	if (mouseX < ox || mouseY < oy || mouseX > (ox + 9 * INVENTORY_SLOT_X * scale) ||
@@ -142,6 +137,16 @@ bool Inventory::update(class Scene* scene, float) {
 	return true;
 }
 
+void Inventory::handleKeys() {
+	// Handle mouse and keys
+	const auto keystate = mGame->getKeystate();
+
+	// Quit menu
+	if (keystate[SDL_SCANCODE_ESCAPE]) {
+		mGame->getSystemManager()->getUISystem()->pop();
+	}
+}
+
 void Inventory::draw(class Scene* scene) {
 	// Draw the inventory
 	SystemManager* systemManager = mGame->getSystemManager();
@@ -181,9 +186,9 @@ void Inventory::draw(class Scene* scene) {
 }
 
 void Inventory::drawItems() {
-	SystemManager* systemManager = mGame->getSystemManager();
-	Shader* shader = systemManager->getShader("ui.vert", "ui.frag");
-	Mesh* mesh = systemManager->getUISystem()->getMesh();
+	SystemManager* const systemManager = mGame->getSystemManager();
+	Shader* const shader = systemManager->getShader("ui.vert", "ui.frag");
+	Mesh* const mesh = systemManager->getUISystem()->getMesh();
 	const Eigen::Vector2f dimensions = systemManager->getDemensions();
 
 	float x, y;

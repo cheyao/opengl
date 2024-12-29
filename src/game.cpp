@@ -122,14 +122,14 @@ SDL_AppResult Game::iterate() {
 	framerate += std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin).count();
 	count++;
 
-	auto l = [this]() {
+	const auto uniqueEntity = [this]() {
 		const auto tid = this->mCurrentLevel->getScene()->newEntity();
 		this->mCurrentLevel->getScene()->emplace<Components::text>(tid, "!Average framerate: 100FPS");
 		this->mCurrentLevel->getScene()->emplace<Components::position>(
 			tid, Eigen::Vector2f(0, std::numeric_limits<float>::infinity()));
 		return tid;
 	};
-	static EntityID tid = l();
+	static EntityID tid = uniqueEntity();
 
 	if (count == 100) {
 		SDL_Log("Average draw time (last 100 frames): %" PRIu64 "ns",

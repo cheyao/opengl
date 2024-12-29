@@ -1,24 +1,172 @@
 #include "components/crafting.hpp"
+
+#include "game.hpp"
 #include "managers/entityManager.hpp"
+#include "managers/eventManager.hpp"
+#include "managers/systemManager.hpp"
+#include "opengl/mesh.hpp"
+#include "opengl/texture.hpp"
+#include "registers.hpp"
+#include "scene.hpp"
+#include "systems/UISystem.hpp"
 #include "third_party/rapidjson/fwd.h"
 
 #include <SDL3/SDL.h>
 #include <cstdint>
 
+// TODO: Save crafting table
 CraftingInventory::CraftingInventory(class Game* game, std::uint64_t size, EntityID entity, std::uint64_t row,
 				     std::uint64_t col)
-	: Inventory(game, size, entity), mRows(row), mCols(col) {}
+	: Inventory(game, size, entity), mRows(row), mCols(col), mCraftingItems(row * col, Components::Item::AIR),
+	  mCraftingCount(row * col, 0) {}
 
 CraftingInventory::CraftingInventory(class Game* game, const rapidjson::Value& contents, EntityID entity,
 				     std::uint64_t row, std::uint64_t col)
-	: Inventory(game, contents, entity), mRows(row), mCols(col) {}
+	: Inventory(game, contents, entity), mRows(row), mCols(col), mCraftingItems(row * col, Components::Item::AIR),
+	  mCraftingCount(row * col, 0) {}
 
 bool CraftingInventory::update(class Scene* scene, float delta) {
-	SDL_Log("Craft");
-	(void)mRows;
-	(void)mCols;
+	SystemManager* const systemManager = mGame->getSystemManager();
+	const Eigen::Vector2f dimensions = systemManager->getDemensions();
 
-	return Inventory::update(scene, delta);
+	float sx, sy;
+	float ox, oy;
+	float scale;
+	if (dimensions.x() <= dimensions.y()) {
+		sx = dimensions.x() / 4 * 3;
+		sy = sx / INVENTORY_TEXTURE_WIDTH * INVENTORY_TEXTURE_HEIGHT;
+		ox = sx / 6;
+		oy = (dimensions.y() - sy) / 2;
+
+		scale = sx / INVENTORY_TEXTURE_WIDTH;
+	} else {
+		sy = dimensions.y() / 4 * 3;
+		sx = sy / INVENTORY_TEXTURE_HEIGHT * INVENTORY_TEXTURE_WIDTH;
+		ox = (dimensions.x() - sx) / 2;
+		oy = sy / 6;
+
+		scale = sy / INVENTORY_TEXTURE_HEIGHT;
+	}
+
+	// BOTL of inv
+	ox += (INVENTORY_SLOTS_OFFSET_X + 98) * scale - (INVENTORY_SLOT_X * scale - sx / INVENTORY_INV_SCALE);
+	oy += (INVENTORY_SLOTS_OFFSET_Y + 114) * scale - (INVENTORY_SLOT_Y * scale - sy / INVENTORY_INV_SCALE);
+
+	const float slotx = INVENTORY_SLOT_X * scale;
+	const float sloty = INVENTORY_SLOT_Y * scale;
+	const float sizex = slotx * mCols;
+	const float sizey = sloty * mRows;
+
+	float mouseX, mouseY;
+	auto buttons = SDL_GetMouseState(&mouseX, &mouseY);
+	mouseY = dimensions.y() - mouseY;
+
+	// 98x114
+	if (mouseX < ox || mouseY < oy || mouseX > (ox + sizex) || mouseY > (oy + sizey)) {
+		return Inventory::update(scene, delta);
+	}
+	(void)buttons;
+
+	// Normalize the buttons to grid cords
+	int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
+
+	if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mCraftingCount[slot] != 0 &&
+	    (scene->mMouse.count == 0 || (scene->mMouse.item == mCraftingItems[slot] && scene->mMouse.count != 0))) {
+		if (scene->mMouse.count != 0 && scene->mMouse.item == mCraftingItems[slot]) {
+			scene->mMouse.count += mCraftingCount[slot];
+		} else {
+			scene->mMouse.item = mCraftingItems[slot];
+			scene->mMouse.count = mCraftingCount[slot];
+		}
+
+		mCraftingItems[slot] = Components::Item::AIR;
+		mCraftingCount[slot] = 0;
+
+		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+	}
+
+	if (scene->mMouse.count != 0 && scene->mMouse.item != Components::Item::AIR &&
+	    scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) &&
+	    (mCraftingCount[slot] == 0 || mCraftingItems[slot] == scene->mMouse.item)) {
+		if (mCraftingItems[slot] == scene->mMouse.item) {
+			mCraftingCount[slot] += scene->mMouse.count;
+		} else {
+			mCraftingCount[slot] = scene->mMouse.count;
+		}
+
+		mCraftingItems[slot] = scene->mMouse.item;
+
+		scene->mMouse.item = Components::Item::AIR;
+		scene->mMouse.count = 0;
+
+		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+	}
+
+	Inventory::handleKeys();
+
+	return true;
 }
 
-void CraftingInventory::draw(class Scene* scene) { Inventory::draw(scene); }
+void CraftingInventory::draw(class Scene* scene) {
+	Inventory::draw(scene);
+
+	SystemManager* const systemManager = mGame->getSystemManager();
+	const Eigen::Vector2f dimensions = systemManager->getDemensions();
+	Shader* const shader = systemManager->getShader("ui.vert", "ui.frag");
+	Mesh* const mesh = systemManager->getUISystem()->getMesh();
+
+	float sx, sy;
+	float ox, oy;
+	float scale;
+	if (dimensions.x() <= dimensions.y()) {
+		sx = dimensions.x() / 4 * 3;
+		sy = sx / INVENTORY_TEXTURE_WIDTH * INVENTORY_TEXTURE_HEIGHT;
+		ox = sx / 6;
+		oy = (dimensions.y() - sy) / 2;
+
+		scale = sx / INVENTORY_TEXTURE_WIDTH;
+	} else {
+		sy = dimensions.y() / 4 * 3;
+		sx = sy / INVENTORY_TEXTURE_HEIGHT * INVENTORY_TEXTURE_WIDTH;
+		ox = (dimensions.x() - sx) / 2;
+		oy = sy / 6;
+
+		scale = sy / INVENTORY_TEXTURE_HEIGHT;
+	}
+
+	// BOTL of inv
+	ox += (INVENTORY_SLOTS_OFFSET_X + 98) * scale - (INVENTORY_SLOT_X * scale - sx / INVENTORY_INV_SCALE);
+	oy += (INVENTORY_SLOTS_OFFSET_Y + 114) * scale - (INVENTORY_SLOT_Y * scale - sy / INVENTORY_INV_SCALE);
+
+	const float slotx = INVENTORY_SLOT_X * scale;
+	const float sloty = INVENTORY_SLOT_Y * scale;
+
+	shader->activate();
+	shader->set("texture_diffuse"_u, 0);
+	shader->set("size"_u, sx / INVENTORY_INV_SCALE, sy / INVENTORY_INV_SCALE);
+
+	for (std::size_t i = 0; i < mCraftingItems.size(); ++i) {
+		if (mCraftingCount[i] == 0) {
+			continue;
+		}
+
+		float yoff = i >= 9 ? 4 * scale : 0;
+
+		Texture* texture = systemManager->getTexture(registers::TEXTURES.at(mCraftingItems[i]));
+		texture->activate(0);
+
+		shader->set("offset"_u, ox + i % mCols * slotx + 5, oy + static_cast<int>(i / mCols) * sloty + yoff);
+
+		mesh->draw(shader);
+
+		if (mCraftingCount[i] > 1) {
+			mGame->getSystemManager()->getTextSystem()->draw(
+				std::to_string(mCraftingCount[i]),
+				Eigen::Vector2f(ox + i % mCols * slotx + INVENTORY_SLOT_X / 2 * scale - 2,
+						oy + static_cast<int>(i / mCols) * sloty - 5 + yoff),
+				false);
+		}
+
+		shader->activate();
+	}
+}

@@ -25,4 +25,6 @@ class CraftingInventory : public Inventory {
       private:
 	std::uint64_t mRows;
 	std::uint64_t mCols;
+	std::vector<Components::Item> mCraftingItems;
+	std::vector<std::uint64_t> mCraftingCount;
 };
