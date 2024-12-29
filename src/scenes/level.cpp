@@ -57,9 +57,10 @@ void Level::create() {
 }
 
 void Level::load(rapidjson::Value& data) {
-	SDL_assert(data.HasMember("player"));
-
 	mData.CopyFrom(std::move(data), mData.GetAllocator());
+
+	SDL_assert(data.HasMember(PLAYER_KEY));
+	SDL_assert(data.HasMember(CHUNK_KEY));
 
 	mScene = new Scene();
 	const EntityID player = mScene->newEntity();
@@ -112,6 +113,7 @@ void Level::save(rapidjson::Value& data, rapidjson::MemoryPoolAllocator<>& alloc
 	mData.AddMember(rapidjson::StringRef(PLAYER_KEY), rapidjson::Value(rapidjson::kObjectType).Move(),
 			mData.GetAllocator());
 
+	mData[PLAYER_KEY].SetObject();
 	mData[PLAYER_KEY].AddMember(
 		"position",
 		fromVector2f(mScene->get<Components::position>(playerID).mPosition, mData.GetAllocator()).Move(),
@@ -127,13 +129,18 @@ void Level::save(rapidjson::Value& data, rapidjson::MemoryPoolAllocator<>& alloc
 	mData[PLAYER_KEY].AddMember("mcount", mScene->mMouse.count, mData.GetAllocator());
 	mData[PLAYER_KEY].AddMember("mitem", static_cast<std::uint64_t>(mScene->mMouse.item), mData.GetAllocator());
 	delete mScene->get<Components::inventory>(playerID).mInventory;
+
+	SDL_assert(mData.HasMember(CHUNK_KEY));
 	mData[CHUNK_KEY].AddMember("seed", mNoise->getSeed(), mData.GetAllocator());
 
 	auto save = [this](Chunk* chunk) {
-		while (this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"].Size() <= std::llabs(position)) {
+		while (this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"].Size() <=
+		       std::llabs(chunk->getPosition())) {
 			this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"].PushBack(
 				rapidjson::Value(rapidjson::kArrayType).SetObject().Move(), this->mData.GetAllocator());
 		}
+
+		this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())].SetObject();
 
 		chunk->save(this->mScene,
 			    this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())],
@@ -180,6 +187,8 @@ void Level::update(const float delta) {
 
 	auto save = [this, &pad](Chunk* chunk) {
 		pad(chunk->getPosition());
+
+		this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())].SetObject();
 
 		chunk->save(this->mScene,
 			    this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())],

@@ -112,7 +112,7 @@ void StorageManager::restoreState(SDL_Storage* storage) {
 	buffer[info.size] = 0; // Ensure null terminasion
 
 	rapidjson::Document worlds;
-	if (worlds.ParseInsitu(buffer.get()).HasParseError()) {
+	if (worlds.Parse(buffer.get()).HasParseError()) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json (offset %u): %s\033[0m",
 				(unsigned)worlds.GetErrorOffset(), rapidjson::GetParseError_En(worlds.GetParseError()));
 		ERROR_BOX("Failed to load save file");
@@ -157,7 +157,7 @@ void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& w
 	buffer[info.size] = 0; // Ensure null terminasion
 
 	rapidjson::Document level;
-	if (level.ParseInsitu(buffer.get()).HasParseError()) {
+	if (level.Parse(buffer.get()).HasParseError()) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json (offset %u): %s\033[0m",
 				(unsigned)level.GetErrorOffset(), rapidjson::GetParseError_En(level.GetParseError()));
 		ERROR_BOX("Failed to load save file");
@@ -194,7 +194,7 @@ void StorageManager::saveState(SDL_Storage* storage) {
 		SDL_ReadStorageFile(storage, "worlds.json", buffer.get(), info.size);
 		buffer[info.size] = 0; // Ensure null terminasion
 
-		if (worlds.ParseInsitu(buffer.get()).HasParseError()) {
+		if (worlds.Parse(buffer.get()).HasParseError()) {
 			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json (offset %u): %s\033[0m",
 					(unsigned)worlds.GetErrorOffset(),
 					rapidjson::GetParseError_En(worlds.GetParseError()));
@@ -213,13 +213,13 @@ void StorageManager::saveState(SDL_Storage* storage) {
 	// TODO: Self-recovery incase of corrupted world save
 	worlds.AddMember("version", rapidjson::Value().SetUint64(LATEST_WORLD_VERSION).Move(), worlds.GetAllocator());
 
-	if (!worlds.HasMember("worlds") || worlds["worlds"].FindMember(worldName) == worlds["worlds"].MemberEnd()) {
-		if (!worlds.HasMember("worlds")) {
-			worlds.AddMember("worlds", rapidjson::Value(rapidjson::kArrayType).Move(),
-					 worlds.GetAllocator());
-		}
+	if (!worlds.HasMember("worlds")) {
+		worlds.AddMember("worlds", rapidjson::Value(rapidjson::kArrayType).Move(), worlds.GetAllocator());
+	}
 
-		worlds["worlds"].PushBack(rapidjson::Value(worldName, worlds.GetAllocator()).Move(), worlds.GetAllocator());
+	if (std::find(worlds["worlds"].Begin(), worlds["worlds"].End(), worldName) == worlds["worlds"].End()) {
+		worlds["worlds"].PushBack(rapidjson::Value(worldName, worlds.GetAllocator()).Move(),
+					  worlds.GetAllocator());
 	}
 
 	if (oldWorlds && !SDL_RenameStoragePath(storage, "worlds.json", "worlds.json.old")) {

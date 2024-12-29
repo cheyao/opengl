@@ -29,8 +29,8 @@ Inventory::Inventory(class Game* game, const rapidjson::Value& contents, EntityI
 
 	SDL_assert(contents[ITEMS_KEY].Size() == contents[COUNT_KEY].Size());
 	for (rapidjson::SizeType i = 0; i < contents[ITEMS_KEY].Size(); i++) {
-		SDL_assert(!contents[ITEMS_KEY][i].IsUint64());
-		SDL_assert(!contents[COUNT_KEY][i].IsUint64());
+		SDL_assert(contents[ITEMS_KEY][i].IsUint64());
+		SDL_assert(contents[COUNT_KEY][i].IsUint64());
 
 		mItems.emplace_back(static_cast<Components::Item>(contents[ITEMS_KEY][i].GetUint64()));
 		mCount.emplace_back(contents[COUNT_KEY][i].GetUint64());

@@ -12,6 +12,7 @@ NoiseGenerator::NoiseGenerator()
 NoiseGenerator::NoiseGenerator(const std::uint64_t seed) : mSeed(seed) {}
 
 double NoiseGenerator::getNoise(std::int64_t x) const {
+	x *= -1 * (x < 0);
 	x ^= mSeed;
 	const double d = static_cast<double>(x); // Oh well...
 

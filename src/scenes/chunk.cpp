@@ -64,14 +64,14 @@ Chunk::Chunk(const rapidjson::Value& data, Game* game, Scene* scene)
 	: mPosition(data[POSITION_KEY].GetInt64()), mGame(game) {
 
 	for (rapidjson::SizeType i = 0; i < data[BLOCKS_KEY].Size(); i++) {
-		const Components::Item block = static_cast<Components::Item>(data[i][0].GetUint64());
+		const Components::Item block = static_cast<Components::Item>(data[BLOCKS_KEY][i][0].GetUint64());
 
 		SDL_assert(registers::TEXTURES.contains(block));
 
 		Texture* texture = game->getSystemManager()->getTexture(registers::TEXTURES.at(block));
 
 		const EntityID entity = scene->newEntity();
-		scene->emplace<Components::block>(entity, block, getVector2i(data[i][1]));
+		scene->emplace<Components::block>(entity, block, getVector2i(data[BLOCKS_KEY][i][1]));
 		scene->emplace<Components::texture>(entity, texture);
 		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(), true);
 	}
@@ -111,8 +111,8 @@ void Chunk::save(class Scene* scene, rapidjson::Value& chunk, rapidjson::MemoryP
 		rapidjson::Value i(rapidjson::kArrayType);
 
 		i.PushBack(etoi(scene->template get<Components::block>(block).mType), allocator);
-		i.PushBack(scene->template get<Components::block>(block).mPosition.x(), allocator);
-		i.PushBack(scene->template get<Components::block>(block).mPosition.y(), allocator);
+		i.PushBack(fromVector2i(scene->template get<Components::block>(block).mPosition, allocator).Move(),
+			   allocator);
 
 		chunk[BLOCKS_KEY].PushBack(i.Move(), allocator);
 
