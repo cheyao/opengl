@@ -12,20 +12,25 @@
 #include "third_party/rapidjson/fwd.h"
 
 #include <SDL3/SDL.h>
+#include <algorithm>
+#include <cstddef>
 #include <cstdint>
+#include <ranges>
 
 // TODO: Save crafting table
 CraftingInventory::CraftingInventory(class Game* game, std::uint64_t size, EntityID entity, std::uint64_t row,
 				     std::uint64_t col)
 	: Inventory(game, size, entity), mRows(row), mCols(col), mCraftingItems(row * col, Components::Item::AIR),
-	  mCraftingCount(row * col, 0) {}
+	  mCraftingCount(row * col, 0), mLastCraft(0) {}
 
 CraftingInventory::CraftingInventory(class Game* game, const rapidjson::Value& contents, EntityID entity,
 				     std::uint64_t row, std::uint64_t col)
 	: Inventory(game, contents, entity), mRows(row), mCols(col), mCraftingItems(row * col, Components::Item::AIR),
-	  mCraftingCount(row * col, 0) {}
+	  mCraftingCount(row * col, 0), mLastCraft(0) {}
 
 bool CraftingInventory::update(class Scene* scene, float delta) {
+	craft();
+
 	SystemManager* const systemManager = mGame->getSystemManager();
 	const Eigen::Vector2f dimensions = systemManager->getDemensions();
 
@@ -105,6 +110,70 @@ bool CraftingInventory::update(class Scene* scene, float delta) {
 	Inventory::handleKeys();
 
 	return true;
+}
+
+void CraftingInventory::craft() {
+	if (mLastCraft != 0 && checkRecipie(mLastCraft)) {
+		return;
+	}
+
+	bool empty = true;
+	for (const auto& s : mCraftingCount) {
+		if (s != 0) {
+			empty = false;
+			break;
+		}
+	}
+	if (empty) {
+		mLastCraft = 0;
+
+		return;
+	}
+
+	for (std::size_t i = 1; i < registers::CRAFTING_RECIPIES.size(); ++i) {
+		if (checkRecipie(i)) {
+			mLastCraft = i;
+
+			return;
+		}
+	}
+}
+
+bool CraftingInventory::checkRecipie(std::uint64_t r) {
+	if (std::get<0>(registers::CRAFTING_RECIPIES[r]) == 0) {
+		// Shapeless
+		auto items = std::get<1>(registers::CRAFTING_RECIPIES[r]);
+
+		std::uint64_t toFind = items.size();
+
+		for (const auto& [item, count] : std::views::zip(mCraftingItems, mCraftingCount)) {
+			if (item == Components::Item::AIR) {
+				SDL_assert(count == 0);
+
+				continue;
+			}
+
+			if (auto i = std::ranges::find(items, item); i != items.end()) {
+				std::swap(*i, items.back());
+
+				items.pop_back();
+
+				--toFind;
+			} else {
+				return false;
+			}
+		}
+
+		if (toFind == 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// TODO: Shaped crafting
+
+	return false;
 }
 
 void CraftingInventory::draw(class Scene* scene) {

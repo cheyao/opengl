@@ -23,8 +23,13 @@ class CraftingInventory : public Inventory {
 	void draw(class Scene* scene) override;
 
       private:
+	void craft();
+	bool checkRecipie(std::uint64_t r);
+
 	std::uint64_t mRows;
 	std::uint64_t mCols;
 	std::vector<Components::Item> mCraftingItems;
 	std::vector<std::uint64_t> mCraftingCount;
+
+	std::size_t mLastCraft;
 };
