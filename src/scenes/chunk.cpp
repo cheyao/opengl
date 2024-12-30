@@ -3,6 +3,7 @@
 #include "components.hpp"
 #include "components/noise.hpp"
 #include "game.hpp"
+#include "items.hpp"
 #include "managers/entityManager.hpp"
 #include "managers/systemManager.hpp"
 #include "opengl/texture.hpp"
@@ -17,7 +18,6 @@
 #include <SDL3/SDL_stdinc.h>
 #include <cstddef>
 #include <cstdint>
-#include <stdexcept>
 
 // TODO: Backup
 Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const std::int64_t position)

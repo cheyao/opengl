@@ -80,6 +80,7 @@ include/utils.hpp
 include/components.hpp
 include/scene.hpp
 include/registers.hpp
+include/items.hpp
 
 include/components/inventory.hpp
 include/components/playerInventory.hpp

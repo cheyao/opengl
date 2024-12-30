@@ -287,7 +287,7 @@ void RenderSystem::draw(Scene* scene) {
 
 	// PERF: Use some VEB to send the data
 	// PERF: Culling & stuff
-	Components::Item lastBlock = Components::Item::AIR;
+	Components::Item lastBlock = Components::AIR();
 	for (const auto& [_, block] : scene->view<Components::block>().each()) {
 		const auto& pos = block.mPosition;
 
@@ -494,18 +494,16 @@ void RenderSystem::drawHUD(Scene* scene) {
 	mMesh->draw(shader);
 
 	// Draw the items
-	glDisable(GL_BLEND);
-
-	float size = y / 2;
+	const float size = y / 2;
 	shader->set("size"_u, size, size);
 
-	Inventory* inventory = scene->get<Components::inventory>(mGame->getPlayerID()).mInventory;
+	Inventory* const inventory = scene->get<Components::inventory>(mGame->getPlayerID()).mInventory;
 	for (std::size_t i = 0; i < 9; ++i) {
 		if (inventory->mCount[i] == 0) {
 			continue;
 		}
 
-		Texture* itemTexture = systemManager->getTexture(registers::TEXTURES.at(inventory->mItems[i]));
+		Texture* const itemTexture = systemManager->getTexture(registers::TEXTURES.at(inventory->mItems[i]));
 		itemTexture->activate(0);
 
 		shader->set("offset"_u, offset.x() + i * x / 9 + y / 4, y / 4);
@@ -522,6 +520,8 @@ void RenderSystem::drawHUD(Scene* scene) {
 
 		shader->activate();
 	}
+
+	glDisable(GL_BLEND);
 }
 
 void RenderSystem::setOrtho() const {

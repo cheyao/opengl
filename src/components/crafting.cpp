@@ -20,12 +20,12 @@
 // TODO: Save crafting table
 CraftingInventory::CraftingInventory(class Game* game, std::uint64_t size, EntityID entity, std::uint64_t row,
 				     std::uint64_t col)
-	: Inventory(game, size, entity), mRows(row), mCols(col), mCraftingItems(row * col, Components::Item::AIR),
+	: Inventory(game, size, entity), mRows(row), mCols(col), mCraftingItems(row * col, Components::AIR()),
 	  mCraftingCount(row * col, 0), mLastCraft(0) {}
 
 CraftingInventory::CraftingInventory(class Game* game, const rapidjson::Value& contents, EntityID entity,
 				     std::uint64_t row, std::uint64_t col)
-	: Inventory(game, contents, entity), mRows(row), mCols(col), mCraftingItems(row * col, Components::Item::AIR),
+	: Inventory(game, contents, entity), mRows(row), mCols(col), mCraftingItems(row * col, Components::AIR()),
 	  mCraftingCount(row * col, 0), mLastCraft(0) {}
 
 bool CraftingInventory::update(class Scene* const scene, const float delta) {
@@ -66,7 +66,7 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 	mouseY = dimensions.y() - mouseY;
 	(void)buttons;
 
-	// Not inside the grid
+	// Test if player is placing inside grid
 	const auto placeGrid = [&]() {
 		if (mouseX < ox || mouseY < oy || mouseX > (ox + sizex) || mouseY > (oy + sizey)) {
 			return;
@@ -85,13 +85,13 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 				scene->mMouse.count = mCraftingCount[slot];
 			}
 
-			mCraftingItems[slot] = Components::Item::AIR;
+			mCraftingItems[slot] = Components::AIR();
 			mCraftingCount[slot] = 0;
 
 			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 		}
 
-		if (scene->mMouse.count != 0 && scene->mMouse.item != Components::Item::AIR &&
+		if (scene->mMouse.count != 0 && scene->mMouse.item != Components::AIR() &&
 		    scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) &&
 		    (mCraftingCount[slot] == 0 || mCraftingItems[slot] == scene->mMouse.item)) {
 			if (mCraftingItems[slot] == scene->mMouse.item) {
@@ -102,13 +102,14 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 
 			mCraftingItems[slot] = scene->mMouse.item;
 
-			scene->mMouse.item = Components::Item::AIR;
+			scene->mMouse.item = Components::AIR();
 			scene->mMouse.count = 0;
 
 			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 		}
 	};
 
+	// Test if player is getting the output
 	const auto getOutput = [&]() {
 		if (!scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL)) {
 			return;
@@ -123,7 +124,7 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 		}
 
 		if (scene->mMouse.count != 0) {
-			SDL_assert(scene->mMouse.item != Components::Item::AIR);
+			SDL_assert(scene->mMouse.item != Components::AIR());
 
 			return;
 		}
@@ -139,23 +140,25 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 			}
 
 			if (mCraftingCount[i] == 1) {
-				mCraftingItems[i] = Components::Item::AIR;
+				mCraftingItems[i] = Components::AIR();
 			}
 
 			--mCraftingCount[i];
 		}
 
-			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 	};
 
 	placeGrid();
 
+	// Offset to output grid
 	ox += 57 * scale;
 	oy += 9 * scale;
 
 	craft();
 	getOutput();
 
+	// Finally get the inventory to update
 	Inventory::update(scene, delta);
 
 	return true;
@@ -186,25 +189,30 @@ void CraftingInventory::craft() {
 			return;
 		}
 	}
+
+	mLastCraft = 0;
 }
 
-bool CraftingInventory::checkRecipie(std::uint64_t r) {
-	if (std::get<0>(registers::CRAFTING_RECIPIES[r]) == 0) {
+bool CraftingInventory::checkRecipie(const std::uint64_t r) {
+	const auto& recipie = registers::CRAFTING_RECIPIES[r];
+
+	if (std::get<0>(recipie) == std::make_pair(0, 0)) {
 		// Shapeless
-		auto items = std::get<1>(registers::CRAFTING_RECIPIES[r]);
+		auto items = std::get<1>(recipie);
 
 		std::uint64_t toFind = items.size();
 
 		for (const auto& [item, count] : std::views::zip(mCraftingItems, mCraftingCount)) {
-			if (item == Components::Item::AIR) {
+			// The current cell is empty
+			if (item == Components::AIR()) {
 				SDL_assert(count == 0);
 
 				continue;
 			}
 
 			if (auto i = std::ranges::find(items, item); i != items.end()) {
+				// Found this item, swap and pop
 				std::swap(*i, items.back());
-
 				items.pop_back();
 
 				--toFind;
@@ -213,14 +221,46 @@ bool CraftingInventory::checkRecipie(std::uint64_t r) {
 			}
 		}
 
+		// The recipie is valid if there isn't any more stuff to find
 		if (toFind == 0) {
 			return true;
 		} else {
 			return false;
 		}
+	} else {
+		const auto& shape = std::get<0>(recipie);
+		const auto& items = std::get<1>(recipie);
+
+		SDL_assert(items.size() == shape.first * shape.second);
+
+		// Recipie too big for us
+		if (shape.first > mCols || shape.second > mRows) {
+			return false;
+		}
+
+		for (std::size_t xoff = 0; xoff <= (mCols - shape.first); ++xoff) {
+			for (std::size_t yoff = 0; yoff <= (mRows - shape.second); ++yoff) {
+				for (std::size_t x = 0; x < shape.first; ++x) {
+					for (std::size_t y = 0; y < shape.second; ++y) {
+						if (items[x + y * shape.first] == Components::AIR()) {
+							continue;
+						}
+
+						if (items[x + y * shape.first] !=
+						    mCraftingItems[(x + xoff) + (y + yoff) * mCols]) {
+							goto breakinnerloop;
+						}
+					}
+				}
+
+				return true;
+
+			breakinnerloop:
+			}
+		}
 	}
 
-	// TODO: Shaped crafting
+	// FIXME: First draw inv, then cursor
 
 	return false;
 }

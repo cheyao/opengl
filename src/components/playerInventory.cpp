@@ -23,7 +23,12 @@ bool PlayerInventory::update(class Scene* scene, float delta) { return CraftingI
 void PlayerInventory::draw(class Scene* scene) { CraftingInventory::draw(scene); }
 
 void PlayerInventory::tryPlace(class Scene* scene, const Eigen::Vector2i& pos) {
-	if (mItems[mSelect] == Components::Item::AIR || mCount[mSelect] == 0) {
+	if (mItems[mSelect] == Components::AIR() || mCount[mSelect] == 0) {
+		return;
+	}
+
+	// Don't place if the block isn't placable
+	if (!registers::BREAK_TIMES.contains(mItems[mSelect])) {
 		return;
 	}
 
@@ -35,6 +40,6 @@ void PlayerInventory::tryPlace(class Scene* scene, const Eigen::Vector2i& pos) {
 
 	--mCount[mSelect];
 	if (mCount[mSelect] == 0) {
-		mItems[mSelect] = Components::Item::AIR;
+		mItems[mSelect] = Components::AIR();
 	}
 }

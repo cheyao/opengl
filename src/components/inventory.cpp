@@ -111,13 +111,13 @@ bool Inventory::update(class Scene* scene, float) {
 			scene->mMouse.count = mCount[slot];
 		}
 
-		mItems[slot] = Components::Item::AIR;
+		mItems[slot] = Components::AIR();
 		mCount[slot] = 0;
 
 		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 	}
 
-	if (scene->mMouse.count != 0 && scene->mMouse.item != Components::Item::AIR &&
+	if (scene->mMouse.count != 0 && scene->mMouse.item != Components::AIR() &&
 	    scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) &&
 	    (mCount[slot] == 0 || mItems[slot] == scene->mMouse.item)) {
 		if (mItems[slot] == scene->mMouse.item) {
@@ -128,7 +128,7 @@ bool Inventory::update(class Scene* scene, float) {
 
 		mItems[slot] = scene->mMouse.item;
 
-		scene->mMouse.item = Components::Item::AIR;
+		scene->mMouse.item = Components::AIR();
 		scene->mMouse.count = 0;
 
 		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
@@ -248,7 +248,7 @@ void Inventory::drawItems() {
 
 void Inventory::drawMouse(Scene* scene) {
 	// Draw Hand
-	if (scene->mMouse.item == Components::Item::AIR) {
+	if (scene->mMouse.item == Components::AIR()) {
 		return;
 	}
 

@@ -24,17 +24,20 @@ Texture::Texture(const FT_Bitmap& bitmap)
 	glGenTextures(1, &mID);
 	glBindTexture(GL_TEXTURE_2D, mID);
 
-#ifdef GLES
 	// See https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, mWidth, mHeight, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
+	glTexImage2D(GL_TEXTURE_2D, 0,
+#ifdef GLES
+		     GL_R8,
 #else
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, mWidth, mHeight, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
+		     GL_RED,
 #endif
+		     mWidth, mHeight, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
+	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
 Texture::~Texture() {
@@ -113,7 +116,8 @@ void Texture::load(bool srgb) {
 	glBindTexture(GL_TEXTURE_2D, mID);
 
 	SDL_assert(mWidth > 0 && mHeight > 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, srgb ? intFormat : format, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, data.get());
+	glTexImage2D(GL_TEXTURE_2D, 0, srgb ? intFormat : format, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE,
+		     data.get());
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
