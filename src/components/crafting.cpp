@@ -54,6 +54,7 @@ bool CraftingInventory::update(class Scene* scene, float delta) {
 	}
 
 	// BOTL of inv
+	// 98x114
 	ox += (INVENTORY_SLOTS_OFFSET_X + 98) * scale - (INVENTORY_SLOT_X * scale - sx / INVENTORY_INV_SCALE);
 	oy += (INVENTORY_SLOTS_OFFSET_Y + 114) * scale - (INVENTORY_SLOT_Y * scale - sy / INVENTORY_INV_SCALE);
 
@@ -65,12 +66,11 @@ bool CraftingInventory::update(class Scene* scene, float delta) {
 	float mouseX, mouseY;
 	auto buttons = SDL_GetMouseState(&mouseX, &mouseY);
 	mouseY = dimensions.y() - mouseY;
+	(void)buttons;
 
-	// 98x114
 	if (mouseX < ox || mouseY < oy || mouseX > (ox + sizex) || mouseY > (oy + sizey)) {
 		return Inventory::update(scene, delta);
 	}
-	(void)buttons;
 
 	// Normalize the buttons to grid cords
 	int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
@@ -238,4 +238,29 @@ void CraftingInventory::draw(class Scene* scene) {
 
 		shader->activate();
 	}
+
+	// Draw output slot
+	// 57x9
+	ox += 57 * scale;
+	oy += 9 * scale;
+
+	if (mLastCraft == 0) {
+		return;
+	}
+
+	const auto& out = std::get<2>(registers::CRAFTING_RECIPIES[mLastCraft]);
+	Texture* texture = systemManager->getTexture(registers::TEXTURES.at(out.second));
+	texture->activate(0);
+
+	shader->set("offset"_u, ox + 5, oy);
+
+	mesh->draw(shader);
+
+	if (out.first > 1) {
+		mGame->getSystemManager()->getTextSystem()->draw(
+			std::to_string(out.first), Eigen::Vector2f(ox + INVENTORY_SLOT_X / 2 * scale - 2, oy - 5),
+			false);
+	}
+
+	shader->activate();
 }
