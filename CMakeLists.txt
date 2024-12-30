@@ -55,7 +55,6 @@ src/managers/glManager.cpp
 src/managers/shaderManager.cpp
 src/managers/textureManager.cpp
 src/managers/eventManager.cpp
-src/managers/IOManager.cpp
 src/managers/localeManager.cpp
 src/managers/entityManager.cpp
 src/managers/systemManager.cpp
@@ -102,7 +101,6 @@ include/managers/shaderManager.hpp
 include/managers/textureManager.hpp
 include/managers/eventManager.hpp
 include/managers/localeManager.hpp
-include/managers/IOManager.hpp
 include/managers/entityManager.hpp
 include/managers/systemManager.hpp
 include/managers/componentManager.hpp
@@ -339,28 +337,6 @@ if(NOT ANDROID) # Android projects include themself using subdirectory
 	target_link_libraries(${BUILD_NAME} PRIVATE ${SDL3_LIBRARIES} SDL3::Headers) # Static library?
 else()
 	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # Static library?
-endif()
-
-# Assimp
-if(ANDROID)
-	add_library(assimp::assimp SHARED IMPORTED) # STATIC instad of SHARED for static
-	# FIXME: Non-hardcoded lib
-	set_target_properties(assimp::assimp PROPERTIES
-	  IMPORTED_LOCATION "/usr/local/lib/libassimp.so"
-	  INTERFACE_INCLUDE_DIRECTORIES "/usr/local/include"
-	)
-
-	target_link_libraries(${BUILD_NAME} PRIVATE assimp::assimp)
-else()
-	find_package(assimp REQUIRED CONFIG)
-
-	if (NOT assimp_FOUND)
-		message(FATAL_ERROR "Assimp not found")
-	endif()
-
-	target_link_directories(${BUILD_NAME} PRIVATE ${ASSIMP_LIBRARY_DIR})
-	target_include_directories(${BUILD_NAME} PRIVATE ${ASSIMP_INCLUDE_DIRS})
-	target_link_libraries(${BUILD_NAME} PRIVATE ${ASSIMP_LIBRARIES})
 endif()
 
 # Freetype
