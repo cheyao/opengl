@@ -83,55 +83,59 @@ bool Inventory::update(class Scene* scene, float) {
 	oy += INVENTORY_SLOTS_OFFSET_Y * scale - (INVENTORY_SLOT_Y * scale / 2 - sy / INVENTORY_INV_SCALE);
 
 	float mouseX, mouseY;
-	auto buttons = SDL_GetMouseState(&mouseX, &mouseY);
+	const auto buttons = SDL_GetMouseState(&mouseX, &mouseY);
 	mouseY = dimensions.y() - mouseY;
 
-	if (!(buttons & SDL_BUTTON_LMASK)) {
+	if (!(buttons & SDL_BUTTON_LMASK) && !(buttons & SDL_BUTTON_RMASK)) {
 		return true;
 	}
 
-	// Not inside the space
-	if (mouseX < ox || mouseY < oy || mouseX > (ox + 9 * INVENTORY_SLOT_X * scale) ||
-	    mouseY > (oy + 4 * INVENTORY_SLOT_Y * scale)) {
-		return true;
-	}
-
-	mouseX -= ox;
-	mouseY -= oy;
-
-	int slot = static_cast<int>(mouseX / (INVENTORY_SLOT_X * scale)) +
-		   static_cast<int>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
-
-	if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mCount[slot] != 0 &&
-	    (scene->mMouse.count == 0 || (scene->mMouse.item == mItems[slot] && scene->mMouse.count != 0))) {
-		if (scene->mMouse.count != 0 && scene->mMouse.item == mItems[slot]) {
-			scene->mMouse.count += mCount[slot];
-		} else {
-			scene->mMouse.item = mItems[slot];
-			scene->mMouse.count = mCount[slot];
+	if (buttons & SDL_BUTTON_RMASK) {
+		// This is long click
+	} else {
+		// Not inside the space
+		if (mouseX < ox || mouseY < oy || mouseX > (ox + 9 * INVENTORY_SLOT_X * scale) ||
+		    mouseY > (oy + 4 * INVENTORY_SLOT_Y * scale)) {
+			return true;
 		}
 
-		mItems[slot] = Components::AIR();
-		mCount[slot] = 0;
+		mouseX -= ox;
+		mouseY -= oy;
 
-		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
-	}
+		const int slot = static_cast<int>(mouseX / (INVENTORY_SLOT_X * scale)) +
+				 static_cast<int>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
 
-	if (scene->mMouse.count != 0 && scene->mMouse.item != Components::AIR() &&
-	    scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) &&
-	    (mCount[slot] == 0 || mItems[slot] == scene->mMouse.item)) {
-		if (mItems[slot] == scene->mMouse.item) {
-			mCount[slot] += scene->mMouse.count;
-		} else {
-			mCount[slot] = scene->mMouse.count;
+		if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mCount[slot] != 0 &&
+		    (scene->mMouse.count == 0 || (scene->mMouse.item == mItems[slot] && scene->mMouse.count != 0))) {
+			if (scene->mMouse.count != 0 && scene->mMouse.item == mItems[slot]) {
+				scene->mMouse.count += mCount[slot];
+			} else {
+				scene->mMouse.item = mItems[slot];
+				scene->mMouse.count = mCount[slot];
+			}
+
+			mItems[slot] = Components::AIR();
+			mCount[slot] = 0;
+
+			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 		}
 
-		mItems[slot] = scene->mMouse.item;
+		if (scene->mMouse.count != 0 && scene->mMouse.item != Components::AIR() &&
+		    scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) &&
+		    (mCount[slot] == 0 || mItems[slot] == scene->mMouse.item)) {
+			if (mItems[slot] == scene->mMouse.item) {
+				mCount[slot] += scene->mMouse.count;
+			} else {
+				mCount[slot] = scene->mMouse.count;
+			}
 
-		scene->mMouse.item = Components::AIR();
-		scene->mMouse.count = 0;
+			mItems[slot] = scene->mMouse.item;
 
-		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+			scene->mMouse.item = Components::AIR();
+			scene->mMouse.count = 0;
+
+			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+		}
 	}
 
 	return true;

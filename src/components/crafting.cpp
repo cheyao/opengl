@@ -260,8 +260,6 @@ bool CraftingInventory::checkRecipie(const std::uint64_t r) {
 		}
 	}
 
-	// FIXME: First draw inv, then cursor
-
 	return false;
 }
 
@@ -341,7 +339,7 @@ void CraftingInventory::draw(class Scene* scene) {
 	Texture* texture = systemManager->getTexture(registers::TEXTURES.at(out.second));
 	texture->activate(0);
 
-	shader->set("offset"_u, ox + 5, oy);
+	shader->set("offset"_u, ox + 3, oy);
 
 	mesh->draw(shader);
 

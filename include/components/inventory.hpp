@@ -36,6 +36,9 @@ class Inventory : public Screen {
 	std::vector<Components::Item> mItems;
 	std::vector<std::uint64_t> mCount;
 
+	// Mouse traversal path but how tf do I get the inv??
+	std::vector<std::pair<std::uint64_t, std::uint64_t>> mPath;
+
 	constexpr const static inline auto INVENTORY_TEXTURE_WIDTH = 176.0f;
 	constexpr const static inline auto INVENTORY_TEXTURE_HEIGHT = 166.0f;
 	constexpr const static inline auto INVENTORY_SLOTS_OFFSET_X = 7.5f;

@@ -6,11 +6,13 @@
 #include "scenes/level.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_stdinc.h>
 
-EventManager::EventManager(class Game* game) : mGame(game), mKeys({}) {}
+EventManager::EventManager(class Game* game) : mGame(game), mKeys({}), mLeftClickDown(0), mRightClickDown(0) {}
 
 EventManager::~EventManager() {}
 
+// So we manage the presses, and we count if it's a long or short press
 SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 	switch (event.type) {
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
@@ -71,13 +73,13 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 
 		case SDL_EVENT_MOUSE_BUTTON_DOWN: {
 			if (event.button.button == SDL_BUTTON_LEFT) {
+				mLeftClickDown = SDL_GetTicks();
 				mGame->getSystemManager()->registerClick(event.button.x, event.button.y);
-				mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = true;
 			}
 
 			if (event.button.button == SDL_BUTTON_RIGHT) {
+				mRightClickDown = SDL_GetTicks();
 				mGame->getSystemManager()->registerClick(event.button.x, event.button.y);
-				mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_DOWN_SIGNAL) = true;
 			}
 
 			break;
@@ -85,13 +87,20 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 
 		case SDL_EVENT_MOUSE_BUTTON_UP: {
 			if (event.button.button == SDL_BUTTON_LEFT) {
-				mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_UP_SIGNAL) = true;
-				mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = false;
+				SDL_Log("%lu %lu", SDL_GetTicks() - mLeftClickDown, ACTIVATION_TIME);
+				if (SDL_GetTicks() - mLeftClickDown < ACTIVATION_TIME) {
+					mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = true;
+				}
+
+				SDL_assert((mLeftClickDown = 0, true));
 			}
 
 			if (event.button.button == SDL_BUTTON_RIGHT) {
-				mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_UP_SIGNAL) = true;
-				mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_DOWN_SIGNAL) = false;
+				if (SDL_GetTicks() - mRightClickDown < ACTIVATION_TIME) {
+					mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_DOWN_SIGNAL) = true;
+				}
+
+				SDL_assert((mRightClickDown = 0, true));
 			}
 			break;
 		}
