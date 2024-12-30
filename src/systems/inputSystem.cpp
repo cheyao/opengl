@@ -1,7 +1,6 @@
 #include "systems/inputSystem.hpp"
 
 #include "components.hpp"
-#include "components/inventory.hpp"
 #include "components/playerInventory.hpp"
 #include "game.hpp"
 #include "managers/eventManager.hpp"

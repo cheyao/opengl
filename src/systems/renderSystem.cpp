@@ -287,7 +287,8 @@ void RenderSystem::draw(Scene* scene) {
 
 	// PERF: Use some VEB to send the data
 	// PERF: Culling & stuff
-	for (const auto& [_, texture, block] : scene->view<Components::texture, Components::block>().each()) {
+	Components::Item lastBlock = Components::Item::AIR;
+	for (const auto& [_, block] : scene->view<Components::block>().each()) {
 		const auto& pos = block.mPosition;
 
 		if (!(pos.y() >= sb && pos.y() <= st && pos.x() <= sr && pos.x() >= sl)) {
@@ -296,7 +297,11 @@ void RenderSystem::draw(Scene* scene) {
 
 		shader->set("position"_u, pos);
 
-		texture.mTexture->activate(0);
+		if (lastBlock != block.mType) {
+			lastBlock = block.mType;
+
+			getTexture(registers::TEXTURES.at(lastBlock))->activate(0);
+		}
 
 		mMesh->draw(shader);
 	}
@@ -310,6 +315,7 @@ void RenderSystem::draw(Scene* scene) {
 		// Not so performant but let's do it for each entity
 		const float time = SDL_sin(SDL_GetTicks() / 1000.0f + position.mPosition.sum());
 
+		// The item is on screen
 		if (scene->contains<Components::item>(entity)) {
 			offset.y() += 40 * time;
 		}

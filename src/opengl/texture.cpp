@@ -5,6 +5,7 @@
 #include "utils.hpp"
 
 #include <ft2build.h>
+#include <memory>
 #include FT_FREETYPE_H
 #include <SDL3/SDL.h>
 #include <cstddef>
@@ -54,8 +55,10 @@ void Texture::load(bool srgb) {
 	SDL_Log("Loading texture %s", name.data());
 
 	std::size_t size = 0;
-	unsigned char* source = static_cast<unsigned char*>(loadFile(name.data(), &size));
-	[[unlikely]] if (source == nullptr) {
+	const auto sfree = [](unsigned char* p) { SDL_free(p); };
+	std::unique_ptr<unsigned char[], decltype(sfree)> source(
+		static_cast<unsigned char*>(loadFile(name.data(), &size)), sfree);
+	[[unlikely]] if (!source) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to read texture shource %s: %s\033[0m",
 				name.data(), SDL_GetError());
 
@@ -65,10 +68,11 @@ void Texture::load(bool srgb) {
 	}
 
 	int channels = 0;
-	unsigned char* data = stbi_load_from_memory(source, size, &mWidth, &mHeight, &channels, 0);
-	SDL_free(source);
+	const auto stbifree = [](unsigned char* p) { stbi_image_free(p); };
+	std::unique_ptr<unsigned char[], decltype(stbifree)> data(
+		stbi_load_from_memory(source.get(), size, &mWidth, &mHeight, &channels, 0), stbifree);
 
-	[[unlikely]] if (data == nullptr) {
+	[[unlikely]] if (!data) {
 		SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to decompress texture: %s\033[0m", name.data());
 		ERROR_BOX("Failed to load textures, the assets is corrupted or you don't have enough memory");
 
@@ -96,28 +100,26 @@ void Texture::load(bool srgb) {
 #endif
 
 			break;
+
 		[[unlikely]] default:
 			SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "\x1B[31m%s:%d Unimplemented image format: %s: %d\033[0m",
 				     __FILE__, __LINE__, name.data(), channels);
 			ERROR_BOX("Failed to recognise file color format, the assets is probably "
 				  "corrupted");
-
-			throw std::runtime_error("Texture.cpp: Invalid enum");
+			break; // Recoverable error
 	}
 
 	glGenTextures(1, &mID);
 	glBindTexture(GL_TEXTURE_2D, mID);
 
 	SDL_assert(mWidth > 0 && mHeight > 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, srgb ? intFormat : format, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, srgb ? intFormat : format, mWidth, mHeight, 0, format, GL_UNSIGNED_BYTE, data.get());
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	stbi_image_free(data);
 
 	SDL_Log("Loaded texture %s: %d channels %dx%d", name.data(), channels, mWidth, mHeight);
 }

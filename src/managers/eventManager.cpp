@@ -35,14 +35,6 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 		case SDL_EVENT_KEY_UP: {
 			mKeys[event.key.scancode] = false;
 
-			if (event.button.button == SDL_BUTTON_RIGHT) {
-				mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_UP_SIGNAL) = true;
-			}
-
-			if (event.button.button == SDL_BUTTON_LEFT) {
-				mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_UP_SIGNAL) = true;
-			}
-
 			break;
 		}
 
@@ -88,7 +80,19 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 				mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_DOWN_SIGNAL) = true;
 			}
 
+			break;
+		}
 
+		case SDL_EVENT_MOUSE_BUTTON_UP: {
+			if (event.button.button == SDL_BUTTON_LEFT) {
+				mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_UP_SIGNAL) = true;
+				mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = false;
+			}
+
+			if (event.button.button == SDL_BUTTON_RIGHT) {
+				mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_UP_SIGNAL) = true;
+				mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_DOWN_SIGNAL) = false;
+			}
 			break;
 		}
 

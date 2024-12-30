@@ -28,9 +28,7 @@ CraftingInventory::CraftingInventory(class Game* game, const rapidjson::Value& c
 	: Inventory(game, contents, entity), mRows(row), mCols(col), mCraftingItems(row * col, Components::Item::AIR),
 	  mCraftingCount(row * col, 0), mLastCraft(0) {}
 
-bool CraftingInventory::update(class Scene* scene, float delta) {
-	craft();
-
+bool CraftingInventory::update(class Scene* const scene, const float delta) {
 	SystemManager* const systemManager = mGame->getSystemManager();
 	const Eigen::Vector2f dimensions = systemManager->getDemensions();
 
@@ -68,46 +66,97 @@ bool CraftingInventory::update(class Scene* scene, float delta) {
 	mouseY = dimensions.y() - mouseY;
 	(void)buttons;
 
-	if (mouseX < ox || mouseY < oy || mouseX > (ox + sizex) || mouseY > (oy + sizey)) {
-		return Inventory::update(scene, delta);
-	}
-
-	// Normalize the buttons to grid cords
-	int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
-
-	if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mCraftingCount[slot] != 0 &&
-	    (scene->mMouse.count == 0 || (scene->mMouse.item == mCraftingItems[slot] && scene->mMouse.count != 0))) {
-		if (scene->mMouse.count != 0 && scene->mMouse.item == mCraftingItems[slot]) {
-			scene->mMouse.count += mCraftingCount[slot];
-		} else {
-			scene->mMouse.item = mCraftingItems[slot];
-			scene->mMouse.count = mCraftingCount[slot];
+	// Not inside the grid
+	const auto placeGrid = [&]() {
+		if (mouseX < ox || mouseY < oy || mouseX > (ox + sizex) || mouseY > (oy + sizey)) {
+			return;
 		}
 
-		mCraftingItems[slot] = Components::Item::AIR;
-		mCraftingCount[slot] = 0;
+		// Normalize the buttons to grid cords
+		int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
 
-		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
-	}
+		if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mCraftingCount[slot] != 0 &&
+		    (scene->mMouse.count == 0 ||
+		     (scene->mMouse.item == mCraftingItems[slot] && scene->mMouse.count != 0))) {
+			if (scene->mMouse.count != 0 && scene->mMouse.item == mCraftingItems[slot]) {
+				scene->mMouse.count += mCraftingCount[slot];
+			} else {
+				scene->mMouse.item = mCraftingItems[slot];
+				scene->mMouse.count = mCraftingCount[slot];
+			}
 
-	if (scene->mMouse.count != 0 && scene->mMouse.item != Components::Item::AIR &&
-	    scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) &&
-	    (mCraftingCount[slot] == 0 || mCraftingItems[slot] == scene->mMouse.item)) {
-		if (mCraftingItems[slot] == scene->mMouse.item) {
-			mCraftingCount[slot] += scene->mMouse.count;
-		} else {
-			mCraftingCount[slot] = scene->mMouse.count;
+			mCraftingItems[slot] = Components::Item::AIR;
+			mCraftingCount[slot] = 0;
+
+			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 		}
 
-		mCraftingItems[slot] = scene->mMouse.item;
+		if (scene->mMouse.count != 0 && scene->mMouse.item != Components::Item::AIR &&
+		    scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) &&
+		    (mCraftingCount[slot] == 0 || mCraftingItems[slot] == scene->mMouse.item)) {
+			if (mCraftingItems[slot] == scene->mMouse.item) {
+				mCraftingCount[slot] += scene->mMouse.count;
+			} else {
+				mCraftingCount[slot] = scene->mMouse.count;
+			}
 
-		scene->mMouse.item = Components::Item::AIR;
-		scene->mMouse.count = 0;
+			mCraftingItems[slot] = scene->mMouse.item;
 
-		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
-	}
+			scene->mMouse.item = Components::Item::AIR;
+			scene->mMouse.count = 0;
 
-	Inventory::handleKeys();
+			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+		}
+	};
+
+	const auto getOutput = [&]() {
+		if (!scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL)) {
+			return;
+		}
+
+		if (mLastCraft == 0) {
+			return;
+		}
+
+		if (mouseX < ox || mouseY < oy || mouseX > (ox + slotx) || mouseY > (oy + sloty)) {
+			return;
+		}
+
+		if (scene->mMouse.count != 0) {
+			SDL_assert(scene->mMouse.item != Components::Item::AIR);
+
+			return;
+		}
+
+		scene->mMouse.count = std::get<2>(registers::CRAFTING_RECIPIES.at(mLastCraft)).first;
+		scene->mMouse.item = std::get<2>(registers::CRAFTING_RECIPIES.at(mLastCraft)).second;
+
+		mLastCraft = 0;
+
+		for (std::size_t i = 0; i < mCraftingCount.size(); ++i) {
+			if (mCraftingCount[i] == 0) {
+				continue;
+			}
+
+			if (mCraftingCount[i] == 1) {
+				mCraftingItems[i] = Components::Item::AIR;
+			}
+
+			--mCraftingCount[i];
+		}
+
+			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+	};
+
+	placeGrid();
+
+	ox += 57 * scale;
+	oy += 9 * scale;
+
+	craft();
+	getOutput();
+
+	Inventory::update(scene, delta);
 
 	return true;
 }

@@ -24,6 +24,7 @@ class CraftingInventory : public Inventory {
 
       private:
 	void craft();
+	void placeGrid();
 	bool checkRecipie(std::uint64_t r);
 
 	std::uint64_t mRows;
