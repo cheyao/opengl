@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <iterator>
 #include <memory>
+#include <ranges>
 #include <span>
 #include <tuple>
 #include <type_traits>
@@ -85,32 +86,36 @@ class sparse_set_view {
 
 	// PERF: Large bottleneck
 	sparse_set_view(ComponentManager* componentManager) : mComponentManager(componentManager) {
-		// This first part makes a array of all the sizes of the that we loop through
-		const std::array<utils::sparse_set_interface*, sizeof...(ComponentTypes)> sets = {
-			mComponentManager->getPool<ComponentTypes>()...};
+		if constexpr (sizeof...(ComponentTypes) == 1) {
+			mEntities = std::vector<EntityID>(std::from_range, (*mComponentManager->getPool<ComponentTypes>(), ...));
+		} else {
+			// This first part makes a array of all the sizes of the that we loop through
+			const std::array<utils::sparse_set_interface*, sizeof...(ComponentTypes)> sets = {
+				mComponentManager->getPool<ComponentTypes>()...};
 
-		std::size_t smallest = 0;
-		std::size_t smallest_size = sets[0]->size();
-		for (std::size_t i = 0; i < sizeof...(ComponentTypes); ++i) {
-			if (sets[i]->size() < smallest_size) {
-				smallest = i;
-				smallest_size = sets[i]->size();
+			std::size_t smallest = 0;
+			std::size_t smallest_size = sets[0]->size();
+			for (std::size_t i = 0; i < sizeof...(ComponentTypes); ++i) {
+				if (sets[i]->size() < smallest_size) {
+					smallest = i;
+					smallest_size = sets[i]->size();
+				}
 			}
-		}
 
-		mEntities.reserve(smallest_size);
+			mEntities.reserve(smallest_size);
 
-		for (const auto id : *sets[smallest]) {
-			if constexpr (sizeof...(ComponentTypes) == 1) {
-				mEntities.emplace_back(id);
-			} else {
-				if ((... && (mComponentManager->getPool<ComponentTypes>()->contains(id)))) {
+			for (const auto id : *sets[smallest]) {
+				if constexpr (sizeof...(ComponentTypes) == 1) {
 					mEntities.emplace_back(id);
+				} else {
+					if ((... && (mComponentManager->getPool<ComponentTypes>()->contains(id)))) {
+						mEntities.emplace_back(id);
+					}
 				}
 			}
 		}
-		// Now at the end of the program, all the entites that are present in all the components are present in
-		// mEntities (doesn't count in addition and deletion)
+		// Now at the end of the program, all the entites that are present in all the components are
+		// present in mEntities (doesn't count in addition and deletion)
 	}
 
 	// Copy
@@ -123,8 +128,8 @@ class sparse_set_view {
 	}
 
 	// Move
-	// sparse_set_view(sparse_set_view&& other) noexcept = default;
-	// sparse_set_view& operator=(sparse_set_view&& other) noexcept = default;
+	sparse_set_view(sparse_set_view&& other) noexcept = default;
+	sparse_set_view& operator=(sparse_set_view&& other) noexcept = default;
 
 	~sparse_set_view() {}
 

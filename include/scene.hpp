@@ -74,7 +74,7 @@ class Scene {
 
 	struct {
 		Components::Item item = static_cast<Components::Item>(0);
-		std::size_t count = 0;
+		std::uint64_t count = 0;
 	} mMouse;
 
       private:

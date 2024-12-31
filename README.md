@@ -16,19 +16,26 @@
     <img src="https://cloud-l0r4ps4t3-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
 </div>
 
+## Explanation
+
+This game engine uses the Entity-Component-System architecture, implemented using `Scenes` and `sparse_sets`.
+
+Entities are just UUIDs
+
+Components are just plain old structs
+
+The systems manage all the logic and changes the components
+
 <h2 align="center">Building</h2>
 
 Dependencies:
 
 - SDL3
 - Freetype 2
-- Assimp (Not really used)
-
-- PERF: Biggest bottleneck is at GPU now, only 60% single-cpu usage at 600FPS
 
 ### MacOS and Linux
 
-Install `assimp` and `freetype` with your package manager
+Install `freetype` with your package manager
 
 Compile SDL3:
 ```bash
@@ -66,17 +73,6 @@ For MacOS:
 $ mv OpenGL.app /Applications/
 $ open /Applications/OpenGL.app # Or just openg the app
 ```
-
-If you are getting this error:
-```bash
-Undefined symbols for architecture x86_64:
-  "Assimp::IOSystem::CurrentDirectory[abi:cxx11]() const", referenced from:
-      vtable for GameIOSystem in IOManager.cpp.o
-ld: symbol(s) not found for architecture x86_64
-collect2: error: ld returned 1 exit status
-```
-This means that you didn't use the same compiler to compile assimp and this engine (clang and gcc are somehow not compatable)
-
 ### Windows
 
 Same, use cmake to build project
@@ -94,25 +90,6 @@ Add these to your `.zshrc` (Change it to the appropriate folders on linux):
 $ export ANDROID_NDK_HOME="/usr/local/share/android-ndk"
 $ export JAVA_HOME=`/usr/libexec/java_home -v 17` # Yes, you __must__ use java 17, blame android
 $ export ANDROID_HOME="/usr/local/share/android-commandlinetools/"
-```
-
-For android you need to compile assimp by yourself:
-
-Change the `CMAKE_TOOLCHAIN_FILE` if you are not on MacOS:
-```bash
-$ git clone --depth 1 https://github.com/assimp/assimp.git
-$ cd assimp
-$ mkdir build && cd build
-$ cmake -DASSIMP_ANDROID_JNIIOSYSTEM=OFF \
-        -DCMAKE_TOOLCHAIN_FILE=/usr/local/share/android-ndk/build/cmake/android.toolchain.cmake \
-        -DANDROID_NDK=${ANDROID_NDK_HOME} \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DANDROID_ABI=arm64-v8a \
-        -DBUILD_SHARED_LIBS=1 \
-        -DANDROID_NATIVE_API_LEVEL=24 \
-        ..
-$ cmake --build .
-$ sudo cmake --install .
 ```
 
 Configure your gradlew's credentials (I'm not gonna let you use mine duh)
@@ -134,7 +111,6 @@ $ mkdir build && cd build
 $ cmake -DCMAKE_BUILD_TYPE=Release \
         -DANDROID=ON \
         ..
-# Note: You might need to edit CMakeLists.txt:320 to point to your assimp lib dir
 $ cmake --build .
 ```
 Now there is the apk in the folder
@@ -154,14 +130,6 @@ $ mkdir build && cd build
 $ emcmake cmake ..
 $ cmake --build .
 $ cmake --install .
-```
-
-Build assimp:
-```bash
-$ git clone --depth 1 https://github.com/assimp/assimp && cd assimp
-$ mkdir build && cd build
-& cmake -DASSIMP_BUILD_ZLIB=ON -DBUILD_SHARED_LIBS=OFF ..
-$ cmake --build .
 ```
 
 Build the project:
@@ -215,16 +183,6 @@ assets
 - `./assets/textures/ui` Textures for the UI
 - `./assets/strings.csv` Source loc csv file (See [here](https://en.wikipedia.org/wiki/IETF_language_tag) for language codes)
 - `./assets/strings.json` Output loc file (to be generated) 
-
-## Explanation
-
-This game engine uses the Entity-Component-System architecture, implemented using `Scenes` and `sparse_sets`.
-
-Entities are just UUIDs
-
-Components are just plain old structs
-
-The systems manage all the logic and changes the components
 
 ## Notes
 

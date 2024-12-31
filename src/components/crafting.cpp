@@ -123,13 +123,14 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 			return;
 		}
 
-		if (scene->mMouse.count != 0) {
+		if (scene->mMouse.count != 0 &&
+		    scene->mMouse.item != std::get<2>(registers::CRAFTING_RECIPIES.at(mLastCraft)).second) {
 			SDL_assert(scene->mMouse.item != Components::AIR());
 
 			return;
 		}
 
-		scene->mMouse.count = std::get<2>(registers::CRAFTING_RECIPIES.at(mLastCraft)).first;
+		scene->mMouse.count += std::get<2>(registers::CRAFTING_RECIPIES.at(mLastCraft)).first;
 		scene->mMouse.item = std::get<2>(registers::CRAFTING_RECIPIES.at(mLastCraft)).second;
 
 		mLastCraft = 0;
