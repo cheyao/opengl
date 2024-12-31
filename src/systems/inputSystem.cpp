@@ -97,11 +97,8 @@ void InputSystem::updateMouse(Scene* scene, const float) {
 			return;
 		}
 
-		// time t, last l, start s
-		// t - (l)
 		const auto pressLength = (SDL_GetTicks() - mLastHold) / 50.0f;
-		for (const auto& [entity, block] :
-		     scene->view<Components::block>().each()) {
+		for (const auto& [entity, block] : scene->view<Components::block>().each()) {
 			if (block.mPosition != blockPos) {
 				continue;
 			}
@@ -117,13 +114,10 @@ void InputSystem::updateMouse(Scene* scene, const float) {
 				break;
 			}
 
-			std::vector<std::pair<float, Components::Item>> loot;
-
-			if (registers::LOOT_TABLES.contains(block.mType)) {
-				loot = registers::LOOT_TABLES.at(block.mType);
-			} else {
-				loot.emplace_back(1.0f, block.mType);
-			}
+			const std::vector<std::pair<float, Components::Item>> defaultLoot = {{1.0f, block.mType}};
+			const std::vector<std::pair<float, Components::Item>>& loot =
+				registers::LOOT_TABLES.contains(block.mType) ? registers::LOOT_TABLES.at(block.mType)
+									     : defaultLoot;
 
 			for (const auto [chance, type] : loot) {
 				const float roll = SDL_randf();
@@ -181,15 +175,14 @@ void InputSystem::draw(class Scene* scene) {
 }
 
 void InputSystem::tryPlace(class Scene* scene, const Eigen::Vector2i& pos) {
+	using namespace Components;
+
 	auto* inv = static_cast<PlayerInventory*>(scene->get<Components::inventory>(mGame->getPlayerID()).mInventory);
 	for (const auto& block : scene->view<Components::block>()) {
 		if (scene->get<Components::block>(block).mPosition == pos) {
 			return;
 		}
 	}
-
-	// Can't place on entity
-	using namespace Components;
 
 	const Eigen::Vector2f minB = pos.template cast<float>() * block::BLOCK_SIZE + Eigen::Vector2f(5, 5);
 	const Texture* stone = mGame->getSystemManager()->getTexture("blocks/stone.png", true);

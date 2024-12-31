@@ -76,7 +76,7 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 		}
 
 		// Normalize the buttons to grid cords
-		int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
+		const int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
 
 		if (mCraftingCount[slot] != 0 &&
 		    (scene->mMouse.count == 0 ||
@@ -151,6 +151,17 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 	};
 
 	placeGrid();
+
+	if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
+		const int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
+
+		// This is long click
+		typename decltype(mPath)::value_type pair = {getID<Inventory>(), slot};
+
+		if (std::ranges::find(mPath, pair) == std::end(mPath)) {
+			mPath.emplace_back(pair);
+		}
+	}
 
 	// Offset to output grid
 	ox += 57 * scale;

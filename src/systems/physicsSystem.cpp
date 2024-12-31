@@ -73,6 +73,8 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 					if (collidingBellow(scene, entity, block)) {
 						onGround = true;
 						mCache.lastAbove[entity] = block;
+
+						break;
 					}
 				}
 			}
@@ -105,10 +107,10 @@ void PhysicsSystem::markDirty(Scene* scene) {
 					   scene->get<Components::collision>(mGame->getPlayerID()).mOffset) /
 					  Components::block::BLOCK_SIZE;
 
-	float cb = playerPos.y() - 1;
-	float ct = playerPos.y() + 1;
-	float cl = playerPos.x() - 1;
-	float cr = playerPos.x() + 1;
+	const float cb = playerPos.y() - 1;
+	const float ct = playerPos.y() + 1;
+	const float cl = playerPos.x() - 1;
+	const float cr = playerPos.x() + 1;
 
 	for (const auto block : scene->view<Components::collision, Components::block>()) {
 		const auto& pos = scene->get<Components::block>(block).mPosition;

@@ -38,6 +38,12 @@ class Inventory : public Screen {
 
 	// Mouse traversal path but how tf do I get the inv??
 	std::vector<std::pair<std::uint64_t, std::uint64_t>> mPath;
+	// Unique ID for all classes
+	template <typename T> [[nodiscard]] auto getID() {
+		static std::uint64_t id = mCounter++;
+
+		return id;
+	}
 
 	constexpr const static inline auto INVENTORY_TEXTURE_WIDTH = 176.0f;
 	constexpr const static inline auto INVENTORY_TEXTURE_HEIGHT = 166.0f;
@@ -60,4 +66,6 @@ class Inventory : public Screen {
 	constexpr const static inline auto COUNT_KEY = "count";
 
 	constexpr const static inline auto INVENTORY_SPRITE_FILE = "ui/inventory.png";
+
+	std::uint64_t mCounter;
 };

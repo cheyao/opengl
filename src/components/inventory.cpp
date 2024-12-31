@@ -20,7 +20,7 @@
 #include <string>
 
 Inventory::Inventory(class Game* game, const std::size_t size, EntityID entity)
-	: Screen(game), mEntity(entity), mSize(size), mItems(size), mCount(size) {}
+	: Screen(game), mEntity(entity), mSize(size), mItems(size), mCount(size), mCounter(0) {}
 
 Inventory::Inventory(class Game* game, const rapidjson::Value& contents, EntityID entity)
 	: Screen(game), mEntity(entity) {
@@ -86,21 +86,28 @@ bool Inventory::update(class Scene* scene, float) {
 	SDL_GetMouseState(&mouseX, &mouseY);
 	mouseY = dimensions.y() - mouseY;
 
+	if (mouseX < ox || mouseY < oy || mouseX > (ox + 9 * INVENTORY_SLOT_X * scale) ||
+	    mouseY > (oy + 4 * INVENTORY_SLOT_Y * scale)) {
+		return true;
+	}
+
+	mouseX -= ox;
+	mouseY -= oy;
+
+	const int slot = static_cast<int>(mouseX / (INVENTORY_SLOT_X * scale)) +
+			 static_cast<int>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
+
 	if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
 		// This is long click
+		// Now note the slots
+
+		typename decltype(mPath)::value_type pair = {getID<Inventory>(), slot};
+
+		if (std::ranges::find(mPath, pair) == std::end(mPath)) {
+			mPath.emplace_back(pair);
+		}
 	} else if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL)) {
 		// Not inside the space
-		if (mouseX < ox || mouseY < oy || mouseX > (ox + 9 * INVENTORY_SLOT_X * scale) ||
-		    mouseY > (oy + 4 * INVENTORY_SLOT_Y * scale)) {
-			return true;
-		}
-
-		mouseX -= ox;
-		mouseY -= oy;
-
-		const int slot = static_cast<int>(mouseX / (INVENTORY_SLOT_X * scale)) +
-				 static_cast<int>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
-
 		if (mCount[slot] != 0 &&
 		    (scene->mMouse.count == 0 || (scene->mMouse.item == mItems[slot] && scene->mMouse.count != 0))) {
 			if (scene->mMouse.count != 0 && scene->mMouse.item == mItems[slot]) {
@@ -130,6 +137,16 @@ bool Inventory::update(class Scene* scene, float) {
 			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 		}
 	}
+
+	std::string s = "";
+	for (const auto i : mPath) {
+		s += std::to_string(i.first);
+		s += ":";
+		s += std::to_string(i.second);
+		s += ", ";
+	}
+	s += '\n';
+	SDL_Log("%s", s.data());
 
 	return true;
 }

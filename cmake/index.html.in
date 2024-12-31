@@ -4,91 +4,65 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>${BUILD_NAME}</title>
-    <style>body {
+    <style>body, html {
   font-family: arial;
   margin: 0;
+  height: 100%;
   padding: none;
   background-color: #9fcfff;
+  overflow: hidden;
 }
 
 .emscripten { padding-right: 0; display: block; }
-div.emscripten { text-align: center; }
 /* the canvas *must not* have any border or padding, or mouse coords will be wrong */
 canvas.emscripten { border: 0px none; }
 
-.spinner {
-  height: 30px;
-  width: 30px;
-  margin: 0;
-  margin-top: 20px;
-  margin-left: 20px;
-  display: inline-block;
-  vertical-align: top;
-
-  -webkit-animation: rotation .8s linear infinite;
-  -moz-animation: rotation .8s linear infinite;
-  -o-animation: rotation .8s linear infinite;
-  animation: rotation 0.8s linear infinite;
-
-  border-left: 5px solid rgb(235, 235, 235);
-  border-right: 5px solid rgb(235, 235, 235);
-  border-bottom: 5px solid rgb(235, 235, 235);
-  border-top: 5px solid rgb(120, 120, 120);
-
-  border-radius: 100%;
-  background-color: #64A0D7 !important; 
+div.emscripten { 
+            display: flex;
+            flex-direction: column; /* Align items vertically */
+            align-items: center; /* Center items horizontally */
 }
 
-@-webkit-keyframes rotation {
-  from {-webkit-transform: rotate(0deg);}
-  to {-webkit-transform: rotate(360deg);}
-}
-@-moz-keyframes rotation {
-  from {-moz-transform: rotate(0deg);}
-  to {-moz-transform: rotate(360deg);}
-}
-@-o-keyframes rotation {
-  from {-o-transform: rotate(0deg);}
-  to {-o-transform: rotate(360deg);}
-}
-@keyframes rotation {
-  from {transform: rotate(0deg);}
-  to {transform: rotate(360deg);}
+.title {
+	font-size: 25px;
 }
 
-#status {
-  display: inline-block;
-  vertical-align: top;
-  margin-top: 30px;
-  margin-left: 20px;
-  font-weight: bold;
-  color: rgb(120, 120, 120);
+.status {
+	margin-top: 70vh;
 }
 
-#progress {
-  height: 20px;
-  width: 300px;
+progress {
+	margin-top: 1vh;
+	  width: 500px;
+	  height: 20px;
+	  border: 1px solid #fff;
+	  padding: 2px 5px;
+	  background-color: #64A0D7;
 }
+progress::-moz-progress-bar { background: #376D99; }
+progress::-webkit-progress-value { background: #376D99; }
+progress { color: #376D99; }
 </style>
   </head>
   <body>
-    <div class="emscripten" style="width: 100%; display: flex; justify-content: center;">
-        <div class="spinner" id='spinner'></div>
-        <div class="emscripten" id="status">Downloading...</div>
-        <progress value="0" max="100" id="progress" hidden=0></progress>
+    <div class="emscripten" style="height: 100%; width: 100%; display: flex; text-align: center;" id="info">
+	<p class="title">Cyao game engine is loading...</p>
+        <div class="emscripten status title" id="status">Downloading wasm binary...</div>
+        <progress value="50" max="100" id="progress"></progress>
+	<p style="margin-top: auto;">Download native versions at <a href="https://github.com/cheyao/opengl/releases">github</a> for better performance</p>
     </div>
 
     <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
 
     <script type='text/javascript'>
-      window.alert("Download native (Windows, MacOS, Linux, Android) versions at https://github.com/cheyao/opengl/releases for better performance");
       if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+	window.alert("Phone support isn't compleate, this game is ment to be played on a PC (Like Minecraft Java)");
       } else {
       };
 
       var statusElement = document.getElementById('status');
       var progressElement = document.getElementById('progress');
-      var spinnerElement = document.getElementById('spinner');
+      var mainDiv = document.getElementById('info');
 
       var Module = {
         print: (function() {
@@ -126,27 +100,25 @@ canvas.emscripten { border: 0px none; }
             progressElement.value = parseInt(m[2])*100;
             progressElement.max = parseInt(m[4])*100;
             progressElement.hidden = false;
-            spinnerElement.hidden = false;
           } else {
             progressElement.value = null;
             progressElement.max = null;
             progressElement.hidden = true;
             if (!text) progressElement.style.display = 'none';
-            if (!text) spinnerElement.style.display = 'none';
             if (!text) statusElement.style.display = 'none';
+            if (!text) mainDiv.style.display = 'none';
           }
           statusElement.innerHTML = text;
         },
         totalDependencies: 1,
         monitorRunDependencies: (left) => {
           this.totalDependencies = Math.max(this.totalDependencies, left);
-          Module.setStatus(left ? 'Downloading wasm binary' : 'All downloads complete.');
+          Module.setStatus(left ? 'Downloading wasm binary...' : 'All downloads complete.');
         }
       };
-      Module.setStatus('Downloading...');
+      Module.setStatus('Downloading data...');
       window.onerror = (event) => {
         Module.setStatus('Exception thrown, see JavaScript console');
-        spinnerElement.style.display = 'none';
         Module.setStatus = (text) => {
           if (text) console.error('[post-exception status] ' + text);
         };

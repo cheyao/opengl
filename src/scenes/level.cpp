@@ -186,11 +186,6 @@ void Level::save(rapidjson::Value& data, rapidjson::MemoryPoolAllocator<>& alloc
 	save(mCenter);
 	save(mRight);
 
-	rapidjson::StringBuffer sb;
-	rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
-	mData.Accept(writer);
-	SDL_Log("%s", sb.GetString());
-
 	data.CopyFrom(mData.Move(), allocator);
 }
 
