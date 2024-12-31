@@ -11,9 +11,6 @@
 
 // TODO: Cleanup this
 class Game {
-	// Our storage manager gotta restore state
-	friend class StorageManager;
-
       private:
 	Game();
 	Game(Game&&) = delete;
@@ -43,10 +40,12 @@ class Game {
 	void setPlayerID(const EntityID id) { mPlayer = id; }
 	[[nodiscard]] EntityID getPlayerID() const { return mPlayer; }
 
-	class Level* getLevel() const { return mCurrentLevel; }
+	class Level* getLevel() const { return mCurrentLevel.get(); }
 
       private:
 	void gui();
+
+	std::unique_ptr<class Level> mCurrentLevel;
 
 	std::unique_ptr<class EventManager> mEventManager;
 
@@ -57,6 +56,4 @@ class Game {
 	std::uint64_t mTicks;
 	std::string mBasePath;
 	EntityID mPlayer;
-
-	class Level* mCurrentLevel;
 };

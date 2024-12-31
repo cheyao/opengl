@@ -107,7 +107,7 @@ SystemManager::SystemManager(Game* game)
 	  mRenderSystem(std::make_unique<RenderSystem>(mGame)), mInputSystem(std::make_unique<InputSystem>(mGame)),
 	  mTextSystem(std::make_unique<TextSystem>(mGame)), mUISystem(std::make_unique<UISystem>(mGame)) {}
 
-SystemManager::~SystemManager() {}
+SystemManager::~SystemManager() { SDL_Log("Unloading system"); }
 
 void SystemManager::setDemensions(const int width, const int height) { mRenderSystem->setDemensions(width, height); }
 

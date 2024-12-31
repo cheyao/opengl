@@ -27,6 +27,8 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 	Texture* stone = game->getSystemManager()->getTexture("blocks/stone.png");
 	Texture* grass = game->getSystemManager()->getTexture("blocks/grass-block.png");
 
+	const auto offset = mPosition * CHUNK_WIDTH;
+
 	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
 		double height = noise->getNoise(i + position * CHUNK_WIDTH);
 		std::uint64_t block_height = WATER_LEVEL + 5 * height;
@@ -35,7 +37,7 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 		for (std::uint64_t y = 0; y < block_height; ++y) {
 			const EntityID entity = scene->newEntity();
 			scene->emplace<Components::block>(entity, Components::Item::STONE,
-							  Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, y));
+							  Eigen::Vector2i(i + offset, y));
 			scene->emplace<Components::texture>(entity, stone);
 			scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), stone->getSize(),
 							      true);
@@ -43,7 +45,7 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 
 		const EntityID entity = scene->newEntity();
 		scene->emplace<Components::block>(entity, Components::Item::GRASS_BLOCK,
-						  Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, block_height));
+						  Eigen::Vector2i(i + offset, block_height));
 		scene->emplace<Components::texture>(entity, grass);
 		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), grass->getSize(), true);
 
@@ -52,8 +54,7 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 			const float roll = SDL_randf();
 
 			if (roll < chance) {
-				spawnStructure(Eigen::Vector2i(i + mPosition * CHUNK_WIDTH, block_height + 1),
-					       structure, scene);
+				spawnStructure(Eigen::Vector2i(i + offset, block_height + 1), structure, scene);
 			}
 		}
 	}
@@ -100,10 +101,10 @@ void Chunk::save(class Scene* scene, rapidjson::Value& chunk, rapidjson::MemoryP
 	}
 	*/
 
-	for (const auto block : scene->template view<Components::block>()) {
+	for (const auto block : scene->view<Components::block>()) {
 		// Not in the chunk
-		if ((scene->template get<Components::block>(block).mPosition.x() / CHUNK_WIDTH -
-		     (scene->template get<Components::block>(block).mPosition.x() < 0)) != mPosition) {
+		if ((scene->get<Components::block>(block).mPosition.x() / CHUNK_WIDTH -
+		     (scene->get<Components::block>(block).mPosition.x() < 0)) != mPosition) {
 			continue;
 		}
 

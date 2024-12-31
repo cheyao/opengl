@@ -25,8 +25,8 @@
 #endif
 
 Game::Game()
-	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mStorageManager(nullptr), mTicks(0),
-	  mBasePath(""), mCurrentLevel(nullptr) {
+	: mCurrentLevel(nullptr), mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr),
+	  mStorageManager(nullptr), mTicks(0), mBasePath("") {
 	const auto begin = std::chrono::high_resolution_clock::now();
 
 	const char* basepath = SDL_GetBasePath();
@@ -46,16 +46,14 @@ Game::Game()
 
 	mStorageManager = std::make_unique<StorageManager>(this);
 
+	mCurrentLevel = std::make_unique<Level>(this);
 	try {
 		mStorageManager->restore();
 	} catch (const std::exception& error) {
 		SDL_Log("\033[31mFailed to read saved state with error %s, creating new state\033[0m", error.what());
 
-		mCurrentLevel = new Level(this);
 		mCurrentLevel->create();
 	}
-
-	SDL_assert(mCurrentLevel != nullptr);
 
 	mTicks = SDL_GetTicks();
 

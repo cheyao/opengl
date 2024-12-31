@@ -123,13 +123,8 @@ class sparse_set_view {
 	}
 
 	// Move
-	sparse_set_view(sparse_set_view&& other) noexcept
-		: mComponentManager(other.mComponentManager), mEntities(std::move(other.mEntities)) {}
-	sparse_set_view& operator=(sparse_set_view&& other) noexcept {
-		mComponentManager = other.mComponentManager;
-		mEntities = std::move(other.mEntities);
-		return *this;
-	}
+	// sparse_set_view(sparse_set_view&& other) noexcept = default;
+	// sparse_set_view& operator=(sparse_set_view&& other) noexcept = default;
 
 	~sparse_set_view() {}
 

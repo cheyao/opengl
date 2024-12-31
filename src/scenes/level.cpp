@@ -15,21 +15,26 @@
 #include "third_party/rapidjson/allocators.h"
 #include "third_party/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson.h"
+#include "third_party/rapidjson/writer.h"
 
 #include <SDL3/SDL.h>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <limits>
-#include <utility>
 
 Level::Level(class Game* game, const std::string& name)
-	: mName(name), mTextID(0), mLeft(nullptr), mCenter(nullptr), mRight(nullptr), mGame(game),
+	: mName(name), mTextID(0), mLeft(nullptr), mCenter(nullptr), mRight(nullptr), mGame(game), mScene(nullptr),
 	  mNoise(new NoiseGenerator()) {}
 
-Level::~Level() { delete mScene; }
+Level::~Level() {
+	SDL_Log("Unloading level");
+	delete mScene;
+}
 
 void Level::create() {
+	delete mScene;
+
 	SDL_assert(mGame != nullptr);
 	mData.SetObject();
 
@@ -57,7 +62,9 @@ void Level::create() {
 }
 
 void Level::load(rapidjson::Value& data) {
-	mData.CopyFrom(std::move(data), mData.GetAllocator());
+	delete mScene;
+
+	mData.CopyFrom(data, mData.GetAllocator());
 
 	SDL_assert(data.HasMember(PLAYER_KEY));
 	SDL_assert(data.HasMember(CHUNK_KEY));
@@ -81,6 +88,7 @@ void Level::load(rapidjson::Value& data) {
 			static_cast<int>(playerPos) / Components::block::BLOCK_SIZE / Chunk::CHUNK_WIDTH - sign;
 
 		if (this->mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(centerChunk)].IsNull()) {
+			SDL_Log("Chunk %d was Null! Making new chunk", centerChunk);
 			chunk = new Chunk(this->mGame, this->mScene, mNoise.get(), centerChunk);
 
 			return;
@@ -108,32 +116,57 @@ void Level::load(rapidjson::Value& data) {
 }
 
 void Level::save(rapidjson::Value& data, rapidjson::MemoryPoolAllocator<>& allocator) {
+	SDL_Log("Saving level");
 	const auto playerID = mGame->getPlayerID();
 
-	mData.AddMember(rapidjson::StringRef(PLAYER_KEY), rapidjson::Value(rapidjson::kObjectType).Move(),
+	if (!mData.HasMember(PLAYER_KEY)) {
+		mData.AddMember(rapidjson::StringRef(PLAYER_KEY), rapidjson::Value(rapidjson::kObjectType).Move(),
+				mData.GetAllocator());
+		mData[PLAYER_KEY].AddMember(
+			"position",
+			fromVector2f(mScene->get<Components::position>(playerID).mPosition, mData.GetAllocator())
+				.Move(),
 			mData.GetAllocator());
+		mData[PLAYER_KEY].AddMember(
+			"velocity",
+			fromVector2f(mScene->get<Components::velocity>(playerID).mVelocity, mData.GetAllocator())
+				.Move(),
+			mData.GetAllocator());
+		mData[PLAYER_KEY].AddMember("inventory", rapidjson::Value(rapidjson::kObjectType).Move(),
+					    mData.GetAllocator());
+		mScene->get<Components::inventory>(playerID).mInventory->save(mData[PLAYER_KEY]["inventory"],
+									      mData.GetAllocator());
 
-	mData[PLAYER_KEY].SetObject();
-	mData[PLAYER_KEY].AddMember(
-		"position",
-		fromVector2f(mScene->get<Components::position>(playerID).mPosition, mData.GetAllocator()).Move(),
-		mData.GetAllocator());
-	mData[PLAYER_KEY].AddMember(
-		"velocity",
-		fromVector2f(mScene->get<Components::velocity>(playerID).mVelocity, mData.GetAllocator()).Move(),
-		mData.GetAllocator());
-	mData[PLAYER_KEY].AddMember("inventory", rapidjson::Value(rapidjson::kObjectType).Move(), mData.GetAllocator());
-	mScene->get<Components::inventory>(playerID).mInventory->save(mData[PLAYER_KEY]["inventory"],
-								      mData.GetAllocator());
+		mData[PLAYER_KEY].AddMember("mcount", mScene->mMouse.count, mData.GetAllocator());
+		mData[PLAYER_KEY].AddMember("mitem", static_cast<std::uint64_t>(mScene->mMouse.item),
+					    mData.GetAllocator());
+	} else {
+		mData[PLAYER_KEY]["position"] =
+			fromVector2f(mScene->get<Components::position>(playerID).mPosition, mData.GetAllocator())
+				.Move();
+		mData[PLAYER_KEY]["velocity"] =
+			fromVector2f(mScene->get<Components::velocity>(playerID).mVelocity, mData.GetAllocator())
+				.Move();
+		mData[PLAYER_KEY]["inventory"] = rapidjson::Value(rapidjson::kObjectType).Move();
+		mScene->get<Components::inventory>(playerID).mInventory->save(mData[PLAYER_KEY]["inventory"],
+									      mData.GetAllocator());
 
-	mData[PLAYER_KEY].AddMember("mcount", mScene->mMouse.count, mData.GetAllocator());
-	mData[PLAYER_KEY].AddMember("mitem", static_cast<std::uint64_t>(mScene->mMouse.item), mData.GetAllocator());
-	delete mScene->get<Components::inventory>(playerID).mInventory;
+		mData[PLAYER_KEY]["mcount"] = mScene->mMouse.count;
+		mData[PLAYER_KEY]["mitem"] = static_cast<std::uint64_t>(mScene->mMouse.item);
+	}
 
 	SDL_assert(mData.HasMember(CHUNK_KEY));
-	mData[CHUNK_KEY].AddMember("seed", mNoise->getSeed(), mData.GetAllocator());
+	if (mData[CHUNK_KEY].HasMember("seed")) {
+		mData[CHUNK_KEY]["seed"] = mNoise->getSeed();
+	} else {
+		mData[CHUNK_KEY].AddMember("seed", mNoise->getSeed(), mData.GetAllocator());
+	}
 
-	auto save = [this](Chunk* chunk) {
+	delete mScene->get<Components::inventory>(playerID).mInventory;
+
+	mScene->erase(playerID);
+
+	const auto save = [this](Chunk* chunk) {
 		while (this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"].Size() <=
 		       std::llabs(chunk->getPosition())) {
 			this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"].PushBack(
@@ -153,9 +186,12 @@ void Level::save(rapidjson::Value& data, rapidjson::MemoryPoolAllocator<>& alloc
 	save(mCenter);
 	save(mRight);
 
-	mScene->erase(playerID);
+	rapidjson::StringBuffer sb;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+	mData.Accept(writer);
+	SDL_Log("%s", sb.GetString());
 
-	data.CopyFrom(std::move(mData), allocator);
+	data.CopyFrom(mData.Move(), allocator);
 }
 
 void Level::update(const float delta) {

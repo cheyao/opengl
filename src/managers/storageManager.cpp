@@ -175,8 +175,7 @@ void StorageManager::loadWorld(struct SDL_Storage* storage, const std::string& w
 
 	SDL_assert(level["name"] == "Level"); // TODO: More option
 
-	mGame->mCurrentLevel = new Level(mGame);
-	mGame->mCurrentLevel->load(level["data"]);
+	mGame->getLevel()->load(level["data"]);
 }
 
 void StorageManager::saveState(SDL_Storage* storage) {
@@ -248,11 +247,11 @@ void StorageManager::saveWorld(struct SDL_Storage* storage, const std::string& w
 	level.SetObject();
 
 	level.AddMember("version", rapidjson::Value().SetUint64(LATEST_LEVEL_VERSION).Move(), level.GetAllocator());
-	level.AddMember("name", rapidjson::Value(mGame->mCurrentLevel->getName().data(), level.GetAllocator()).Move(),
+	level.AddMember("name", rapidjson::Value(mGame->getLevel()->getName().data(), level.GetAllocator()).Move(),
 			level.GetAllocator()); // TODO: More options
 
 	level.AddMember("data", rapidjson::Value(rapidjson::kObjectType).Move(), level.GetAllocator());
-	mGame->mCurrentLevel->save(level["data"], level.GetAllocator());
+	mGame->getLevel()->save(level["data"], level.GetAllocator());
 
 	rapidjson::StringBuffer sb;
 	rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
@@ -260,3 +259,4 @@ void StorageManager::saveWorld(struct SDL_Storage* storage, const std::string& w
 
 	SDL_WriteStorageFile(storage, (world + ".json").data(), sb.GetString(), sb.GetSize());
 }
+
