@@ -17,6 +17,7 @@
 #include "third_party/glad/glad.h"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_timer.h>
 #include <cstddef>
 #include <functional>
 #include <span>
@@ -24,7 +25,7 @@
 #include <unordered_map>
 #include <utility>
 
-InputSystem::InputSystem(Game* game) : mGame(game), mPressedX(0), mPressedY(0), mPressLength(0) {
+InputSystem::InputSystem(Game* game) : mGame(game) {
 	constexpr const static float vertices[] = {
 		0.0f, 0.0f, 0.0f, // TL
 		0.0f, 1.0f, 0.0f, // BR
@@ -61,12 +62,12 @@ void InputSystem::update(Scene* scene, const float delta) {
 	updateMouse(scene, delta);
 }
 
-void InputSystem::updateMouse(Scene* scene, const float delta) {
+void InputSystem::updateMouse(Scene* scene, const float) {
 	mDestruction.render = false;
 
 	// From Topright
 	float mouseZ = 0, mouseY = 0;
-	const SDL_MouseButtonFlags flags = SDL_GetMouseState(&mouseZ, &mouseY);
+	SDL_GetMouseState(&mouseZ, &mouseY);
 
 	// Convert Y to opengl cords
 	const auto windowSize = mGame->getSystemManager()->getDemensions();
@@ -84,78 +85,74 @@ void InputSystem::updateMouse(Scene* scene, const float delta) {
 		tryPlace(scene, blockPos.template cast<int>());
 	}
 
-	const bool leftClick = flags & SDL_BUTTON_LMASK;
-
-	if (!leftClick) {
-		if (mPressLength > 0 && mPressLength < LONG_PRESS_ACTIVATION_TIME) {
-			// Short click
-			// TODO: Open stuff here
+	static std::int64_t mLastHold = SDL_GetTicks();
+	const auto& handleLeftClick = [&]() {
+		if (mDestruction.pos != blockPos) {
+			mLastHold = SDL_GetTicks();
 		}
 
-		mPressLength = 0;
+		mDestruction.pos = blockPos;
 
-		return;
-	}
-
-	if (mDestruction.pos != blockPos) {
-		mPressLength = 0;
-	}
-
-	mDestruction.pos = blockPos;
-
-	mPressLength += delta;
-
-	if (mPressLength < LONG_PRESS_ACTIVATION_TIME) {
-		return;
-	}
-
-	for (const auto& [entity, block, texture] : scene->view<Components::block, Components::texture>().each()) {
-		if (block.mPosition != blockPos) {
-			continue;
+		if (!scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
+			return;
 		}
 
-		// Not enough time passed since press
-		if ((mPressLength * 20) < registers::BREAK_TIMES.at(block.mType)) {
-			mDestruction.render = true;
-
-			const int stage = ((mPressLength * 20) / registers::BREAK_TIMES.at(block.mType)) * 10;
-			mDestruction.texture = mGame->getSystemManager()->getTexture(
-				"blocks/destroy_stage_" + std::to_string(stage) + ".png", true);
-
-			break;
-		}
-
-		std::vector<std::pair<float, Components::Item>> loot;
-
-		if (registers::LOOT_TABLES.contains(block.mType)) {
-			loot = registers::LOOT_TABLES.at(block.mType);
-		} else {
-			loot.emplace_back(1.0f, block.mType);
-		}
-
-		for (const auto [chance, type] : loot) {
-			const float roll = SDL_randf();
-			if (roll >= chance) {
+		// time t, last l, start s
+		// t - (l)
+		const auto pressLength = (SDL_GetTicks() - mLastHold) / 50.0f;
+		for (const auto& [entity, block, texture] :
+		     scene->view<Components::block, Components::texture>().each()) {
+			if (block.mPosition != blockPos) {
 				continue;
 			}
 
-			const auto item = scene->newEntity();
-			scene->emplace<Components::position>(
-				item, (scene->get<Components::block>(entity).mPosition.template cast<float>() +
-				       Eigen::Vector2f(0.40f, 0.40f)) *
-					      Components::block::BLOCK_SIZE);
-			scene->emplace<Components::item>(item, type);
-			scene->emplace<Components::texture>(
-				item, mGame->getSystemManager()->getTexture(registers::TEXTURES.at(type)), 0.3f);
+			// Not enough time passed since press
+			if (pressLength < registers::BREAK_TIMES.at(block.mType)) {
+				mDestruction.render = true;
+
+				const int stage = (pressLength / registers::BREAK_TIMES.at(block.mType)) * 10;
+				mDestruction.texture = mGame->getSystemManager()->getTexture(
+					"blocks/destroy_stage_" + std::to_string(stage) + ".png", true);
+
+				break;
+			}
+
+			std::vector<std::pair<float, Components::Item>> loot;
+
+			if (registers::LOOT_TABLES.contains(block.mType)) {
+				loot = registers::LOOT_TABLES.at(block.mType);
+			} else {
+				loot.emplace_back(1.0f, block.mType);
+			}
+
+			for (const auto [chance, type] : loot) {
+				const float roll = SDL_randf();
+				if (roll >= chance) {
+					continue;
+				}
+
+				const auto item = scene->newEntity();
+				scene->emplace<Components::position>(
+					item, (scene->get<Components::block>(entity).mPosition.template cast<float>() +
+					       Eigen::Vector2f(0.40f, 0.40f)) *
+						      Components::block::BLOCK_SIZE);
+				scene->emplace<Components::item>(item, type);
+				scene->emplace<Components::texture>(
+					item, mGame->getSystemManager()->getTexture(registers::TEXTURES.at(type)),
+					0.3f);
+			}
+
+			scene->erase(entity);
+			scene->getSignal(EventManager::LEFT_HOLD_SIGNAL) = 0;
+
+			// Unused for the moment
+			scene->getSignal(PhysicsSystem::PHYSICS_DIRTY_SIGNAL) = true;
+
+			break;
 		}
+	};
 
-		scene->erase(entity);
-		scene->getSignal(PhysicsSystem::PHYSICS_DIRTY_SIGNAL) = true;
-
-		mPressLength = 0;
-
-		break;
-	}
+	handleLeftClick();
 }
 
 void InputSystem::draw(class Scene* scene) {

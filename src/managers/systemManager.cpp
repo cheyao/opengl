@@ -3,6 +3,7 @@
 #include "components.hpp"
 #include "components/playerInventory.hpp"
 #include "game.hpp"
+#include "managers/eventManager.hpp"
 #include "scene.hpp"
 #include "systems/UISystem.hpp"
 #include "systems/inputSystem.hpp"
@@ -144,9 +145,10 @@ void SystemManager::update(Scene* scene, const float delta) {
 	printDebug(scene);
 
 	mRenderSystem->present();
-}
 
-void SystemManager::registerClick(const float x, const float y) { mInputSystem->registerClick(x, y); }
+	scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+	scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) = false;
+}
 
 void SystemManager::updatePlayer(Scene* scene) {
 	// We handle some player's logic here

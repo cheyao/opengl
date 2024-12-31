@@ -83,16 +83,12 @@ bool Inventory::update(class Scene* scene, float) {
 	oy += INVENTORY_SLOTS_OFFSET_Y * scale - (INVENTORY_SLOT_Y * scale / 2 - sy / INVENTORY_INV_SCALE);
 
 	float mouseX, mouseY;
-	const auto buttons = SDL_GetMouseState(&mouseX, &mouseY);
+	SDL_GetMouseState(&mouseX, &mouseY);
 	mouseY = dimensions.y() - mouseY;
 
-	if (!(buttons & SDL_BUTTON_LMASK) && !(buttons & SDL_BUTTON_RMASK)) {
-		return true;
-	}
-
-	if (buttons & SDL_BUTTON_RMASK) {
+	if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
 		// This is long click
-	} else {
+	} else if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL)) {
 		// Not inside the space
 		if (mouseX < ox || mouseY < oy || mouseX > (ox + 9 * INVENTORY_SLOT_X * scale) ||
 		    mouseY > (oy + 4 * INVENTORY_SLOT_Y * scale)) {
@@ -105,7 +101,9 @@ bool Inventory::update(class Scene* scene, float) {
 		const int slot = static_cast<int>(mouseX / (INVENTORY_SLOT_X * scale)) +
 				 static_cast<int>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
 
-		if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mCount[slot] != 0 &&
+		SDL_Log("Y%lu", scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL));
+
+		if (mCount[slot] != 0 &&
 		    (scene->mMouse.count == 0 || (scene->mMouse.item == mItems[slot] && scene->mMouse.count != 0))) {
 			if (scene->mMouse.count != 0 && scene->mMouse.item == mItems[slot]) {
 				scene->mMouse.count += mCount[slot];
@@ -118,11 +116,8 @@ bool Inventory::update(class Scene* scene, float) {
 			mCount[slot] = 0;
 
 			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
-		}
-
-		if (scene->mMouse.count != 0 && scene->mMouse.item != Components::AIR() &&
-		    scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) &&
-		    (mCount[slot] == 0 || mItems[slot] == scene->mMouse.item)) {
+		} else if (scene->mMouse.count != 0 && scene->mMouse.item != Components::AIR() &&
+			   (mCount[slot] == 0 || mItems[slot] == scene->mMouse.item)) {
 			if (mItems[slot] == scene->mMouse.item) {
 				mCount[slot] += scene->mMouse.count;
 			} else {

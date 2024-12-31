@@ -22,13 +22,14 @@ class EventManager {
 	~EventManager();
 
 	[[nodiscard]] SDL_AppResult manageEvent(const union SDL_Event& event);
+	void update();
 
 	void setKey(const std::size_t key, const bool val) { mKeys[key] = val; }
 	[[nodiscard]] std::span<bool> getKeystate() { return mKeys; };
 
       private:
 	// 0.2s
-	constexpr const static inline std::uint64_t ACTIVATION_TIME = 250;
+	constexpr const static inline std::uint64_t ACTIVATION_TIME = 200ull;
 	[[nodiscard]] SDL_AppResult manageKeyboardEvent(const union SDL_Event& event);
 
 	class Game* mGame;

@@ -62,12 +62,15 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 	const float sizey = sloty * mRows;
 
 	float mouseX, mouseY;
-	auto buttons = SDL_GetMouseState(&mouseX, &mouseY);
+	SDL_GetMouseState(&mouseX, &mouseY);
 	mouseY = dimensions.y() - mouseY;
-	(void)buttons;
 
 	// Test if player is placing inside grid
 	const auto placeGrid = [&]() {
+		if (!scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL)) {
+			return;
+		}
+
 		if (mouseX < ox || mouseY < oy || mouseX > (ox + sizex) || mouseY > (oy + sizey)) {
 			return;
 		}
@@ -75,7 +78,7 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 		// Normalize the buttons to grid cords
 		int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
 
-		if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mCraftingCount[slot] != 0 &&
+		if (mCraftingCount[slot] != 0 &&
 		    (scene->mMouse.count == 0 ||
 		     (scene->mMouse.item == mCraftingItems[slot] && scene->mMouse.count != 0))) {
 			if (scene->mMouse.count != 0 && scene->mMouse.item == mCraftingItems[slot]) {
@@ -89,11 +92,8 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 			mCraftingCount[slot] = 0;
 
 			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
-		}
-
-		if (scene->mMouse.count != 0 && scene->mMouse.item != Components::AIR() &&
-		    scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) &&
-		    (mCraftingCount[slot] == 0 || mCraftingItems[slot] == scene->mMouse.item)) {
+		} else if (scene->mMouse.count != 0 && scene->mMouse.item != Components::AIR() &&
+			   (mCraftingCount[slot] == 0 || mCraftingItems[slot] == scene->mMouse.item)) {
 			if (mCraftingItems[slot] == scene->mMouse.item) {
 				mCraftingCount[slot] += scene->mMouse.count;
 			} else {

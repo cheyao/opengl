@@ -111,6 +111,8 @@ SDL_AppResult Game::iterate() {
 	}
 	mTicks = SDL_GetTicks();
 
+	mEventManager->update();
+
 	gui();
 	mCurrentLevel->update(delta);
 	mSystemManager->update(mCurrentLevel->getScene(), delta);

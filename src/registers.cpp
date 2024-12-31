@@ -11,13 +11,16 @@ namespace registers {
 
 using namespace Components;
 
-const std::unordered_map<Components::Item, std::string> TEXTURES = {
-	{Item::GRASS_BLOCK, "blocks/grass-block.png"}, {Item::STONE, "blocks/stone.png"},
-	{Item::OAK_LOG, "blocks/oak-log.png"},	       {Item::OAK_LEAVES, "blocks/oak-leaves.png"},
-	{Item::OAK_PLANKS, "blocks/oak-planks.png"},   {Item::STICK, "blocks/stick.png"}};
+const std::unordered_map<Components::Item, std::string> TEXTURES = {{Item::GRASS_BLOCK, "blocks/grass-block.png"},
+								    {Item::DIRT, "blocks/dirt.png"},
+								    {Item::STONE, "blocks/stone.png"},
+								    {Item::OAK_LOG, "blocks/oak-log.png"},
+								    {Item::OAK_LEAVES, "blocks/oak-leaves.png"},
+								    {Item::OAK_PLANKS, "blocks/oak-planks.png"},
+								    {Item::STICK, "blocks/stick.png"}};
 
 const std::unordered_map<Components::Item, std::uint64_t> BREAK_TIMES = {
-	{Item::AIR, 0},	     {Item::GRASS_BLOCK, 20}, {Item::STONE, 80},
+	{Item::AIR, 0},	     {Item::GRASS_BLOCK, 20}, {Item::DIRT, 20},	     {Item::STONE, 80},
 	{Item::OAK_LOG, 60}, {Item::OAK_LEAVES, 20},  {Item::OAK_PLANKS, 60}};
 
 const std::vector<std::pair<float, std::vector<std::pair<Components::Item, Eigen::Vector2i>>>> SURFACE_STRUCTURES = {
@@ -49,7 +52,11 @@ const std::vector<std::pair<float, std::vector<std::pair<Components::Item, Eigen
 const std::unordered_map<Components::Item, std::vector<std::pair<float, Components::Item>>> LOOT_TABLES = {
 	{Item::OAK_LEAVES,
 	 {
-		 {0.2f, Item::OAK_PLANKS},
+		 {0.2f, Item::STICK},
+	 }},
+	{Item::GRASS_BLOCK,
+	 {
+		 {1.1f, Item::DIRT},
 	 }},
 };
 

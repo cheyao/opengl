@@ -6,7 +6,6 @@
 #include "scenes/level.hpp"
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_stdinc.h>
 
 EventManager::EventManager(class Game* game) : mGame(game), mKeys({}), mLeftClickDown(0), mRightClickDown(0) {}
 
@@ -74,12 +73,10 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 		case SDL_EVENT_MOUSE_BUTTON_DOWN: {
 			if (event.button.button == SDL_BUTTON_LEFT) {
 				mLeftClickDown = SDL_GetTicks();
-				mGame->getSystemManager()->registerClick(event.button.x, event.button.y);
 			}
 
 			if (event.button.button == SDL_BUTTON_RIGHT) {
 				mRightClickDown = SDL_GetTicks();
-				mGame->getSystemManager()->registerClick(event.button.x, event.button.y);
 			}
 
 			break;
@@ -87,7 +84,6 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 
 		case SDL_EVENT_MOUSE_BUTTON_UP: {
 			if (event.button.button == SDL_BUTTON_LEFT) {
-				SDL_Log("%lu %lu", SDL_GetTicks() - mLeftClickDown, ACTIVATION_TIME);
 				if (SDL_GetTicks() - mLeftClickDown < ACTIVATION_TIME) {
 					mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = true;
 				}
@@ -110,6 +106,24 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 	}
 
 	return SDL_APP_CONTINUE;
+}
+
+void EventManager::update() {
+	const auto buttons = SDL_GetMouseState(nullptr, nullptr);
+
+	if (buttons & SDL_BUTTON_LMASK && SDL_GetTicks() - mLeftClickDown > ACTIVATION_TIME) {
+		mGame->getLevel()->getScene()->getSignal(LEFT_HOLD_SIGNAL) = mLeftClickDown;
+		mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = false;
+	} else {
+		mGame->getLevel()->getScene()->getSignal(LEFT_HOLD_SIGNAL) = false;
+	}
+
+	if (buttons & SDL_BUTTON_RMASK && SDL_GetTicks() - mRightClickDown > ACTIVATION_TIME) {
+		mGame->getLevel()->getScene()->getSignal(RIGHT_HOLD_SIGNAL) = mRightClickDown;
+		mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_DOWN_SIGNAL) = false;
+	} else {
+		mGame->getLevel()->getScene()->getSignal(RIGHT_HOLD_SIGNAL) = false;
+	}
 }
 
 SDL_AppResult EventManager::manageKeyboardEvent(const SDL_Event& event) {
