@@ -119,6 +119,7 @@ class sparse_set_view {
 	sparse_set_view& operator=(const sparse_set_view& other) noexcept {
 		mComponentManager = other.mComponentManager;
 		mEntities = other.mEntities;
+		return *this;
 	}
 
 	// Move
@@ -127,6 +128,7 @@ class sparse_set_view {
 	sparse_set_view& operator=(sparse_set_view&& other) noexcept {
 		mComponentManager = other.mComponentManager;
 		mEntities = std::move(other.mEntities);
+		return *this;
 	}
 
 	~sparse_set_view() {}

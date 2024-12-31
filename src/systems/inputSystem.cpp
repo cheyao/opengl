@@ -100,8 +100,8 @@ void InputSystem::updateMouse(Scene* scene, const float) {
 		// time t, last l, start s
 		// t - (l)
 		const auto pressLength = (SDL_GetTicks() - mLastHold) / 50.0f;
-		for (const auto& [entity, block, texture] :
-		     scene->view<Components::block, Components::texture>().each()) {
+		for (const auto& [entity, block] :
+		     scene->view<Components::block>().each()) {
 			if (block.mPosition != blockPos) {
 				continue;
 			}

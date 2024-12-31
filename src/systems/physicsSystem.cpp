@@ -74,8 +74,6 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 						onGround = true;
 						mCache.lastAbove[entity] = block;
 					}
-
-					// scene->get<Components::block>(block).mClose = false;
 				}
 			}
 		}

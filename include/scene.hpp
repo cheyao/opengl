@@ -35,6 +35,8 @@ class Scene {
 	// Adds a component to an entity
 	template <typename Component, typename... Args> void emplace(const EntityID entity, Args&&... args) {
 		mComponentManager->getPool<Component>()->emplace(entity, args...);
+
+		dirty = true;
 	}
 
 	// Returns the component of the entity
@@ -49,7 +51,14 @@ class Scene {
 
 	// Returns a view of the components
 	template <typename... Components> [[nodiscard]] utils::sparse_set_view<Components...> view() const {
-		return utils::sparse_set_view<Components...>(mComponentManager);
+		static auto cache = utils::sparse_set_view<Components...>(mComponentManager);
+
+		if (dirty) {
+			cache = utils::sparse_set_view<Components...>(mComponentManager);
+			dirty = false;
+		}
+
+		return cache;
 	}
 
 	void erase(const EntityID entity) noexcept {
@@ -57,6 +66,8 @@ class Scene {
 
 		mComponentManager->erase(entity);
 		mEntityManager->releaseEntity(entity);
+
+		dirty = true;
 	}
 
 	[[nodiscard]] bool valid(const EntityID entity) noexcept { return mEntityManager->valid(entity); }
@@ -80,4 +91,5 @@ class Scene {
 	class ComponentManager* mComponentManager;
 
 	std::unordered_map<std::uint64_t, std::int64_t> mSignals;
+	mutable bool dirty;
 };

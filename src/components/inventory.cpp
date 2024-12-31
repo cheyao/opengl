@@ -101,8 +101,6 @@ bool Inventory::update(class Scene* scene, float) {
 		const int slot = static_cast<int>(mouseX / (INVENTORY_SLOT_X * scale)) +
 				 static_cast<int>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
 
-		SDL_Log("Y%lu", scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL));
-
 		if (mCount[slot] != 0 &&
 		    (scene->mMouse.count == 0 || (scene->mMouse.item == mItems[slot] && scene->mMouse.count != 0))) {
 			if (scene->mMouse.count != 0 && scene->mMouse.item == mItems[slot]) {
