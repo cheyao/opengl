@@ -56,6 +56,8 @@ void Level::create() {
 
 	mData.AddMember(rapidjson::StringRef(CHUNK_KEY), rapidjson::Value(rapidjson::kObjectType),
 			mData.GetAllocator());
+	mData.AddMember(rapidjson::StringRef(PLAYER_KEY), rapidjson::Value(rapidjson::kObjectType),
+			mData.GetAllocator());
 	mData[CHUNK_KEY].AddMember("-", rapidjson::Value(rapidjson::kArrayType), mData.GetAllocator());
 	mData[CHUNK_KEY].AddMember("+", rapidjson::Value(rapidjson::kArrayType), mData.GetAllocator());
 

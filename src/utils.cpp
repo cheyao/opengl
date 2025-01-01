@@ -9,4 +9,3 @@ namespace utils {
 
 void* loadFile(const char* file, size_t* datasize) { return SDL_LoadFile(file, datasize); }
 std::vector<int*> mViewCache;
-std::vector<class utils::sparse_set_interface*> mPools;

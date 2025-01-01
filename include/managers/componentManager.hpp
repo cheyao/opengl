@@ -8,19 +8,24 @@
 
 using ComponentID = std::uint64_t;
 constexpr const static ComponentID MAX_COMPONENTS = std::numeric_limits<ComponentID>::max();
-extern std::vector<utils::sparse_set_interface*> mPools;
 
 class ComponentManager {
-      public:
 	ComponentManager() = default;
 	ComponentManager(ComponentManager&&) = delete;
 	ComponentManager(const ComponentManager&) = delete;
 	ComponentManager& operator=(ComponentManager&&) = delete;
 	ComponentManager& operator=(const ComponentManager&) = delete;
+
+      public:
 	~ComponentManager() {
 		for (auto* pool : mPools) {
 			pool->clear();
 		}
+	}
+
+	static ComponentManager* getInstance() {
+		static ComponentManager manager;
+		return &manager;
 	}
 
 	template <typename Component> [[nodiscard]] utils::sparse_set<Component>* getPool() {
@@ -37,5 +42,12 @@ class ComponentManager {
 		}
 	}
 
+	void clear() noexcept {
+		for (auto* pool : mPools) {
+			pool->clear();
+		}
+	}
+
       private:
+	std::vector<utils::sparse_set_interface*> mPools;
 };

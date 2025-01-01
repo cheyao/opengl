@@ -26,10 +26,6 @@ Components are just plain old structs.
 
 The systems manage all the logic and changes the components.
 
-Almost no AI used, only AI changes are from the pull requests submitted by these prs https://github.com/cheyao/opengl/pulls?q=is%3Apr+is%3Aclosed. I accepted them since some beta tester is testing the new o3 model on my project and I was really curious of what if can acheive. But I still modified most of the code generated.
-
-Plus I'm smarter then AI! My implementation of sparse set caching shaved out 700000ns of runtime while the ai version shaved only 400000ns!
-
 <h2 align="center">Building</h2>
 
 Dependencies:
@@ -252,5 +248,9 @@ The linux save directory is `~/.local/share/cyao/opengl/`
     - [ ] [Real time collision detection](https://www.amazon.com/dp/1558607323)
 
 # :3
+
+Almost no AI used, only AI changes are from the pull requests submitted by these prs https://github.com/cheyao/opengl/pulls?q=is%3Apr+is%3Aclosed. I accepted them since some beta tester is testing the new o3 model on my project and I was really curious of what if can acheive. But I still modified most of the code generated.
+
+Plus I'm smarter then AI! My implementation of sparse set caching shaved out 700000ns of runtime while the ai version shaved only 400000ns!
 
 NOT AN OFFICIAL MINECRAFT SPINOFF. NOT APPROVED BY OR ASSOCIATED WITH MOJANG OR MICROSOFT

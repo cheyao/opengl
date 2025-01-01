@@ -13,12 +13,12 @@
 extern std::vector<int*> mViewCache;
 
 template <typename... Components>
-[[nodiscard]] utils::sparse_set_view<Components...> view_impl(ComponentManager* const mComponentManager) {
+[[nodiscard]] utils::sparse_set_view<Components...> view_impl() {
 	static int key = (mViewCache.push_back(&key), false);
-	static utils::sparse_set_view<Components...> view = utils::sparse_set_view<Components...>(mComponentManager);
+	static utils::sparse_set_view<Components...> view = utils::sparse_set_view<Components...>();
 
 	if (key) {
-		view = utils::sparse_set_view<Components...>(mComponentManager);
+		view = utils::sparse_set_view<Components...>();
 		key = false;
 	}
 
@@ -31,7 +31,7 @@ class Scene {
 	friend class SystemManager;
 #endif
       public:
-	Scene() noexcept : mEntityManager(new EntityManager()), mComponentManager(new ComponentManager()), mSignals() {}
+	Scene() noexcept : mEntityManager(new EntityManager()), mSignals() {}
 
 	Scene(Scene&&) = delete;
 	Scene(const Scene&) = delete;
@@ -40,8 +40,8 @@ class Scene {
 
 	~Scene() noexcept {
 		delete mEntityManager;
-		delete mComponentManager;
 
+		ComponentManager::getInstance()->clear();
 		markAllCachesDirty();
 	}
 
@@ -54,27 +54,27 @@ class Scene {
 
 	// Adds a component to an entity
 	template <typename Component, typename... Args> void emplace(const EntityID entity, Args&&... args) {
-		mComponentManager->getPool<Component>()->emplace(entity, std::forward<Args>(args)...);
+		ComponentManager::getInstance()->getPool<Component>()->emplace(entity, std::forward<Args>(args)...);
 		// Mark entire view cache as dirty because we changed the pools
 		markAllCachesDirty();
 	}
 
 	template <typename Component> [[nodiscard]] Component& get(const EntityID entity) const {
-		return mComponentManager->getPool<Component>()->get(entity);
+		return ComponentManager::getInstance()->getPool<Component>()->get(entity);
 	}
 
 	template <typename Component> [[nodiscard]] bool contains(const EntityID entity) const {
-		return mComponentManager->getPool<Component>()->contains(entity);
+		return ComponentManager::getInstance()->getPool<Component>()->contains(entity);
 	}
 
 	template <typename... Components> [[nodiscard]] utils::sparse_set_view<Components...> view() {
-		return ::view_impl<Components...>(mComponentManager);
+		return ::view_impl<Components...>();
 	}
 
 	// Remove an entity
 	void erase(const EntityID entity) noexcept {
 		SDL_assert(entity != 0);
-		mComponentManager->erase(entity);
+		ComponentManager::getInstance()->erase(entity);
 		mEntityManager->releaseEntity(entity);
 
 		markAllCachesDirty();
@@ -106,7 +106,6 @@ class Scene {
 	}
 
 	class EntityManager* mEntityManager;
-	class ComponentManager* mComponentManager;
 
 	std::unordered_map<std::uint64_t, std::int64_t> mSignals;
 };

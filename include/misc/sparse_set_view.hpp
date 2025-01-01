@@ -6,10 +6,7 @@
 #include <SDL3/SDL.h>
 #include <algorithm>
 #include <cstddef>
-#include <iterator>
 #include <memory>
-#include <ranges>
-#include <span>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -85,15 +82,16 @@ class sparse_set_view {
 	using iterable = iterable_adaptor<sparse_set_view_tuple_iterator<ComponentTypes...>>;
 
 	// PERF: Large bottleneck
-	sparse_set_view(ComponentManager* componentManager) : mComponentManager(componentManager) {
+	sparse_set_view() noexcept {
 		if constexpr (sizeof...(ComponentTypes) == 1) {
-			const auto c =
-				(static_cast<utils::sparse_set<ComponentTypes>*>(mComponentManager->getPool<ComponentTypes>()), ...);
-			mEntities = std::vector(c->begin(), c->end());
+			const auto& c = *(static_cast<utils::sparse_set<ComponentTypes>*>(
+						ComponentManager::getInstance()->getPool<ComponentTypes>()),
+					...);
+			mEntities = std::vector<EntityID>(c.begin(), c.end());
 		} else {
 			// This first part makes a array of all the sizes of the that we loop through
 			const std::array<utils::sparse_set_interface*, sizeof...(ComponentTypes)> sets = {
-				mComponentManager->getPool<ComponentTypes>()...};
+				ComponentManager::getInstance()->getPool<ComponentTypes>()...};
 
 			std::size_t smallest = 0;
 			std::size_t smallest_size = sets[0]->size();
@@ -110,7 +108,9 @@ class sparse_set_view {
 				if constexpr (sizeof...(ComponentTypes) == 1) {
 					mEntities.emplace_back(id);
 				} else {
-					if ((... && (mComponentManager->getPool<ComponentTypes>()->contains(id)))) {
+					if ((... &&
+					     (ComponentManager::getInstance()->getPool<ComponentTypes>()->contains(
+						     id)))) {
 						mEntities.emplace_back(id);
 					}
 				}
@@ -121,13 +121,8 @@ class sparse_set_view {
 	}
 
 	// Copy
-	sparse_set_view(const sparse_set_view& other) noexcept
-		: mComponentManager(other.mComponentManager), mEntities(other.mEntities) {}
-	sparse_set_view& operator=(const sparse_set_view& other) noexcept {
-		mComponentManager = other.mComponentManager;
-		mEntities = other.mEntities;
-		return *this;
-	}
+	sparse_set_view(const sparse_set_view& other) noexcept = default;
+	sparse_set_view& operator=(const sparse_set_view& other) noexcept = default;
 
 	// Move
 	sparse_set_view(sparse_set_view&& other) noexcept = default;
@@ -144,15 +139,15 @@ class sparse_set_view {
 	[[nodiscard]] const_iterator cend() const noexcept { return end(); }
 
 	[[nodiscard]] iterable each() const noexcept {
-		return iterable{tuple_iterator{mComponentManager, mEntities, 0},
-				tuple_iterator{mComponentManager, mEntities, mEntities.size()}};
+		return iterable{tuple_iterator{ComponentManager::getInstance(), mEntities, 0},
+				tuple_iterator{ComponentManager::getInstance(), mEntities, mEntities.size()}};
 	}
 
 	template <typename... Components> [[nodiscard]] decltype(auto) get(const EntityID entt) const {
 		if constexpr (sizeof...(Components) == 1) {
-			return (mComponentManager->getPool<Components>()->get(entt), ...);
+			return (ComponentManager::getInstance()->getPool<Components>()->get(entt), ...);
 		} else {
-			return std::make_tuple(mComponentManager->getPool<Components>()->get(entt)...);
+			return std::make_tuple(ComponentManager::getInstance()->getPool<Components>()->get(entt)...);
 		}
 	}
 
@@ -163,11 +158,12 @@ class sparse_set_view {
 			}
 		} else if constexpr (std::is_invocable_v<Func, EntityID, ComponentTypes&...>) {
 			for (const auto entity : mEntities) {
-				func(entity, mComponentManager->getPool<ComponentTypes>()->get(entity)...);
+				func(entity,
+				     ComponentManager::getInstance()->getPool<ComponentTypes>()->get(entity)...);
 			}
 		} else if constexpr (std::is_invocable_v<Func, ComponentTypes&...>) {
 			for (const auto entity : mEntities) {
-				func(mComponentManager->getPool<ComponentTypes>()->get(entity)...);
+				func(ComponentManager::getInstance()->getPool<ComponentTypes>()->get(entity)...);
 			}
 		} else {
 			static_assert(false, "The signatures for each are: (EntityID), (EntityID, ComponentTypes&...) "
@@ -182,7 +178,6 @@ class sparse_set_view {
 	constexpr const EntityID* data() const noexcept { return mEntities.data(); }
 
       private:
-	class ComponentManager* mComponentManager;
 	std::vector<EntityID> mEntities;
 };
 
