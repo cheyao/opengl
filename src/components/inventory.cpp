@@ -18,7 +18,9 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_assert.h>
+#include <SDL3/SDL_timer.h>
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 Inventory::Inventory(class Game* game, const std::size_t size, EntityID entity)
@@ -30,6 +32,9 @@ Inventory::Inventory(class Game* game, const std::size_t size, EntityID entity)
 
 Inventory::Inventory(class Game* game, const rapidjson::Value& contents, EntityID entity)
 	: Screen(game), mEntity(entity) {
+	mCountRegister[getID<Inventory>()] = &mCount;
+	mItemRegister[getID<Inventory>()] = &mItems;
+
 	SDL_assert(contents[SIZE_KEY].IsUint64());
 	mSize = contents[SIZE_KEY].GetUint64();
 
@@ -95,13 +100,17 @@ bool Inventory::update(class Scene* scene, float) {
 	mouseX -= ox;
 	mouseY -= oy;
 
+	static std::int64_t leftLongClick = 0;
 	const std::int64_t slot = static_cast<std::int64_t>(mouseX / (INVENTORY_SLOT_X * scale)) +
 				  static_cast<std::int64_t>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
 	if (scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL) || scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
+		// Here we register all the slots touched by our long click
 		if (mouseX < 0 || mouseY < 0 || mouseX > (9 * INVENTORY_SLOT_X * scale) ||
 		    mouseY > (4 * INVENTORY_SLOT_Y * scale)) {
 			goto endLogic;
 		}
+
+		leftLongClick = scene->getSignal(EventManager::LEFT_HOLD_SIGNAL);
 
 		// This is long click
 		// Now note the slots
@@ -112,39 +121,62 @@ bool Inventory::update(class Scene* scene, float) {
 				mPath.emplace_back(pair);
 			}
 		}
-	} else if (!scene->getSignal(EventManager::LEFT_HOLD_SIGNAL) && !mPath.empty()) {
-		const auto c = scene->mMouse.count / mPath.size();
-		const auto left = scene->mMouse.count % mPath.size();
-		for (std::size_t i = 0; i < mPath.size();) {
-			if (mPath[i].first != getID<Inventory>()) {
-				++i;
+	} else if ((!scene->getSignal(EventManager::LEFT_HOLD_SIGNAL) &&
+		    !scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL)) &&
+		   !mPath.empty()) {
+		if (leftLongClick) {
+			// Here we redistribute the items
+			const auto c = scene->mMouse.count / mPath.size();
+			const auto left = scene->mMouse.count % mPath.size();
 
-				continue;
+			for (const auto& [id, s] : mPath) {
+				(*mCountRegister[id])[s] += c;
+				(*mItemRegister[id])[s] = static_cast<Components::Item>(scene->mMouse.item);
 			}
 
-			const auto s = mPath[i].second;
+			scene->mMouse.count = left;
+			if (scene->mMouse.count == 0) {
+				scene->mMouse.item = Components::AIR();
+			}
+		} else {
+			for (const auto& [id, s] : mPath) {
+				(*mCountRegister[id])[s] += 1;
+				(*mItemRegister[id])[s] = static_cast<Components::Item>(scene->mMouse.item);
+				scene->mMouse.count--;
 
-			mCount[s] += c;
-			mItems[s] = static_cast<Components::Item>(scene->mMouse.item);
-
-			std::swap(mPath[i], mPath.back());
-			mPath.pop_back();
+				if (scene->mMouse.count == 0) {
+					scene->mMouse.item = Components::AIR();
+					break;
+				}
+			}
 		}
 
-		scene->mMouse.count -= c * mPath.size();
-		if (scene->mMouse.count == 0) {
-			scene->mMouse.item = Components::AIR();
-		}
-
-		SDL_assert(left == scene->mMouse.count);
+		mPath.clear();
 	} else if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mPath.empty()) {
 		if (mouseX < 0 || mouseY < 0 || mouseX > (9 * INVENTORY_SLOT_X * scale) ||
 		    mouseY > (4 * INVENTORY_SLOT_Y * scale)) {
 			goto endLogic;
 		}
 
-		if (mCount[slot] == 0 && mLastClickPos == slot &&
-		    (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) - mLastClick) < 200ul) {
+		if (mCount[slot] == 0 && scene->mMouse.count != 0 && mLastClickPos == slot &&
+		    (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) - mLastClick) < 300ul) {
+			SDL_assert(scene->mMouse.item != Components::AIR());
+
+			// Here we get all stuff together
+			for (const auto [i, inv] : mItemRegister) {
+				for (std::size_t s = 0; s < inv->size(); ++s) {
+					if ((*inv)[s] != scene->mMouse.item) {
+						continue;
+					}
+
+					auto& count = (*mCountRegister[i])[s];
+					scene->mMouse.count += count;
+					count = 0;
+					(*inv)[s] = Components::AIR();
+				}
+			}
+
+			goto endLogic;
 		}
 
 		// Not inside the space
@@ -159,6 +191,8 @@ bool Inventory::update(class Scene* scene, float) {
 			scene->mMouse.count = 0;
 		}
 
+		mLastClickPos = slot;
+		mLastClick = SDL_GetTicks();
 		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 	} else if (scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) && mPath.empty()) {
 		if (mouseX < 0 || mouseY < 0 || mouseX > (9 * INVENTORY_SLOT_X * scale) ||

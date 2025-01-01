@@ -2,7 +2,6 @@
 
 #include "components.hpp"
 #include "managers/entityManager.hpp"
-#include "opengl/shader.hpp"
 #include "screens/screen.hpp"
 #include "systems/renderSystem.hpp"
 #include "third_party/rapidjson/document.h"
