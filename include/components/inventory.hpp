@@ -9,6 +9,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <unordered_map>
 #include <vector>
 
 class Inventory : public Screen {
@@ -24,7 +25,7 @@ class Inventory : public Screen {
 	~Inventory() override = default;
 
 	void load(const rapidjson::Document& contents);
-	void save(rapidjson::Value& contents, rapidjson::Document::AllocatorType& allocator);
+	virtual void save(rapidjson::Value& contents, rapidjson::Document::AllocatorType& allocator);
 
 	virtual bool update(class Scene* scene, float delta) override;
 	virtual void draw(class Scene* scene) override;
@@ -32,8 +33,6 @@ class Inventory : public Screen {
 	virtual bool tryPick(class Scene* scene, EntityID item);
 
       protected:
-	constexpr const static inline auto REDISTRIBUTE = "inv_redistribute"_u;
-	constexpr const static inline auto REDISTRIBUTE_ITEM = "inv_redistribute_item"_u;
 	const EntityID mEntity;
 	std::uint64_t mSize;
 	std::vector<Components::Item> mItems;
@@ -50,6 +49,8 @@ class Inventory : public Screen {
 
 		return id;
 	}
+	std::unordered_map<std::uint64_t, decltype(mCount)*> mCountRegister;
+	std::unordered_map<std::uint64_t, decltype(mItems)*> mItemRegister;
 
 	constexpr const static inline auto INVENTORY_TEXTURE_WIDTH = 176.0f;
 	constexpr const static inline auto INVENTORY_TEXTURE_HEIGHT = 166.0f;
@@ -60,16 +61,18 @@ class Inventory : public Screen {
 	constexpr const static inline auto INVENTORY_SLOT_Y = 18.0f;
 
 	void handleKeys();
+	// TODO: Common handler
+	// void handleInventory(decltype(mItems)& items, decltype(mCount)& count, std::uint64_t slot);
+
+	constexpr const static inline auto SIZE_KEY = "size";
+	constexpr const static inline auto ITEMS_KEY = "items";
+	constexpr const static inline auto COUNT_KEY = "count";
 
       private:
 	void drawItems();
 	void drawMouse(class Scene* scene);
 	void close();
 	void pickUp(class Scene* scene, EntityID item, std::size_t index);
-
-	constexpr const static inline auto SIZE_KEY = "size";
-	constexpr const static inline auto ITEMS_KEY = "items";
-	constexpr const static inline auto COUNT_KEY = "count";
 
 	constexpr const static inline auto INVENTORY_SPRITE_FILE = "ui/inventory.png";
 

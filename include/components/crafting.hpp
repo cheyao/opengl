@@ -21,6 +21,7 @@ class CraftingInventory : public Inventory {
 
 	bool update(class Scene* scene, float delta) override;
 	void draw(class Scene* scene) override;
+	void save(rapidjson::Value& contents, rapidjson::Document::AllocatorType& allocator) override;
 
       private:
 	void craft();
@@ -33,4 +34,6 @@ class CraftingInventory : public Inventory {
 	std::vector<std::uint64_t> mCraftingCount;
 
 	std::size_t mLastCraft;
+
+	constexpr const static inline auto CRAFTING_KEY = "crafting";
 };

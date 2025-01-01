@@ -10,6 +10,7 @@
 #include "scene.hpp"
 #include "systems/UISystem.hpp"
 #include "third_party/rapidjson/fwd.h"
+#include "third_party/rapidjson/rapidjson.h"
 
 #include <SDL3/SDL.h>
 #include <algorithm>
@@ -21,12 +22,27 @@
 CraftingInventory::CraftingInventory(class Game* game, std::uint64_t size, EntityID entity, std::uint64_t row,
 				     std::uint64_t col)
 	: Inventory(game, size, entity), mRows(row), mCols(col), mCraftingItems(row * col, Components::AIR()),
-	  mCraftingCount(row * col, 0), mLastCraft(0) {}
+	  mCraftingCount(row * col, 0), mLastCraft(0) {
+	mCountRegister[getID<CraftingInventory>()] = &mCraftingCount;
+	mItemRegister[getID<CraftingInventory>()] = &mCraftingItems;
+}
 
 CraftingInventory::CraftingInventory(class Game* game, const rapidjson::Value& contents, EntityID entity,
 				     std::uint64_t row, std::uint64_t col)
-	: Inventory(game, contents, entity), mRows(row), mCols(col), mCraftingItems(row * col, Components::AIR()),
-	  mCraftingCount(row * col, 0), mLastCraft(0) {}
+	: Inventory(game, contents, entity), mRows(row), mCols(col), mCraftingItems(), mCraftingCount(), mLastCraft(0) {
+	mCountRegister[getID<CraftingInventory>()] = &mCraftingCount;
+	mItemRegister[getID<CraftingInventory>()] = &mCraftingItems;
+
+	SDL_assert(contents[CRAFTING_KEY][ITEMS_KEY].Size() == contents[CRAFTING_KEY][COUNT_KEY].Size());
+	for (rapidjson::SizeType i = 0; i < contents[CRAFTING_KEY][ITEMS_KEY].Size(); i++) {
+		SDL_assert(contents[CRAFTING_KEY][ITEMS_KEY][i].IsUint64());
+		SDL_assert(contents[CRAFTING_KEY][COUNT_KEY][i].IsUint64());
+
+		mCraftingItems.emplace_back(
+			static_cast<Components::Item>(contents[CRAFTING_KEY][ITEMS_KEY][i].GetUint64()));
+		mCraftingCount.emplace_back(contents[CRAFTING_KEY][COUNT_KEY][i].GetUint64());
+	}
+}
 
 bool CraftingInventory::update(class Scene* const scene, const float delta) {
 	SystemManager* const systemManager = mGame->getSystemManager();
@@ -172,7 +188,7 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 	const int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
 	if (!(mouseX < ox || mouseY < oy || mouseX > (ox + sizex) || mouseY > (oy + sizey))) {
 		if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL) ||
-		    scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
+		    scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL)) {
 			// This is long click
 			// Now note the slots
 			if (scene->mMouse.count != 0 &&
@@ -183,26 +199,6 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 					mPath.emplace_back(pair);
 				}
 			}
-		}
-	}
-
-	if (scene->getSignal(REDISTRIBUTE)) {
-		const auto c = scene->getSignal(REDISTRIBUTE);
-
-		for (std::size_t i = 0; i < mPath.size();) {
-			if (mPath[i].first != getID<CraftingInventory>()) {
-				++i;
-
-				continue;
-			}
-
-			const auto s = mPath[i].second;
-
-			mCraftingCount[s] += c;
-			mCraftingItems[s] = static_cast<Components::Item>(scene->getSignal(REDISTRIBUTE_ITEM));
-
-			std::swap(mPath[i], mPath.back());
-			mPath.pop_back();
 		}
 	}
 
@@ -405,4 +401,22 @@ void CraftingInventory::draw(class Scene* scene) {
 	}
 
 	shader->activate();
+}
+
+void CraftingInventory::save(rapidjson::Value& contents, rapidjson::Document::AllocatorType& allocator) {
+	Inventory::save(contents, allocator);
+
+	contents.AddMember(rapidjson::StringRef(CRAFTING_KEY), rapidjson::Value(rapidjson::kObjectType).Move(),
+			   allocator);
+
+	rapidjson::Value items(rapidjson::kArrayType);
+	rapidjson::Value count(rapidjson::kArrayType);
+
+	for (std::size_t i = 0; i < mCraftingItems.size(); ++i) {
+		items.PushBack(static_cast<std::uint64_t>(mCraftingItems[i]), allocator);
+		count.PushBack(mCraftingCount[i], allocator);
+	}
+
+	contents[CRAFTING_KEY].AddMember(rapidjson::StringRef(ITEMS_KEY), std::move(items.Move()), allocator);
+	contents[CRAFTING_KEY].AddMember(rapidjson::StringRef(COUNT_KEY), std::move(count.Move()), allocator);
 }

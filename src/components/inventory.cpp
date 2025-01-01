@@ -23,7 +23,10 @@
 
 Inventory::Inventory(class Game* game, const std::size_t size, EntityID entity)
 	: Screen(game), mEntity(entity), mSize(size), mItems(size), mCount(size), mLastClick(0), mLastClickPos(0),
-	  mCounter(0) {}
+	  mCounter(0) {
+	mCountRegister[getID<Inventory>()] = &mCount;
+	mItemRegister[getID<Inventory>()] = &mItems;
+}
 
 Inventory::Inventory(class Game* game, const rapidjson::Value& contents, EntityID entity)
 	: Screen(game), mEntity(entity) {
@@ -94,7 +97,7 @@ bool Inventory::update(class Scene* scene, float) {
 
 	const std::int64_t slot = static_cast<std::int64_t>(mouseX / (INVENTORY_SLOT_X * scale)) +
 				  static_cast<std::int64_t>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
-	if (scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL)) {
+	if (scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL) || scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
 		if (mouseX < 0 || mouseY < 0 || mouseX > (9 * INVENTORY_SLOT_X * scale) ||
 		    mouseY > (4 * INVENTORY_SLOT_Y * scale)) {
 			goto endLogic;
@@ -109,19 +112,9 @@ bool Inventory::update(class Scene* scene, float) {
 				mPath.emplace_back(pair);
 			}
 		}
-	} else if (!scene->getSignal(EventManager::LEFT_HOLD_SIGNAL) && !mPath.empty() &&
-		   !scene->getSignal(REDISTRIBUTE)) {
+	} else if (!scene->getSignal(EventManager::LEFT_HOLD_SIGNAL) && !mPath.empty()) {
 		const auto c = scene->mMouse.count / mPath.size();
-		scene->getSignal(REDISTRIBUTE) = c;
-		scene->getSignal(REDISTRIBUTE_ITEM) = etoi(scene->mMouse.item);
 		const auto left = scene->mMouse.count % mPath.size();
-
-		scene->mMouse.count -= c * mPath.size();
-		if (scene->mMouse.count == 0) {
-			scene->mMouse.item = Components::AIR();
-		}
-
-		SDL_assert(left == scene->mMouse.count);
 		for (std::size_t i = 0; i < mPath.size();) {
 			if (mPath[i].first != getID<Inventory>()) {
 				++i;
@@ -132,11 +125,18 @@ bool Inventory::update(class Scene* scene, float) {
 			const auto s = mPath[i].second;
 
 			mCount[s] += c;
-			mItems[s] = static_cast<Components::Item>(scene->getSignal(REDISTRIBUTE_ITEM));
+			mItems[s] = static_cast<Components::Item>(scene->mMouse.item);
 
 			std::swap(mPath[i], mPath.back());
 			mPath.pop_back();
 		}
+
+		scene->mMouse.count -= c * mPath.size();
+		if (scene->mMouse.count == 0) {
+			scene->mMouse.item = Components::AIR();
+		}
+
+		SDL_assert(left == scene->mMouse.count);
 	} else if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) && mPath.empty()) {
 		if (mouseX < 0 || mouseY < 0 || mouseX > (9 * INVENTORY_SLOT_X * scale) ||
 		    mouseY > (4 * INVENTORY_SLOT_Y * scale)) {
@@ -199,10 +199,6 @@ bool Inventory::update(class Scene* scene, float) {
 		scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) = false;
 	}
 endLogic:
-
-	if (mPath.empty()) {
-		scene->getSignal(REDISTRIBUTE) = 0;
-	}
 
 	return true;
 }

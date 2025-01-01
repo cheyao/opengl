@@ -4,11 +4,10 @@
 - **Cross-Platorm** 💻📱: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported!
 - **Performant** 🏃: Uses C++, the game runs smoothly even on browsers. (**600**+ FPS on a **11 year old** laptop!)
 - **Multilingual** 🌐: **Unicode** and Locale support build in. (No more �!)
-- **Modern** ✨: Uses **Modern** C++20 features and follows best practices. SDL3 used!
-- **Extendable** 🧩: The Game Engine uses the **Bleeding-edge** ECS arcitecture.
+- **Modern** ✨: Uses **Modern** C++23 features and follows best practices. SDL3 used!
+- **Extendable** 🧩: The Game Engine uses the ECS arcitecture. Extend easily by adding stuff to `src/registers.cpp`!
 - **Debuggable** 🔍: Custom asserts and **Debug menu** helps you identify any bugs 🐛!
 - **Custom Saves** 📝: Easily save **any** data on any platform you want in a json file, the game engine will manage it for you!
-- **2D and 3D** : Make **2D** and **3D** Together!
 
 <h3 align="center"><a href="https://cyao.hackclub.app">Try out web version now!</a></h3>
 
