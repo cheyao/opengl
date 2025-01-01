@@ -161,53 +161,42 @@ bool Inventory::update(class Scene* scene, float) {
 			goto endLogic;
 		}
 
-		// Not inside the space
-		if (mCount[slot] != 0 &&
-		    (scene->mMouse.count == 0 || (scene->mMouse.item == mItems[slot] && scene->mMouse.count != 0))) {
-			if (scene->mMouse.count != 0 && scene->mMouse.item == mItems[slot]) {
-				scene->mMouse.count += mCount[slot];
-			} else {
-				scene->mMouse.item = mItems[slot];
-				scene->mMouse.count = mCount[slot];
-			}
-
-			mCount[slot] = 0;
-			if (mCount[slot] == 0) {
-				mItems[slot] = Components::AIR();
-			}
-
-			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
-		} else if (scene->mMouse.count != 0 && scene->mMouse.item != Components::AIR() &&
-			   (mCount[slot] == 0 || mItems[slot] == scene->mMouse.item)) {
-			if (mItems[slot] == scene->mMouse.item) {
-				mCount[slot] += scene->mMouse.count;
-			} else {
-				mCount[slot] = scene->mMouse.count;
-			}
-
-			mItems[slot] = scene->mMouse.item;
-
-			scene->mMouse.item = Components::AIR();
-			scene->mMouse.count = 0;
-
-			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+		// Not empty hand on empty slot
+		if (scene->mMouse.count == 0 && mCount[slot] == 0) {
+			goto endLogic;
 		}
+
+		// 3 types of actions
+		// One of the slot are empty: place half
+		if (scene->mMouse.count == 0 && mCount[slot] != 0) {
+			const auto half = (scene->mMouse.count ? scene->mMouse.count : mCount[slot]) / 2;
+			const auto round = (scene->mMouse.count ? scene->mMouse.count : mCount[slot]) % 2;
+			const auto item = scene->mMouse.item != Components::AIR() ? scene->mMouse.item : mItems[slot];
+
+			scene->mMouse.item = mItems[slot] = item;
+			scene->mMouse.count = mCount[slot] = half;
+			scene->mMouse.count += round;
+			// different blocks in slot & hand
+		} else if (mItems[slot] != scene->mMouse.item) {
+			std::swap(scene->mMouse.count, mCount[slot]);
+			std::swap(scene->mMouse.item, mItems[slot]);
+			// Same block: add one to stack
+		} else if (mItems[slot] == scene->mMouse.item) {
+			mCount[slot] += 1;
+
+			scene->mMouse.count -= 1;
+			if (scene->mMouse.count == 0) {
+				scene->mMouse.item = Components::AIR();
+			}
+		}
+
+		scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) = false;
 	}
 endLogic:
 
 	if (mPath.empty()) {
 		scene->getSignal(REDISTRIBUTE) = 0;
 	}
-
-	std::string s = "";
-	for (const auto& i : mPath) {
-		s += std::to_string(i.first);
-		s += " : ";
-		s += std::to_string(i.second);
-		s += ", ";
-	}
-	s += '\n';
-	SDL_Log("%s", s.data());
 
 	return true;
 }

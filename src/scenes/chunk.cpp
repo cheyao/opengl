@@ -51,7 +51,12 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 
 		// Spawn structures
 		for (const auto& [chance, structure] : registers::SURFACE_STRUCTURES) {
-			const float roll = SDL_randf();
+			float roll = SDL_randf();
+
+			// Rig the roll so there is always a tree near
+			if (i + offset == 3) {
+				roll = 0;
+			}
 
 			if (roll < chance) {
 				spawnStructure(Eigen::Vector2i(i + offset, block_height + 1), structure, scene);

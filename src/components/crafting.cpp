@@ -67,30 +67,62 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 
 	// Test if player is placing inside grid
 	const auto placeGrid = [&]() {
-		if (!scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL)) {
-			return;
-		}
-
 		if (mouseX < ox || mouseY < oy || mouseX > (ox + sizex) || mouseY > (oy + sizey)) {
 			return;
 		}
 
-		// Normalize the buttons to grid cords
 		const int slot =
 			static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
-		if (scene->mMouse.count == 0 || mCraftingCount[slot] == 0 ||
-		    (mCraftingItems[slot] != scene->mMouse.item)) {
-			std::swap(scene->mMouse.count, mCraftingCount[slot]);
-			std::swap(scene->mMouse.item, mCraftingItems[slot]);
-		} else if (mCraftingItems[slot] == scene->mMouse.item) {
-			mCraftingCount[slot] += scene->mMouse.count;
-			mCraftingItems[slot] = scene->mMouse.item;
+		if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL)) {
+			// Normalize the buttons to grid cords
+			if (scene->mMouse.count == 0 || mCraftingCount[slot] == 0 ||
+			    (mCraftingItems[slot] != scene->mMouse.item)) {
+				std::swap(scene->mMouse.count, mCraftingCount[slot]);
+				std::swap(scene->mMouse.item, mCraftingItems[slot]);
+			} else if (mCraftingItems[slot] == scene->mMouse.item) {
+				mCraftingCount[slot] += scene->mMouse.count;
+				mCraftingItems[slot] = scene->mMouse.item;
 
-			scene->mMouse.item = Components::AIR();
-			scene->mMouse.count = 0;
+				scene->mMouse.item = Components::AIR();
+				scene->mMouse.count = 0;
+			}
+
+			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+		} else if (scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) && mPath.empty()) {
+			// Not empty hand on empty slot
+			if (scene->mMouse.count == 0 && mCraftingCount[slot] == 0) {
+				return;
+			}
+
+			// 3 types of actions
+			// One of the slot are empty: place half
+			if (scene->mMouse.count == 0 && mCraftingCount[slot] != 0) {
+				const auto half =
+					(scene->mMouse.count ? scene->mMouse.count : mCraftingCount[slot]) / 2;
+				const auto round =
+					(scene->mMouse.count ? scene->mMouse.count : mCraftingCount[slot]) % 2;
+				const auto item = scene->mMouse.item != Components::AIR() ? scene->mMouse.item
+											  : mCraftingItems[slot];
+
+				scene->mMouse.item = mCraftingItems[slot] = item;
+				scene->mMouse.count = mCraftingCount[slot] = half;
+				scene->mMouse.count += round;
+				// different blocks in slot & hand
+			} else if (mCraftingItems[slot] != scene->mMouse.item) {
+				std::swap(scene->mMouse.count, mCraftingCount[slot]);
+				std::swap(scene->mMouse.item, mCraftingItems[slot]);
+				// Same block: add one to stack
+			} else if (mCraftingItems[slot] == scene->mMouse.item) {
+				mCraftingCount[slot] += 1;
+
+				scene->mMouse.count -= 1;
+				if (scene->mMouse.count == 0) {
+					scene->mMouse.item = Components::AIR();
+				}
+			}
+
+			scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) = false;
 		}
-
-		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 	};
 
 	// Test if player is getting the output

@@ -42,8 +42,16 @@
         color: #333;
       }
 
+      .image-frame {
+        height: 40vh;
+      }
+
+      img {
+        height: 100%;
+      }
+
       .status {
-        margin-top: 50vh; /* Position near the middle. Adjust as desired. */
+        margin-top: 30vh; /* Position near the middle. Adjust as desired. */
         font-size: 1.1rem;
       }
 
@@ -91,14 +99,17 @@
     <div class="emscripten-container" id="info">
       <!-- Title and status area -->
       <p class="title">Cyao Game Engine is Loading...</p>
+
+      <div class="image-frame">
+        <img src="assets/gura.png" class="picture" alt="Beautiful gura picture eye candy" width="auto" height="25vh">
+      </div>
+
       <div class="status" id="status">Downloading Wasm binary...</div>
       <progress value="50" max="100" id="progress"></progress>
 
       <p class="bottom-note">
         Download native versions at 
-        <a href="https://github.com/cheyao/opengl/releases" target="_blank" rel="noopener noreferrer">
-          GitHub
-        </a> 
+        <a href="https://github.com/cheyao/opengl/releases" target="_blank" rel="noopener noreferrer">GitHub</a> 
         for better performance.
       </p>
     </div>
@@ -118,8 +129,8 @@
       const progressElement = document.getElementById('progress');
       const mainDiv         = document.getElementById('info');
 
-      // Create our Module object for Emscripten
-      const Module = {
+      // Create our Module object for Emscripten (Can't be const)
+      var Module = {
         print: (() => {
           const outputElement = document.getElementById('output'); // if any
           if (outputElement) {

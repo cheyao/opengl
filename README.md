@@ -16,15 +16,15 @@
     <img src="https://cloud-l0r4ps4t3-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
 </div>
 
-## Explanation
+<h2 align="center">Inner workings</h2>
 
 This game engine uses the Entity-Component-System architecture, implemented using `Scenes` and `sparse_sets`.
 
-Entities are just UUIDs
+Entities are just UUIDs.
 
-Components are just plain old structs
+Components are just plain old structs.
 
-The systems manage all the logic and changes the components
+The systems manage all the logic and changes the components.
 
 <h2 align="center">Building</h2>
 
