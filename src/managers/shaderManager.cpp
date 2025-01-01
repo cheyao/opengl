@@ -2,18 +2,19 @@
 
 #include "imgui.h"
 #include "opengl/shader.hpp"
+#include "utils.hpp"
 
 #include <SDL3/SDL.h>
 #include <cstddef>
-#include <vector>
 #include <stddef.h>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <vector>
 #include <version>
 
-ShaderManager::ShaderManager(const std::string_view path) : mPath(std::string(path) + "assets/shaders/") {
+ShaderManager::ShaderManager() : mPath(getBasePath() + "assets/shaders/") {
 	mShaders["default.vert:default.frag:"] = nullptr;
 }
 
@@ -65,16 +66,17 @@ const auto keys = _mm_set_epi32(value); // broadcast the value to search for acr
 // Assumes the size of the vector to search against is a multiple of 8 and is properly aligned
 for (auto i = 0; i < vec.size(); i += 8) {
   // Load 8 elements into registers
-  const auto v1 = _mm_loadu_si128(reinterpret_cast<const _m128i*>(&vec[i + 0])); // Load 4 elements into a vector register
-  const auto v2 = _mm_loadu_si128(reinterpret_cast<const _m128i*>(&vec[i + 4])); // Load the next 4 elements into another vector register
-  
+  const auto v1 = _mm_loadu_si128(reinterpret_cast<const _m128i*>(&vec[i + 0])); // Load 4 elements into a vector
+register const auto v2 = _mm_loadu_si128(reinterpret_cast<const _m128i*>(&vec[i + 4])); // Load the next 4 elements into
+another vector register
+
   // Compare the elements
   const auto c1 = _mm_cmpeq_epi32(v1, keys);
   const auto c2 = _mm_cmpeq_epi32(v2, keys);
 
   // Get a mask representing the result of the comparison
   const auto mask = _mm_movemask_epi8(_mm_packs_epi32(c1, c2));
-  
+
   // If the mask is not 0, then we found what we're looking for
   if (mask != 0) {
     return i + std::countr_zero(mask);

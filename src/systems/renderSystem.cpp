@@ -49,8 +49,8 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 RenderSystem::RenderSystem() noexcept
 	: mGame(Game::getInstance()), mWindow(nullptr, SDL_DestroyWindow), mCursor(nullptr, SDL_DestroyCursor),
 	  mIcon(nullptr, SDL_DestroySurface), mGL(nullptr), mFramebuffer(nullptr), mMatricesUBO(nullptr),
-	  mTextures(std::make_unique<TextureManager>(mGame->getBasePath())),
-	  mShaders(std::make_unique<ShaderManager>(mGame->getBasePath())), mMesh(nullptr), mWidth(0), mHeight(0) {
+	  mTextures(std::make_unique<TextureManager>()),
+	  mShaders(std::make_unique<ShaderManager>()), mMesh(nullptr), mWidth(0), mHeight(0) {
 	const SDL_DisplayMode* const DM = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
 
 	SDL_Log("\n");
@@ -110,7 +110,7 @@ RenderSystem::RenderSystem() noexcept
 		return;
 	}
 
-	mIcon.reset(SDL_LoadBMP((mGame->getBasePath() + "assets/textures/icon.bmp").data()));
+	mIcon.reset(SDL_LoadBMP((getBasePath() + "assets/textures/icon.bmp").data()));
 	if (!SDL_SetWindowIcon(mWindow.get(), mIcon.get())) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033]31mFailed to set window icon: %s\n\033]0m",
 				SDL_GetError());
@@ -217,7 +217,7 @@ RenderSystem::RenderSystem() noexcept
 
 #ifndef __ANDROID__
 	std::unique_ptr<SDL_Surface, void (*)(SDL_Surface*)> cursorSurface(
-		SDL_LoadBMP((mGame->getBasePath() + "assets/textures/crosshair.bmp").data()), SDL_DestroySurface);
+		SDL_LoadBMP((getBasePath() + "assets/textures/crosshair.bmp").data()), SDL_DestroySurface);
 
 	if (cursorSurface) {
 		mCursor.reset(SDL_CreateColorCursor(cursorSurface.get(), 8, 8));

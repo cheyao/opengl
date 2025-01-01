@@ -6,7 +6,7 @@
 
 class ShaderManager {
       public:
-	explicit ShaderManager(std::string_view path);
+	explicit ShaderManager();
 	ShaderManager(ShaderManager&&) = delete;
 	ShaderManager(const ShaderManager&) = delete;
 	ShaderManager& operator=(ShaderManager&&) = delete;

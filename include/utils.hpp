@@ -30,6 +30,8 @@ template <typename... Args> std::string string_format(const std::string& format,
 constexpr const static float PI = 3.14159265358979323846;
 constexpr const static float EULER = 2.71828182845904523536;
 
+extern std::string getBasePath();
+
 inline constexpr float toRadians(const float degrees) { return degrees * (PI / 180.f); }
 
 inline constexpr float toDegrees(const float radians) { return radians * (180.f / PI); }

@@ -14,7 +14,6 @@
 #include "third_party/glad/glad.h"
 #include "utils.hpp"
 
-#include <SDL3/SDL_stdinc.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <SDL3/SDL.h>
@@ -31,7 +30,7 @@
 // FIXME: Maybe add support for emojis
 // FIXME: Better unicode support
 TextSystem::TextSystem(const unsigned int size, const bool final) noexcept
-	: mGame(Game::getInstance()), mPath(mGame->getBasePath() + "assets/fonts/"), mSize(size), mLibrary(nullptr),
+	: mGame(Game::getInstance()), mPath(getBasePath() + "assets/fonts/"), mSize(size), mLibrary(nullptr),
 	  mFace(nullptr), mFontData(nullptr), mChild(nullptr) {
 	if (FT_Init_FreeType(&mLibrary)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "TextSystem.cpp: Failed to init freetype");

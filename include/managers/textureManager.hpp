@@ -5,7 +5,7 @@
 
 class TextureManager {
   public:
-	explicit TextureManager(const std::string& path);
+	explicit TextureManager();
 	TextureManager(TextureManager&&) = delete;
 	TextureManager(const TextureManager&) = delete;
 	TextureManager& operator=(TextureManager&&) = delete;

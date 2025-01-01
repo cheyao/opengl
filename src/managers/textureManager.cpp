@@ -2,11 +2,12 @@
 
 #include "opengl/texture.hpp"
 #include "third_party/stb_image.h"
+#include "utils.hpp"
 
 #include <unordered_map>
 #include <version>
 
-TextureManager::TextureManager(const std::string& path) : mPath(path + "assets/textures/") {
+TextureManager::TextureManager() : mPath(getBasePath() + "assets/textures/") {
 	// OpenGL wants this
 	stbi_set_flip_vertically_on_load(false);
 }

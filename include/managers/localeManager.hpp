@@ -7,7 +7,7 @@
 
 class LocaleManager {
       public:
-	LocaleManager(const std::string& path);
+	LocaleManager();
 	LocaleManager(LocaleManager&&) = delete;
 	LocaleManager(const LocaleManager&) = delete;
 	LocaleManager& operator=(LocaleManager&&) = delete;

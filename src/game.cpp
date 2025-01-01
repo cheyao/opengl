@@ -25,16 +25,7 @@
 
 Game::Game()
 	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mCurrentLevel(nullptr),
-	  mStorageManager(nullptr), mTicks(0), mBasePath("") {
-	const char* basepath = SDL_GetBasePath();
-	if (basepath != nullptr) {
-		mBasePath = std::string(basepath);
-	} else {
-		mBasePath = "";
-
-		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to get base path: %s\033[0m", SDL_GetError());
-	}
-}
+	  mStorageManager(nullptr), mTicks(0) {}
 
 void Game::init() {
 	const auto begin = std::chrono::high_resolution_clock::now();
@@ -43,7 +34,7 @@ void Game::init() {
 	mEventManager = std::make_unique<EventManager>();
 
 	mSystemManager = std::make_unique<SystemManager>();
-	mLocaleManager = std::make_unique<LocaleManager>(mBasePath);
+	mLocaleManager = std::make_unique<LocaleManager>();
 
 	mCurrentLevel = std::make_unique<Level>();
 	mStorageManager = std::make_unique<StorageManager>();

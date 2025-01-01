@@ -123,9 +123,7 @@ void Level::save(rapidjson::Value& data, rapidjson::MemoryPoolAllocator<>& alloc
 	SDL_Log("Saving level");
 	const auto playerID = mGame->getPlayerID();
 
-	if (!mData.HasMember(PLAYER_KEY)) {
-		mData.AddMember(rapidjson::StringRef(PLAYER_KEY), rapidjson::Value(rapidjson::kObjectType).Move(),
-				mData.GetAllocator());
+	if (!mData[PLAYER_KEY].HasMember("position")) {
 		mData[PLAYER_KEY].AddMember(
 			"position",
 			fromVector2f(mScene->get<Components::position>(playerID).mPosition, mData.GetAllocator())

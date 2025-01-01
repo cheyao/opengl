@@ -7,7 +7,6 @@
 #include <cstdint>
 #include <memory>
 #include <span>
-#include <string>
 
 // TODO: Cleanup this
 class Game {
@@ -35,8 +34,6 @@ class Game {
 	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager.get(); }
 	[[nodiscard]] class SystemManager* getSystemManager() const { return mSystemManager.get(); }
 
-	[[nodiscard]] inline std::string getBasePath() const { return mBasePath; }
-
 	void setKey(std::size_t key, bool val);
 	[[nodiscard]] std::span<bool> getKeystate();
 
@@ -58,6 +55,5 @@ class Game {
 	std::unique_ptr<class StorageManager> mStorageManager;
 
 	std::uint64_t mTicks;
-	std::string mBasePath;
 	EntityID mPlayer;
 };
