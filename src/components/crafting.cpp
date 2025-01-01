@@ -363,7 +363,7 @@ void CraftingInventory::draw(class Scene* scene) {
 	}
 
 	for (std::size_t i = 0; i < mCraftingItems.size(); ++i) {
-		if (mCraftingCount[i] == 0) {
+		if (mCraftingCount[i] == 0 && !virtItems) {
 			continue;
 		}
 
