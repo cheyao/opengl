@@ -1,128 +1,208 @@
 <!doctype html>
-<html lang="en-us">
+<html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8" />
+    <!-- Provide compatibility for legacy browsers -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <!-- Ensures responsive, mobile-friendly behavior -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Dynamic page title (BUILD_NAME can be replaced via templating) -->
     <title>${BUILD_NAME}</title>
-    <style>body, html {
-  font-family: arial;
-  margin: 0;
-  height: 100%;
-  padding: none;
-  background-color: #9fcfff;
-  overflow: hidden;
-}
 
-.emscripten { padding-right: 0; display: block; }
-/* the canvas *must not* have any border or padding, or mouse coords will be wrong */
-canvas.emscripten { border: 0px none; }
-
-div.emscripten { 
-            display: flex;
-            flex-direction: column; /* Align items vertically */
-            align-items: center; /* Center items horizontally */
-}
-
-.title {
-	font-size: 25px;
-}
-
-.status {
-	margin-top: 70vh;
-}
-
-progress {
-	margin-top: 1vh;
-	  width: 500px;
-	  height: 20px;
-	  border: 1px solid #fff;
-	  padding: 2px 5px;
-	  background-color: #64A0D7;
-}
-progress::-moz-progress-bar { background: #376D99; }
-progress::-webkit-progress-value { background: #376D99; }
-progress { color: #376D99; }
-</style>
-  </head>
-  <body>
-    <div class="emscripten" style="height: 100%; width: 100%; display: flex; text-align: center;" id="info">
-	<p class="title">Cyao game engine is loading...</p>
-        <div class="emscripten status title" id="status">Downloading wasm binary...</div>
-        <progress value="50" max="100" id="progress"></progress>
-	<p style="margin-top: auto;">Download native versions at <a href="https://github.com/cheyao/opengl/releases">github</a> for better performance</p>
-    </div>
-
-    <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
-
-    <script type='text/javascript'>
-      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
-	window.alert("Phone support isn't compleate, this game is ment to be played on a PC (Like Minecraft Java)");
+    <style>
+      /* Global styling */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
 
-      var statusElement = document.getElementById('status');
-      var progressElement = document.getElementById('progress');
-      var mainDiv = document.getElementById('info');
+      body, html {
+        font-family: Arial, sans-serif;
+        height: 100%;
+        background-color: #9fcfff;
+        overflow: hidden; /* Prevent scrolling if desired */
+      }
 
-      var Module = {
-        print: (function() {
-          var element = document.getElementById('output');
-          if (element) element.value = ''; // clear browser cache
-          return (...args) => {
-            var text = args.join(' ');
+      /* Root container for loading info */
+      .emscripten-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* or center, if you prefer vertically centering everything */
+        height: 100vh;
+        text-align: center;
+      }
+
+      .title {
+        margin-top: 1rem;
+        font-size: 1.5rem;
+        color: #333;
+      }
+
+      .status {
+        margin-top: 50vh; /* Position near the middle. Adjust as desired. */
+        font-size: 1.1rem;
+      }
+
+      /* The progress bar styling */
+      progress {
+        width: 300px;
+        max-width: 80vw; /* Responsiveness for smaller screens */
+        height: 20px;
+        margin-top: 1rem;
+        border: 1px solid #fff;
+        background-color: #64A0D7;
+      }
+
+      progress::-moz-progress-bar {
+        background: #376D99;
+      }
+
+      progress::-webkit-progress-value {
+        background: #376D99;
+      }
+
+      /* The game canvas container */
+      .emscripten-canvas-container {
+        flex: 1; 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: auto; /* Canvas goes below the loading info */
+      }
+
+      /* The actual canvas must not have any border or padding, or mouse coords break */
+      canvas.emscripten {
+        border: none;
+        display: block;
+      }
+
+      .bottom-note {
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="emscripten-container" id="info">
+      <!-- Title and status area -->
+      <p class="title">Cyao Game Engine is Loading...</p>
+      <div class="status" id="status">Downloading Wasm binary...</div>
+      <progress value="50" max="100" id="progress"></progress>
+
+      <p class="bottom-note">
+        Download native versions at 
+        <a href="https://github.com/cheyao/opengl/releases" target="_blank" rel="noopener noreferrer">
+          GitHub
+        </a> 
+        for better performance.
+      </p>
+    </div>
+
+    <!-- Canvas area -->
+    <div class="emscripten-canvas-container">
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    </div>
+
+    <script type="text/javascript">
+      // Check for mobile user agent
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+        window.alert("Mobile/Tablet support is not fully complete; this is intended for desktop usage.");
+      }
+
+      const statusElement   = document.getElementById('status');
+      const progressElement = document.getElementById('progress');
+      const mainDiv         = document.getElementById('info');
+
+      // Create our Module object for Emscripten
+      const Module = {
+        print: (() => {
+          const outputElement = document.getElementById('output'); // if any
+          if (outputElement) {
+            outputElement.value = ''; // Clear any existing text
+          }
+          return function(...args) {
+            const text = args.join(' ');
             console.log(text);
-            if (element) {
-              element.value += text + "\n";
-              element.scrollTop = element.scrollHeight; // focus on bottom
+            if (outputElement) {
+              outputElement.value += text + "\n";
+              outputElement.scrollTop = outputElement.scrollHeight;
             }
           };
         })(),
+
         canvas: (() => {
-          var canvas = document.getElementById('canvas');
-
-          // As a default initial behavior, pop up an alert when webgl context is lost. To make your
-          // application robust, you may want to override this behavior before shipping!
-          // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
-          canvas.addEventListener("webglcontextlost", (e) => { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
-
+          const canvas = document.getElementById('canvas');
+          // If WebGL context is lost, alert user
+          canvas.addEventListener("webglcontextlost", (e) => {
+            alert('WebGL context lost. You may need to reload the page.');
+            e.preventDefault();
+          }, false);
           return canvas;
         })(),
+
+        // Show a status message to the user
         setStatus: (text) => {
-          if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+          if (!Module.setStatus.last) {
+            Module.setStatus.last = { time: Date.now(), text: '' };
+          }
           if (text === Module.setStatus.last.text) return;
-          var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-          var now = Date.now();
-          if (m && now - Module.setStatus.last.time < 30) return; // if this is a progress update, skip it if too soon
+
+          const now = Date.now();
+          // If this is a progress update, skip if it floods too quickly
+          const match = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+          if (match && (now - Module.setStatus.last.time < 30)) return;
+
           Module.setStatus.last.time = now;
           Module.setStatus.last.text = text;
-          if (m) {
-            text = m[1];
-            progressElement.value = parseInt(m[2])*100;
-            progressElement.max = parseInt(m[4])*100;
+
+          if (match) {
+            // If it's a progress line
+            text = match[1];
+            progressElement.value = parseInt(match[2]) * 100;
+            progressElement.max = parseInt(match[4]) * 100;
             progressElement.hidden = false;
           } else {
+            // Hide the progress bar if we're done or if there's no progress text
             progressElement.value = null;
             progressElement.max = null;
             progressElement.hidden = true;
-            if (!text) progressElement.style.display = 'none';
-            if (!text) statusElement.style.display = 'none';
-            if (!text) mainDiv.style.display = 'none';
+
+            if (!text) {
+              progressElement.style.display = 'none';
+              statusElement.style.display = 'none';
+              mainDiv.style.display = 'none';
+            }
           }
           statusElement.innerHTML = text;
         },
+
         totalDependencies: 1,
+
         monitorRunDependencies: (left) => {
-          this.totalDependencies = Math.max(this.totalDependencies, left);
-          Module.setStatus(left ? 'Downloading wasm binary...' : 'All downloads complete.');
+          Module.totalDependencies = Math.max(Module.totalDependencies, left);
+          Module.setStatus(left
+            ? 'Downloading wasm binary...'
+            : 'All downloads complete.'
+          );
         }
       };
-      Module.setStatus('Downloading data...');
-      window.onerror = (event) => {
-        Module.setStatus('Exception thrown, see JavaScript console');
-        Module.setStatus = (text) => {
-          if (text) console.error('[post-exception status] ' + text);
+
+      Module.setStatus('Initializing download...');
+      window.onerror = (msg) => {
+        Module.setStatus('Exception thrown, see JavaScript console for details.');
+        // After error, override setStatus to log errors silently or just log in console
+        Module.setStatus = (errorText) => {
+          console.error('[post-exception status]', errorText);
         };
       };
     </script>
+
+    <!-- Asynchronous JS for Emscripten build. The BUILD_NAME gets replaced in your build system. -->
     <script async type="text/javascript" src="${BUILD_NAME}.js"></script>
   </body>
 </html>
