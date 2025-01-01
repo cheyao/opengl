@@ -59,6 +59,9 @@ void Level::create() {
 			mData.GetAllocator());
 	mData[CHUNK_KEY].AddMember("-", rapidjson::Value(rapidjson::kArrayType), mData.GetAllocator());
 	mData[CHUNK_KEY].AddMember("+", rapidjson::Value(rapidjson::kArrayType), mData.GetAllocator());
+
+	SDL_assert(mData.HasMember(PLAYER_KEY));
+	SDL_assert(mData.HasMember(CHUNK_KEY));
 }
 
 void Level::load(rapidjson::Value& data) {

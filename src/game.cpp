@@ -25,7 +25,7 @@
 #endif
 
 Game::Game()
-	: mCurrentLevel(nullptr), mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr),
+	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mCurrentLevel(nullptr),
 	  mStorageManager(nullptr), mTicks(0), mBasePath("") {
 	const auto begin = std::chrono::high_resolution_clock::now();
 
@@ -44,9 +44,8 @@ Game::Game()
 	mSystemManager = std::make_unique<SystemManager>(this);
 	mLocaleManager = std::make_unique<LocaleManager>(mBasePath);
 
-	mStorageManager = std::make_unique<StorageManager>(this);
-
 	mCurrentLevel = std::make_unique<Level>(this);
+	mStorageManager = std::make_unique<StorageManager>(this);
 	try {
 		mStorageManager->restore();
 	} catch (const std::exception& error) {

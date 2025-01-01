@@ -22,7 +22,8 @@
 #include <string>
 
 Inventory::Inventory(class Game* game, const std::size_t size, EntityID entity)
-	: Screen(game), mEntity(entity), mSize(size), mItems(size), mCount(size), mCounter(0) {}
+	: Screen(game), mEntity(entity), mSize(size), mItems(size), mCount(size), mLastClick(0), mLastClickPos(0),
+	  mCounter(0) {}
 
 Inventory::Inventory(class Game* game, const rapidjson::Value& contents, EntityID entity)
 	: Screen(game), mEntity(entity) {
@@ -91,8 +92,8 @@ bool Inventory::update(class Scene* scene, float) {
 	mouseX -= ox;
 	mouseY -= oy;
 
-	const int slot = static_cast<int>(mouseX / (INVENTORY_SLOT_X * scale)) +
-			 static_cast<int>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
+	const std::int64_t slot = static_cast<std::int64_t>(mouseX / (INVENTORY_SLOT_X * scale)) +
+				  static_cast<std::int64_t>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
 	if (scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL)) {
 		if (mouseX < 0 || mouseY < 0 || mouseX > (9 * INVENTORY_SLOT_X * scale) ||
 		    mouseY > (4 * INVENTORY_SLOT_Y * scale)) {
@@ -142,6 +143,10 @@ bool Inventory::update(class Scene* scene, float) {
 			goto endLogic;
 		}
 
+		if (mCount[slot] == 0 && mLastClickPos == slot &&
+		    (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) - mLastClick) < 200ul) {
+		}
+
 		// Not inside the space
 		if (scene->mMouse.count == 0 || mCount[slot] == 0 || (mItems[slot] != scene->mMouse.item)) {
 			std::swap(scene->mMouse.count, mCount[slot]);
@@ -176,18 +181,19 @@ bool Inventory::update(class Scene* scene, float) {
 			scene->mMouse.item = mItems[slot] = item;
 			scene->mMouse.count = mCount[slot] = half;
 			scene->mMouse.count += round;
-			// different blocks in slot & hand
-		} else if (mItems[slot] != scene->mMouse.item) {
-			std::swap(scene->mMouse.count, mCount[slot]);
-			std::swap(scene->mMouse.item, mItems[slot]);
 			// Same block: add one to stack
-		} else if (mItems[slot] == scene->mMouse.item) {
+		} else if (mCount[slot] == 0 || mItems[slot] == scene->mMouse.item) {
 			mCount[slot] += 1;
+			mItems[slot] = scene->mMouse.item;
 
 			scene->mMouse.count -= 1;
 			if (scene->mMouse.count == 0) {
 				scene->mMouse.item = Components::AIR();
 			}
+			// different blocks in slot & hand
+		} else if (mItems[slot] != scene->mMouse.item) {
+			std::swap(scene->mMouse.count, mCount[slot]);
+			std::swap(scene->mMouse.item, mItems[slot]);
 		}
 
 		scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) = false;

@@ -20,7 +20,7 @@ class PlayerInventory : public CraftingInventory {
 	void draw(class Scene* scene) override;
 
 	void select(std::size_t cell) {
-		SDL_assert(cell < 9 && cell >= 0);
+		SDL_assert(cell < 9);
 		mSelect = cell;
 	}
 	std::size_t getSelection() const { return mSelect; }

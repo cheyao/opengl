@@ -107,18 +107,19 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 				scene->mMouse.item = mCraftingItems[slot] = item;
 				scene->mMouse.count = mCraftingCount[slot] = half;
 				scene->mMouse.count += round;
-				// different blocks in slot & hand
-			} else if (mCraftingItems[slot] != scene->mMouse.item) {
-				std::swap(scene->mMouse.count, mCraftingCount[slot]);
-				std::swap(scene->mMouse.item, mCraftingItems[slot]);
 				// Same block: add one to stack
-			} else if (mCraftingItems[slot] == scene->mMouse.item) {
+			} else if (mCraftingCount[slot] == 0 || mCraftingItems[slot] == scene->mMouse.item) {
 				mCraftingCount[slot] += 1;
+				mCraftingItems[slot] = scene->mMouse.item;
 
 				scene->mMouse.count -= 1;
 				if (scene->mMouse.count == 0) {
 					scene->mMouse.item = Components::AIR();
 				}
+				// different blocks in slot & hand
+			} else if (mCraftingItems[slot] != scene->mMouse.item) {
+				std::swap(scene->mMouse.count, mCraftingCount[slot]);
+				std::swap(scene->mMouse.item, mCraftingItems[slot]);
 			}
 
 			scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) = false;

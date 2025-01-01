@@ -39,6 +39,9 @@ class Inventory : public Screen {
 	std::vector<Components::Item> mItems;
 	std::vector<std::uint64_t> mCount;
 
+	std::uint64_t mLastClick;
+	std::int64_t mLastClickPos;
+
 	// Mouse traversal path but how tf do I get the inv??
 	std::vector<std::pair<std::uint64_t, std::uint64_t>> mPath;
 	// Unique ID for all classes

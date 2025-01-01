@@ -48,7 +48,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
 #endif
 
 	try {
-		*appstate = Game::getInstance();
+		*appstate = new Game;
 	} catch (const std::runtime_error& error) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Main.cpp: Critical runtime error: %s\n", error.what());
 
@@ -112,7 +112,9 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 	}
 }
 
-void SDL_AppQuit(void*, const SDL_AppResult result) {
+void SDL_AppQuit(void* appstate, const SDL_AppResult result) {
+	delete static_cast<Game*>(appstate);
+
 	SDL_Quit();
 
 	if (result == SDL_APP_SUCCESS) {

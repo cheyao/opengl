@@ -87,7 +87,9 @@ class sparse_set_view {
 	// PERF: Large bottleneck
 	sparse_set_view(ComponentManager* componentManager) : mComponentManager(componentManager) {
 		if constexpr (sizeof...(ComponentTypes) == 1) {
-			mEntities = std::vector<EntityID>(std::from_range, (*mComponentManager->getPool<ComponentTypes>(), ...));
+			const auto c =
+				(static_cast<utils::sparse_set<ComponentTypes>*>(mComponentManager->getPool<ComponentTypes>()), ...);
+			mEntities = std::vector(c->begin(), c->end());
 		} else {
 			// This first part makes a array of all the sizes of the that we loop through
 			const std::array<utils::sparse_set_interface*, sizeof...(ComponentTypes)> sets = {

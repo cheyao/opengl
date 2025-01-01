@@ -119,7 +119,7 @@ void InputSystem::updateMouse(Scene* scene, const float) {
 				registers::LOOT_TABLES.contains(block.mType) ? registers::LOOT_TABLES.at(block.mType)
 									     : defaultLoot;
 
-			for (const auto [chance, type] : loot) {
+			for (const auto& [chance, type] : loot) {
 				const float roll = SDL_randf();
 				if (roll >= chance) {
 					continue;

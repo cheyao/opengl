@@ -8,6 +8,7 @@
 
 using ComponentID = std::uint64_t;
 constexpr const static ComponentID MAX_COMPONENTS = std::numeric_limits<ComponentID>::max();
+extern std::vector<utils::sparse_set_interface*> mPools;
 
 class ComponentManager {
       public:
@@ -37,5 +38,4 @@ class ComponentManager {
 	}
 
       private:
-	std::vector<utils::sparse_set_interface*> mPools;
 };
