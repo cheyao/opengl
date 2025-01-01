@@ -249,7 +249,7 @@ The linux save directory is `~/.local/share/cyao/opengl/`
 
 # :3
 
-Almost no AI used, only AI changes are from the pull requests submitted by these prs https://github.com/cheyao/opengl/pulls?q=is%3Apr+is%3Aclosed. I accepted them since some beta tester is testing the new o3 model on my project and I was really curious of what if can acheive. But I still modified most of the code generated.
+No AI used, the prs from https://github.com/cheyao/opengl/pulls?q=is%3Apr+is%3Aclosed included some, but they included some fucking bugs and I had to rewrite everything.
 
 Plus I'm smarter then AI! My implementation of sparse set caching shaved out 700000ns of runtime while the ai version shaved only 400000ns!
 

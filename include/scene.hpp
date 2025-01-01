@@ -40,8 +40,6 @@ class Scene {
 
 	~Scene() noexcept {
 		delete mEntityManager;
-
-		ComponentManager::getInstance()->clear();
 		markAllCachesDirty();
 	}
 

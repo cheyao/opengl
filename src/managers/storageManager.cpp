@@ -23,7 +23,9 @@
 
 StorageManager::StorageManager() : mGame(Game::getInstance()) {}
 
-StorageManager::~StorageManager() {
+StorageManager::~StorageManager() { SDL_Log("Storage Manager destroyed"); }
+
+void StorageManager::save() {
 	SDL_Log("Saving state");
 
 	SDL_Storage* storage = SDL_OpenUserStorage("cyao", "opengl", 0);

@@ -1,18 +1,14 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <!-- Provide compatibility for legacy browsers -->
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8"/>
 
-    <!-- Ensures responsive, mobile-friendly behavior -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-    <!-- Dynamic page title (BUILD_NAME can be replaced via templating) -->
     <title>${BUILD_NAME}</title>
 
     <style>
-      /* Global styling */
       * {
         margin: 0;
         padding: 0;
@@ -23,15 +19,14 @@
         font-family: Arial, sans-serif;
         height: 100%;
         background-color: #9fcfff;
-        overflow: hidden; /* Prevent scrolling if desired */
+        overflow: hidden;
       }
 
-      /* Root container for loading info */
       .emscripten-container {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start; /* or center, if you prefer vertically centering everything */
+        justify-content: flex-start;
         height: 100vh;
         text-align: center;
       }
@@ -51,14 +46,13 @@
       }
 
       .status {
-        margin-top: 30vh; /* Position near the middle. Adjust as desired. */
+        margin-top: 30vh;
         font-size: 1.1rem;
       }
 
-      /* The progress bar styling */
       progress {
         width: 300px;
-        max-width: 80vw; /* Responsiveness for smaller screens */
+        max-width: 80vw;
         height: 20px;
         margin-top: 1rem;
         border: 1px solid #fff;
@@ -73,13 +67,12 @@
         background: #376D99;
       }
 
-      /* The game canvas container */
       .emscripten-canvas-container {
         flex: 1; 
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-top: auto; /* Canvas goes below the loading info */
+        margin-top: auto;
       }
 
       /* The actual canvas must not have any border or padding, or mouse coords break */
@@ -120,7 +113,7 @@
     </div>
 
     <script type="text/javascript">
-      // Check for mobile user agent
+      // Check for mobile user agent and scream at the user
       if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
         window.alert("Mobile/Tablet support is not fully complete; this is intended for desktop usage.");
       }

@@ -17,11 +17,7 @@ class ComponentManager {
 	ComponentManager& operator=(const ComponentManager&) = delete;
 
       public:
-	~ComponentManager() {
-		for (auto* pool : mPools) {
-			pool->clear();
-		}
-	}
+	~ComponentManager() {}
 
 	static ComponentManager* getInstance() {
 		static ComponentManager manager;

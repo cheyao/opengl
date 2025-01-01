@@ -13,6 +13,7 @@ class StorageManager {
 	~StorageManager();
 
 	[[nodiscard]] bool restore();
+	void save();
 
       private:
 	[[nodiscard]] bool restoreState(struct SDL_Storage* storage);

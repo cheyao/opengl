@@ -97,6 +97,8 @@ Game::~Game() {
 #endif
 }
 
+void Game::save() { mStorageManager->save(); }
+
 SDL_AppResult Game::iterate() {
 	const auto begin = std::chrono::high_resolution_clock::now();
 

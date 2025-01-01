@@ -27,6 +27,8 @@ class Game {
 	}
 
 	void init();
+	void save();
+
 	[[nodiscard]] SDL_AppResult iterate();
 	[[nodiscard]] SDL_AppResult event(const union SDL_Event& event);
 

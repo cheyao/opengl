@@ -114,6 +114,8 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 }
 
 void SDL_AppQuit(void*, const SDL_AppResult result) {
+	Game::getInstance()->save();
+
 	SDL_Quit();
 
 	if (result == SDL_APP_SUCCESS) {
