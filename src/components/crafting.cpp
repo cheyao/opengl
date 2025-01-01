@@ -352,23 +352,46 @@ void CraftingInventory::draw(class Scene* scene) {
 	shader->set("texture_diffuse"_u, 0);
 	shader->set("size"_u, sx / INVENTORY_INV_SCALE, sy / INVENTORY_INV_SCALE);
 
+	const bool virtItems =
+		scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL) || scene->getSignal(EventManager::LEFT_HOLD_SIGNAL);
+
+	std::uint64_t vcount = 0;
+	if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
+		vcount = scene->mMouse.count / mPath.size();
+	} else {
+		vcount = 1;
+	}
+
 	for (std::size_t i = 0; i < mCraftingItems.size(); ++i) {
 		if (mCraftingCount[i] == 0) {
 			continue;
 		}
 
-		float yoff = i >= 9 ? 4 * scale : 0;
+		const float yoff = i >= 9 ? 4 * scale : 0;
 
-		Texture* texture = systemManager->getTexture(registers::TEXTURES.at(mCraftingItems[i]));
+		auto type = mCraftingItems[i];
+		auto count = mCraftingCount[i];
+		if (virtItems) {
+			if (auto s = std::ranges::find(mPath, std::make_pair(getID<CraftingInventory>(), i));
+			    s != mPath.end()) {
+				count += vcount;
+				type = scene->mMouse.item;
+			} else if (count == 0) {
+				// This slot isn't in our path
+				continue;
+			}
+		}
+
+		Texture* const texture = systemManager->getTexture(registers::TEXTURES.at(type));
 		texture->activate(0);
 
 		shader->set("offset"_u, ox + i % mCols * slotx + 5, oy + static_cast<int>(i / mCols) * sloty + yoff);
 
 		mesh->draw(shader);
 
-		if (mCraftingCount[i] > 1) {
+		if (count > 1) {
 			mGame->getSystemManager()->getTextSystem()->draw(
-				std::to_string(mCraftingCount[i]),
+				std::to_string(count),
 				Eigen::Vector2f(ox + i % mCols * slotx + INVENTORY_SLOT_X / 2 * scale - 2,
 						oy + static_cast<int>(i / mCols) * sloty - 5 + yoff),
 				false);
@@ -401,6 +424,8 @@ void CraftingInventory::draw(class Scene* scene) {
 	}
 
 	shader->activate();
+
+	drawMouse(scene);
 }
 
 void CraftingInventory::save(rapidjson::Value& contents, rapidjson::Document::AllocatorType& allocator) {

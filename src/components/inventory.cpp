@@ -124,10 +124,10 @@ bool Inventory::update(class Scene* scene, float) {
 	} else if ((!scene->getSignal(EventManager::LEFT_HOLD_SIGNAL) &&
 		    !scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL)) &&
 		   !mPath.empty()) {
+		// Here we redistribute the items
 		if (leftLongClick) {
-			// Here we redistribute the items
 			const auto c = scene->mMouse.count / mPath.size();
-			const auto left = scene->mMouse.count % mPath.size();
+			const auto left = scene->mMouse.count - mPath.size() * c;
 
 			for (const auto& [id, s] : mPath) {
 				(*mCountRegister[id])[s] += c;
@@ -281,11 +281,11 @@ void Inventory::draw(class Scene* scene) {
 
 	mesh->draw(shader);
 
-	drawItems();
+	drawItems(scene);
 	drawMouse(scene);
 }
 
-void Inventory::drawItems() {
+void Inventory::drawItems(class Scene* const scene) {
 	SystemManager* const systemManager = mGame->getSystemManager();
 	Shader* const shader = systemManager->getShader("ui.vert", "ui.frag");
 	Mesh* const mesh = systemManager->getUISystem()->getMesh();
@@ -318,14 +318,37 @@ void Inventory::drawItems() {
 	shader->set("texture_diffuse"_u, 0);
 	shader->set("size"_u, x / INVENTORY_INV_SCALE, y / INVENTORY_INV_SCALE);
 
+	const bool virtItems =
+		scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL) || scene->getSignal(EventManager::LEFT_HOLD_SIGNAL);
+
+	std::uint64_t vcount = 0;
+	if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
+		vcount = scene->mMouse.count / mPath.size();
+	} else {
+		vcount = 1;
+	}
+
 	for (std::size_t i = 0; i < mItems.size(); ++i) {
-		if (mCount[i] == 0) {
+		if (mCount[i] == 0 && !virtItems) {
 			continue;
 		}
 
-		float yoff = i >= 9 ? 4 * scale : 0;
+		auto type = mItems[i];
+		auto count = mCount[i];
+		if (virtItems) {
+			if (auto s = std::ranges::find(mPath, std::make_pair(getID<Inventory>(), i));
+			    s != mPath.end()) {
+				count += vcount;
+				type = scene->mMouse.item;
+			} else if (count == 0) {
+				// This slot isn't in our path
+				continue;
+			}
+		}
 
-		Texture* texture = systemManager->getTexture(registers::TEXTURES.at(mItems[i]));
+		const float yoff = i >= 9 ? 4 * scale : 0;
+
+		Texture* const texture = systemManager->getTexture(registers::TEXTURES.at(type));
 		texture->activate(0);
 
 		shader->set("offset"_u, ox + i % 9 * INVENTORY_SLOT_X * scale,
@@ -333,9 +356,9 @@ void Inventory::drawItems() {
 
 		mesh->draw(shader);
 
-		if (mCount[i] > 1) {
+		if (count > 1) {
 			mGame->getSystemManager()->getTextSystem()->draw(
-				std::to_string(mCount[i]),
+				std::to_string(count),
 				Eigen::Vector2f(ox + i % 9 * INVENTORY_SLOT_X * scale + INVENTORY_SLOT_X / 2 * scale -
 							2,
 						oy + static_cast<int>(i / 9) * INVENTORY_SLOT_Y * scale - 5 + yoff),
@@ -352,9 +375,20 @@ void Inventory::drawMouse(Scene* scene) {
 		return;
 	}
 
-	SystemManager* systemManager = mGame->getSystemManager();
-	Shader* shader = systemManager->getShader("ui.vert", "ui.frag");
-	Mesh* mesh = systemManager->getUISystem()->getMesh();
+	const bool virtItems =
+		scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL) || scene->getSignal(EventManager::LEFT_HOLD_SIGNAL);
+	std::uint64_t vcount = 0;
+	if (virtItems) {
+		if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
+			vcount = scene->mMouse.count / mPath.size() * mPath.size();
+		} else {
+			vcount = SDL_min(scene->mMouse.count, mPath.size());
+		}
+	}
+
+	SystemManager* const systemManager = mGame->getSystemManager();
+	Shader* const shader = systemManager->getShader("ui.vert", "ui.frag");
+	Mesh* const mesh = systemManager->getUISystem()->getMesh();
 	const Eigen::Vector2f dimensions = systemManager->getDemensions();
 
 	float mx, my;
@@ -383,9 +417,9 @@ void Inventory::drawMouse(Scene* scene) {
 
 	mesh->draw(shader);
 
-	if (scene->mMouse.count > 1) {
+	if ((scene->mMouse.count - vcount) > 1) {
 		mGame->getSystemManager()->getTextSystem()->draw(
-			std::to_string(scene->mMouse.count),
+			std::to_string(scene->mMouse.count - vcount),
 			Eigen::Vector2f(mx + x / Inventory::INVENTORY_INV_SCALE - 2, my - 5), false);
 	}
 }

@@ -60,6 +60,7 @@ class Inventory : public Screen {
 	constexpr const static inline auto INVENTORY_SLOT_Y = 18.0f;
 
 	void handleKeys();
+	void drawMouse(class Scene* scene);
 	// TODO: Common handler
 	// void handleInventory(decltype(mItems)& items, decltype(mCount)& count, std::uint64_t slot);
 
@@ -68,8 +69,7 @@ class Inventory : public Screen {
 	constexpr const static inline auto COUNT_KEY = "count";
 
       private:
-	void drawItems();
-	void drawMouse(class Scene* scene);
+	void drawItems(class Scene* scene);
 	void close();
 	void pickUp(class Scene* scene, EntityID item, std::size_t index);
 
