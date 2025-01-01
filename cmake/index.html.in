@@ -57,8 +57,7 @@ progress { color: #376D99; }
     <script type='text/javascript'>
       if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
 	window.alert("Phone support isn't compleate, this game is ment to be played on a PC (Like Minecraft Java)");
-      } else {
-      };
+      }
 
       var statusElement = document.getElementById('status');
       var progressElement = document.getElementById('progress');

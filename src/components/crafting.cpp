@@ -76,7 +76,8 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 		}
 
 		// Normalize the buttons to grid cords
-		const int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
+		const int slot =
+			static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
 
 		if (mCraftingCount[slot] != 0 &&
 		    (scene->mMouse.count == 0 ||
@@ -152,14 +153,39 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 
 	placeGrid();
 
-	if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
-		const int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
+	const int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
+	if (!(mouseX < ox || mouseY < oy || mouseX > (ox + sizex) || mouseY > (oy + sizey))) {
+		if (scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL)) {
+			// This is long click
+			// Now note the slots
+			if (scene->mMouse.count != 0 &&
+			    (mCraftingCount[slot] == 0 || mCraftingItems[slot] == scene->mMouse.item)) {
+				typename decltype(mPath)::value_type pair = {getID<CraftingInventory>(), slot};
 
-		// This is long click
-		typename decltype(mPath)::value_type pair = {getID<Inventory>(), slot};
+				if (std::ranges::find(mPath, pair) == std::end(mPath)) {
+					mPath.emplace_back(pair);
+				}
+			}
+		}
+	}
 
-		if (std::ranges::find(mPath, pair) == std::end(mPath)) {
-			mPath.emplace_back(pair);
+	if (scene->getSignal(REDISTRIBUTE)) {
+		const auto c = scene->getSignal(REDISTRIBUTE);
+
+		for (std::size_t i = 0; i < mPath.size();) {
+			if (mPath[i].first != getID<CraftingInventory>()) {
+				++i;
+
+				continue;
+			}
+
+			const auto s = mPath[i].second;
+
+			mCraftingCount[s] += c;
+			mCraftingItems[s] = static_cast<Components::Item>(scene->getSignal(REDISTRIBUTE_ITEM));
+
+			std::swap(mPath[i], mPath.back());
+			mPath.pop_back();
 		}
 	}
 

@@ -2,6 +2,7 @@
 
 #include "components.hpp"
 #include "managers/entityManager.hpp"
+#include "opengl/shader.hpp"
 #include "screens/screen.hpp"
 #include "systems/renderSystem.hpp"
 #include "third_party/rapidjson/document.h"
@@ -31,6 +32,8 @@ class Inventory : public Screen {
 	virtual bool tryPick(class Scene* scene, EntityID item);
 
       protected:
+	constexpr const static inline auto REDISTRIBUTE = "inv_redistribute"_u;
+	constexpr const static inline auto REDISTRIBUTE_ITEM = "inv_redistribute_item"_u;
 	const EntityID mEntity;
 	std::uint64_t mSize;
 	std::vector<Components::Item> mItems;

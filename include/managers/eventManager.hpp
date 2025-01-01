@@ -29,7 +29,7 @@ class EventManager {
 
       private:
 	// 0.2s
-	constexpr const static inline std::uint64_t ACTIVATION_TIME = 200ull;
+	constexpr const static inline std::uint64_t ACTIVATION_TIME = 180ull;
 	[[nodiscard]] SDL_AppResult manageKeyboardEvent(const union SDL_Event& event);
 
 	class Game* mGame;
