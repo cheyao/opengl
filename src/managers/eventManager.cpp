@@ -6,12 +6,8 @@
 #include "scenes/level.hpp"
 
 #include <SDL3/SDL.h>
-#include <cassert>
-#include <iostream> // For optional logging
 
-// Activation time in milliseconds to differentiate between "click" vs. "hold"
-static constexpr Uint32 ACTIVATION_TIME = 200; 
-
+// TODO: Run clang tidy here
 // Constructor initializes member variables
 EventManager::EventManager(Game* game)
     : mGame(game)
@@ -40,8 +36,8 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event)
         case SDL_EVENT_QUIT:
         {
             SDL_Log("Received quit event.");
-            // Potentially set some global game->SetRunning(false) or similar
-            return SDL_APP_SUCCESS; // or SDL_APP_FAILURE if you want to shut down
+            
+            return SDL_APP_SUCCESS; // SDL_APP_SUCCESS makes the app shutdown with exit code 0
         }
 
         // Key down
@@ -68,16 +64,14 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event)
         case SDL_EVENT_WINDOW_RESIZED:
         {
             // event.window.data1, event.window.data2 store the new width/height
-            if (mGame && mGame->getSystemManager())
-            {
-                mGame->getSystemManager()->setDemensions(
-                    event.window.data1, 
-                    event.window.data2
-                );
-            }
+            mGame->getSystemManager()->setDemensions(
+                event.window.data1, 
+                event.window.data2
+            );
             break;
         }
 
+        // TODO: Handle fingers
         // Mouse button down
         case SDL_EVENT_MOUSE_BUTTON_DOWN:
         {
@@ -95,7 +89,7 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event)
         // Mouse button up
         case SDL_EVENT_MOUSE_BUTTON_UP:
         {
-            Uint32 now = SDL_GetTicks();
+            std::uint64_t now = SDL_GetTicks();
 
             if (event.button.button == SDL_BUTTON_LEFT)
             {
@@ -103,10 +97,8 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event)
                 if (now - mLeftClickDown < ACTIVATION_TIME)
                 {
                     // Mark the left-click-down signal
-                    if (mGame && mGame->getLevel() && mGame->getLevel()->getScene())
-                    {
-                        mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = true;
-                    }
+                    
+                    mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = true;
                 }
                 // Reset the timestamp
                 mLeftClickDown = 0;
@@ -115,11 +107,9 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event)
             {
                 if (now - mRightClickDown < ACTIVATION_TIME)
                 {
-                    if (mGame && mGame->getLevel() && mGame->getLevel()->getScene())
-                    {
-                        mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_DOWN_SIGNAL) = true;
-                    }
+                    mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_DOWN_SIGNAL) = true;
                 }
+                
                 mRightClickDown = 0;
             }
             break;
@@ -140,55 +130,39 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event)
 ////////////////////////////////////////////////////////////////////////////////
 void EventManager::update()
 {
-    int x = 0, y = 0;
-    const Uint32 buttons = SDL_GetMouseState(&x, &y);
+    const auto buttons = SDL_GetMouseState(nullptr, nullptr);
+    const std::uint64_t now = SDL_GetTicks();
+    const bool isShortPressTime = (now - mLeftClickDown <= ACTIVATION_TIME);
 
     // Check left mouse hold
     {
-        Uint32 now = SDL_GetTicks();
-        bool isLeftDown = (buttons & SDL_BUTTON_LMASK) != 0;
-        bool isShortPressTime = (now - mLeftClickDown <= ACTIVATION_TIME);
+        const bool isLeftDown = buttons & SDL_BUTTON_LMASK;
 
         // If the button is held beyond the threshold, mark as hold
         if (isLeftDown && !isShortPressTime)
         {
-            if (mGame && mGame->getLevel() && mGame->getLevel()->getScene())
-            {
                 mGame->getLevel()->getScene()->getSignal(LEFT_HOLD_SIGNAL) = mLeftClickDown;
                 // We ensure the short-click signal is not triggered anymore
                 mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = false;
-            }
-        }
-        else
-        {
+        } else {
             // Not holding
-            if (mGame && mGame->getLevel() && mGame->getLevel()->getScene())
-            {
-                mGame->getLevel()->getScene()->getSignal(LEFT_HOLD_SIGNAL) = false;
-            }
+            mGame->getLevel()->getScene()->getSignal(LEFT_HOLD_SIGNAL) = false;
         }
     }
 
     // Check right mouse hold
     {
-        Uint32 now = SDL_GetTicks();
-        bool isRightDown = (buttons & SDL_BUTTON_RMASK) != 0;
-        bool isShortPressTime = (now - mRightClickDown <= ACTIVATION_TIME);
+        const bool isRightDown = buttons & SDL_BUTTON_RMASK
+        const bool isShortPressTime = (now - mRightClickDown <= ACTIVATION_TIME);
 
         if (isRightDown && !isShortPressTime)
         {
-            if (mGame && mGame->getLevel() && mGame->getLevel()->getScene())
-            {
-                mGame->getLevel()->getScene()->getSignal(RIGHT_HOLD_SIGNAL) = mRightClickDown;
-                mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_DOWN_SIGNAL) = false;
-            }
+            mGame->getLevel()->getScene()->getSignal(RIGHT_HOLD_SIGNAL) = mRightClickDown;
+            mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_DOWN_SIGNAL) = false;
         }
         else
         {
-            if (mGame && mGame->getLevel() && mGame->getLevel()->getScene())
-            {
-                mGame->getLevel()->getScene()->getSignal(RIGHT_HOLD_SIGNAL) = false;
-            }
+            mGame->getLevel()->getScene()->getSignal(RIGHT_HOLD_SIGNAL) = false;
         }
     }
 }
@@ -202,14 +176,6 @@ SDL_AppResult EventManager::manageKeyboardEvent(const SDL_Event& event)
 {
     switch (event.key.key)
     {
-        case SDLK_F3:
-        {
-            // Example debug toggle
-            // e.g. toggle debug overlay or something
-            // ...
-            break;
-        }
-
         default:
         {
             // For unhandled keys
