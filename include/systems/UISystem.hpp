@@ -1,8 +1,8 @@
 #pragma once
 
+#include <SDL3/SDL.h>
 #include <memory>
 #include <vector>
-#include <SDL3/SDL.h>
 
 /*
  * The UI system
@@ -11,7 +11,7 @@
  */
 class UISystem {
       public:
-	explicit UISystem(class Game* game);
+	explicit UISystem() noexcept;
 	UISystem(UISystem&&) = delete;
 	UISystem(const UISystem&) = delete;
 	UISystem& operator=(UISystem&&) = delete;
@@ -22,7 +22,10 @@ class UISystem {
 	void draw(class Scene* scene);
 
 	void addScreen(class Screen* screen) { mScreenStack.emplace_back(screen); }
-	void pop() { SDL_assert(!mScreenStack.empty()); mScreenStack.pop_back(); }
+	void pop() {
+		SDL_assert(!mScreenStack.empty());
+		mScreenStack.pop_back();
+	}
 	class Screen* top() { return mScreenStack.back(); }
 
 	bool empty() const { return mScreenStack.empty(); }

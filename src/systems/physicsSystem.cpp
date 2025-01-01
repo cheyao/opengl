@@ -22,7 +22,7 @@
 #endif
 
 // The physicsSystem is in charge of the collision and mouvements
-PhysicsSystem::PhysicsSystem(Game* game) : mGame(game) {}
+PhysicsSystem::PhysicsSystem() noexcept : mGame(Game::getInstance()) {}
 
 // Performance benchmark:
 // Before enabling checks (98f1275078cad77b0b7a3145b4e57c6f098bd078): 2560632.097561ns avg (391 FPS)

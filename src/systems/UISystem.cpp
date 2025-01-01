@@ -6,7 +6,7 @@
 #include "screens/screen.hpp"
 #include <cstddef>
 
-UISystem::UISystem(Game* game) : mGame(game), mMesh(nullptr) {
+UISystem::UISystem() noexcept : mGame(Game::getInstance()), mMesh(nullptr) {
 	constexpr const static float vertices[] = {
 		0.0f, 0.0f, 0.0f, // TL
 		0.0f, 1.0f, 0.0f, // BR

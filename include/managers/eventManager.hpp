@@ -14,12 +14,12 @@ class EventManager {
 	constexpr const static inline auto RIGHT_CLICK_DOWN_SIGNAL = "right_click"_u;
 	constexpr const static inline auto RIGHT_HOLD_SIGNAL = "right_hold"_u;
 
-	explicit EventManager(class Game* game);
+	explicit EventManager() noexcept;
 	EventManager(EventManager&&) = delete;
 	EventManager(const EventManager&) = delete;
 	EventManager& operator=(EventManager&&) = delete;
 	EventManager& operator=(const EventManager&) = delete;
-	~EventManager();
+	~EventManager() = default;
 
 	[[nodiscard]] SDL_AppResult manageEvent(const union SDL_Event& event);
 	void update();

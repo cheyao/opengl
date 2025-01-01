@@ -31,14 +31,14 @@ class Scene {
 	friend class SystemManager;
 #endif
       public:
-	Scene() : mEntityManager(new EntityManager()), mComponentManager(new ComponentManager()), mSignals() {}
+	Scene() noexcept : mEntityManager(new EntityManager()), mComponentManager(new ComponentManager()), mSignals() {}
 
 	Scene(Scene&&) = delete;
 	Scene(const Scene&) = delete;
 	Scene& operator=(Scene&&) = delete;
 	Scene& operator=(const Scene&) = delete;
 
-	~Scene() {
+	~Scene() noexcept {
 		delete mEntityManager;
 		delete mComponentManager;
 
@@ -46,7 +46,7 @@ class Scene {
 	}
 
 	// This returns a UUID for a new entity
-	[[nodiscard]] EntityID newEntity() {
+	[[nodiscard]] EntityID newEntity() noexcept {
 		const EntityID entity = mEntityManager->getEntity();
 		markAllCachesDirty();
 		return entity;

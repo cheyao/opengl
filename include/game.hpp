@@ -11,14 +11,22 @@
 
 // TODO: Cleanup this
 class Game {
-      public:
+      private:
 	Game();
 	Game(Game&&) = delete;
 	Game(const Game&) = delete;
 	Game& operator=(Game&&) = delete;
 	Game& operator=(const Game&) = delete;
+
+      public:
 	~Game();
 
+	static Game* getInstance() {
+		static Game instance;
+		return &instance;
+	}
+
+	void init();
 	[[nodiscard]] SDL_AppResult iterate();
 	[[nodiscard]] SDL_AppResult event(const union SDL_Event& event);
 

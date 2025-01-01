@@ -7,7 +7,7 @@
 // TODO: DPI
 class RenderSystem {
       public:
-	explicit RenderSystem(class Game* game);
+	explicit RenderSystem() noexcept;
 	RenderSystem(RenderSystem&&) = delete;
 	RenderSystem(const RenderSystem&) = delete;
 	RenderSystem& operator=(RenderSystem&&) = delete;

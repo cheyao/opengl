@@ -15,7 +15,6 @@
 #include "third_party/rapidjson/allocators.h"
 #include "third_party/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson.h"
-#include "third_party/rapidjson/writer.h"
 
 #include <SDL3/SDL.h>
 #include <cstddef>
@@ -23,8 +22,8 @@
 #include <cstdlib>
 #include <limits>
 
-Level::Level(class Game* game, const std::string& name)
-	: mName(name), mTextID(0), mLeft(nullptr), mCenter(nullptr), mRight(nullptr), mGame(game), mScene(nullptr),
+Level::Level(const std::string& name)
+	: mName(name), mTextID(0), mLeft(nullptr), mCenter(nullptr), mRight(nullptr), mGame(Game::getInstance()), mScene(nullptr),
 	  mNoise(new NoiseGenerator()) {}
 
 Level::~Level() {
@@ -170,6 +169,8 @@ void Level::save(rapidjson::Value& data, rapidjson::MemoryPoolAllocator<>& alloc
 	mScene->erase(playerID);
 
 	const auto save = [this](Chunk* chunk) {
+		SDL_assert(chunk != nullptr);
+
 		while (this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"].Size() <=
 		       std::llabs(chunk->getPosition())) {
 			this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"].PushBack(

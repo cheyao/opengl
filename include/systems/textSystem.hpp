@@ -11,7 +11,7 @@
 
 class TextSystem {
       public:
-	explicit TextSystem(class Game* game, const unsigned int size = 48, bool final = false);
+	explicit TextSystem(const unsigned int size = 48, bool final = false) noexcept;
 	TextSystem(TextSystem&&) = delete;
 	TextSystem(const TextSystem&) = delete;
 	TextSystem& operator=(TextSystem&&) = delete;

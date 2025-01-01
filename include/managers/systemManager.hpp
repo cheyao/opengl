@@ -8,7 +8,7 @@
 
 class SystemManager {
       public:
-	explicit SystemManager(class Game* game);
+	explicit SystemManager() noexcept;
 	SystemManager(SystemManager&&) = delete;
 	SystemManager(const SystemManager&) = delete;
 	SystemManager& operator=(SystemManager&&) = delete;
@@ -31,8 +31,6 @@ class SystemManager {
       private:
 	void printDebug(class Scene* scene);
 	void updatePlayer(class Scene* scene);
-
-	class Game* mGame;
 
 	// The order of the systems shall be listed by the order they are updated
 	std::unique_ptr<class PhysicsSystem> mPhysicsSystem;

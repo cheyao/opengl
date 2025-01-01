@@ -10,7 +10,7 @@
 // Something important
 class Level {
       public:
-	explicit Level(class Game* game, const std::string& name = "Level");
+	explicit Level(const std::string& name = "Level");
 	Level(Level&&) = delete;
 	Level(const Level&) = delete;
 	Level& operator=(Level&&) = delete;

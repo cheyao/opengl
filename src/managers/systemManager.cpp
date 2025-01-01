@@ -102,10 +102,10 @@ template <EigenTypeMatExpr MatT> std::ostream& operator<<(std::ostream& os, cons
 }
 #endif
 
-SystemManager::SystemManager(Game* game)
-	: mGame(game), mPhysicsSystem(std::make_unique<PhysicsSystem>(mGame)),
-	  mRenderSystem(std::make_unique<RenderSystem>(mGame)), mInputSystem(std::make_unique<InputSystem>(mGame)),
-	  mTextSystem(std::make_unique<TextSystem>(mGame)), mUISystem(std::make_unique<UISystem>(mGame)) {}
+SystemManager::SystemManager() noexcept
+	: mPhysicsSystem(std::make_unique<PhysicsSystem>()), mRenderSystem(std::make_unique<RenderSystem>()),
+	  mInputSystem(std::make_unique<InputSystem>()), mTextSystem(std::make_unique<TextSystem>()),
+	  mUISystem(std::make_unique<UISystem>()) {}
 
 SystemManager::~SystemManager() { SDL_Log("Unloading system"); }
 
@@ -152,11 +152,11 @@ void SystemManager::update(Scene* scene, const float delta) {
 
 void SystemManager::updatePlayer(Scene* scene) {
 	// We handle some player's logic here
-	const auto keystate = mGame->getKeystate();
-	const auto select = [this, scene, keystate](SDL_Scancode s, std::size_t n) {
+	const auto keystate = Game::getInstance()->getKeystate();
+	const auto select = [&scene, &keystate](SDL_Scancode s, std::size_t n) {
 		if (keystate[s]) {
 			static_cast<PlayerInventory*>(
-				scene->get<Components::inventory>(this->mGame->getPlayerID()).mInventory)
+				scene->get<Components::inventory>(Game::getInstance()->getPlayerID()).mInventory)
 				->select(n);
 		}
 	};

@@ -25,7 +25,7 @@
 #include <unordered_map>
 #include <utility>
 
-InputSystem::InputSystem(Game* game) : mGame(game) {
+InputSystem::InputSystem() noexcept : mGame(Game::getInstance()) {
 	constexpr const static float vertices[] = {
 		0.0f, 0.0f, 0.0f, // TL
 		0.0f, 1.0f, 0.0f, // BR

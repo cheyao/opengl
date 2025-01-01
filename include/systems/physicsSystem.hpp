@@ -10,7 +10,7 @@ class PhysicsSystem {
       public:
 	constexpr const static inline std::uint64_t PHYSICS_DIRTY_SIGNAL = "physics_dirty"_u;
 
-	explicit PhysicsSystem(class Game* game);
+	explicit PhysicsSystem() noexcept;
 	PhysicsSystem(PhysicsSystem&&) = delete;
 	PhysicsSystem(const PhysicsSystem&) = delete;
 	PhysicsSystem& operator=(PhysicsSystem&&) = delete;

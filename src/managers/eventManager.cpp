@@ -8,10 +8,7 @@
 #include <SDL3/SDL.h>
 
 // Constructor initializes member variables
-EventManager::EventManager(Game* game) : mGame(game), mKeys({}), mLeftClickDown(0), mRightClickDown(0) {}
-
-// Default destructor
-EventManager::~EventManager() {}
+EventManager::EventManager() noexcept : mGame(Game::getInstance()), mKeys({}), mLeftClickDown(0), mRightClickDown(0) {}
 
 ////////////////////////////////////////////////////////////////////////////////
 // manageEvent

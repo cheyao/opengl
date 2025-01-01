@@ -12,7 +12,6 @@
 #include <chrono>
 #include <cinttypes>
 #include <cstdint>
-#include <exception>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -27,8 +26,6 @@
 Game::Game()
 	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mCurrentLevel(nullptr),
 	  mStorageManager(nullptr), mTicks(0), mBasePath("") {
-	const auto begin = std::chrono::high_resolution_clock::now();
-
 	const char* basepath = SDL_GetBasePath();
 	if (basepath != nullptr) {
 		mBasePath = std::string(basepath);
@@ -37,19 +34,22 @@ Game::Game()
 
 		SDL_LogError(SDL_LOG_PRIORITY_ERROR, "\033[31mFailed to get base path: %s\033[0m", SDL_GetError());
 	}
+}
+
+void Game::init() {
+	const auto begin = std::chrono::high_resolution_clock::now();
 
 	// First initialize these subsystems because the other ones need it
-	mEventManager = std::make_unique<EventManager>(this);
+	mEventManager = std::make_unique<EventManager>();
 
-	mSystemManager = std::make_unique<SystemManager>(this);
+	mSystemManager = std::make_unique<SystemManager>();
 	mLocaleManager = std::make_unique<LocaleManager>(mBasePath);
 
-	mCurrentLevel = std::make_unique<Level>(this);
-	mStorageManager = std::make_unique<StorageManager>(this);
-	try {
-		mStorageManager->restore();
-	} catch (const std::exception& error) {
-		SDL_Log("\033[31mFailed to read saved state with error %s, creating new state\033[0m", error.what());
+	mCurrentLevel = std::make_unique<Level>();
+	mStorageManager = std::make_unique<StorageManager>();
+
+	if (mStorageManager->restore() != 0) {
+		SDL_Log("\033[31mFailed to read saved state, creating new state\033[0m");
 
 		mCurrentLevel->create();
 	}

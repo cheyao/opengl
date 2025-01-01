@@ -7,7 +7,7 @@
 
 class InputSystem {
       public:
-	InputSystem(class Game* game);
+	InputSystem() noexcept;
 	InputSystem(InputSystem&&) = delete;
 	InputSystem(const InputSystem&) = delete;
 	InputSystem& operator=(InputSystem&&) = delete;

@@ -21,11 +21,9 @@
 #include "utils.hpp"
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_surface.h>
 #include <cstddef>
 #include <memory>
 #include <span>
-#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -48,8 +46,8 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 #endif
 
 // PERF: Use the other draw call
-RenderSystem::RenderSystem(Game* game)
-	: mGame(game), mWindow(nullptr, SDL_DestroyWindow), mCursor(nullptr, SDL_DestroyCursor),
+RenderSystem::RenderSystem() noexcept
+	: mGame(Game::getInstance()), mWindow(nullptr, SDL_DestroyWindow), mCursor(nullptr, SDL_DestroyCursor),
 	  mIcon(nullptr, SDL_DestroySurface), mGL(nullptr), mFramebuffer(nullptr), mMatricesUBO(nullptr),
 	  mTextures(std::make_unique<TextureManager>(mGame->getBasePath())),
 	  mShaders(std::make_unique<ShaderManager>(mGame->getBasePath())), mMesh(nullptr), mWidth(0), mHeight(0) {
@@ -109,7 +107,7 @@ RenderSystem::RenderSystem(Game* game)
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033]31mFailed to create window: %s\n\033]0m", SDL_GetError());
 		ERROR_BOX("Failed to make SDL window, there is something wrong with your system/SDL installation");
 
-		throw std::runtime_error("Game.cpp: Failed to create SDL window");
+		return;
 	}
 
 	mIcon.reset(SDL_LoadBMP((mGame->getBasePath() + "assets/textures/icon.bmp").data()));
