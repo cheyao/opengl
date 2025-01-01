@@ -108,7 +108,7 @@ bool Inventory::update(class Scene* scene, float) {
 				mPath.emplace_back(pair);
 			}
 		}
-	} else if (!scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL) && !mPath.empty() &&
+	} else if (!scene->getSignal(EventManager::LEFT_HOLD_SIGNAL) && !mPath.empty() &&
 		   !scene->getSignal(REDISTRIBUTE)) {
 		const auto c = scene->mMouse.count / mPath.size();
 		scene->getSignal(REDISTRIBUTE) = c;
@@ -143,6 +143,25 @@ bool Inventory::update(class Scene* scene, float) {
 		}
 
 		// Not inside the space
+		if (scene->mMouse.count == 0 || mCount[slot] == 0 || (mItems[slot] != scene->mMouse.item)) {
+			std::swap(scene->mMouse.count, mCount[slot]);
+			std::swap(scene->mMouse.item, mItems[slot]);
+		} else if (mItems[slot] == scene->mMouse.item) {
+			mCount[slot] += scene->mMouse.count;
+			mItems[slot] = scene->mMouse.item;
+
+			scene->mMouse.item = Components::AIR();
+			scene->mMouse.count = 0;
+		}
+
+		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
+	} else if (scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) && mPath.empty()) {
+		if (mouseX < 0 || mouseY < 0 || mouseX > (9 * INVENTORY_SLOT_X * scale) ||
+		    mouseY > (4 * INVENTORY_SLOT_Y * scale)) {
+			goto endLogic;
+		}
+
+		// Not inside the space
 		if (mCount[slot] != 0 &&
 		    (scene->mMouse.count == 0 || (scene->mMouse.item == mItems[slot] && scene->mMouse.count != 0))) {
 			if (scene->mMouse.count != 0 && scene->mMouse.item == mItems[slot]) {
@@ -152,8 +171,10 @@ bool Inventory::update(class Scene* scene, float) {
 				scene->mMouse.count = mCount[slot];
 			}
 
-			mItems[slot] = Components::AIR();
 			mCount[slot] = 0;
+			if (mCount[slot] == 0) {
+				mItems[slot] = Components::AIR();
+			}
 
 			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 		} else if (scene->mMouse.count != 0 && scene->mMouse.item != Components::AIR() &&

@@ -78,36 +78,19 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 		// Normalize the buttons to grid cords
 		const int slot =
 			static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
-
-		if (mCraftingCount[slot] != 0 &&
-		    (scene->mMouse.count == 0 ||
-		     (scene->mMouse.item == mCraftingItems[slot] && scene->mMouse.count != 0))) {
-			if (scene->mMouse.count != 0 && scene->mMouse.item == mCraftingItems[slot]) {
-				scene->mMouse.count += mCraftingCount[slot];
-			} else {
-				scene->mMouse.item = mCraftingItems[slot];
-				scene->mMouse.count = mCraftingCount[slot];
-			}
-
-			mCraftingItems[slot] = Components::AIR();
-			mCraftingCount[slot] = 0;
-
-			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
-		} else if (scene->mMouse.count != 0 && scene->mMouse.item != Components::AIR() &&
-			   (mCraftingCount[slot] == 0 || mCraftingItems[slot] == scene->mMouse.item)) {
-			if (mCraftingItems[slot] == scene->mMouse.item) {
-				mCraftingCount[slot] += scene->mMouse.count;
-			} else {
-				mCraftingCount[slot] = scene->mMouse.count;
-			}
-
+		if (scene->mMouse.count == 0 || mCraftingCount[slot] == 0 ||
+		    (mCraftingItems[slot] != scene->mMouse.item)) {
+			std::swap(scene->mMouse.count, mCraftingCount[slot]);
+			std::swap(scene->mMouse.item, mCraftingItems[slot]);
+		} else if (mCraftingItems[slot] == scene->mMouse.item) {
+			mCraftingCount[slot] += scene->mMouse.count;
 			mCraftingItems[slot] = scene->mMouse.item;
 
 			scene->mMouse.item = Components::AIR();
 			scene->mMouse.count = 0;
-
-			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 		}
+
+		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 	};
 
 	// Test if player is getting the output
@@ -155,7 +138,8 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 
 	const int slot = static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
 	if (!(mouseX < ox || mouseY < oy || mouseX > (ox + sizex) || mouseY > (oy + sizey))) {
-		if (scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL)) {
+		if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL) ||
+		    scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
 			// This is long click
 			// Now note the slots
 			if (scene->mMouse.count != 0 &&
