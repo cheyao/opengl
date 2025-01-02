@@ -8,8 +8,8 @@
 
 class PlayerInventory : public CraftingInventory {
       public:
-	explicit PlayerInventory(class Game* game, std::size_t size, EntityID entity = 0);
-	explicit PlayerInventory(class Game* game, const rapidjson::Value& contents, EntityID entity = 0);
+	explicit PlayerInventory(class Game* game, std::size_t size);
+	explicit PlayerInventory(class Game* game, const rapidjson::Value& contents);
 	PlayerInventory(PlayerInventory&&) = delete;
 	PlayerInventory(const PlayerInventory&) = delete;
 	PlayerInventory& operator=(PlayerInventory&&) = delete;

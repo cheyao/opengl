@@ -25,26 +25,7 @@
 #include <unordered_map>
 #include <utility>
 
-InputSystem::InputSystem() noexcept : mGame(Game::getInstance()) {
-	constexpr const static float vertices[] = {
-		0.0f, 0.0f, 0.0f, // TL
-		0.0f, 1.0f, 0.0f, // BR
-		1.0f, 0.0f, 0.0f, // TR
-		1.0f, 1.0f, 0.0f  // BL
-	};
-
-	constexpr const static float texturePos[] = {
-		0.0f, 1.0f, // TR
-		0.0f, 0.0f, // BR
-		1.0f, 1.0f, // TL
-		1.0f, 0.0f  // BL
-	};
-
-	constexpr const static GLuint indices[] = {2, 1, 0,  // a
-						   1, 2, 3}; // b
-
-	mMesh = std::unique_ptr<Mesh>(new Mesh(vertices, {}, texturePos, indices, {}));
-}
+InputSystem::InputSystem() noexcept : mGame(Game::getInstance()) {}
 
 void InputSystem::update(Scene* scene, const float delta) {
 	if (!mGame->getSystemManager()->getUISystem()->empty()) {
@@ -171,7 +152,7 @@ void InputSystem::draw(class Scene* scene) {
 	shader->set("scale"_u, 1.0f);
 
 	mDestruction.texture->activate(0);
-	mMesh->draw(shader);
+	mGame->getSystemManager()->getUISystem()->getMesh()->draw(shader);
 }
 
 void InputSystem::tryPlace(class Scene* scene, const Eigen::Vector2i& pos) {

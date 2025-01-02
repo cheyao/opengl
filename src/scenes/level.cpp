@@ -23,8 +23,8 @@
 #include <limits>
 
 Level::Level(const std::string& name)
-	: mName(name), mTextID(0), mLeft(nullptr), mCenter(nullptr), mRight(nullptr), mGame(Game::getInstance()), mScene(nullptr),
-	  mNoise(new NoiseGenerator()) {}
+	: mName(name), mTextID(0), mLeft(nullptr), mCenter(nullptr), mRight(nullptr), mGame(Game::getInstance()),
+	  mScene(nullptr), mNoise(new NoiseGenerator()) {}
 
 Level::~Level() {
 	SDL_Log("Unloading level");
@@ -48,7 +48,7 @@ void Level::create() {
 	mScene->emplace<Components::position>(
 		player, Eigen::Vector2f(0.0f, (Chunk::WATER_LEVEL + 1) * Components::block::BLOCK_SIZE +
 						      5 * mNoise->getNoise(0)));
-	mScene->emplace<Components::inventory>(player, new PlayerInventory(mGame, 36, player));
+	mScene->emplace<Components::inventory>(player, new PlayerInventory(mGame, 36));
 
 	mLeft = new Chunk(mGame, mScene, mNoise.get(), -1);
 	mCenter = new Chunk(mGame, mScene, mNoise.get(), 0);
@@ -83,8 +83,7 @@ void Level::load(rapidjson::Value& data) {
 
 	mScene->emplace<Components::position>(player, getVector2f(mData[PLAYER_KEY]["position"]));
 	mScene->emplace<Components::velocity>(player, getVector2f(mData[PLAYER_KEY]["velocity"]));
-	mScene->emplace<Components::inventory>(player,
-					       new PlayerInventory(mGame, mData[PLAYER_KEY]["inventory"], player));
+	mScene->emplace<Components::inventory>(player, new PlayerInventory(mGame, mData[PLAYER_KEY]["inventory"]));
 
 	const auto loadChunk = [this](Chunk*& chunk, const float playerPos) {
 		const auto sign = playerPos < 0;

@@ -19,17 +19,16 @@
 #include <ranges>
 
 // TODO: Save crafting table
-CraftingInventory::CraftingInventory(class Game* game, std::uint64_t size, EntityID entity, std::uint64_t row,
-				     std::uint64_t col)
-	: Inventory(game, size, entity), mRows(row), mCols(col), mCraftingItems(row * col, Components::AIR()),
+CraftingInventory::CraftingInventory(class Game* game, std::uint64_t size, std::uint64_t row, std::uint64_t col)
+	: Inventory(game, size), mRows(row), mCols(col), mCraftingItems(row * col, Components::AIR()),
 	  mCraftingCount(row * col, 0), mLastCraft(0) {
 	mCountRegister[getID<CraftingInventory>()] = &mCraftingCount;
 	mItemRegister[getID<CraftingInventory>()] = &mCraftingItems;
 }
 
-CraftingInventory::CraftingInventory(class Game* game, const rapidjson::Value& contents, EntityID entity,
-				     std::uint64_t row, std::uint64_t col)
-	: Inventory(game, contents, entity), mRows(row), mCols(col), mCraftingItems(), mCraftingCount(), mLastCraft(0) {
+CraftingInventory::CraftingInventory(class Game* game, const rapidjson::Value& contents, std::uint64_t row,
+				     std::uint64_t col)
+	: Inventory(game, contents), mRows(row), mCols(col), mCraftingItems(), mCraftingCount(), mLastCraft(0) {
 	mCountRegister[getID<CraftingInventory>()] = &mCraftingCount;
 	mItemRegister[getID<CraftingInventory>()] = &mCraftingItems;
 
@@ -43,6 +42,9 @@ CraftingInventory::CraftingInventory(class Game* game, const rapidjson::Value& c
 		mCraftingCount.emplace_back(contents[CRAFTING_KEY][COUNT_KEY][i].GetUint64());
 	}
 }
+
+// Crafting table
+CraftingInventory::CraftingInventory(struct crafting_table_t) : Inventory(Eigen::Vector2f(), "ui/crafting-table.png") {}
 
 bool CraftingInventory::update(class Scene* const scene, const float delta) {
 	SystemManager* const systemManager = mGame->getSystemManager();
@@ -366,7 +368,8 @@ bool CraftingInventory::checkRecipie(const std::uint64_t r) {
 }
 
 void CraftingInventory::draw(class Scene* scene) {
-	Inventory::draw(scene);
+	Inventory::drawInventory(scene);
+	Inventory::drawItems(scene);
 
 	SystemManager* const systemManager = mGame->getSystemManager();
 	const Eigen::Vector2f dimensions = systemManager->getDemensions();
@@ -458,27 +461,25 @@ void CraftingInventory::draw(class Scene* scene) {
 	ox += 57 * scale;
 	oy += 9 * scale;
 
-	if (mLastCraft == 0) {
-		return;
+	if (mLastCraft != 0) {
+		const auto& out = std::get<2>(registers::CRAFTING_RECIPIES[mLastCraft]);
+		Texture* texture = systemManager->getTexture(registers::TEXTURES.at(out.second));
+		texture->activate(0);
+
+		shader->set("offset"_u, ox + 3, oy);
+
+		mesh->draw(shader);
+
+		if (out.first > 1) {
+			mGame->getSystemManager()->getTextSystem()->draw(
+				std::to_string(out.first),
+				Eigen::Vector2f(ox + INVENTORY_SLOT_X / 2 * scale - 2, oy - 5), false);
+		}
+
+		shader->activate();
 	}
 
-	const auto& out = std::get<2>(registers::CRAFTING_RECIPIES[mLastCraft]);
-	Texture* texture = systemManager->getTexture(registers::TEXTURES.at(out.second));
-	texture->activate(0);
-
-	shader->set("offset"_u, ox + 3, oy);
-
-	mesh->draw(shader);
-
-	if (out.first > 1) {
-		mGame->getSystemManager()->getTextSystem()->draw(
-			std::to_string(out.first), Eigen::Vector2f(ox + INVENTORY_SLOT_X / 2 * scale - 2, oy - 5),
-			false);
-	}
-
-	shader->activate();
-
-	drawMouse(scene);
+	Inventory::drawMouse(scene);
 }
 
 void CraftingInventory::save(rapidjson::Value& contents, rapidjson::Document::AllocatorType& allocator) {

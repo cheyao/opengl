@@ -23,14 +23,22 @@
 #include <cstdint>
 #include <string>
 
-Inventory::Inventory(class Game* game, const std::size_t size, EntityID entity)
-	: Screen(game), mEntity(entity), mSize(size), mItems(size), mCount(size), mLeftLongClick(0), mCounter(0) {
+std::vector<Components::Item> Inventory::mItems;
+std::vector<std::uint64_t> Inventory::mCount;
+
+Inventory::Inventory(class Game* game, const std::size_t size)
+	: Screen(game), mSize(size), mLeftLongClick(0), mCounter(0) {
+	mItems = std::vector<Components::Item>(size);
+	mCount = std::vector<std::uint64_t>(size);
+
 	mCountRegister[getID<Inventory>()] = &mCount;
 	mItemRegister[getID<Inventory>()] = &mItems;
 }
 
-Inventory::Inventory(class Game* game, const rapidjson::Value& contents, EntityID entity)
-	: Screen(game), mEntity(entity) {
+Inventory::Inventory(class Game* game, const rapidjson::Value& contents) : Screen(game) {
+	mItems = std::vector<Components::Item>();
+	mCount = std::vector<std::uint64_t>();
+
 	mCountRegister[getID<Inventory>()] = &mCount;
 	mItemRegister[getID<Inventory>()] = &mItems;
 
@@ -46,6 +54,11 @@ Inventory::Inventory(class Game* game, const rapidjson::Value& contents, EntityI
 		mCount.emplace_back(contents[COUNT_KEY][i].GetUint64());
 	}
 }
+
+// A view of the main inventory
+Inventory::Inventory(const Eigen::Vector2f& offset, const std::string& texture)
+	: Screen(Game::getInstance()), INVENTORY_SLOTS_OFFSET_X(offset.x()), INVENTORY_SLOTS_OFFSET_Y(offset.y()),
+	  INVENTORY_SPRITE_FILE(texture) {}
 
 void Inventory::save(rapidjson::Value& contents, rapidjson::Document::AllocatorType& allocator) {
 	contents.AddMember(rapidjson::StringRef(SIZE_KEY), mSize, allocator);
@@ -250,6 +263,12 @@ void Inventory::handleKeys() {
 }
 
 void Inventory::draw(class Scene* scene) {
+	drawInventory(scene);
+	drawItems(scene);
+	drawMouse(scene);
+}
+
+void Inventory::drawInventory(class Scene*) {
 	// Draw the inventory
 	SystemManager* systemManager = mGame->getSystemManager();
 	Shader* shader = systemManager->getShader("ui.vert", "ui.frag");
@@ -282,9 +301,6 @@ void Inventory::draw(class Scene* scene) {
 	texture->activate(0);
 
 	mesh->draw(shader);
-
-	drawItems(scene);
-	drawMouse(scene);
 }
 
 void Inventory::drawItems(class Scene* const scene) {
@@ -363,8 +379,7 @@ void Inventory::drawItems(class Scene* const scene) {
 		if (count > 1) {
 			mGame->getSystemManager()->getTextSystem()->draw(
 				std::to_string(count),
-				Eigen::Vector2f(ox + i % 9 * INVENTORY_SLOT_X * scale + INVENTORY_SLOT_X / 2 * scale -
-							2,
+				Eigen::Vector2f(ox + (i % 9 + 0.5) * INVENTORY_SLOT_X * scale - 3,
 						oy + static_cast<int>(i / 9) * INVENTORY_SLOT_Y * scale - 5 + yoff),
 				false);
 		}
@@ -424,7 +439,7 @@ void Inventory::drawMouse(Scene* scene) {
 	if ((scene->mMouse.count - vcount) > 1) {
 		mGame->getSystemManager()->getTextSystem()->draw(
 			std::to_string(scene->mMouse.count - vcount),
-			Eigen::Vector2f(mx + x / Inventory::INVENTORY_INV_SCALE - 2, my - 5), false);
+			Eigen::Vector2f(mx + x / Inventory::INVENTORY_INV_SCALE - 3, my - 5), false);
 	}
 }
 

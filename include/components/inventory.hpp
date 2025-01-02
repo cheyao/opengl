@@ -15,9 +15,12 @@
 class Inventory : public Screen {
 	friend class RenderSystem;
 
+      protected:
+	explicit Inventory(class Game* game, std::size_t size);
+	explicit Inventory(class Game* game, const rapidjson::Value& contents);
+
       public:
-	explicit Inventory(class Game* game, std::size_t size, EntityID entity = 0);
-	explicit Inventory(class Game* game, const rapidjson::Value& contents, EntityID entity);
+	explicit Inventory(const Eigen::Vector2f& offset, const std::string& texture);
 	Inventory(Inventory&&) = delete;
 	Inventory(const Inventory&) = delete;
 	Inventory& operator=(Inventory&&) = delete;
@@ -33,10 +36,9 @@ class Inventory : public Screen {
 	virtual bool tryPick(class Scene* scene, EntityID item);
 
       protected:
-	const EntityID mEntity;
 	std::uint64_t mSize;
-	std::vector<Components::Item> mItems;
-	std::vector<std::uint64_t> mCount;
+	static std::vector<Components::Item> mItems;
+	static std::vector<std::uint64_t> mCount;
 
 	std::int64_t mLeftLongClick;
 
@@ -53,16 +55,16 @@ class Inventory : public Screen {
 
 	constexpr const static inline auto INVENTORY_TEXTURE_WIDTH = 176.0f;
 	constexpr const static inline auto INVENTORY_TEXTURE_HEIGHT = 166.0f;
-	constexpr const static inline auto INVENTORY_SLOTS_OFFSET_X = 7.5f;
-	constexpr const static inline auto INVENTORY_SLOTS_OFFSET_Y = 8.5f;
 	constexpr const static inline auto INVENTORY_INV_SCALE = 15.0f;
 	constexpr const static inline auto INVENTORY_SLOT_X = 18.0f;
 	constexpr const static inline auto INVENTORY_SLOT_Y = 18.0f;
+	float INVENTORY_SLOTS_OFFSET_X = 7.5f;
+	float INVENTORY_SLOTS_OFFSET_Y = 8.5f;
 
 	void handleKeys();
 	void drawMouse(class Scene* scene);
-	// TODO: Common handler
-	// void handleInventory(decltype(mItems)& items, decltype(mCount)& count, std::uint64_t slot);
+	void drawInventory(class Scene* scene);
+	void drawItems(class Scene* scene);
 
 	constexpr const static inline auto SIZE_KEY = "size";
 	constexpr const static inline auto ITEMS_KEY = "items";
@@ -71,11 +73,10 @@ class Inventory : public Screen {
 	constexpr const static inline auto DOUBLE_CLICK_SIGNAL = "double_click"_u;
 
       private:
-	void drawItems(class Scene* scene);
 	void close();
 	void pickUp(class Scene* scene, EntityID item, std::size_t index);
 
-	constexpr const static inline auto INVENTORY_SPRITE_FILE = "ui/inventory.png";
+	std::string INVENTORY_SPRITE_FILE = "ui/inventory.png";
 
 	std::uint64_t mCounter;
 };

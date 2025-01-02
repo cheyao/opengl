@@ -12,11 +12,11 @@
 #include <SDL3/SDL.h>
 #include <cstddef>
 
-PlayerInventory::PlayerInventory(class Game* game, const std::size_t size, const EntityID entity)
-	: CraftingInventory(game, size, entity, 2, 2), mSelect(0) {}
+PlayerInventory::PlayerInventory(class Game* game, const std::size_t size)
+	: CraftingInventory(game, size, 2, 2), mSelect(0) {}
 
-PlayerInventory::PlayerInventory(class Game* game, const rapidjson::Value& contents, const EntityID entity)
-	: CraftingInventory(game, contents, entity, 2, 2), mSelect(0) {}
+PlayerInventory::PlayerInventory(class Game* game, const rapidjson::Value& contents)
+	: CraftingInventory(game, contents, 2, 2), mSelect(0) {}
 
 bool PlayerInventory::update(class Scene* scene, float delta) { return CraftingInventory::update(scene, delta); }
 
