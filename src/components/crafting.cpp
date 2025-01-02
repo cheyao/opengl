@@ -87,9 +87,32 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 			return;
 		}
 
+		static std::uint64_t lastClick;
+		static std::int64_t lastClickPos;
 		const int slot =
 			static_cast<int>((mouseX - ox) / slotx) + static_cast<int>((mouseY - oy) / sloty) * mCols;
 		if (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL)) {
+			if ((mCraftingCount[slot] == 0 && scene->mMouse.count != 0 && lastClickPos == slot &&
+			     (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) - lastClick) < 300ul)) {
+				SDL_assert(scene->mMouse.item != Components::AIR());
+
+				// Here we get all stuff together
+				for (const auto [i, inv] : mItemRegister) {
+					for (std::size_t s = 0; s < inv->size(); ++s) {
+						if ((*inv)[s] != scene->mMouse.item) {
+							continue;
+						}
+
+						auto& count = (*mCountRegister[i])[s];
+						scene->mMouse.count += count;
+						count = 0;
+						(*inv)[s] = Components::AIR();
+					}
+				}
+
+				scene->getSignal(DOUBLE_CLICK_SIGNAL) = false;
+				return;
+			}
 			// Normalize the buttons to grid cords
 			if (scene->mMouse.count == 0 || mCraftingCount[slot] == 0 ||
 			    (mCraftingItems[slot] != scene->mMouse.item)) {
@@ -103,6 +126,8 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 				scene->mMouse.count = 0;
 			}
 
+			lastClickPos = slot;
+			lastClick = SDL_GetTicks();
 			scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;
 		} else if (scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) && mPath.empty()) {
 			// Not empty hand on empty slot
@@ -189,6 +214,8 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 	if (!(mouseX < ox || mouseY < oy || mouseX > (ox + sizex) || mouseY > (oy + sizey))) {
 		if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL) ||
 		    scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL)) {
+			mLeftLongClick = scene->getSignal(EventManager::LEFT_HOLD_SIGNAL);
+
 			// This is long click
 			// Now note the slots
 			if (scene->mMouse.count != 0 &&
@@ -280,7 +307,8 @@ bool CraftingInventory::checkRecipie(const std::uint64_t r) {
 		}
 	} else {
 		const auto& shape = std::get<0>(recipie);
-		const auto& items = std::get<1>(recipie);
+		auto items = std::get<1>(recipie);
+		std::uint64_t toFind = items.size();
 
 		SDL_assert(items.size() == shape.first * shape.second);
 
@@ -304,8 +332,31 @@ bool CraftingInventory::checkRecipie(const std::uint64_t r) {
 					}
 				}
 
-				return true;
+				for (const auto& [item, count] : std::views::zip(mCraftingItems, mCraftingCount)) {
+					// The current cell is empty
+					if (item == Components::AIR()) {
+						SDL_assert(count == 0);
 
+						continue;
+					}
+
+					if (auto i = std::ranges::find(items, item); i != items.end()) {
+						// Found this item, swap and pop
+						std::swap(*i, items.back());
+						items.pop_back();
+
+						--toFind;
+					} else {
+						return false;
+					}
+				}
+
+				// The recipie is valid if there isn't any more stuff to find
+				if (toFind == 0) {
+					return true;
+				}
+
+				items = std::get<1>(recipie);
 			breakinnerloop:
 			}
 		}
@@ -357,7 +408,9 @@ void CraftingInventory::draw(class Scene* scene) {
 
 	std::uint64_t vcount = 0;
 	if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
-		vcount = scene->mMouse.count / mPath.size();
+		if (!mPath.empty()) {
+			vcount = scene->mMouse.count / mPath.size();
+		}
 	} else {
 		vcount = 1;
 	}

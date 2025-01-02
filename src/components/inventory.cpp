@@ -24,8 +24,7 @@
 #include <string>
 
 Inventory::Inventory(class Game* game, const std::size_t size, EntityID entity)
-	: Screen(game), mEntity(entity), mSize(size), mItems(size), mCount(size), mLastClick(0), mLastClickPos(0),
-	  mCounter(0) {
+	: Screen(game), mEntity(entity), mSize(size), mItems(size), mCount(size), mLeftLongClick(0), mCounter(0) {
 	mCountRegister[getID<Inventory>()] = &mCount;
 	mItemRegister[getID<Inventory>()] = &mItems;
 }
@@ -100,7 +99,8 @@ bool Inventory::update(class Scene* scene, float) {
 	mouseX -= ox;
 	mouseY -= oy;
 
-	static std::int64_t leftLongClick = 0;
+	static std::uint64_t mLastClick;
+	static std::int64_t mLastClickPos;
 	const std::int64_t slot = static_cast<std::int64_t>(mouseX / (INVENTORY_SLOT_X * scale)) +
 				  static_cast<std::int64_t>(mouseY / (INVENTORY_SLOT_Y * scale)) * 9;
 	if (scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL) || scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
@@ -110,7 +110,7 @@ bool Inventory::update(class Scene* scene, float) {
 			goto endLogic;
 		}
 
-		leftLongClick = scene->getSignal(EventManager::LEFT_HOLD_SIGNAL);
+		mLeftLongClick = scene->getSignal(EventManager::LEFT_HOLD_SIGNAL);
 
 		// This is long click
 		// Now note the slots
@@ -125,7 +125,7 @@ bool Inventory::update(class Scene* scene, float) {
 		    !scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL)) &&
 		   !mPath.empty()) {
 		// Here we redistribute the items
-		if (leftLongClick) {
+		if (mLeftLongClick) {
 			const auto c = scene->mMouse.count / mPath.size();
 			const auto left = scene->mMouse.count - mPath.size() * c;
 
@@ -158,8 +158,9 @@ bool Inventory::update(class Scene* scene, float) {
 			goto endLogic;
 		}
 
-		if (mCount[slot] == 0 && scene->mMouse.count != 0 && mLastClickPos == slot &&
-		    (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) - mLastClick) < 300ul) {
+		if ((mCount[slot] == 0 && scene->mMouse.count != 0 && mLastClickPos == slot &&
+		     (scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) - mLastClick) < 300ul) ||
+		    scene->getSignal(DOUBLE_CLICK_SIGNAL)) {
 			SDL_assert(scene->mMouse.item != Components::AIR());
 
 			// Here we get all stuff together
@@ -176,6 +177,7 @@ bool Inventory::update(class Scene* scene, float) {
 				}
 			}
 
+			scene->getSignal(DOUBLE_CLICK_SIGNAL) = false;
 			goto endLogic;
 		}
 
@@ -323,7 +325,9 @@ void Inventory::drawItems(class Scene* const scene) {
 
 	std::uint64_t vcount = 0;
 	if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
-		vcount = scene->mMouse.count / mPath.size();
+		if (!mPath.empty()) {
+			vcount = scene->mMouse.count / mPath.size();
+		}
 	} else {
 		vcount = 1;
 	}
@@ -380,7 +384,7 @@ void Inventory::drawMouse(Scene* scene) {
 	std::uint64_t vcount = 0;
 	if (virtItems) {
 		if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
-			vcount = scene->mMouse.count / mPath.size() * mPath.size();
+			vcount = scene->mMouse.count - scene->mMouse.count % mPath.size();
 		} else {
 			vcount = SDL_min(scene->mMouse.count, mPath.size());
 		}

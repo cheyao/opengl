@@ -1,0 +1,15 @@
+id: org.cyao.opengl
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+command: OpenGL
+modules:
+  - name: OpenGL
+    buildsystem: cmake
+    build-commands:
+      - install -Dm755 OpenGL /app/bin/OpenGL
+    sources:
+      - type: script
+        dest-filename: hello.sh
+        commands:
+          - echo "Hello world, from a sandbox"

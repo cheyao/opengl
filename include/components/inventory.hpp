@@ -2,6 +2,7 @@
 
 #include "components.hpp"
 #include "managers/entityManager.hpp"
+#include "opengl/shader.hpp"
 #include "screens/screen.hpp"
 #include "systems/renderSystem.hpp"
 #include "third_party/rapidjson/document.h"
@@ -37,8 +38,7 @@ class Inventory : public Screen {
 	std::vector<Components::Item> mItems;
 	std::vector<std::uint64_t> mCount;
 
-	std::uint64_t mLastClick;
-	std::int64_t mLastClickPos;
+	std::int64_t mLeftLongClick;
 
 	// Mouse traversal path but how tf do I get the inv??
 	std::vector<std::pair<std::uint64_t, std::uint64_t>> mPath;
@@ -67,6 +67,8 @@ class Inventory : public Screen {
 	constexpr const static inline auto SIZE_KEY = "size";
 	constexpr const static inline auto ITEMS_KEY = "items";
 	constexpr const static inline auto COUNT_KEY = "count";
+
+	constexpr const static inline auto DOUBLE_CLICK_SIGNAL = "double_click"_u;
 
       private:
 	void drawItems(class Scene* scene);
