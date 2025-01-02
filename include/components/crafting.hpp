@@ -40,4 +40,9 @@ class CraftingInventory : public Inventory {
 	std::size_t mLastCraft;
 
 	constexpr const static inline auto CRAFTING_KEY = "crafting";
+
+	double mGridX;
+	double mGridY;
+	double mOutX;
+	double mOutY;
 };

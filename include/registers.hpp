@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components.hpp"
+#include "screens/screen.hpp"
 #include "third_party/Eigen/Core"
 
 #include <cstdint>
@@ -24,4 +25,5 @@ extern const std::unordered_map<Components::Item, std::vector<std::pair<float, C
 extern const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vector<Components::Item>,
 				    std::pair<std::uint64_t, Components::Item>>>
 	CRAFTING_RECIPIES;
+extern const std::unordered_map<Components::Item, class Screen*(*)(void)> CLICKABLES;
 } // namespace registers

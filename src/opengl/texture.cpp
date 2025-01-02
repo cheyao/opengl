@@ -47,8 +47,6 @@ Texture::~Texture() {
 }
 
 void Texture::activate(const unsigned int num) const {
-	SDL_assert(num < 80);
-
 	glActiveTexture(GL_TEXTURE0 + num);
 	glBindTexture(GL_TEXTURE_2D, mID);
 }

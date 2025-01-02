@@ -69,7 +69,7 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 				if (now - mLeftClickDown < ACTIVATION_TIME) {
 					// Mark the left-click-down signal
 					mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = now;
-					mGame->getLevel()->getScene()->getSignal(LEFT_HOLD_SIGNAL) = mLeftClickDown;
+					mGame->getLevel()->getScene()->getSignal(LEFT_HOLD_SIGNAL) = false;
 				}
 
 				// Reset the timestamp
@@ -77,7 +77,7 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 			} else if (event.button.button == SDL_BUTTON_RIGHT) {
 				if (now - mRightClickDown < ACTIVATION_TIME) {
 					mGame->getLevel()->getScene()->getSignal(RIGHT_CLICK_DOWN_SIGNAL) = now;
-					mGame->getLevel()->getScene()->getSignal(RIGHT_HOLD_SIGNAL) = mRightClickDown;
+					mGame->getLevel()->getScene()->getSignal(RIGHT_HOLD_SIGNAL) = false;
 				}
 
 				mRightClickDown = 0;

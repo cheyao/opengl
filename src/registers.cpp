@@ -1,11 +1,15 @@
 #include "registers.hpp"
 
 #include "components.hpp"
+#include "components/crafting.hpp"
+#include "components/inventory.hpp"
 #include "items.hpp"
+#include "screens/screen.hpp"
 
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 namespace registers {
 
@@ -71,5 +75,11 @@ const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vecto
 			      {Item::OAK_PLANKS, Item::OAK_PLANKS, Item::OAK_PLANKS, Item::OAK_PLANKS},
 			      {1, Item::CRAFTING_TABLE}}};
 
+template <typename T, typename... Args> T* staticHelper(Args&&... args) {
+	static T t(std::forward<Args>(args)...);
+	return &t;
+};
 
+const std::unordered_map<Components::Item, Screen* (*)(void)> CLICKABLES = {
+	{Item::CRAFTING_TABLE, [] -> Screen* { return staticHelper<CraftingInventory>(crafting_table_t()); }}};
 } // namespace registers

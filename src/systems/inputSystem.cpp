@@ -63,7 +63,23 @@ void InputSystem::updateMouse(Scene* scene, const float) {
 	if (scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL)) {
 		scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) = false;
 
+		for (const auto& [entity, block] : scene->view<Components::block>().each()) {
+			if (block.mPosition != blockPos) {
+				continue;
+			}
+
+			if (registers::CLICKABLES.contains(block.mType)) {
+				mGame->getSystemManager()->getUISystem()->addScreen(
+					registers::CLICKABLES.at(block.mType)());
+
+				goto afterPlace;
+			}
+
+			break;
+		}
+
 		tryPlace(scene, blockPos.template cast<int>());
+	afterPlace:
 	}
 
 	static std::int64_t mLastHold = SDL_GetTicks();

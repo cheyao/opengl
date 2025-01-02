@@ -1,7 +1,6 @@
 #include "components/crafting.hpp"
 
 #include "game.hpp"
-#include "managers/entityManager.hpp"
 #include "managers/eventManager.hpp"
 #include "managers/systemManager.hpp"
 #include "opengl/mesh.hpp"
@@ -21,14 +20,15 @@
 // TODO: Save crafting table
 CraftingInventory::CraftingInventory(class Game* game, std::uint64_t size, std::uint64_t row, std::uint64_t col)
 	: Inventory(game, size), mRows(row), mCols(col), mCraftingItems(row * col, Components::AIR()),
-	  mCraftingCount(row * col, 0), mLastCraft(0) {
+	  mCraftingCount(row * col, 0), mLastCraft(0), mGridX(98), mGridY(114), mOutX(56), mOutY(9) {
 	mCountRegister[getID<CraftingInventory>()] = &mCraftingCount;
 	mItemRegister[getID<CraftingInventory>()] = &mCraftingItems;
 }
 
 CraftingInventory::CraftingInventory(class Game* game, const rapidjson::Value& contents, std::uint64_t row,
 				     std::uint64_t col)
-	: Inventory(game, contents), mRows(row), mCols(col), mCraftingItems(), mCraftingCount(), mLastCraft(0) {
+	: Inventory(game, contents), mRows(row), mCols(col), mCraftingItems(), mCraftingCount(), mLastCraft(0),
+	  mGridX(98), mGridY(114), mOutX(56), mOutY(9) {
 	mCountRegister[getID<CraftingInventory>()] = &mCraftingCount;
 	mItemRegister[getID<CraftingInventory>()] = &mCraftingItems;
 
@@ -44,7 +44,13 @@ CraftingInventory::CraftingInventory(class Game* game, const rapidjson::Value& c
 }
 
 // Crafting table
-CraftingInventory::CraftingInventory(struct crafting_table_t) : Inventory(Eigen::Vector2f(), "ui/crafting-table.png") {}
+CraftingInventory::CraftingInventory(struct crafting_table_t)
+	: Inventory(Eigen::Vector2f(8, 8), "ui/crafting-table.png"), mRows(3), mCols(3),
+	  mCraftingItems(mRows * mCols, Components::AIR()), mCraftingCount(mRows * mCols, 0), mLastCraft(0), mGridX(29),
+	  mGridY(98), mOutX(91 + 3), mOutY(15 + 3) {
+	mCountRegister[getID<CraftingInventory>()] = &mCraftingCount;
+	mItemRegister[getID<CraftingInventory>()] = &mCraftingItems;
+}
 
 bool CraftingInventory::update(class Scene* const scene, const float delta) {
 	SystemManager* const systemManager = mGame->getSystemManager();
@@ -71,8 +77,8 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 
 	// BOTL of inv
 	// 98x114
-	ox += (INVENTORY_SLOTS_OFFSET_X + 98) * scale - (INVENTORY_SLOT_X * scale - sx / INVENTORY_INV_SCALE);
-	oy += (INVENTORY_SLOTS_OFFSET_Y + 114) * scale - (INVENTORY_SLOT_Y * scale - sy / INVENTORY_INV_SCALE);
+	ox += (INVENTORY_SLOTS_OFFSET_X + mGridX) * scale - (INVENTORY_SLOT_X * scale - sx / INVENTORY_INV_SCALE);
+	oy += (INVENTORY_SLOTS_OFFSET_Y + mGridY) * scale - (INVENTORY_SLOT_Y * scale - sy / INVENTORY_INV_SCALE);
 
 	const float slotx = INVENTORY_SLOT_X * scale;
 	const float sloty = INVENTORY_SLOT_Y * scale;
@@ -232,8 +238,8 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 	}
 
 	// Offset to output grid
-	ox += 57 * scale;
-	oy += 9 * scale;
+	ox += mOutX * scale;
+	oy += mOutY * scale;
 
 	craft();
 	getOutput();
@@ -396,8 +402,8 @@ void CraftingInventory::draw(class Scene* scene) {
 	}
 
 	// BOTL of inv
-	ox += (INVENTORY_SLOTS_OFFSET_X + 98) * scale - (INVENTORY_SLOT_X * scale - sx / INVENTORY_INV_SCALE);
-	oy += (INVENTORY_SLOTS_OFFSET_Y + 114) * scale - (INVENTORY_SLOT_Y * scale - sy / INVENTORY_INV_SCALE);
+	ox += (INVENTORY_SLOTS_OFFSET_X + mGridX) * scale - (INVENTORY_SLOT_X * scale - sx / INVENTORY_INV_SCALE);
+	oy += (INVENTORY_SLOTS_OFFSET_Y + mGridY) * scale - (INVENTORY_SLOT_Y * scale - sy / INVENTORY_INV_SCALE);
 
 	const float slotx = INVENTORY_SLOT_X * scale;
 	const float sloty = INVENTORY_SLOT_Y * scale;
@@ -458,8 +464,8 @@ void CraftingInventory::draw(class Scene* scene) {
 
 	// Draw output slot
 	// 57x9
-	ox += 57 * scale;
-	oy += 9 * scale;
+	ox += mOutX * scale;
+	oy += mOutY * scale;
 
 	if (mLastCraft != 0) {
 		const auto& out = std::get<2>(registers::CRAFTING_RECIPIES[mLastCraft]);

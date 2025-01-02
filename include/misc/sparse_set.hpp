@@ -65,7 +65,7 @@ template <typename Component> class sparse_set : public sparse_set_interface {
 
 		mSparseContainer[entity] = mPackedContainer.size();
 		mPackedContainer.emplace_back(entity);
-		mComponents.emplace_back(args...);
+		mComponents.emplace_back(std::forward<Args>(args)...);
 	}
 
 	[[nodiscard]] Component& get(const EntityID entity) noexcept {

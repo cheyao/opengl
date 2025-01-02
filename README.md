@@ -9,6 +9,12 @@
 - **Debuggable** 🔍: Custom asserts and **Debug menu** helps you identify any bugs 🐛!
 - **Custom Saves** 📝: Easily save **any** data on any platform you want in a json file, the game engine will manage it for you!
 
+Controls:
+WASD for movement
+E to open Inventory
+ESC to close
+Everything else like Minecraft
+
 <h3 align="center"><a href="https://cyao.hackclub.app">Try out web version now!</a></h3>
 
 <div align="center">

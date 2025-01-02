@@ -212,14 +212,14 @@ void Level::update(const float delta) {
 		return;
 	}
 
-	auto pad = [this](std::int64_t position) {
+	const auto pad = [this](std::int64_t position) {
 		while (this->mData[CHUNK_KEY][position < 0 ? "-" : "+"].Size() <= std::llabs(position)) {
 			this->mData[CHUNK_KEY][position < 0 ? "-" : "+"].PushBack(
 				rapidjson::Value(rapidjson::kArrayType).SetObject().Move(), this->mData.GetAllocator());
 		}
 	};
 
-	auto save = [this, &pad](Chunk* chunk) {
+	const auto save = [this, &pad](Chunk* chunk) {
 		pad(chunk->getPosition());
 
 		this->mData[CHUNK_KEY][chunk->getPosition() < 0 ? "-" : "+"][SDL_abs(chunk->getPosition())].SetObject();
@@ -264,7 +264,7 @@ void Level::update(const float delta) {
 			mRight = new Chunk(chunkData, mGame, mScene);
 		}
 	} else {
-		SDL_Log("\033[33mOut of boundary for chunk %d, loaded chunks: %" PRIu64 " %" PRIu64 " %" PRIu64
+		SDL_Log("\033[33mOut of boundary for chunk %d, loaded chunks: %" PRIi64 " %" PRIi64 " %" PRIi64
 			"\033[0m",
 			currentChunk, mLeft->getPosition(), mCenter->getPosition(), mRight->getPosition());
 

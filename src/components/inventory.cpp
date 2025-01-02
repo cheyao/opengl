@@ -26,8 +26,8 @@
 std::vector<Components::Item> Inventory::mItems;
 std::vector<std::uint64_t> Inventory::mCount;
 
-Inventory::Inventory(class Game* game, const std::size_t size)
-	: Screen(game), mSize(size), mLeftLongClick(0), mCounter(0) {
+Inventory::Inventory(class Game*, const std::size_t size)
+	: Screen(Game::getInstance()), mSize(size), mLeftLongClick(0), mCounter(0) {
 	mItems = std::vector<Components::Item>(size);
 	mCount = std::vector<std::uint64_t>(size);
 
@@ -399,7 +399,9 @@ void Inventory::drawMouse(Scene* scene) {
 	std::uint64_t vcount = 0;
 	if (virtItems) {
 		if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL)) {
-			vcount = scene->mMouse.count - scene->mMouse.count % mPath.size();
+			if (!mPath.empty()) {
+				vcount = scene->mMouse.count - scene->mMouse.count % mPath.size();
+			}
 		} else {
 			vcount = SDL_min(scene->mMouse.count, mPath.size());
 		}
