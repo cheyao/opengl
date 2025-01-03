@@ -9,6 +9,7 @@
 <h3 align="center"><a href="https://opengl.pages.dev">Try out web version now!</a></h3>
 
 <h2 align="center">Controls</h2>
+
 - WASD for movement
 - E to open Inventory
 - ESC to close
