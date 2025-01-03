@@ -58,7 +58,10 @@ Inventory::Inventory(class Game* game, const rapidjson::Value& contents) : Scree
 // A view of the main inventory
 Inventory::Inventory(const Eigen::Vector2f& offset, const std::string& texture)
 	: Screen(Game::getInstance()), INVENTORY_SLOTS_OFFSET_X(offset.x()), INVENTORY_SLOTS_OFFSET_Y(offset.y()),
-	  INVENTORY_SPRITE_FILE(texture) {}
+	  INVENTORY_SPRITE_FILE(texture) {
+	mCountRegister[getID<Inventory>()] = &mCount;
+	mItemRegister[getID<Inventory>()] = &mItems;
+}
 
 void Inventory::save(rapidjson::Value& contents, rapidjson::Document::AllocatorType& allocator) {
 	contents.AddMember(rapidjson::StringRef(SIZE_KEY), mSize, allocator);
@@ -153,6 +156,12 @@ bool Inventory::update(class Scene* scene, float) {
 			}
 		} else {
 			for (const auto& [id, s] : mPath) {
+				if (mCountRegister[id]->size() <= s) {
+					SDL_Log("Patherror! Ignoring place for %" PRIu64 " at %" PRIu64, id, s);
+
+					continue;
+				}
+
 				(*mCountRegister[id])[s] += 1;
 				(*mItemRegister[id])[s] = static_cast<Components::Item>(scene->mMouse.item);
 				scene->mMouse.count--;

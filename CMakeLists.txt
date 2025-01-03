@@ -142,7 +142,10 @@ external/imgui/backends/imgui_impl_opengl3.cpp
 )
 
 set(ASSETS_EMBED_WEB
---preload-file=assets@assets
+--preload-file=assets/fonts
+--preload-file=assets/shaders
+--preload-file=assets/strings
+--preload-file=assets/textures
 )
 
 if(ANDROID STREQUAL ON) 
@@ -250,9 +253,9 @@ elseif(WINDOWS)
 elseif(WEB)
 	add_executable(${BUILD_NAME} ${SRC})
 
-	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -DGLES -sNO_DISABLE_EXCEPTION_CATCHING -fno-rtti)
+	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -DGLES -fno-rtti)
 	target_compile_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
-	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sALLOW_MEMORY_GROWTH -sNO_DISABLE_EXCEPTION_CATCHING -fno-rtti)
+	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sALLOW_MEMORY_GROWTH -fno-rtti -sFETCH)
 	target_link_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
 
 	if(DEBUG)

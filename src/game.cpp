@@ -7,8 +7,10 @@
 #include "scene.hpp"
 #include "scenes/level.hpp"
 #include "third_party/glad/glad.h"
+#include "utils.hpp"
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_audio.h>
 #include <chrono>
 #include <cinttypes>
 #include <cstdint>
@@ -16,6 +18,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #ifdef IMGUI
 #include <backends/imgui_impl_opengl3.h>
@@ -23,9 +26,36 @@
 #include <imgui.h>
 #endif
 
+std::vector<std::pair<std::uint8_t*, std::uint32_t>> mAudio;
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten/fetch.h>
+
+void audioSucceeded(emscripten_fetch_t* fetch) {
+	SDL_Log("Finished downloading %llu bytes from URL %s.\n", fetch->numBytes, fetch->url);
+	// The data is now available at fetch->data[0] through fetch->data[fetch->numBytes-1];
+	SDL_AudioSpec spec;
+	std::uint8_t* wav_data;
+	std::uint32_t wav_data_len;
+
+	if (SDL_LoadWAV_IO(SDL_IOFromConstMem(fetch->data, fetch->numBytes), true, &spec, &wav_data, &wav_data_len)) {
+		mAudio.emplace_back(std::make_pair(wav_data, wav_data_len));
+	} else {
+		SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
+	}
+
+	emscripten_fetch_close(fetch);
+}
+
+void audioFailed(emscripten_fetch_t* fetch) {
+	SDL_Log("Downloading %s failed, HTTP failure status code: %d.\n", fetch->url, fetch->status);
+	emscripten_fetch_close(fetch); // Also free data on failure.
+}
+#endif
+
 Game::Game()
 	: mEventManager(nullptr), mSystemManager(nullptr), mLocaleManager(nullptr), mCurrentLevel(nullptr),
-	  mStorageManager(nullptr), mTicks(0) {}
+	  mStorageManager(nullptr), mTicks(0), mStream(nullptr) {}
 
 void Game::init() {
 	const auto begin = std::chrono::high_resolution_clock::now();
@@ -53,6 +83,44 @@ void Game::init() {
 	     << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "milis)";
 	SDL_Log("Startup took %s", time.str().data());
 
+	// static auto sign = Inventory(Eigen::Vector2f(0, 0), "ui/sign.png");
+	// mSystemManager->getUISystem()->addScreen(&sign);
+
+	SDL_AudioSpec spec;
+
+#ifdef __EMSCRIPTEN__
+	emscripten_fetch_attr_t attr;
+	emscripten_fetch_attr_init(&attr);
+	strcpy(attr.requestMethod, "GET");
+	attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
+	attr.onsuccess = audioSucceeded;
+	attr.onerror = audioFailed;
+	emscripten_fetch(&attr, "assets/sounds/subwoofer_lullaby.wav");
+	emscripten_fetch(&attr, "assets/sounds/sweden.wav");
+#else
+	std::uint8_t* wav_data;
+	std::uint32_t wav_data_len;
+
+	if (SDL_LoadWAV((getBasePath() + "assets/sounds/subwoofer_lullaby.wav").data(), &spec, &wav_data,
+			&wav_data_len)) {
+		mAudio.emplace_back(std::make_pair(wav_data, wav_data_len));
+	} else {
+		SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
+	}
+
+	if (SDL_LoadWAV((getBasePath() + "assets/sounds/sweden.wav").data(), &spec, &wav_data, &wav_data_len)) {
+		mAudio.emplace_back(std::make_pair(wav_data, wav_data_len));
+	} else {
+		SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
+	}
+#endif
+
+	spec.format = SDL_AUDIO_S16LE;
+	spec.channels = 2;
+	spec.freq = 48000;
+	mStream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, nullptr, nullptr);
+	SDL_ResumeAudioStreamDevice(mStream);
+
 #ifdef DEBUG
 	GLenum err = 0;
 	while ((err = glGetError()) != GL_NO_ERROR) {
@@ -61,17 +129,17 @@ void Game::init() {
 				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\033[31mInit GLError: Invalid enum\033[0m");
 				break;
 			case GL_INVALID_VALUE:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid value\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\033[31mInit GLError: Invalid value\033[0m");
 				break;
 			case GL_INVALID_OPERATION:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Invalid operation\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\033[31mInit GLError: Invalid operation\033[0m");
 				break;
 			case GL_INVALID_FRAMEBUFFER_OPERATION:
 				SDL_LogError(SDL_LOG_CATEGORY_RENDER,
-					     "\x1B[31mInit GLError: Invalid framebuffer op\033[0m");
+					     "\033[31mInit GLError: Invalid framebuffer op\033[0m");
 				break;
 			case GL_OUT_OF_MEMORY:
-				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\x1B[31mInit GLError: Out of memory\033[0m");
+				SDL_LogError(SDL_LOG_CATEGORY_RENDER, "\033[31mInit GLError: Out of memory\033[0m");
 				break;
 		}
 	}
@@ -86,11 +154,32 @@ Game::~Game() {
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
 #endif
+
+	for (const auto [data, _] : mAudio) {
+		SDL_free(data);
+	}
+
+	SDL_Quit();
 }
 
 void Game::save() { mStorageManager->save(); }
 
 SDL_AppResult Game::iterate() {
+	static std::size_t audioPtr = 0;
+	if (mStream && !mAudio.empty()) {
+		if (SDL_GetAudioStreamAvailable(mStream) < static_cast<int>(mAudio[audioPtr].second)) {
+			SDL_PutAudioStreamData(mStream, mAudio[audioPtr].first, mAudio[audioPtr].second);
+			SDL_ResumeAudioStreamDevice(mStream);
+
+			++audioPtr;
+			if (audioPtr == mAudio.size()) {
+				audioPtr = 0;
+			}
+
+			SDL_Log("Replenished sound buffer");
+		}
+	}
+
 	const auto begin = std::chrono::high_resolution_clock::now();
 
 	float delta = static_cast<float>(SDL_GetTicks() - mTicks) / 1000.0f;
@@ -170,15 +259,11 @@ void Game::gui() {
 
 	static bool wireframe = false;
 	static bool vsync = true;
-	static bool demo = false;
 
 	/* Main menu */ {
 		ImGui::Begin("Developer menu");
 
-		ImGuiIO& io = ImGui::GetIO();
-		ImGui::Text("%.3f ms %.1f FPS", (1000.f / io.Framerate), io.Framerate);
-
-		const char* locales[] = {"en", "fr", "zh-CN"};
+		const char* locales[] = {"en", "fr"};
 		static int current = 0;
 		if (ImGui::Combo("language", &current, locales, IM_ARRAYSIZE(locales))) {
 			mLocaleManager->changeLocale(locales[current]);
@@ -195,13 +280,7 @@ void Game::gui() {
 			}
 		}
 
-		ImGui::Checkbox("Demo", &demo);
-
 		ImGui::End();
-	}
-
-	if (demo) {
-		ImGui::ShowDemoWindow(&demo);
 	}
 #endif
 }

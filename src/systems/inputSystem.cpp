@@ -94,17 +94,45 @@ void InputSystem::updateMouse(Scene* scene, const float) {
 			return;
 		}
 
-		const auto pressLength = (SDL_GetTicks() - mLastHold) / 50.0f;
+		const auto pressLength =
+			(SDL_GetTicks() - std::max(mLastHold, scene->getSignal(EventManager::LEFT_HOLD_SIGNAL))) /
+			50.0f;
 		for (const auto& [entity, block] : scene->view<Components::block>().each()) {
 			if (block.mPosition != blockPos) {
 				continue;
 			}
 
+			const auto handItem =
+				static_cast<PlayerInventory*>(
+					scene->get<Components::inventory>(mGame->getPlayerID()).mInventory)
+					->getItem();
+			int handLevel = 0;
+			if (registers::MINING_LEVEL.contains(handItem)) {
+				handLevel = registers::MINING_LEVEL.at(handItem);
+			}
+			const auto [breakLevel, breakTime] = registers::BREAK_TIMES.at(block.mType);
+
+			bool getLoot = true;
+			int speed = 1;
+			if (breakLevel != 0) {
+				if (handLevel == 0) {
+					getLoot = false;
+				} else if (registers::MINING_SYSTEM.at(block.mType) !=
+					   registers::MINING_SYSTEM.at(handItem)) {
+					getLoot = false;
+				}
+			}
+			if (handLevel != 0 &&
+			    registers::MINING_SYSTEM.at(block.mType) == registers::MINING_SYSTEM.at(handItem)) {
+				speed += handLevel;
+			}
+
+			const auto realBreakTime = breakTime / speed;
 			// Not enough time passed since press
-			if (pressLength < registers::BREAK_TIMES.at(block.mType)) {
+			if (pressLength < realBreakTime) {
 				mDestruction.render = true;
 
-				const int stage = (pressLength / registers::BREAK_TIMES.at(block.mType)) * 10;
+				const int stage = (pressLength / realBreakTime) * 10;
 				mDestruction.texture = mGame->getSystemManager()->getTexture(
 					"blocks/destroy_stage_" + std::to_string(stage) + ".png", true);
 
@@ -112,9 +140,12 @@ void InputSystem::updateMouse(Scene* scene, const float) {
 			}
 
 			const std::vector<std::pair<float, Components::Item>> defaultLoot = {{1.0f, block.mType}};
+			const std::vector<std::pair<float, Components::Item>> noLoot = {};
 			const std::vector<std::pair<float, Components::Item>>& loot =
-				registers::LOOT_TABLES.contains(block.mType) ? registers::LOOT_TABLES.at(block.mType)
-									     : defaultLoot;
+				getLoot ? registers::LOOT_TABLES.contains(block.mType)
+						  ? registers::LOOT_TABLES.at(block.mType)
+						  : defaultLoot
+					: noLoot;
 
 			for (const auto& [chance, type] : loot) {
 				const float roll = SDL_randf();

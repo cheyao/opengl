@@ -67,8 +67,6 @@ TextSystem::TextSystem(const unsigned int size, const bool final) noexcept
 
 	// TODO: Dyn load CJK
 	if (!final) {
-		mChild = new TextSystem(size, true);
-		mChild->loadFont("NotoSansCJK.ttc");
 		loadFont("NotoSans.ttf");
 	}
 }
@@ -87,8 +85,6 @@ TextSystem::~TextSystem() {
 	for (const auto& [_, texture] : mGlyphMap) {
 		delete texture.texture;
 	}
-
-	delete mChild;
 }
 
 void TextSystem::loadFont(const std::string& name) {

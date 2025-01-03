@@ -20,7 +20,7 @@
 // TODO: Save crafting table
 CraftingInventory::CraftingInventory(class Game* game, std::uint64_t size, std::uint64_t row, std::uint64_t col)
 	: Inventory(game, size), mRows(row), mCols(col), mCraftingItems(row * col, Components::AIR()),
-	  mCraftingCount(row * col, 0), mLastCraft(0), mGridX(98), mGridY(114), mOutX(56), mOutY(9) {
+	  mCraftingCount(row * col, 0), mLastCraft(0), mGridX(97), mGridY(114), mOutX(57), mOutY(9) {
 	mCountRegister[getID<CraftingInventory>()] = &mCraftingCount;
 	mItemRegister[getID<CraftingInventory>()] = &mCraftingItems;
 }
@@ -28,7 +28,7 @@ CraftingInventory::CraftingInventory(class Game* game, std::uint64_t size, std::
 CraftingInventory::CraftingInventory(class Game* game, const rapidjson::Value& contents, std::uint64_t row,
 				     std::uint64_t col)
 	: Inventory(game, contents), mRows(row), mCols(col), mCraftingItems(), mCraftingCount(), mLastCraft(0),
-	  mGridX(98), mGridY(114), mOutX(56), mOutY(9) {
+	  mGridX(97), mGridY(114), mOutX(57), mOutY(9) {
 	mCountRegister[getID<CraftingInventory>()] = &mCraftingCount;
 	mItemRegister[getID<CraftingInventory>()] = &mCraftingItems;
 
@@ -291,8 +291,6 @@ bool CraftingInventory::checkRecipie(const std::uint64_t r) {
 		for (const auto& [item, count] : std::views::zip(mCraftingItems, mCraftingCount)) {
 			// The current cell is empty
 			if (item == Components::AIR()) {
-				SDL_assert(count == 0);
-
 				continue;
 			}
 
@@ -329,15 +327,22 @@ bool CraftingInventory::checkRecipie(const std::uint64_t r) {
 			for (std::size_t yoff = 0; yoff <= (mRows - shape.second); ++yoff) {
 				for (std::size_t x = 0; x < shape.first; ++x) {
 					for (std::size_t y = 0; y < shape.second; ++y) {
-						if (items[x + y * shape.first] == Components::AIR()) {
-							continue;
-						}
-
 						if (items[x + y * shape.first] !=
 						    mCraftingItems[(x + xoff) + (y + yoff) * mCols]) {
 							goto breakinnerloop;
 						}
 					}
+				}
+
+				// Clear all air
+				while (true) {
+					auto i = std::ranges::find(items, Components::AIR());
+					if (i == items.end()) {
+						break;
+					}
+					std::swap(*i, items.back());
+					items.pop_back();
+					--toFind;
 				}
 
 				for (const auto& [item, count] : std::views::zip(mCraftingItems, mCraftingCount)) {

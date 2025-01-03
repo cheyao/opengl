@@ -7,14 +7,8 @@
 
 #include <SDL3/SDL.h>
 
-// Constructor initializes member variables
 EventManager::EventManager() noexcept : mGame(Game::getInstance()), mKeys({}), mLeftClickDown(0), mRightClickDown(0) {}
 
-////////////////////////////////////////////////////////////////////////////////
-// manageEvent
-//  - Handles a single SDL_Event and returns an SDL_AppResult signifying if we
-//    should continue, exit, or handle failures gracefully.
-////////////////////////////////////////////////////////////////////////////////
 SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 	switch (event.type) {
 		// Quit-like events
@@ -25,7 +19,6 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 			return SDL_APP_SUCCESS; // SDL_APP_SUCCESS makes the app shutdown with exit code 0
 		}
 
-		// Key down
 		case SDL_EVENT_KEY_DOWN: {
 			if (manageKeyboardEvent(event) != SDL_APP_CONTINUE) {
 				// Something handled it in a way that indicates we should fail or exit
@@ -36,13 +29,11 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 			break;
 		}
 
-		// Key up
 		case SDL_EVENT_KEY_UP: {
 			mKeys[event.key.scancode] = false;
 			break;
 		}
 
-		// Window resize event
 		case SDL_EVENT_WINDOW_RESIZED: {
 			// event.window.data1, event.window.data2 store the new width/height
 			mGame->getSystemManager()->setDemensions(event.window.data1, event.window.data2);
@@ -93,11 +84,6 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 	return SDL_APP_CONTINUE;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// update
-//  - Called each frame to handle "hold" logic for mouse buttons, i.e., whether
-//    the user is continuing to press a mouse button beyond the short-press time.
-////////////////////////////////////////////////////////////////////////////////
 void EventManager::update() {
 	const auto buttons = SDL_GetMouseState(nullptr, nullptr);
 	const std::uint64_t now = SDL_GetTicks();
@@ -110,7 +96,6 @@ void EventManager::update() {
 		// If the button is held beyond the threshold, mark as hold
 		if (isLeftDown && !isShortPressTime) {
 			mGame->getLevel()->getScene()->getSignal(LEFT_HOLD_SIGNAL) = mLeftClickDown;
-			// We ensure the short-click signal is not triggered anymore
 			mGame->getLevel()->getScene()->getSignal(LEFT_CLICK_DOWN_SIGNAL) = false;
 		} else {
 			// Not holding
@@ -132,11 +117,6 @@ void EventManager::update() {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// manageKeyboardEvent
-//  - Handles additional logic for particular key events. Return SDL_APP_CONTINUE
-//    by default, or SDL_APP_FAILURE/SDL_APP_SUCCESS if you want special handling.
-////////////////////////////////////////////////////////////////////////////////
 SDL_AppResult EventManager::manageKeyboardEvent(const SDL_Event& event) {
 	switch (event.key.key) {
 		default: {

@@ -115,7 +115,7 @@
     <script type="text/javascript">
       // Check for mobile user agent and scream at the user
       if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
-        window.alert("Mobile/Tablet support is not fully complete; this is intended for desktop usage.");
+        window.alert("Mobile/Tablet support is not fully complete; this is intended for desktop usage. Please watch video demo.");
       }
 
       const statusElement   = document.getElementById('status');

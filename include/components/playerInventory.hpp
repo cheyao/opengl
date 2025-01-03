@@ -23,7 +23,8 @@ class PlayerInventory : public CraftingInventory {
 		SDL_assert(cell < 9);
 		mSelect = cell;
 	}
-	std::size_t getSelection() const { return mSelect; }
+	[[nodiscard]] std::size_t getSelection() const { return mSelect; }
+	[[nodiscard]] Components::Item getItem() const { return mItems[mSelect]; }
 	void tryPlace(class Scene* scene, const Eigen::Vector2i& pos);
 
       private:

@@ -33,7 +33,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
 	SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 	SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_CENTER, "0");
 
-	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
+	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD | SDL_INIT_AUDIO)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Failed to init SDL: %s\n", SDL_GetError());
 		ERROR_BOX("Failed to initialize SDL, there is something wrong with your system");
 
@@ -115,8 +115,6 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 
 void SDL_AppQuit(void*, const SDL_AppResult result) {
 	Game::getInstance()->save();
-
-	SDL_Quit();
 
 	if (result == SDL_APP_SUCCESS) {
 		SDL_Log("Cyao game engine terminated successfully");

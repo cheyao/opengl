@@ -56,4 +56,6 @@ class Game {
 
 	std::uint64_t mTicks;
 	EntityID mPlayer;
+
+	SDL_AudioStream* mStream;
 };
