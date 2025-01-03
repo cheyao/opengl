@@ -95,8 +95,8 @@ void Game::init() {
 	attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
 	attr.onsuccess = audioSucceeded;
 	attr.onerror = audioFailed;
-	emscripten_fetch(&attr, "assets/sounds/subwoofer_lullaby.wav");
-	emscripten_fetch(&attr, "assets/sounds/sweden.wav");
+	emscripten_fetch(&attr, "https://rawcdn.githack.com/cheyao/opengl/refs/heads/main/assets/sounds/subwoofer_lullaby.wav");
+	emscripten_fetch(&attr, "https://rawcdn.githack.com/cheyao/opengl/refs/heads/main/assets/sounds/sweden.wav");
 #else
 	std::uint8_t* wav_data;
 	std::uint32_t wav_data_len;

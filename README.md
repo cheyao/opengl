@@ -1,13 +1,12 @@
 <h1 align="center" style="text-shadow: 2px 2px 5px red;">2D Minecraft + Cyao Game Engine</h2>
-<h2 align="center">Features</h2>
 
-- **Cross-Platorm** 💻📱: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported!
-- **Performant** 🏃: Uses C++, the game runs smoothly even on browsers. (**600**+ FPS on a **11 year old** laptop!)
-- **Multilingual** 🌐: **Unicode** and Locale support build in. (No more �!)
-- **Modern** ✨: Uses **Modern** C++23 features and follows best practices. SDL3 used!
-- **Extendable** 🧩: The Game Engine uses the ECS arcitecture. Extend easily by adding stuff to `src/registers.cpp`!
-- **Debuggable** 🔍: Custom asserts and **Debug menu** helps you identify any bugs 🐛!
-- **Custom Saves** 📝: Easily save **any** data on any platform you want in a json file, the game engine will manage it for you!
+<div align="center">
+    <img src="https://cloud-27xm3qrn9-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
+    <img src="https://cloud-27xm3qrn9-hack-club-bot.vercel.app/1image.png" width="auto" height="auto" alt="Demo pic of the game">
+    <img src="https://cloud-89ohmxlnj-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
+</div>
+
+<h3 align="center"><a href="https://opengl.pages.dev">Try out web version now!</a></h3>
 
 <h2 align="center">Controls</h2>
 - WASD for movement
@@ -15,13 +14,16 @@
 - ESC to close
 - Everything else like Minecraft
 
-<h3 align="center"><a href="https://opengl.pages.dev">Try out web version now!</a></h3>
-
-<div align="center">
-    <img src="https://cloud-27xm3qrn9-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
-    <img src="https://cloud-27xm3qrn9-hack-club-bot.vercel.app/1image.png" width="auto" height="auto" alt="Demo pic of the game">
-    <img src="https://cloud-89ohmxlnj-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
-</div>
+<h2 align="center">Features</h2>
+- **Cross-Platorm** 💻📱: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported!
+- **Performant** 🏃: Uses C++, the game runs smoothly even on browsers. (**600**+ FPS on a **11 year old** laptop!)
+- **Multilingual** 🌐: **Unicode** and Locale support build in. (No more �!)
+- **Modern** ✨: Uses **Modern** C++23 features and follows best practices. SDL3 used!
+- **Extendable** 🧩: The Game Engine uses the ECS arcitecture. Extend easily by adding stuff to `src/registers.cpp`!
+- **Debuggable** 🔍: Custom asserts and **Debug menu** helps you identify any bugs 🐛!
+- **Custom Saves** 📝: Easily save **any** data on any platform you want in a json file, the game engine will manage it for you!
+- **Crafting UI**: UI for any type of menu you want!
+- **Audio** 📢: Easily integrate audio into the game
 
 <h2 align="center">Inner workings</h2>
 
