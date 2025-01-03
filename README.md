@@ -1,4 +1,4 @@
-<h1 align="center" style="text-shadow: 2px 2px 5px red;">Cyao Game Engine</h1>
+<h1 align="center" style="text-shadow: 2px 2px 5px red;">2D Minecraft + Cyao Game Engine</h2>
 <h2 align="center">Features</h2>
 
 - **Cross-Platorm** 💻📱: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported!
@@ -9,16 +9,18 @@
 - **Debuggable** 🔍: Custom asserts and **Debug menu** helps you identify any bugs 🐛!
 - **Custom Saves** 📝: Easily save **any** data on any platform you want in a json file, the game engine will manage it for you!
 
-Controls:
-WASD for movement
-E to open Inventory
-ESC to close
-Everything else like Minecraft
+<h2 align="center">Controls</h2>
+- WASD for movement
+- E to open Inventory
+- ESC to close
+- Everything else like Minecraft
 
-<h3 align="center"><a href="https://cyao.hackclub.app">Try out web version now!</a></h3>
+<h3 align="center"><a href="https://opengl.pages.dev">Try out web version now!</a></h3>
 
 <div align="center">
-    <img src="https://cloud-l0r4ps4t3-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
+    <img src="https://cloud-27xm3qrn9-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
+    <img src="https://cloud-27xm3qrn9-hack-club-bot.vercel.app/1image.png" width="auto" height="auto" alt="Demo pic of the game">
+    <img src="https://cloud-89ohmxlnj-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
 </div>
 
 <h2 align="center">Inner workings</h2>

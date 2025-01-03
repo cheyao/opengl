@@ -43,3 +43,4 @@ void PlayerInventory::tryPlace(class Scene* scene, const Eigen::Vector2i& pos) {
 		mItems[mSelect] = Components::AIR();
 	}
 }
+

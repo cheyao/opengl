@@ -49,8 +49,8 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 RenderSystem::RenderSystem() noexcept
 	: mGame(Game::getInstance()), mWindow(nullptr, SDL_DestroyWindow), mCursor(nullptr, SDL_DestroyCursor),
 	  mIcon(nullptr, SDL_DestroySurface), mGL(nullptr), mFramebuffer(nullptr), mMatricesUBO(nullptr),
-	  mTextures(std::make_unique<TextureManager>()),
-	  mShaders(std::make_unique<ShaderManager>()), mMesh(nullptr), mWidth(0), mHeight(0) {
+	  mTextures(std::make_unique<TextureManager>()), mShaders(std::make_unique<ShaderManager>()), mMesh(nullptr),
+	  mWidth(0), mHeight(0) {
 	const SDL_DisplayMode* const DM = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
 
 	SDL_Log("\n");
@@ -504,7 +504,7 @@ void RenderSystem::drawHUD(Scene* scene) {
 		Texture* const itemTexture = systemManager->getTexture(registers::TEXTURES.at(inventory->mItems[i]));
 		itemTexture->activate(0);
 
-		shader->set("offset"_u, offset.x() + i * x / 9 + y / 4, y / 4);
+		shader->set("offset"_u, offset.x() + i * x / 9.1 + y / 4, y / 4);
 
 		mMesh->draw(shader);
 
@@ -513,7 +513,8 @@ void RenderSystem::drawHUD(Scene* scene) {
 			float yoffset = inventory->mCount[i] >= 10 ? (y / 5 * 3) : (y / 4 * 3);
 			mGame->getSystemManager()->getTextSystem()->draw(
 				std::to_string(inventory->mCount[i]),
-				Eigen::Vector2f(offset.x() + i * x / 9 + yoffset, y / 9), false);
+				Eigen::Vector2f(offset.x() + i * x / 9 + yoffset, y / 9), false,
+				Eigen::Vector3f(0.9f, 0.9f, 0.9f));
 		}
 
 		shader->activate();

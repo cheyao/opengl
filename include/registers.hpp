@@ -24,6 +24,9 @@ extern const std::unordered_map<Components::Item, std::pair<int, std::uint64_t>>
 extern const std::unordered_map<Components::Item, int> MINING_LEVEL;
 extern const std::unordered_map<Components::Item, registers::MiningSystem> MINING_SYSTEM;
 
+extern const std::unordered_map<Components::Item, std::uint64_t> BURNING_TIME;
+extern const std::unordered_map<Components::Item, Components::Item> SMELTING_RECIPIE;
+
 extern const std::vector<std::pair<float, std::vector<std::pair<Components::Item, Eigen::Vector2i>>>>
 	SURFACE_STRUCTURES;
 extern const std::unordered_map<Components::Item, std::vector<std::pair<float, Components::Item>>> LOOT_TABLES;

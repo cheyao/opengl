@@ -2,6 +2,7 @@
 
 #include "components.hpp"
 #include "components/crafting.hpp"
+#include "components/furnace.hpp"
 #include "items.hpp"
 #include "screens/screen.hpp"
 
@@ -95,6 +96,10 @@ const std::unordered_map<Components::Item, std::vector<std::pair<float, Componen
 	{Item::GRASS_BLOCK,
 	 {
 		 {1.1f, Item::DIRT},
+	 }},
+	{Item::STONE,
+	 {
+		 {1.1f, Item::COBBLESTONE},
 	 }},
 };
 
@@ -205,13 +210,25 @@ const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vecto
 };
 // NOLINTEND
 
+const std::unordered_map<Components::Item, std::uint64_t> BURNING_TIME = {
+	{Item::OAK_LOG, 160},
+	{Item::OAK_PLANKS, 40},
+	{Item::STICK, 10},
+};
+
+const std::unordered_map<Components::Item, Components::Item> SMELTING_RECIPIE = {
+	{Item::COBBLESTONE, Item::STONE},
+};
+
 template <typename T, typename... Args> T* staticHelper(Args&&... args) {
 	static T t(std::forward<Args>(args)...);
 	return &t;
 };
 
 const std::unordered_map<Components::Item, Screen* (*)(void)> CLICKABLES = {
-	{Item::CRAFTING_TABLE, [] -> Screen* { return staticHelper<CraftingInventory>(crafting_table_t()); }}};
+	{Item::CRAFTING_TABLE, [] -> Screen* { return staticHelper<CraftingInventory>(crafting_table_t()); }},
+	{Item::CRAFTING_TABLE, [] -> Screen* { return staticHelper<FurnaceInventory>(furnace_t()); }},
+};
 
 const std::vector<std::string> BACKGROUND_SOUNDS = {
 	"sweden.wav",

@@ -156,6 +156,10 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 				scene->mMouse.item = mCraftingItems[slot] = item;
 				scene->mMouse.count = mCraftingCount[slot] = half;
 				scene->mMouse.count += round;
+				if (scene->mMouse.count == 0) {
+					scene->mMouse.item = Components::AIR();
+				}
+
 				// Same block: add one to stack
 			} else if (mCraftingCount[slot] == 0 || mCraftingItems[slot] == scene->mMouse.item) {
 				mCraftingCount[slot] += 1;
@@ -206,11 +210,10 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 				continue;
 			}
 
-			if (mCraftingCount[i] == 1) {
+			--mCraftingCount[i];
+			if (mCraftingCount[i] == 0) {
 				mCraftingItems[i] = Components::AIR();
 			}
-
-			--mCraftingCount[i];
 		}
 
 		scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL) = false;

@@ -233,7 +233,7 @@ void TextSystem::draw(Scene* scene) {
 	const Eigen::Vector2f dimensions = mGame->getSystemManager()->getDemensions();
 	shader->activate();
 	shader->set("letter"_u, 0);
-	shader->set("textColor"_u, color);
+	shader->set("textColor"_u, COLOR);
 
 	for (const auto& [_, text, position] : scene->view<Components::text, Components::position>().each()) {
 		auto offset = position.mPosition;
@@ -282,7 +282,7 @@ void TextSystem::draw(Scene* scene) {
 	}
 }
 
-void TextSystem::draw(const std::string_view str, const Eigen::Vector2f& o, const bool translate) {
+void TextSystem::draw(const std::string_view str, const Eigen::Vector2f& o, const bool translate, const Eigen::Vector3f& color) {
 	Shader* shader = mGame->getSystemManager()->getShader("text.vert", "text.frag");
 	shader->activate();
 	shader->set("letter"_u, 0);

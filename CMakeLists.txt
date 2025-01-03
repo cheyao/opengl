@@ -44,6 +44,7 @@ src/components/inventory.cpp
 src/components/playerInventory.cpp
 src/components/crafting.cpp
 src/components/noise.cpp
+src/components/furnace.cpp
 
 src/opengl/mesh.cpp
 src/opengl/shader.cpp
@@ -85,6 +86,7 @@ include/components/inventory.hpp
 include/components/playerInventory.hpp
 include/components/crafting.hpp
 include/components/noise.hpp
+include/components/furnace.hpp
 
 include/misc/sparse_set.hpp
 include/misc/sparse_set_view.hpp

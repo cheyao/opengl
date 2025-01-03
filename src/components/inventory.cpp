@@ -239,6 +239,9 @@ bool Inventory::update(class Scene* scene, float) {
 			scene->mMouse.item = mItems[slot] = item;
 			scene->mMouse.count = mCount[slot] = half;
 			scene->mMouse.count += round;
+			if (scene->mMouse.count == 0) {
+				scene->mMouse.item = Components::AIR();
+			}
 			// Same block: add one to stack
 		} else if (mCount[slot] == 0 || mItems[slot] == scene->mMouse.item) {
 			mCount[slot] += 1;

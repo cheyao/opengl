@@ -22,10 +22,10 @@ class TextSystem {
 	// Size in 1/64 of a pixel
 	void setFontSize(const unsigned int size);
 	void draw(class Scene* scene);
-	void draw(std::string_view str, const Eigen::Vector2f& offset, bool translate);
+	void draw(std::string_view str, const Eigen::Vector2f& offset, bool translate, const Eigen::Vector3f& color = COLOR);
 
       private:
-	const static inline Eigen::Vector3f color = Eigen::Vector3f(0.0f, 0.0f, 0.0f);
+	const static inline Eigen::Vector3f COLOR = Eigen::Vector3f(0.0f, 0.0f, 0.0f);
 
 	struct Glyph {
 		class Texture* texture;
