@@ -36,6 +36,7 @@ const std::unordered_map<Components::Item, std::string> TEXTURES = {
 	{Item::STONE_PICKAXE, "items/stone-pickaxe.png"},
 	{Item::COBBLESTONE, "blocks/cobblestone.png"},
 	{Item::FURNACE, "blocks/furnace.png"},
+	{Item::APPLE, "items/apple.png"},
 };
 
 const std::unordered_map<Components::Item, std::pair<int, std::uint64_t>> BREAK_TIMES = {
@@ -92,6 +93,7 @@ const std::unordered_map<Components::Item, std::vector<std::pair<float, Componen
 	{Item::OAK_LEAVES,
 	 {
 		 {0.2f, Item::STICK},
+		 {0.1f, Item::APPLE},
 	 }},
 	{Item::GRASS_BLOCK,
 	 {
@@ -216,8 +218,9 @@ const std::unordered_map<Components::Item, std::uint64_t> BURNING_TIME = {
 	{Item::STICK, 10},
 };
 
-const std::unordered_map<Components::Item, Components::Item> SMELTING_RECIPIE = {
-	{Item::COBBLESTONE, Item::STONE},
+// Time in seconds
+const std::unordered_map<Components::Item, std::pair<double, Components::Item>> SMELTING_RECIPIE = {
+	{Item::COBBLESTONE, {5, Item::STONE}},
 };
 
 template <typename T, typename... Args> T* staticHelper(Args&&... args) {
@@ -227,7 +230,7 @@ template <typename T, typename... Args> T* staticHelper(Args&&... args) {
 
 const std::unordered_map<Components::Item, Screen* (*)(void)> CLICKABLES = {
 	{Item::CRAFTING_TABLE, [] -> Screen* { return staticHelper<CraftingInventory>(crafting_table_t()); }},
-	{Item::CRAFTING_TABLE, [] -> Screen* { return staticHelper<FurnaceInventory>(furnace_t()); }},
+	{Item::FURNACE, [] -> Screen* { return staticHelper<FurnaceInventory>(furnace_t()); }},
 };
 
 const std::vector<std::string> BACKGROUND_SOUNDS = {

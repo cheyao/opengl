@@ -23,5 +23,6 @@ enum class Item : std::uint64_t {
 	STONE_HOE,
 	COBBLESTONE,
 	FURNACE,
+	APPLE,
 };
 } // namespace Components

@@ -17,14 +17,39 @@
 // Crafting table
 FurnaceInventory::FurnaceInventory(struct furnace_t)
 	: Inventory(Eigen::Vector2f(8, 8), "ui/furnace.png"), mSmeltingItems(2, Components::AIR()),
-	  mSmeltingCount(2, 0), mLastCraft(0) {
+	  mSmeltingCount(2, 0), mFuelLeft(0), mRecipieTime(0), mLastCraft(Components::AIR()) {
 	mCountRegister[getID<FurnaceInventory>()] = &mSmeltingCount;
 	mItemRegister[getID<FurnaceInventory>()] = &mSmeltingItems;
 }
 
-bool FurnaceInventory::update(class Scene* const, const float) { return true; }
+bool FurnaceInventory::update(class Scene* const scene, const float delta) {
+	Inventory::update(scene, delta);
 
-void FurnaceInventory::craft() {}
+	return true;
+}
+
+void FurnaceInventory::tick(class Scene* const, float delta) {
+	mFuelLeft -= delta;
+	if (mFuelLeft < 0) {
+		if (mSmeltingCount[FUEL_SLOT] != 0 && mLastCraft != Components::AIR() &&
+		    mLastCraft == mSmeltingItems[COOK_SLOT] &&
+		    (mSmeltingItems[OUTPUT_SLOT] == Components::AIR() ||
+		     mSmeltingItems[OUTPUT_SLOT] == registers::SMELTING_RECIPIE.at(mLastCraft).second)) {
+			mRecipieTime += delta;
+
+			if (mRecipieTime > registers::SMELTING_RECIPIE.at(mLastCraft).first) {
+				mRecipieTime = 0;
+
+				// We add the stuff to the output
+				mSmeltingCount[OUTPUT_SLOT]++;
+				mSmeltingItems[OUTPUT_SLOT] = registers::SMELTING_RECIPIE.at(mLastCraft).second;
+			}
+		} else {
+			mFuelLeft = 0;
+			mRecipieTime = 0;
+		}
+	}
+}
 
 bool FurnaceInventory::checkRecipie(const std::uint64_t r) { return r; }
 
@@ -56,8 +81,8 @@ void FurnaceInventory::draw(class Scene* scene) {
 		scale = sy / INVENTORY_TEXTURE_HEIGHT;
 	}
 
-	ox += (INVENTORY_SLOTS_OFFSET_X + mAX) * scale - (INVENTORY_SLOT_X * scale - sx / INVENTORY_INV_SCALE);
-	oy += (INVENTORY_SLOTS_OFFSET_Y + mAY) * scale - (INVENTORY_SLOT_Y * scale - sy / INVENTORY_INV_SCALE);
+	ox += (INVENTORY_SLOTS_OFFSET_X + mFuelOffsetX) * scale - (INVENTORY_SLOT_X * scale - sx / INVENTORY_INV_SCALE);
+	oy += (INVENTORY_SLOTS_OFFSET_Y + mFuelOffsetY) * scale - (INVENTORY_SLOT_Y * scale - sy / INVENTORY_INV_SCALE);
 
 	shader->activate();
 	shader->set("texture_diffuse"_u, 0);

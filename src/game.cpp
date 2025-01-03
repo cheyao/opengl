@@ -1,9 +1,12 @@
 #include "game.hpp"
 
+#include "components/furnace.hpp"
+#include "items.hpp"
 #include "managers/eventManager.hpp"
 #include "managers/localeManager.hpp"
 #include "managers/storageManager.hpp"
 #include "managers/systemManager.hpp"
+#include "registers.hpp"
 #include "scene.hpp"
 #include "scenes/level.hpp"
 #include "third_party/glad/glad.h"
@@ -95,7 +98,8 @@ void Game::init() {
 	attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
 	attr.onsuccess = audioSucceeded;
 	attr.onerror = audioFailed;
-	emscripten_fetch(&attr, "https://rawcdn.githack.com/cheyao/opengl/refs/heads/main/assets/sounds/subwoofer_lullaby.wav");
+	emscripten_fetch(
+		&attr, "https://rawcdn.githack.com/cheyao/opengl/refs/heads/main/assets/sounds/subwoofer_lullaby.wav");
 	emscripten_fetch(&attr, "https://rawcdn.githack.com/cheyao/opengl/refs/heads/main/assets/sounds/sweden.wav");
 #else
 	std::uint8_t* wav_data;
@@ -194,6 +198,10 @@ SDL_AppResult Game::iterate() {
 
 	gui();
 	mCurrentLevel->update(delta);
+
+	// Tick the furnace
+	static_cast<class FurnaceInventory*>(registers::CLICKABLES.at(Components::Item::FURNACE)())
+		->tick(mCurrentLevel->getScene(), delta);
 	mSystemManager->update(mCurrentLevel->getScene(), delta);
 
 	const auto end = std::chrono::high_resolution_clock::now();
