@@ -15,6 +15,7 @@
 - Everything else like Minecraft
 
 <h2 align="center">Features</h2>
+
 - **Cross-Platorm** 💻📱: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported!
 - **Performant** 🏃: Uses C++, the game runs smoothly even on browsers. (**600**+ FPS on a **11 year old** laptop!)
 - **Multilingual** 🌐: **Unicode** and Locale support build in. (No more �!)
