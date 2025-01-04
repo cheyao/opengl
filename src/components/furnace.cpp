@@ -17,7 +17,7 @@
 // Crafting table
 FurnaceInventory::FurnaceInventory(struct furnace_t)
 	: Inventory(Eigen::Vector2f(8, 8), "ui/furnace.png"), mSmeltingItems(3, Components::AIR()),
-	  mSmeltingCount(3, 0), mFuelLeft(0), mRecipieTime(0), mLastCraft(Components::AIR()) {
+	  mSmeltingCount(3, 0), mFuelTime(0), mFuelLeft(0), mRecipieTime(0), mLastRecipie(Components::AIR()) {
 	mCountRegister[getID<FurnaceInventory>()] = &mSmeltingCount;
 	mItemRegister[getID<FurnaceInventory>()] = &mSmeltingItems;
 }
@@ -63,8 +63,9 @@ bool FurnaceInventory::update(class Scene* const scene, const float delta) {
 			return;
 		}
 
-		if (scene->getSignal(EventManager::LEFT_HOLD_SIGNAL) ||
-		    scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL)) {
+		if ((scene->getSignal(EventManager::LEFT_HOLD_SIGNAL) ||
+		     scene->getSignal(EventManager::RIGHT_HOLD_SIGNAL)) &&
+		    slot != 2) {
 			mLeftLongClick = scene->getSignal(EventManager::LEFT_HOLD_SIGNAL);
 
 			// This is long click
@@ -106,9 +107,11 @@ bool FurnaceInventory::update(class Scene* const scene, const float delta) {
 			// Normalize the buttons to grid cords
 			if (scene->mMouse.count == 0 || mSmeltingCount[slot] == 0 ||
 			    (mSmeltingItems[slot] != scene->mMouse.item)) {
-				std::swap(scene->mMouse.count, mSmeltingCount[slot]);
-				std::swap(scene->mMouse.item, mSmeltingItems[slot]);
-			} else if (mSmeltingItems[slot] == scene->mMouse.item) {
+				if (slot != 2 || scene->mMouse.count == 0) {
+					std::swap(scene->mMouse.count, mSmeltingCount[slot]);
+					std::swap(scene->mMouse.item, mSmeltingItems[slot]);
+				}
+			} else if (mSmeltingItems[slot] == scene->mMouse.item && slot != 2) {
 				mSmeltingCount[slot] += scene->mMouse.count;
 				mSmeltingItems[slot] = scene->mMouse.item;
 
@@ -125,36 +128,45 @@ bool FurnaceInventory::update(class Scene* const scene, const float delta) {
 				return;
 			}
 
-			// 3 types of actions
-			// One of the slot are empty: place half
-			if (scene->mMouse.count == 0 && mSmeltingCount[slot] != 0) {
-				const auto half =
-					(scene->mMouse.count ? scene->mMouse.count : mSmeltingCount[slot]) / 2;
-				const auto round =
-					(scene->mMouse.count ? scene->mMouse.count : mSmeltingCount[slot]) % 2;
-				const auto item = scene->mMouse.item != Components::AIR() ? scene->mMouse.item
-											  : mSmeltingItems[slot];
+			if (slot != 2) {
+				// 3 types of actions
+				// One of the slot are empty: place half
+				if (scene->mMouse.count == 0 && mSmeltingCount[slot] != 0) {
+					const auto half =
+						(scene->mMouse.count ? scene->mMouse.count : mSmeltingCount[slot]) / 2;
+					const auto round =
+						(scene->mMouse.count ? scene->mMouse.count : mSmeltingCount[slot]) % 2;
+					const auto item = scene->mMouse.item != Components::AIR()
+								  ? scene->mMouse.item
+								  : mSmeltingItems[slot];
 
-				scene->mMouse.item = mSmeltingItems[slot] = item;
-				scene->mMouse.count = mSmeltingCount[slot] = half;
-				scene->mMouse.count += round;
-				if (scene->mMouse.count == 0) {
-					scene->mMouse.item = Components::AIR();
+					scene->mMouse.item = mSmeltingItems[slot] = item;
+					scene->mMouse.count = mSmeltingCount[slot] = half;
+					scene->mMouse.count += round;
+					if (scene->mMouse.count == 0) {
+						scene->mMouse.item = Components::AIR();
+					}
+
+					// Same block: add one to stack
+				} else if (mSmeltingCount[slot] == 0 || mSmeltingItems[slot] == scene->mMouse.item) {
+					mSmeltingCount[slot] += 1;
+					mSmeltingItems[slot] = scene->mMouse.item;
+
+					scene->mMouse.count -= 1;
+					if (scene->mMouse.count == 0) {
+						scene->mMouse.item = Components::AIR();
+					}
+					// different blocks in slot & hand: change
+				} else if (mSmeltingItems[slot] != scene->mMouse.item) {
+					std::swap(scene->mMouse.count, mSmeltingCount[slot]);
+					std::swap(scene->mMouse.item, mSmeltingItems[slot]);
 				}
-
-				// Same block: add one to stack
-			} else if (mSmeltingCount[slot] == 0 || mSmeltingItems[slot] == scene->mMouse.item) {
-				mSmeltingCount[slot] += 1;
-				mSmeltingItems[slot] = scene->mMouse.item;
-
-				scene->mMouse.count -= 1;
-				if (scene->mMouse.count == 0) {
-					scene->mMouse.item = Components::AIR();
+			} else {
+				if (mSmeltingItems[slot] != scene->mMouse.item &&
+				    scene->mMouse.item == Components::AIR()) {
+					std::swap(scene->mMouse.count, mSmeltingCount[slot]);
+					std::swap(scene->mMouse.item, mSmeltingItems[slot]);
 				}
-				// different blocks in slot & hand
-			} else if (mSmeltingItems[slot] != scene->mMouse.item) {
-				std::swap(scene->mMouse.count, mSmeltingCount[slot]);
-				std::swap(scene->mMouse.item, mSmeltingItems[slot]);
 			}
 
 			scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) = false;
@@ -174,29 +186,66 @@ bool FurnaceInventory::update(class Scene* const scene, const float delta) {
 }
 
 void FurnaceInventory::tick(class Scene* const, float delta) {
-	mFuelLeft -= delta;
-	if (mFuelLeft < 0) {
-		if (mSmeltingCount[FUEL_SLOT] != 0 && mLastCraft != Components::AIR() &&
-		    mLastCraft == mSmeltingItems[COOK_SLOT] &&
-		    (mSmeltingItems[OUTPUT_SLOT] == Components::AIR() ||
-		     mSmeltingItems[OUTPUT_SLOT] == registers::SMELTING_RECIPIE.at(mLastCraft).second)) {
-			mRecipieTime += delta;
+	// TODO: Don't eat fuel if rec slot is emptry
+	SDL_Log("%f, %f, %f", mFuelLeft, mFuelTime, mRecipieTime);
 
-			if (mRecipieTime > registers::SMELTING_RECIPIE.at(mLastCraft).first) {
-				mRecipieTime = 0;
+	if (registers::SMELTING_RECIPIE.contains(mSmeltingItems[COOK_SLOT])) {
+		const std::pair<double, Components::Item>& recipie =
+			registers::SMELTING_RECIPIE.at(mSmeltingItems[COOK_SLOT]);
+		if (mSmeltingItems[OUTPUT_SLOT] != Components::AIR() && mSmeltingItems[OUTPUT_SLOT] != recipie.second) {
+			mRecipieTime = 0;
 
-				// We add the stuff to the output
-				mSmeltingCount[OUTPUT_SLOT]++;
-				mSmeltingItems[OUTPUT_SLOT] = registers::SMELTING_RECIPIE.at(mLastCraft).second;
-			}
-		} else {
+			goto processFuel;
+		}
+
+		if (mFuelLeft <= 0 &&
+		    !(mSmeltingCount[FUEL_SLOT] >= 1 && registers::BURNING_TIME.contains(mSmeltingItems[FUEL_SLOT]))) {
+			mFuelTime = 0;
 			mFuelLeft = 0;
 			mRecipieTime = 0;
+
+			return;
+		}
+
+		// Here the recipie is valid
+		if (mLastRecipie != recipie.second) {
+			mRecipieTime = 0;
+			mLastRecipie = recipie.second;
+		}
+
+		mRecipieTime += delta;
+		// First check progress, then deduct fuel
+		// I'm feeling generous
+		if (mRecipieTime >= recipie.first) {
+			mSmeltingItems[OUTPUT_SLOT] = recipie.second;
+			mSmeltingCount[OUTPUT_SLOT]++;
+			mRecipieTime = 0;
+		}
+	} else {
+		mRecipieTime = 0;
+	}
+
+processFuel:
+	mFuelLeft -= delta;
+
+	if (mFuelLeft < 0) {
+		// Oh no! No more fuel, get some more or abort
+		if (mSmeltingCount[FUEL_SLOT] >= 1 && registers::BURNING_TIME.contains(mSmeltingItems[FUEL_SLOT])) {
+			mFuelLeft = mFuelTime = registers::BURNING_TIME.at(mSmeltingItems[FUEL_SLOT]);
+
+			mSmeltingCount[FUEL_SLOT]--;
+			if (mSmeltingCount[FUEL_SLOT] == 0) {
+				mSmeltingItems[FUEL_SLOT] = Components::AIR();
+			}
+		} else {
+			mFuelTime = 0;
+			mFuelLeft = 0;
+			mRecipieTime = 0;
+
+			return;
 		}
 	}
 }
-
-bool FurnaceInventory::checkRecipie(const std::uint64_t r) { return r; }
 
 void FurnaceInventory::draw(class Scene* scene) {
 	Inventory::drawInventory(scene);

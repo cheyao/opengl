@@ -22,16 +22,14 @@ class FurnaceInventory : public Inventory {
 	void draw(class Scene* scene) override;
 
       private:
-	void placeGrid();
-	bool checkRecipie(std::uint64_t r);
-
 	std::vector<Components::Item> mSmeltingItems;
 	std::vector<std::uint64_t> mSmeltingCount;
 
+	double mFuelTime;
 	double mFuelLeft;
 	double mRecipieTime;
 
-	Components::Item mLastCraft;
+	Components::Item mLastRecipie;
 
 	constexpr const static inline double mFuelOffsetX = 55;
 	constexpr const static inline double mFuelOffsetY = 98;
