@@ -485,7 +485,7 @@ void RenderSystem::drawHUD(Scene* scene) {
 			->getSelection();
 
 	shader->set("size"_u, y, y);
-	shader->set("offset"_u, offset.x() + x / 9 * select, 0.0f);
+	shader->set("offset"_u, offset.x() + x / 9.1 * select, 0.0f);
 
 	selectTexture->activate(0);
 

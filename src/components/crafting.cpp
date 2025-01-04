@@ -248,9 +248,7 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 	getOutput();
 
 	// Finally get the inventory to update
-	Inventory::update(scene, delta);
-
-	return true;
+	return Inventory::update(scene, delta);
 }
 
 void CraftingInventory::craft() {
