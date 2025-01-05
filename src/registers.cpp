@@ -236,7 +236,7 @@ const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vecto
 			 Item::STICK,
 			 Item::CHARCOAL,
 		 },
-		 {1, Item::TORCH}},
+		 {4, Item::TORCH}},
 };
 // NOLINTEND
 
