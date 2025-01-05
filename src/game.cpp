@@ -300,7 +300,3 @@ SDL_AppResult Game::event(const SDL_Event& event) {
 
 	return mEventManager->manageEvent(event);
 }
-
-// FIXME: There shouldn't be so much inderection
-void Game::setKey(const std::size_t key, const bool val) { mEventManager->setKey(key, val); }
-[[nodiscard]] std::span<bool> Game::getKeystate() { return mEventManager->getKeystate(); };

@@ -177,6 +177,24 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 
 			scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) = false;
 		}
+
+		const auto select = [this, &scene, &slot](const SDL_Scancode s, const std::int64_t n) {
+			if (scene->getSignal(s)) {
+				std::swap(mCraftingCount[slot], mCount[n]);
+				std::swap(mCraftingItems[slot], mItems[n]);
+				scene->getSignal(s) = false;
+			}
+		};
+
+		select(SDL_SCANCODE_1, 0);
+		select(SDL_SCANCODE_2, 1);
+		select(SDL_SCANCODE_3, 2);
+		select(SDL_SCANCODE_4, 3);
+		select(SDL_SCANCODE_5, 4);
+		select(SDL_SCANCODE_6, 5);
+		select(SDL_SCANCODE_7, 6);
+		select(SDL_SCANCODE_8, 7);
+		select(SDL_SCANCODE_9, 8);
 	};
 
 	// Test if player is getting the output

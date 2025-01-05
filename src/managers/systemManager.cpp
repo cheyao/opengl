@@ -152,12 +152,17 @@ void SystemManager::update(Scene* scene, const float delta) {
 
 void SystemManager::updatePlayer(Scene* scene) {
 	// We handle some player's logic here
-	const auto keystate = Game::getInstance()->getKeystate();
-	const auto select = [&scene, &keystate](SDL_Scancode s, std::size_t n) {
-		if (keystate[s]) {
+	if (!mUISystem->empty()) {
+		return;
+	}
+
+	const auto select = [&scene](SDL_Scancode s, std::size_t n) {
+		if (scene->getSignal(s)) {
 			static_cast<PlayerInventory*>(
 				scene->get<Components::inventory>(Game::getInstance()->getPlayerID()).mInventory)
 				->select(n);
+
+			scene->getSignal(s) = false;
 		}
 	};
 

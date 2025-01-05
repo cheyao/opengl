@@ -7,7 +7,7 @@
 
 #include <SDL3/SDL.h>
 
-EventManager::EventManager() noexcept : mGame(Game::getInstance()), mKeys({}), mLeftClickDown(0), mRightClickDown(0) {}
+EventManager::EventManager() noexcept : mGame(Game::getInstance()), mLeftClickDown(0), mRightClickDown(0) {}
 
 SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 	switch (event.type) {
@@ -25,12 +25,12 @@ SDL_AppResult EventManager::manageEvent(const SDL_Event& event) {
 				return SDL_APP_FAILURE;
 			}
 			// Mark the scancode as pressed
-			mKeys[event.key.scancode] = true;
+			mGame->getLevel()->getScene()->getSignal(event.key.scancode) = true;
 			break;
 		}
 
 		case SDL_EVENT_KEY_UP: {
-			mKeys[event.key.scancode] = false;
+			mGame->getLevel()->getScene()->getSignal(event.key.scancode) = false;
 			break;
 		}
 

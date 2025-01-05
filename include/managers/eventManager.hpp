@@ -1,9 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <array>
 #include <cstddef>
-#include <span>
 
 #include "opengl/shader.hpp"
 
@@ -24,17 +22,13 @@ class EventManager {
 	[[nodiscard]] SDL_AppResult manageEvent(const union SDL_Event& event);
 	void update();
 
-	void setKey(const std::size_t key, const bool val) { mKeys[key] = val; }
-	[[nodiscard]] std::span<bool> getKeystate() { return mKeys; };
-
       private:
 	// 0.2s
-	constexpr const static inline std::uint64_t ACTIVATION_TIME = 180ull;
+	constexpr const static inline std::uint64_t ACTIVATION_TIME = 220ull;
 	[[nodiscard]] SDL_AppResult manageKeyboardEvent(const union SDL_Event& event);
 
 	class Game* mGame;
 
-	std::array<bool, SDL_SCANCODE_COUNT> mKeys;
 	std::uint64_t mLeftClickDown;
 	std::uint64_t mRightClickDown;
 };

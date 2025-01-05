@@ -479,8 +479,8 @@ void RenderSystem::drawHUD(Scene* scene) {
 	mMesh->draw(shader);
 
 	// Draw the selection
-	Texture* selectTexture = systemManager->getTexture("ui/hotbar_selection.png");
-	std::size_t select =
+	Texture* const selectTexture = systemManager->getTexture("ui/hotbar-selection.png");
+	const std::size_t select =
 		static_cast<PlayerInventory*>(scene->get<Components::inventory>(mGame->getPlayerID()).mInventory)
 			->getSelection();
 

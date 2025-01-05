@@ -53,8 +53,7 @@ struct texture {
 };
 
 struct input {
-	std::function<void(class Scene* scene, EntityID entity, const std::span<bool> scancodes, const float delta)>
-		mFunction;
+	void (*mFunction)(class Scene* scene, EntityID entity, const float delta);
 
 	input(const decltype(mFunction) function) noexcept : mFunction(function) {}
 };

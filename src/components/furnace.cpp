@@ -171,6 +171,24 @@ bool FurnaceInventory::update(class Scene* const scene, const float delta) {
 
 			scene->getSignal(EventManager::RIGHT_CLICK_DOWN_SIGNAL) = false;
 		}
+
+		const auto select = [this, &scene, &slot](const SDL_Scancode s, const std::int64_t n) {
+			if (scene->getSignal(s) && (slot != 2 || mItems[n] == Components::AIR())) {
+				std::swap(mSmeltingCount[slot], mCount[n]);
+				std::swap(mSmeltingItems[slot], mItems[n]);
+				scene->getSignal(s) = false;
+			}
+		};
+
+		select(SDL_SCANCODE_1, 0);
+		select(SDL_SCANCODE_2, 1);
+		select(SDL_SCANCODE_3, 2);
+		select(SDL_SCANCODE_4, 3);
+		select(SDL_SCANCODE_5, 4);
+		select(SDL_SCANCODE_6, 5);
+		select(SDL_SCANCODE_7, 6);
+		select(SDL_SCANCODE_8, 7);
+		select(SDL_SCANCODE_9, 8);
 	};
 
 	// Uhh
@@ -186,9 +204,6 @@ bool FurnaceInventory::update(class Scene* const scene, const float delta) {
 }
 
 void FurnaceInventory::tick(class Scene* const, float delta) {
-	// TODO: Don't eat fuel if rec slot is emptry
-	SDL_Log("%f, %f, %f", mFuelLeft, mFuelTime, mRecipieTime);
-
 	if (registers::SMELTING_RECIPIE.contains(mSmeltingItems[COOK_SLOT])) {
 		const std::pair<double, Components::Item>& recipie =
 			registers::SMELTING_RECIPIE.at(mSmeltingItems[COOK_SLOT]);
@@ -217,6 +232,11 @@ void FurnaceInventory::tick(class Scene* const, float delta) {
 		// First check progress, then deduct fuel
 		// I'm feeling generous
 		if (mRecipieTime >= recipie.first) {
+			mSmeltingCount[COOK_SLOT]--;
+			if (mSmeltingCount[COOK_SLOT] == 0) {
+				mSmeltingItems[COOK_SLOT] = Components::AIR();
+			}
+
 			mSmeltingItems[OUTPUT_SLOT] = recipie.second;
 			mSmeltingCount[OUTPUT_SLOT]++;
 			mRecipieTime = 0;
@@ -230,7 +250,8 @@ processFuel:
 
 	if (mFuelLeft < 0) {
 		// Oh no! No more fuel, get some more or abort
-		if (mSmeltingCount[FUEL_SLOT] >= 1 && registers::BURNING_TIME.contains(mSmeltingItems[FUEL_SLOT])) {
+		if (mSmeltingCount[FUEL_SLOT] >= 1 && registers::BURNING_TIME.contains(mSmeltingItems[FUEL_SLOT]) &&
+		    registers::SMELTING_RECIPIE.contains(mSmeltingItems[COOK_SLOT])) {
 			mFuelLeft = mFuelTime = registers::BURNING_TIME.at(mSmeltingItems[FUEL_SLOT]);
 
 			mSmeltingCount[FUEL_SLOT]--;
@@ -338,6 +359,53 @@ void FurnaceInventory::draw(class Scene* scene) {
 	ox += mOutX * scale;
 	oy += mOutY * scale;
 	drawSlot(ox, oy, 2);
+
+	// Now draw the process & stuff
+
+	ox -= mOutX * scale;
+	oy -= mOutY * scale;
+	oy -= (INVENTORY_SLOT_Y + 1) * scale;
+	ox -= 1 * scale;
+
+	// 1. Fuel fire
+	if (mFuelLeft > 0 && mFuelTime != 0) {
+		const float percentage = mFuelLeft / mFuelTime;
+		Texture* const fireTexture = mGame->getSystemManager()->getTexture("ui/lit-progress.png");
+		Shader* const percentShader = mGame->getSystemManager()->getShader("percentage.vert", "ui.frag");
+		const Eigen::Vector2f size = fireTexture->getSize() / 7 * scale;
+
+		percentShader->activate();
+		percentShader->set("texture_diffuse"_u, 0);
+		percentShader->set("size"_u, size);
+		percentShader->set("offset"_u, ox, oy);
+		percentShader->set("percent"_u, percentage);
+		percentShader->set("vertical"_u, true);
+		fireTexture->activate(0);
+
+		mesh->draw(percentShader);
+	}
+
+	ox += 23 * scale;
+
+	// 2. Recipie time left
+	if (mRecipieTime > 0) {
+		const float percentage = mRecipieTime / registers::SMELTING_RECIPIE.at(mSmeltingItems[COOK_SLOT]).first;
+		Texture* const progressTexture = mGame->getSystemManager()->getTexture("ui/burn-progress.png");
+		Shader* const percentShader = mGame->getSystemManager()->getShader("percentage.vert", "ui.frag");
+		const Eigen::Vector2f size = progressTexture->getSize() / 7 * scale;
+
+		percentShader->activate();
+		percentShader->set("texture_diffuse"_u, 0);
+		percentShader->set("size"_u, size);
+		percentShader->set("offset"_u, ox, oy);
+		percentShader->set("percent"_u, percentage);
+		percentShader->set("vertical"_u, false);
+		progressTexture->activate(0);
+
+		mesh->draw(percentShader);
+	}
+
+	shader->activate();
 
 	Inventory::drawMouse(scene);
 }

@@ -34,9 +34,6 @@ class Game {
 	[[nodiscard]] class LocaleManager* getLocaleManager() const { return mLocaleManager.get(); }
 	[[nodiscard]] class SystemManager* getSystemManager() const { return mSystemManager.get(); }
 
-	void setKey(std::size_t key, bool val);
-	[[nodiscard]] std::span<bool> getKeystate();
-
 	void setPlayerID(const EntityID id) { mPlayer = id; }
 	[[nodiscard]] EntityID getPlayerID() const { return mPlayer; }
 

@@ -284,24 +284,23 @@ void Level::createCommon() {
 	mScene->emplace<Components::texture>(player, playerTexture);
 	mScene->emplace<Components::collision>(player, Eigen::Vector2f(0.0f, 0.0f), playerTexture->getSize());
 	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
-	mScene->emplace<Components::input>(
-		player, [this](class Scene* scene, const EntityID entity, const auto scancodes, const float) {
-			Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;
+	mScene->emplace<Components::input>(player, [](class Scene* scene, const EntityID entity, const float) {
+		Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;
 
-			if (scancodes[SDL_SCANCODE_D] && vel.x() < 220) {
-				vel.x() += 70;
-			}
+		if (scene->getSignal(SDL_SCANCODE_D) && vel.x() < 220) {
+			vel.x() += 70;
+		}
 
-			if (scancodes[SDL_SCANCODE_A] && vel.x() > -220) {
-				vel.x() -= 70;
-			}
+		if (scene->getSignal(SDL_SCANCODE_A) && vel.x() > -220) {
+			vel.x() -= 70;
+		}
 
-			// Open inv
-			if (scancodes[SDL_SCANCODE_E]) {
-				this->mGame->getSystemManager()->getUISystem()->addScreen(
-					scene->get<Components::inventory>(entity).mInventory);
-			}
-		});
+		// Open inv
+		if (scene->getSignal(SDL_SCANCODE_E)) {
+			Game::getInstance()->getSystemManager()->getUISystem()->addScreen(
+				scene->get<Components::inventory>(entity).mInventory);
+		}
+	});
 
 	mTextID = mScene->newEntity();
 	mScene->emplace<Components::text>(mTextID, "AD0");

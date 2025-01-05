@@ -12,7 +12,6 @@
 
 #include <SDL3/SDL.h>
 #include <cstddef>
-#include <span>
 #include <string>
 
 #ifdef IMGUI
@@ -84,7 +83,7 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 		if (onGround) {
 			// We can jump IF the entity is a misc entity with the jump flag, and the up key is pressed, and
 			// we are on the ground
-			if (entity == mGame->getPlayerID() && mGame->getKeystate()[SDL_SCANCODE_SPACE]) {
+			if (entity == mGame->getPlayerID() && scene->getSignal(SDL_SCANCODE_SPACE)) {
 				velocity.y() = jumpForce;
 			} else {
 				velocity.y() = 0.0f;

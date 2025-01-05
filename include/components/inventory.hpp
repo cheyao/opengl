@@ -61,7 +61,7 @@ class Inventory : public Screen {
 	float INVENTORY_SLOTS_OFFSET_X = 7.5f;
 	float INVENTORY_SLOTS_OFFSET_Y = 8.5f;
 
-	void handleKeys();
+	void handleKeys(class Scene* scene);
 	void drawMouse(class Scene* scene);
 	void drawInventory(class Scene* scene);
 	void drawItems(class Scene* scene);

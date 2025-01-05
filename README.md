@@ -13,6 +13,8 @@
 - WASD for movement
 - E to open Inventory
 - ESC to close
+- Hold left click to break block
+- Right click to interact/place block
 - Everything else like Minecraft
 
 <h2 align="center">Features</h2>

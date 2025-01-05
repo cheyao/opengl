@@ -79,7 +79,7 @@ void Inventory::save(rapidjson::Value& contents, rapidjson::Document::AllocatorT
 }
 
 bool Inventory::update(class Scene* scene, float) {
-	handleKeys();
+	handleKeys(scene);
 
 	SystemManager* const systemManager = mGame->getSystemManager();
 	const Eigen::Vector2f dimensions = systemManager->getDemensions();
@@ -261,20 +261,35 @@ bool Inventory::update(class Scene* scene, float) {
 	}
 endLogic:
 
+	const auto select = [&scene, &slot](const SDL_Scancode s, const std::int64_t n) {
+		if (scene->getSignal(s) && n != slot) {
+			std::swap(mCount[slot], mCount[n]);
+			std::swap(mItems[slot], mItems[n]);
+			scene->getSignal(s) = false;
+		}
+	};
+
+	select(SDL_SCANCODE_1, 0);
+	select(SDL_SCANCODE_2, 1);
+	select(SDL_SCANCODE_3, 2);
+	select(SDL_SCANCODE_4, 3);
+	select(SDL_SCANCODE_5, 4);
+	select(SDL_SCANCODE_6, 5);
+	select(SDL_SCANCODE_7, 6);
+	select(SDL_SCANCODE_8, 7);
+	select(SDL_SCANCODE_9, 8);
+
 	return true;
 }
 
-void Inventory::handleKeys() {
-	// Handle mouse and keys
-	const auto keystate = mGame->getKeystate();
-
+void Inventory::handleKeys(class Scene* const scene) {
 	// Quit menu
-	if (keystate[SDL_SCANCODE_ESCAPE]) {
+	if (scene->getSignal(SDL_SCANCODE_ESCAPE)) {
 		mGame->getSystemManager()->getUISystem()->pop();
 	}
 }
 
-void Inventory::draw(class Scene* scene) {
+void Inventory::draw(class Scene* const scene) {
 	drawInventory(scene);
 	drawItems(scene);
 	drawMouse(scene);
@@ -283,11 +298,11 @@ void Inventory::draw(class Scene* scene) {
 void Inventory::drawInventory(class Scene*) {
 	// Draw the inventory
 	SystemManager* systemManager = mGame->getSystemManager();
-	Shader* shader = systemManager->getShader("ui.vert", "ui.frag");
+	Shader* const shader = systemManager->getShader("ui.vert", "ui.frag");
 	const Eigen::Vector2f dimensions = systemManager->getDemensions();
 
-	Texture* texture = systemManager->getTexture(INVENTORY_SPRITE_FILE);
-	Mesh* mesh = systemManager->getUISystem()->getMesh();
+	Texture* const texture = systemManager->getTexture(INVENTORY_SPRITE_FILE);
+	Mesh* const mesh = systemManager->getUISystem()->getMesh();
 
 	float x, y;
 	float ox, oy;

@@ -19,8 +19,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_timer.h>
 #include <cstddef>
-#include <functional>
-#include <span>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -32,12 +30,10 @@ void InputSystem::update(Scene* scene, const float delta) {
 		return;
 	}
 
-	const auto keystate = mGame->getKeystate();
-
 	for (const auto& [entity, input] : scene->view<Components::input>().each()) {
 		SDL_assert(input.mFunction != nullptr);
 
-		input.mFunction(scene, entity, keystate, delta);
+		input.mFunction(scene, entity, delta);
 	}
 
 	updateMouse(scene, delta);
