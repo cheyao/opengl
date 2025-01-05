@@ -36,11 +36,19 @@ void PlayerInventory::tryPlace(class Scene* scene, const Eigen::Vector2i& pos) {
 	const EntityID entity = scene->newEntity();
 	scene->emplace<Components::block>(entity, mItems[mSelect], pos);
 	scene->emplace<Components::texture>(entity, texture);
-	scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(), true);
+
+	if (registers::COLLISION_BOXES.contains(mItems[mSelect])) {
+		const auto& box = registers::COLLISION_BOXES.at(mItems[mSelect]);
+
+		if (!(box.second.x() == 0 || box.second.y() == 0)) {
+			scene->emplace<Components::collision>(entity, box.first, box.second, true);
+		}
+	} else {
+		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(), true);
+	}
 
 	--mCount[mSelect];
 	if (mCount[mSelect] == 0) {
 		mItems[mSelect] = Components::AIR();
 	}
 }
-

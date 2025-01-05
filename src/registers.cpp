@@ -5,6 +5,7 @@
 #include "components/furnace.hpp"
 #include "items.hpp"
 #include "screens/screen.hpp"
+#include "third_party/Eigen/Core"
 
 #include <cstdint>
 #include <string>
@@ -37,13 +38,17 @@ const std::unordered_map<Components::Item, std::string> TEXTURES = {
 	{Item::COBBLESTONE, "blocks/cobblestone.png"},
 	{Item::FURNACE, "blocks/furnace.png"},
 	{Item::APPLE, "items/apple.png"},
+	{Item::TORCH, "blocks/torch.png"},
+	{Item::CAMPFIRE, "blocks/campfire.png"},
+	{Item::CHARCOAL, "items/charcoal.png"},
 };
 
 const std::unordered_map<Components::Item, std::pair<int, std::uint64_t>> BREAK_TIMES = {
 	{Item::AIR, {0, 0}},	     {Item::GRASS_BLOCK, {0, 40}},    {Item::DIRT, {0, 40}},
 	{Item::STONE, {1, 80}},	     {Item::OAK_LOG, {0, 50}},	      {Item::OAK_LEAVES, {0, 20}},
 	{Item::OAK_PLANKS, {0, 60}}, {Item::CRAFTING_TABLE, {0, 50}}, {Item::COBBLESTONE, {1, 80}},
-	{Item::FURNACE, {1, 80}}};
+	{Item::FURNACE, {1, 80}},    {Item::CAMPFIRE, {0, 50}},	      {Item::TORCH, {0, 2}},
+};
 
 // Will add one in the real calculation
 // WOOD 1 STONE 3 IRON 5 diamond 7 neth 8 gold 11
@@ -60,8 +65,7 @@ extern const std::unordered_map<Components::Item, registers::MiningSystem> MININ
 	{Item::WOODEN_PICKAXE, MiningSystem::PICKAXE}, {Item::STONE_SHOVEL, MiningSystem::SHOVEL},
 	{Item::STONE_AXE, MiningSystem::AXE},	       {Item::STONE_HOE, MiningSystem::HOE},
 	{Item::STONE_PICKAXE, MiningSystem::PICKAXE},  {Item::COBBLESTONE, MiningSystem::PICKAXE},
-	{Item::FURNACE, MiningSystem::PICKAXE},
-};
+	{Item::FURNACE, MiningSystem::PICKAXE},	       {Item::CAMPFIRE, MiningSystem::AXE}};
 
 const std::vector<std::pair<float, std::vector<std::pair<Components::Item, Eigen::Vector2i>>>> SURFACE_STRUCTURES = {
 	{0.08,
@@ -102,6 +106,11 @@ const std::unordered_map<Components::Item, std::vector<std::pair<float, Componen
 	{Item::STONE,
 	 {
 		 {1.1f, Item::COBBLESTONE},
+	 }},
+	{Item::CAMPFIRE,
+	 {
+		 {1.1f, Item::CHARCOAL},
+		 {1.1f, Item::CHARCOAL},
 	 }},
 };
 
@@ -209,18 +218,38 @@ const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vecto
 			 Item::COBBLESTONE,
 		 },
 		 {1, Item::FURNACE}},
+		{{3, 3},
+		 {
+			 Item::OAK_LOG,
+			 Item::OAK_LOG,
+			 Item::OAK_LOG,
+			 Item::STICK,
+			 Item::CHARCOAL,
+			 Item::STICK,
+			 Item::AIR,
+			 Item::STICK,
+			 Item::AIR,
+		 },
+		 {1, Item::CAMPFIRE}},
+		{{1, 2},
+		 {
+			 Item::STICK,
+			 Item::CHARCOAL,
+		 },
+		 {1, Item::TORCH}},
 };
 // NOLINTEND
 
-const std::unordered_map<Components::Item, std::uint64_t> BURNING_TIME = {
-	{Item::OAK_LOG, 160},
-	{Item::OAK_PLANKS, 40},
-	{Item::STICK, 10},
+// Time in seconds
+const std::unordered_map<Components::Item, double> BURNING_TIME = {
+	{Item::OAK_LOG, 16},	   {Item::OAK_PLANKS, 4}, {Item::STICK, 2},	    {Item::WOODEN_AXE, 8},
+	{Item::WOODEN_PICKAXE, 8}, {Item::WOODEN_HOE, 8}, {Item::WOODEN_SHOVEL, 8}, {Item::CHARCOAL, 32},
 };
 
 // Time in seconds
 const std::unordered_map<Components::Item, std::pair<double, Components::Item>> SMELTING_RECIPIE = {
-	{Item::COBBLESTONE, {5, Item::STONE}},
+	{Item::COBBLESTONE, {8, Item::STONE}},
+	{Item::OAK_LOG, {8, Item::CHARCOAL}},
 };
 
 template <typename T, typename... Args> T* staticHelper(Args&&... args) {
@@ -236,5 +265,11 @@ const std::unordered_map<Components::Item, Screen* (*)(void)> CLICKABLES = {
 const std::vector<std::string> BACKGROUND_SOUNDS = {
 	"sweden.wav",
 	"subwoofer_lullaby.wav",
+};
+
+constexpr inline auto size = 16 * 7;
+extern const std::unordered_map<Components::Item, std::pair<Eigen::Vector2f, Eigen::Vector2f>> COLLISION_BOXES = {
+	{Item::CAMPFIRE, {Eigen::Vector2f(0, 0), Eigen::Vector2f(size, size / 2)}},
+	{Item::TORCH, {Eigen::Vector2f(0, 0), Eigen::Vector2f(0, 0)}},
 };
 } // namespace registers

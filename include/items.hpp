@@ -24,5 +24,8 @@ enum class Item : std::uint64_t {
 	COBBLESTONE,
 	FURNACE,
 	APPLE,
+	CHARCOAL,
+	TORCH,
+	CAMPFIRE
 };
 } // namespace Components

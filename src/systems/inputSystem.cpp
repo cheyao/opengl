@@ -118,7 +118,7 @@ void InputSystem::updateMouse(Scene* scene, const float) {
 					getLoot = false;
 				}
 			}
-			if (handLevel != 0 &&
+			if (handLevel != 0 && registers::MINING_SYSTEM.contains(block.mType) &&
 			    registers::MINING_SYSTEM.at(block.mType) == registers::MINING_SYSTEM.at(handItem)) {
 				speed += handLevel;
 			}
