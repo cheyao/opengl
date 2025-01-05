@@ -49,7 +49,7 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 RenderSystem::RenderSystem() noexcept
 	: mGame(Game::getInstance()), mWindow(nullptr, SDL_DestroyWindow), mCursor(nullptr, SDL_DestroyCursor),
 	  mIcon(nullptr, SDL_DestroySurface), mGL(nullptr), mFramebuffer(nullptr), mMatricesUBO(nullptr),
-	  mTextures(std::make_unique<TextureManager>()), mShaders(std::make_unique<ShaderManager>()), mMesh(nullptr),
+	  mTextures(nullptr), mShaders(nullptr), mMesh(nullptr),
 	  mWidth(0), mHeight(0) {
 	const SDL_DisplayMode* const DM = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
 
@@ -182,6 +182,9 @@ RenderSystem::RenderSystem() noexcept
 #endif
 
 	SDL_GetWindowSize(mWindow.get(), &mWidth, &mHeight);
+
+	mTextures = std::make_unique<TextureManager>();
+	mShaders = std::make_unique<ShaderManager>();
 
 	mFramebuffer = std::make_unique<Framebuffer>(this);
 	// NOTE: Uncomment if testing framebuffer module

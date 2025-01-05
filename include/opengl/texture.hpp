@@ -26,7 +26,7 @@ class Texture {
 	Eigen::Vector2f getSize() const { return Eigen::Vector2f(mWidth, mHeight) * 7; }
 
       protected:
-	virtual void load(bool srgb);
+	[[nodiscard]] virtual bool load(bool srgb);
 
 	GLuint mID;
 	std::string name;

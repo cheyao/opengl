@@ -7,19 +7,15 @@
 #include <SDL3/SDL.h>
 #include <cstddef>
 #include <stddef.h>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <vector>
 #include <version>
 
-ShaderManager::ShaderManager() : mPath(getBasePath() + "assets/shaders/") {
-	mShaders["default.vert:default.frag:"] = nullptr;
-}
+ShaderManager::ShaderManager() : mPath(getBasePath() + "assets/shaders/") { get("default.vert", "default.frag"); }
 
 Shader* ShaderManager::get(std::string_view vert, std::string_view frag, std::string_view geom) {
-	SDL_assert(!(vert == "default.vert" && frag == "default.frag"));
 #ifdef __cpp_lib_string_contains
 	// Ugh don't mind assering when the libc++ isn't up to date
 	SDL_assert(!vert.contains(':') && !frag.contains(':') && !geom.contains(':'));
@@ -35,22 +31,16 @@ Shader* ShaderManager::get(std::string_view vert, std::string_view frag, std::st
 		return mShaders.at(concated);
 	}
 
-	Shader* shader = nullptr;
-	try {
-		shader = new Shader(mPath + std::string(vert), mPath + std::string(frag),
-				    geom.empty() ? geom : mPath + std::string(geom));
-	} catch (const std::runtime_error& error) {
+	Shader* shader = new Shader();
+	if (!shader->load(mPath + std::string(vert), mPath + std::string(frag),
+			  geom.empty() ? geom : mPath + std::string(geom))) {
 		SDL_LogError(
 			SDL_LOG_CATEGORY_RENDER,
 			"\x1B[31mShaderManager.cpp: Error compiling shader %s, falling back to default shader\033[0m",
 			concated.data());
 
-		if (mShaders["default.vert:default.frag:"] == nullptr) {
-			mShaders["default.vert:default.frag:"] =
-				new Shader(mPath + "default.vert", mPath + "default.frag");
-		}
-
-		shader = mShaders["default.vert:default.frag:"];
+		delete shader;
+		shader = get("default.vert", "default.frag");
 	}
 
 	mShaders[concated] = shader;
@@ -89,7 +79,7 @@ another vector register
 // TODO: Unloading when out of memory
 ShaderManager::~ShaderManager() {
 	// Default shader might get used multiple times
-	Shader* def = mShaders["default.vert:default.frag:"];
+	Shader* const def = get("default.vert", "default.frag");
 
 	for (const auto& [_, shader] : mShaders) {
 		if (shader != def) {
@@ -111,35 +101,16 @@ void ShaderManager::reload() {
 		std::string geom = names.substr(pos2 + 1, names.size() - pos);
 		geom = geom.empty() ? "" : mPath + geom;
 
-#ifdef DEBUG
 		SDL_Log("Reloading %s:%s", vert.data(), frag.data());
 
-		try {
-			Shader* newTexture = new Shader(vert, frag, geom);
-
-			delete shader;
-			shader = nullptr;
-
-			shader = newTexture;
-		} catch (const std::runtime_error& error) {
-			SDL_Log("Error recompiling shaders: %s", error.what());
-
-			shader = this->get("default.vert", "default.frag");
+		Shader* newShader = new Shader();
+		if (!newShader->load(vert, frag, geom)) {
+			newShader = this->get("default.vert", "default.frag");
+			SDL_Log("Error recompiling shaders");
 		}
-#else
-		try {
-			delete shader;
-			shader = nullptr;
 
-			Shader* newTexture = new Shader(vert, frag, geom);
-
-			shader = newTexture;
-		} catch (const std::runtime_error& error) {
-			shader = this->get("default.vert", "default.frag");
-
-			throw error;
-		}
-#endif
+		delete shader;
+		shader = newShader;
 	}
 }
 

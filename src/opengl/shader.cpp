@@ -25,19 +25,18 @@ std::uint64_t crc32(const char* str, std::size_t len) {
 	return crc ^ 0xFFFFFFFF;
 }
 
-Shader::Shader(const std::string_view vertName, const std::string_view fragName, const std::string_view geomName)
-	: mName(std::string(vertName) + ":" + std::string(fragName) + ":" + std::string(geomName)),
-	  mShaderProgram(glCreateProgram()) {
-	const GLuint vertShader = compile(vertName, GL_VERTEX_SHADER);
-	SDL_assert(glIsShader(vertShader) && "Shader.cpp: Vertex shader not loaded correctly");
+Shader::Shader() : mName(), mShaderProgram(glCreateProgram()) {}
 
+bool Shader::load(std::string_view vertName, std::string_view fragName, std::string_view geomName) {
+	mName = (std::string(vertName) + ":" + std::string(fragName) + ":" + std::string(geomName));
+
+	const GLuint vertShader = compile(vertName, GL_VERTEX_SHADER);
 	const GLuint fragShader = compile(fragName, GL_FRAGMENT_SHADER);
-	SDL_assert(glIsShader(fragShader) && "Shader.cpp: Fragment shader not loaded correctly");
+	[[unlikely]] if (vertShader == 0 || fragShader == 0) { return false; }
 
 	GLuint geomShader = geomName.empty() ? 0 : compile(geomName, GL_GEOMETRY_SHADER);
 	if (!geomName.empty()) {
-		SDL_assert(geomShader != 0);
-		SDL_assert(glIsShader(geomShader) && "Shader.cpp: Geometry shader not loaded correctly");
+		[[unlikely]] if (geomShader == 0) { return false; }
 	}
 
 	glAttachShader(mShaderProgram, vertShader);
@@ -59,18 +58,17 @@ Shader::Shader(const std::string_view vertName, const std::string_view fragName,
 	[[unlikely]] if (success == 0 || !glIsProgram(mShaderProgram)) {
 		GLint len = 0;
 		glGetProgramiv(mShaderProgram, GL_INFO_LOG_LENGTH, &len);
-		GLchar* log = new GLchar[len + 1];
+		std::unique_ptr<GLchar[]> log(new GLchar[len + 1]);
 
 		glGetProgramInfoLog(mShaderProgram, 512, nullptr, &log[0]);
 
 		log[len] = 0;
 
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mShader.cpp: Failed to link shader: \n%s\n\033[0m", log);
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mShader.cpp: Failed to link shader: \n%s\n\033[0m",
+				log.get());
 		ERROR_BOX("Failed to link shader");
 
-		delete[] log;
-
-		throw std::runtime_error("Shader.cpp: Failed to link shader");
+		return false;
 	}
 
 	bind("Matrices", 0);
@@ -97,17 +95,17 @@ Shader::Shader(const std::string_view vertName, const std::string_view fragName,
 	GLint len = 0;
 	glGetProgramiv(mShaderProgram, GL_INFO_LOG_LENGTH, &len);
 
-	if (len == 0) {
-		return;
+	if (len != 0) {
+		std::unique_ptr<GLchar[]> log(new GLchar[len + 1]);
+
+		log[len] = 0;
+
+		glGetProgramInfoLog(mShaderProgram, 512, nullptr, log.get());
+		SDL_Log("Log of shader compile: \n%s\n", log.get());
 	}
-
-	GLchar* log = new GLchar[len + 1];
-
-	log[len] = 0;
-
-	glGetProgramInfoLog(mShaderProgram, 512, nullptr, &log[0]);
-	SDL_Log("Log of shader compile: \n%s\n", log);
 #endif
+
+	return true;
 }
 
 Shader::~Shader() { glDeleteProgram(mShaderProgram); }
@@ -173,7 +171,8 @@ void Shader::bind(const std::string_view name, const GLuint index) const {
 }
 
 GLuint Shader::compile(const std::string_view fileName, const GLenum type) {
-	char* shaderSource = static_cast<char*>(loadFile(fileName.data(), nullptr));
+	std::unique_ptr<char[], void (*)(void*)> shaderSource(static_cast<char*>(loadFile(fileName.data(), nullptr)),
+							      SDL_free);
 
 	[[unlikely]] if (shaderSource == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to read shader shource %s: %s\n",
@@ -181,7 +180,7 @@ GLuint Shader::compile(const std::string_view fileName, const GLenum type) {
 
 		ERROR_BOX("Failed to read assets");
 
-		throw std::runtime_error("Shader.cpp: Failed to read shader source");
+		return 0;
 	}
 	SDL_Log("Shader.cpp: Loading %s", fileName.data());
 
@@ -199,13 +198,11 @@ GLuint Shader::compile(const std::string_view fileName, const GLenum type) {
 	shaderSource[15] = ' ';
 	shaderSource[16] = ' ';
 #endif
-
+	const auto ptr = shaderSource.get();
 	GLuint out = glCreateShader(type);
 	// Zero terminated, so no need for length
-	glShaderSource(out, 1, &shaderSource, nullptr);
+	glShaderSource(out, 1, &ptr, nullptr);
 	glCompileShader(out);
-
-	SDL_free(shaderSource);
 
 	// Error checking
 	GLint success = 0;
@@ -213,39 +210,32 @@ GLuint Shader::compile(const std::string_view fileName, const GLenum type) {
 	[[unlikely]] if (success == 0) {
 		GLint len = 0;
 		glGetShaderiv(out, GL_INFO_LOG_LENGTH, &len);
-		GLchar* log = new GLchar[len + 1];
+		std::unique_ptr<GLchar[]> log(new GLchar[len + 1]);
 
-		glGetShaderInfoLog(out, len * sizeof(GLchar), nullptr, &log[0]);
+		glGetShaderInfoLog(out, len, nullptr, log.get());
 
 		log[len] = 0;
 
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Shader.cpp: Failed to compile shader %s: \n%s\n",
-				fileName.data(), log);
+				fileName.data(), log.get());
 
 		ERROR_BOX("Failed to compile shader");
 
-		delete[] log;
-
-		throw std::runtime_error("Shader.cpp: Failed to compile shader");
+		return 0;
 	}
-
-	SDL_assert(glIsShader(out) &&
-		   "Shader.cpp: Error compiling shader, something wrong with code: should have been catched");
 
 #ifdef DEBUG
 	GLint len = 0;
 	glGetShaderiv(out, GL_INFO_LOG_LENGTH, &len);
 
-	if (len == 0) {
-		return out;
+	if (len != 0) {
+		std::unique_ptr<GLchar[]> log(new GLchar[len + 1]);
+
+		log[len] = 0;
+
+		glGetShaderInfoLog(out, len, nullptr, log.get());
+		SDL_Log("Log of shader compile: \n%s\n", log.get());
 	}
-
-	GLchar* log = new GLchar[len + 1];
-
-	log[len] = 0;
-
-	glGetShaderInfoLog(out, 512, nullptr, &log[0]);
-	SDL_Log("Log of shader compile: \n%s\n", log);
 #endif
 
 	return out;

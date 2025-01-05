@@ -10,6 +10,7 @@
 TextureManager::TextureManager() : mPath(getBasePath() + "assets/textures/") {
 	// OpenGL wants this
 	stbi_set_flip_vertically_on_load(false);
+	get("missing-texture.png");
 }
 
 Texture* TextureManager::get(const std::string& name, const bool srgb) {
@@ -18,7 +19,12 @@ Texture* TextureManager::get(const std::string& name, const bool srgb) {
 	}
 
 	Texture* texture = new Texture(mPath + name);
-	texture->load(srgb);
+	[[unlikely]] if (!texture->load(srgb)) {
+		SDL_Log("Warining! Texture not found for %s", name.data());
+
+		delete texture;
+		texture = get("missing-texture.png");
+	}
 
 	mTextures[name] = texture;
 
@@ -27,9 +33,15 @@ Texture* TextureManager::get(const std::string& name, const bool srgb) {
 
 // TODO: Unloading when out of memory
 TextureManager::~TextureManager() {
+	Texture* const missing = get("missing-texture.png");
+
 	for (const auto& [_, texture] : mTextures) {
-		delete texture;
+		if (texture != missing) {
+			delete texture;
+		}
 	}
+
+	delete missing;
 }
 
 void TextureManager::reload() {

@@ -22,9 +22,9 @@ void main() {
 		pos.y *= percent;
 
 		// Reverse the texture position
-		vTexPos.y = 1 - vTexPos.y;
+		vTexPos.y = 1.0f - vTexPos.y;
 		vTexPos.y *= percent;
-		vTexPos.y = 1 - vTexPos.y;
+		vTexPos.y = 1.0f - vTexPos.y;
 	} else {
 		pos.x *= percent;
 

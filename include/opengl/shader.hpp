@@ -63,13 +63,14 @@ std::uint64_t crc32(const char* str, std::size_t len);
 
 class Shader {
       public:
-	explicit Shader(std::string_view vertName, std::string_view fragName, std::string_view geomName = "");
+	Shader();
 	Shader(Shader&&) = delete;
 	Shader(const Shader&) = delete;
 	Shader& operator=(Shader&&) = delete;
 	Shader& operator=(const Shader&) = delete;
 	~Shader();
 
+	[[nodiscard]] bool load(std::string_view vertName, std::string_view fragName, std::string_view geomName = "");
 	void activate() const noexcept;
 
 	// set uniform
@@ -94,7 +95,7 @@ class Shader {
 
 	GLint getUniform(std::uint64_t name) const;
 
-	const std::string mName;
+	std::string mName;
 	const GLuint mShaderProgram;
 
 	// Cache

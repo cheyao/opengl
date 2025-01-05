@@ -9,7 +9,6 @@
 #include FT_FREETYPE_H
 #include <SDL3/SDL.h>
 #include <cstddef>
-#include <stdexcept>
 #include <string_view>
 
 // Load on demand
@@ -52,7 +51,7 @@ void Texture::activate(const unsigned int num) const {
 }
 
 // NOTE: Maybe load on demand?
-void Texture::load(bool srgb) {
+bool Texture::load(bool srgb) {
 	SDL_Log("Loading texture %s", name.data());
 
 	std::size_t size = 0;
@@ -65,7 +64,7 @@ void Texture::load(bool srgb) {
 
 		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have enough memory");
 
-		throw std::runtime_error("Texture.cpp: Failed to read texture");
+		return false;
 	}
 
 	int channels = 0;
@@ -77,7 +76,7 @@ void Texture::load(bool srgb) {
 		SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mFailed to decompress texture: %s\033[0m", name.data());
 		ERROR_BOX("Failed to load textures, the assets is corrupted or you don't have enough memory");
 
-		throw std::runtime_error("Texture.cpp: Failed to load texture");
+		return false;
 	}
 
 	GLenum format = GL_RGB;
@@ -107,6 +106,7 @@ void Texture::load(bool srgb) {
 				     __FILE__, __LINE__, name.data(), channels);
 			ERROR_BOX("Failed to recognise file color format, the assets is probably "
 				  "corrupted");
+
 			break; // Recoverable error
 	}
 
@@ -124,4 +124,6 @@ void Texture::load(bool srgb) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	SDL_Log("Loaded texture %s: %d channels %dx%d", name.data(), channels, mWidth, mHeight);
+
+	return true;
 }
