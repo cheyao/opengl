@@ -43,6 +43,7 @@ void audioSucceeded(emscripten_fetch_t* fetch) {
 
 	if (SDL_LoadWAV_IO(SDL_IOFromConstMem(fetch->data, fetch->numBytes), true, &spec, &wav_data, &wav_data_len)) {
 		mAudio.emplace_back(std::make_pair(wav_data, wav_data_len));
+		SDL_Log("Queued wav with %d %d %d", spec.freq, spec.channels, spec.format);
 	} else {
 		SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
 	}
@@ -90,6 +91,9 @@ void Game::init() {
 	// mSystemManager->getUISystem()->addScreen(&sign);
 
 	SDL_AudioSpec spec;
+	spec.format = SDL_AUDIO_S16LE;
+	spec.channels = 2;
+	spec.freq = 48000;
 
 #ifdef __EMSCRIPTEN__
 	emscripten_fetch_attr_t attr;
@@ -119,9 +123,6 @@ void Game::init() {
 	}
 #endif
 
-	spec.format = SDL_AUDIO_S16LE;
-	spec.channels = 2;
-	spec.freq = 48000;
 	mStream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, nullptr, nullptr);
 	SDL_ResumeAudioStreamDevice(mStream);
 
@@ -173,7 +174,7 @@ SDL_AppResult Game::iterate() {
 	if (mStream && !mAudio.empty()) {
 		if (SDL_GetAudioStreamAvailable(mStream) < static_cast<int>(mAudio[audioPtr].second)) {
 			SDL_PutAudioStreamData(mStream, mAudio[audioPtr].first, mAudio[audioPtr].second);
-			SDL_ResumeAudioStreamDevice(mStream);
+			SDL_FlushAudioStream(mStream);
 
 			++audioPtr;
 			if (audioPtr == mAudio.size()) {

@@ -40,6 +40,7 @@ Minecraft Features:
 - Smelting
 - Break levels
 - Loot table
+- Audio
 
 <h2 align="center">Inner workings</h2>
 
