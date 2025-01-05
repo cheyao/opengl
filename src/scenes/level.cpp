@@ -287,12 +287,12 @@ void Level::createCommon() {
 	mScene->emplace<Components::input>(player, [](class Scene* scene, const EntityID entity, const float) {
 		Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;
 
-		if (scene->getSignal(SDL_SCANCODE_D) && vel.x() < 220) {
-			vel.x() += 70;
+		if (scene->getSignal(SDL_SCANCODE_D) && vel.x() < 300) {
+			vel.x() += 90;
 		}
 
-		if (scene->getSignal(SDL_SCANCODE_A) && vel.x() > -220) {
-			vel.x() -= 70;
+		if (scene->getSignal(SDL_SCANCODE_A) && vel.x() > -300) {
+			vel.x() -= 90;
 		}
 
 		// Open inv
