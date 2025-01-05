@@ -199,15 +199,49 @@ bool CraftingInventory::update(class Scene* const scene, const float delta) {
 
 	// Test if player is getting the output
 	const auto getOutput = [&]() {
-		if (!scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL)) {
-			return;
-		}
-
 		if (mLastCraft == 0) {
 			return;
 		}
 
 		if (mouseX < ox || mouseY < oy || mouseX > (ox + slotx) || mouseY > (oy + sloty)) {
+			return;
+		}
+
+		if (!scene->getSignal(EventManager::LEFT_CLICK_DOWN_SIGNAL)) {
+			const auto select = [this, &scene](const SDL_Scancode s, const std::int64_t n) {
+				if (scene->getSignal(s) &&
+				    (mItems[n] == Components::AIR() ||
+				     mItems[n] == std::get<2>(registers::CRAFTING_RECIPIES.at(mLastCraft)).second)) {
+					mCount[n] += std::get<2>(registers::CRAFTING_RECIPIES.at(mLastCraft)).first;
+					mItems[n] = std::get<2>(registers::CRAFTING_RECIPIES.at(mLastCraft)).second;
+
+					mLastCraft = 0;
+
+					for (std::size_t i = 0; i < mCraftingCount.size(); ++i) {
+						if (mCraftingCount[i] == 0) {
+							continue;
+						}
+
+						--mCraftingCount[i];
+						if (mCraftingCount[i] == 0) {
+							mCraftingItems[i] = Components::AIR();
+						}
+					}
+
+					scene->getSignal(s) = false;
+				}
+			};
+
+			select(SDL_SCANCODE_1, 0);
+			select(SDL_SCANCODE_2, 1);
+			select(SDL_SCANCODE_3, 2);
+			select(SDL_SCANCODE_4, 3);
+			select(SDL_SCANCODE_5, 4);
+			select(SDL_SCANCODE_6, 5);
+			select(SDL_SCANCODE_7, 6);
+			select(SDL_SCANCODE_8, 7);
+			select(SDL_SCANCODE_9, 8);
+
 			return;
 		}
 

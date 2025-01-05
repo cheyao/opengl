@@ -261,23 +261,26 @@ bool Inventory::update(class Scene* scene, float) {
 	}
 endLogic:
 
-	const auto select = [&scene, &slot](const SDL_Scancode s, const std::int64_t n) {
-		if (scene->getSignal(s) && n != slot) {
-			std::swap(mCount[slot], mCount[n]);
-			std::swap(mItems[slot], mItems[n]);
-			scene->getSignal(s) = false;
-		}
-	};
+	if (!(mouseX < 0 || mouseY < 0 || mouseX > (9 * INVENTORY_SLOT_X * scale) ||
+	      mouseY > (4 * INVENTORY_SLOT_Y * scale))) {
+		const auto select = [&scene, &slot](const SDL_Scancode s, const std::int64_t n) {
+			if (scene->getSignal(s) && n != slot) {
+				std::swap(mCount[slot], mCount[n]);
+				std::swap(mItems[slot], mItems[n]);
+				scene->getSignal(s) = false;
+			}
+		};
 
-	select(SDL_SCANCODE_1, 0);
-	select(SDL_SCANCODE_2, 1);
-	select(SDL_SCANCODE_3, 2);
-	select(SDL_SCANCODE_4, 3);
-	select(SDL_SCANCODE_5, 4);
-	select(SDL_SCANCODE_6, 5);
-	select(SDL_SCANCODE_7, 6);
-	select(SDL_SCANCODE_8, 7);
-	select(SDL_SCANCODE_9, 8);
+		select(SDL_SCANCODE_1, 0);
+		select(SDL_SCANCODE_2, 1);
+		select(SDL_SCANCODE_3, 2);
+		select(SDL_SCANCODE_4, 3);
+		select(SDL_SCANCODE_5, 4);
+		select(SDL_SCANCODE_6, 5);
+		select(SDL_SCANCODE_7, 6);
+		select(SDL_SCANCODE_8, 7);
+		select(SDL_SCANCODE_9, 8);
+	}
 
 	return true;
 }

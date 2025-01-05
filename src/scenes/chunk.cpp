@@ -24,8 +24,9 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 	: mPosition(position), mGame(game) {
 
 	// Spawn blocks
-	Texture* stone = game->getSystemManager()->getTexture("blocks/stone.png");
-	Texture* grass = game->getSystemManager()->getTexture("blocks/grass-block.png");
+	Texture* const stone = game->getSystemManager()->getTexture("blocks/stone.png");
+	Texture* const grass = game->getSystemManager()->getTexture("blocks/grass-block.png");
+	const auto& blocks = scene->view<Components::block>();
 
 	const auto offset = mPosition * CHUNK_WIDTH;
 
@@ -35,6 +36,18 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 		mHeightMap[i] = block_height;
 
 		for (std::uint64_t y = 0; y < block_height; ++y) {
+			bool occupied = false;
+			for (const auto block : blocks) {
+				if (scene->get<Components::block>(block).mPosition == Eigen::Vector2i(i + offset, y)) {
+					occupied = true;
+					break;
+				}
+			}
+
+			if (occupied) {
+				continue;
+			}
+
 			const EntityID entity = scene->newEntity();
 			scene->emplace<Components::block>(entity, Components::Item::STONE,
 							  Eigen::Vector2i(i + offset, y));
@@ -43,11 +56,23 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 							      true);
 		}
 
-		const EntityID entity = scene->newEntity();
-		scene->emplace<Components::block>(entity, Components::Item::GRASS_BLOCK,
-						  Eigen::Vector2i(i + offset, block_height));
-		scene->emplace<Components::texture>(entity, grass);
-		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), grass->getSize(), true);
+		bool occupied = false;
+		for (const auto block : blocks) {
+			if (scene->get<Components::block>(block).mPosition ==
+			    Eigen::Vector2i(i + offset, block_height)) {
+				occupied = true;
+				break;
+			}
+		}
+
+		if (!occupied) {
+			const EntityID entity = scene->newEntity();
+			scene->emplace<Components::block>(entity, Components::Item::GRASS_BLOCK,
+							  Eigen::Vector2i(i + offset, block_height));
+			scene->emplace<Components::texture>(entity, grass);
+			scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), grass->getSize(),
+							      true);
+		}
 
 		// Spawn structures
 		for (const auto& [chance, structure] : registers::SURFACE_STRUCTURES) {
@@ -79,7 +104,17 @@ Chunk::Chunk(const rapidjson::Value& data, Game* game, Scene* scene)
 		const EntityID entity = scene->newEntity();
 		scene->emplace<Components::block>(entity, block, getVector2i(data[BLOCKS_KEY][i][1]));
 		scene->emplace<Components::texture>(entity, texture);
-		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(), true);
+
+		if (registers::COLLISION_BOXES.contains(block)) {
+			const auto& box = registers::COLLISION_BOXES.at(block);
+
+			if (!(box.second.x() == 0 || box.second.y() == 0)) {
+				scene->emplace<Components::collision>(entity, box.first, box.second, true);
+			}
+		} else {
+			scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(),
+							      true);
+		}
 	}
 }
 

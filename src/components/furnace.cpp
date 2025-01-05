@@ -251,7 +251,9 @@ processFuel:
 	if (mFuelLeft < 0) {
 		// Oh no! No more fuel, get some more or abort
 		if (mSmeltingCount[FUEL_SLOT] >= 1 && registers::BURNING_TIME.contains(mSmeltingItems[FUEL_SLOT]) &&
-		    registers::SMELTING_RECIPIE.contains(mSmeltingItems[COOK_SLOT])) {
+		    registers::SMELTING_RECIPIE.contains(mSmeltingItems[COOK_SLOT]) &&
+		    (mSmeltingItems[OUTPUT_SLOT] == Components::AIR() ||
+		     mSmeltingItems[OUTPUT_SLOT] == registers::SMELTING_RECIPIE.at(mSmeltingItems[COOK_SLOT]).second)) {
 			mFuelLeft = mFuelTime = registers::BURNING_TIME.at(mSmeltingItems[FUEL_SLOT]);
 
 			mSmeltingCount[FUEL_SLOT]--;

@@ -3,7 +3,8 @@
 <div align="center">
     <img src="https://cloud-27xm3qrn9-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
     <img src="https://cloud-27xm3qrn9-hack-club-bot.vercel.app/1image.png" width="auto" height="auto" alt="Demo pic of the game">
-    <img src="https://cloud-89ohmxlnj-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
+    <img src="https://cloud-49di6uwyy-hack-club-bot.vercel.app/0image.png" width="auto" height="auto" alt="Demo pic of the game">
+    <img src="https://cloud-49di6uwyy-hack-club-bot.vercel.app/1image.png" width="auto" height="auto" alt="Demo pic of the game">
 </div>
 
 <h3 align="center"><a href="https://opengl.pages.dev">Try out web version now!</a></h3>
@@ -28,6 +29,17 @@
 - **Custom Saves** 📝: Easily save **any** data on any platform you want in a json file, the game engine will manage it for you!
 - **Crafting UI**: UI for any type of menu you want!
 - **Audio** 📢: Easily integrate audio into the game
+
+Minecraft Features:
+
+- Walking
+- Breaking
+- Inventory
+- Placing
+- Crafting
+- Smelting
+- Break levels
+- Loot table
 
 <h2 align="center">Inner workings</h2>
 
