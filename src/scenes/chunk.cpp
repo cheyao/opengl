@@ -19,60 +19,25 @@
 #include <cstddef>
 #include <cstdint>
 
-// TODO: Backup
 Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const std::int64_t position)
 	: mPosition(position), mGame(game) {
+	// We shall first generate a chunk map
+	// Then we shall spawn the blocks
+
+	// Indexed by x and then y
+	std::vector<std::vector<Components::Item>> grid(CHUNK_WIDTH, std::vector(WATER_LEVEL * 2, Components::AIR()));
 
 	// Spawn blocks
-	Texture* const stone = game->getSystemManager()->getTexture("blocks/stone.png");
-	Texture* const grass = game->getSystemManager()->getTexture("blocks/grass-block.png");
-	const auto& blocks = scene->view<Components::block>();
-
 	const auto offset = mPosition * CHUNK_WIDTH;
-
-	for (auto i = 0; i < CHUNK_WIDTH; ++i) {
-		double height = noise->getNoise(i + position * CHUNK_WIDTH);
-		std::uint64_t block_height = WATER_LEVEL + 5 * height;
+	for (std::uint64_t i = 0; i < CHUNK_WIDTH; ++i) {
+		const double height = noise->getNoise(i + position * CHUNK_WIDTH);
+		const std::uint64_t block_height = WATER_LEVEL + 5 * height;
 		mHeightMap[i] = block_height;
 
 		for (std::uint64_t y = 0; y < block_height; ++y) {
-			bool occupied = false;
-			for (const auto block : blocks) {
-				if (scene->get<Components::block>(block).mPosition == Eigen::Vector2i(i + offset, y)) {
-					occupied = true;
-					break;
-				}
-			}
-
-			if (occupied) {
-				continue;
-			}
-
-			const EntityID entity = scene->newEntity();
-			scene->emplace<Components::block>(entity, Components::Item::STONE,
-							  Eigen::Vector2i(i + offset, y));
-			scene->emplace<Components::texture>(entity, stone);
-			scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), stone->getSize(),
-							      true);
+			grid[i][y] = Components::Item::STONE;
 		}
-
-		bool occupied = false;
-		for (const auto block : blocks) {
-			if (scene->get<Components::block>(block).mPosition ==
-			    Eigen::Vector2i(i + offset, block_height)) {
-				occupied = true;
-				break;
-			}
-		}
-
-		if (!occupied) {
-			const EntityID entity = scene->newEntity();
-			scene->emplace<Components::block>(entity, Components::Item::GRASS_BLOCK,
-							  Eigen::Vector2i(i + offset, block_height));
-			scene->emplace<Components::texture>(entity, grass);
-			scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), grass->getSize(),
-							      true);
-		}
+		grid[i][block_height] = Components::Item::GRASS_BLOCK;
 
 		// Spawn structures
 		for (const auto& [chance, structure] : registers::SURFACE_STRUCTURES) {
@@ -84,7 +49,46 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 			}
 
 			if (roll < chance) {
-				spawnStructure(Eigen::Vector2i(i + offset, block_height + 1), structure, scene);
+				spawnStructure(grid, Eigen::Vector2i(i, block_height), structure, scene);
+			}
+		}
+	}
+
+	const auto& blockView = scene->view<Components::block>();
+	for (std::uint64_t x = 0; x < CHUNK_WIDTH; ++x) {
+		for (std::uint64_t y = 0; y < WATER_LEVEL * 2; ++y) {
+			if (grid[x][y] == Components::AIR()) {
+				continue;
+			}
+
+			const Eigen::Vector2i pos = Eigen::Vector2i(x + mPosition * CHUNK_WIDTH, y);
+
+			Components::Item occupied = Components::AIR();
+			for (const auto block : blockView) {
+				if (scene->get<Components::block>(block).mPosition == pos) {
+					occupied = scene->get<Components::block>(block).mType;
+					break;
+				}
+			}
+
+			if (occupied != Components::AIR()) {
+				grid[x][y] = occupied;
+
+				continue;
+			}
+
+			Texture* const texture =
+				mGame->getSystemManager()->getTexture(registers::TEXTURES.at(grid[x][y]));
+			const EntityID entity = scene->newEntity();
+			scene->emplace<Components::block>(entity, grid[x][y], Eigen::Vector2i(x + offset, y));
+			scene->emplace<Components::texture>(entity, texture);
+
+			if (registers::COLLISION_BOXES.contains(grid[x][y])) {
+				const auto& collision = registers::COLLISION_BOXES.at(grid[x][y]);
+				scene->emplace<Components::collision>(entity, collision.first, collision.second, true);
+			} else {
+				scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f),
+								      texture->getSize(), true);
 			}
 		}
 	}
@@ -161,28 +165,46 @@ void Chunk::save(class Scene* scene, rapidjson::Value& chunk, rapidjson::MemoryP
 	}
 }
 
-void Chunk::spawnStructure(const Eigen::Vector2i& pos,
-			   const std::vector<std::pair<Components::Item, Eigen::Vector2i>> structure, Scene* scene) {
-	const auto& blocks = scene->view<Components::block>();
+void Chunk::spawnStructure(std::vector<std::vector<Components::Item>>& blocks, const Eigen::Vector2i& pos,
+			   const std::vector<std::pair<Components::Item, Eigen::Vector2i>> structure,
+			   Scene* const scene) {
+	const auto& blockView = scene->view<Components::block>();
 	for (const auto& [blockType, offset] : structure) {
-		const Eigen::Vector2i position = offset + pos;
+		const Eigen::Vector2i realPos = pos + offset;
 
-		bool occupied = false;
-		for (const auto block : blocks) {
-			if (scene->get<Components::block>(block).mPosition == position) {
-				occupied = true;
-				break;
+		if (realPos.x() < 0 || realPos.x() >= CHUNK_WIDTH) {
+			// Lets place in scene
+			const Eigen::Vector2i position = offset + pos + Eigen::Vector2i(mPosition * CHUNK_WIDTH, 0);
+
+			bool occupied = false;
+			for (const auto block : blockView) {
+				if (scene->get<Components::block>(block).mPosition == position) {
+					occupied = true;
+					break;
+				}
+			}
+
+			if (occupied) {
+				continue;
+			}
+
+			Texture* const texture =
+				mGame->getSystemManager()->getTexture(registers::TEXTURES.at(blockType));
+			const EntityID entity = scene->newEntity();
+			scene->emplace<Components::block>(entity, blockType, position);
+			scene->emplace<Components::texture>(entity, texture);
+
+			if (registers::COLLISION_BOXES.contains(blockType)) {
+				const auto& collision = registers::COLLISION_BOXES.at(blockType);
+				scene->emplace<Components::collision>(entity, collision.first, collision.second, true);
+			} else {
+				scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f),
+								      texture->getSize(), true);
+			}
+		} else {
+			if (blocks[realPos.x()][realPos.y()] == Components::AIR()) {
+				blocks[realPos.x()][realPos.y()] = blockType;
 			}
 		}
-
-		if (occupied) {
-			continue;
-		}
-
-		Texture* texture = mGame->getSystemManager()->getTexture(registers::TEXTURES.at(blockType));
-		const EntityID entity = scene->newEntity();
-		scene->emplace<Components::block>(entity, blockType, position);
-		scene->emplace<Components::texture>(entity, texture);
-		scene->emplace<Components::collision>(entity, Eigen::Vector2f(0.0f, 0.0f), texture->getSize(), true);
 	}
 }

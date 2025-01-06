@@ -44,7 +44,7 @@ const std::unordered_map<Components::Item, std::string> TEXTURES = {
 };
 
 const std::unordered_map<Components::Item, std::pair<int, std::uint64_t>> BREAK_TIMES = {
-	{Item::AIR, {0, 0}},	     {Item::GRASS_BLOCK, {0, 40}},    {Item::DIRT, {0, 40}},
+	{Item::AIR, {0, 0}},	     {Item::GRASS_BLOCK, {0, 30}},    {Item::DIRT, {0, 30}},
 	{Item::STONE, {1, 80}},	     {Item::OAK_LOG, {0, 50}},	      {Item::OAK_LEAVES, {0, 20}},
 	{Item::OAK_PLANKS, {0, 60}}, {Item::CRAFTING_TABLE, {0, 50}}, {Item::COBBLESTONE, {1, 80}},
 	{Item::FURNACE, {1, 80}},    {Item::CAMPFIRE, {0, 50}},	      {Item::TORCH, {0, 2}},

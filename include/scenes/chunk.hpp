@@ -32,7 +32,7 @@ class Chunk {
 	constexpr const static inline char* const BLOCKS_KEY = "blocks";
 	constexpr const static inline char* const ITEMS_KEY = "items";
 
-	void spawnStructure(const Eigen::Vector2i& pos,
+	void spawnStructure(std::vector<std::vector<Components::Item>>& blocks, const Eigen::Vector2i& pos,
 			    const std::vector<std::pair<Components::Item, Eigen::Vector2i>> structure,
 			    class Scene* scene);
 
