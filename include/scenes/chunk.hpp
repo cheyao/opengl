@@ -12,10 +12,9 @@ class Chunk {
 	inline constexpr const static int WATER_LEVEL = 16;
 
 	// Generate a chunk from scratch
-	explicit Chunk(class Game* game, class Scene* scene, const class NoiseGenerator* const noise,
-		       const std::int64_t position);
+	explicit Chunk(class Scene* scene, class NoiseGenerator* const noise, const std::int64_t position);
 	// Load from json
-	explicit Chunk(const rapidjson::Value& data, class Game* game, class Scene* scene);
+	explicit Chunk(const rapidjson::Value& data, class Scene* scene);
 
 	Chunk(Chunk&&) = delete;
 	Chunk(const Chunk&) = delete;
@@ -38,5 +37,4 @@ class Chunk {
 
 	const std::int64_t mPosition;
 	std::array<std::uint64_t, CHUNK_WIDTH> mHeightMap;
-	Game* mGame;
 };

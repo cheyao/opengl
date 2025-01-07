@@ -19,8 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 
-Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const std::int64_t position)
-	: mPosition(position), mGame(game) {
+Chunk::Chunk(Scene* scene, NoiseGenerator* const noise, const std::int64_t position) : mPosition(position) {
 	// We shall first generate a chunk map
 	// Then we shall spawn the blocks
 
@@ -41,7 +40,7 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 
 		// Spawn structures
 		for (const auto& [chance, structure] : registers::SURFACE_STRUCTURES) {
-			float roll = SDL_randf();
+			double roll = noise->randf();
 
 			// Rig the roll so there is always a tree near
 			if (i + offset == 3) {
@@ -78,7 +77,7 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 			}
 
 			Texture* const texture =
-				mGame->getSystemManager()->getTexture(registers::TEXTURES.at(grid[x][y]));
+				Game::getInstance()->getSystemManager()->getTexture(registers::TEXTURES.at(grid[x][y]));
 			const EntityID entity = scene->newEntity();
 			scene->emplace<Components::block>(entity, grid[x][y], Eigen::Vector2i(x + offset, y));
 			scene->emplace<Components::texture>(entity, texture);
@@ -95,15 +94,15 @@ Chunk::Chunk(Game* game, Scene* scene, const NoiseGenerator* const noise, const 
 }
 
 // Loading from save
-Chunk::Chunk(const rapidjson::Value& data, Game* game, Scene* scene)
-	: mPosition(data[POSITION_KEY].GetInt64()), mGame(game) {
+Chunk::Chunk(const rapidjson::Value& data, Scene* scene) : mPosition(data[POSITION_KEY].GetInt64()) {
 
 	for (rapidjson::SizeType i = 0; i < data[BLOCKS_KEY].Size(); i++) {
 		const Components::Item block = static_cast<Components::Item>(data[BLOCKS_KEY][i][0].GetUint64());
 
 		SDL_assert(registers::TEXTURES.contains(block));
 
-		Texture* texture = game->getSystemManager()->getTexture(registers::TEXTURES.at(block));
+		Texture* const texture =
+			Game::getInstance()->getSystemManager()->getTexture(registers::TEXTURES.at(block));
 
 		const EntityID entity = scene->newEntity();
 		scene->emplace<Components::block>(entity, block, getVector2i(data[BLOCKS_KEY][i][1]));
@@ -189,7 +188,7 @@ void Chunk::spawnStructure(std::vector<std::vector<Components::Item>>& blocks, c
 			}
 
 			Texture* const texture =
-				mGame->getSystemManager()->getTexture(registers::TEXTURES.at(blockType));
+				Game::getInstance()->getSystemManager()->getTexture(registers::TEXTURES.at(blockType));
 			const EntityID entity = scene->newEntity();
 			scene->emplace<Components::block>(entity, blockType, position);
 			scene->emplace<Components::texture>(entity, texture);

@@ -50,9 +50,9 @@ void Level::create() {
 						      5 * mNoise->getNoise(0)));
 	mScene->emplace<Components::inventory>(player, new PlayerInventory(mGame, 36));
 
-	mLeft = new Chunk(mGame, mScene, mNoise.get(), -1);
-	mCenter = new Chunk(mGame, mScene, mNoise.get(), 0);
-	mRight = new Chunk(mGame, mScene, mNoise.get(), 1);
+	mLeft = new Chunk(mScene, mNoise.get(), -1);
+	mCenter = new Chunk(mScene, mNoise.get(), 0);
+	mRight = new Chunk(mScene, mNoise.get(), 1);
 
 	mData.AddMember(rapidjson::StringRef(CHUNK_KEY), rapidjson::Value(rapidjson::kObjectType),
 			mData.GetAllocator());
@@ -92,21 +92,12 @@ void Level::load(rapidjson::Value& data) {
 
 		if (this->mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(centerChunk)].IsNull()) {
 			SDL_Log("Chunk %d was Null! Making new chunk", centerChunk);
-			chunk = new Chunk(this->mGame, this->mScene, mNoise.get(), centerChunk);
+			chunk = new Chunk(this->mScene, mNoise.get(), centerChunk);
 
 			return;
 		}
 
-		try {
-			chunk = new Chunk(this->mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(centerChunk)], this->mGame,
-					  this->mScene);
-		} catch (const std::exception& error) {
-			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
-					"\033[31mGenerating new chunk: Failed to parse json for chunk %d: id %s\033[0m",
-					centerChunk, error.what());
-
-			chunk = new Chunk(this->mGame, this->mScene, mNoise.get(), centerChunk);
-		}
+		chunk = new Chunk(this->mData[CHUNK_KEY][sign ? "-" : "+"][SDL_abs(centerChunk)], this->mScene);
 	};
 
 	const auto playerPos = getVector2f(mData[PLAYER_KEY]["position"]).x();
@@ -243,9 +234,9 @@ void Level::update(const float delta) {
 			SDL_LogInfo(SDL_LOG_CATEGORY_CUSTOM, "\033[31mGenerating new chunk for chunk %d\033[0m",
 				    currentChunk - 1);
 
-			mLeft = new Chunk(mGame, mScene, mNoise.get(), currentChunk - 1);
+			mLeft = new Chunk(mScene, mNoise.get(), currentChunk - 1);
 		} else {
-			mLeft = new Chunk(chunkData, mGame, mScene);
+			mLeft = new Chunk(chunkData, mScene);
 		}
 	} else if (currentChunk == mRight->getPosition()) {
 		save(mLeft);
@@ -259,9 +250,9 @@ void Level::update(const float delta) {
 			SDL_LogInfo(SDL_LOG_CATEGORY_CUSTOM, "\033[31mGenerating new chunk for chunk %d\033[0m",
 				    currentChunk + 1);
 
-			mRight = new Chunk(mGame, mScene, mNoise.get(), currentChunk + 1);
+			mRight = new Chunk(mScene, mNoise.get(), currentChunk + 1);
 		} else {
-			mRight = new Chunk(chunkData, mGame, mScene);
+			mRight = new Chunk(chunkData, mScene);
 		}
 	} else {
 		SDL_Log("\033[33mOut of boundary for chunk %d, loaded chunks: %" PRIi64 " %" PRIi64 " %" PRIi64
@@ -272,9 +263,9 @@ void Level::update(const float delta) {
 		save(mCenter);
 		save(mRight);
 
-		mLeft = new Chunk(mGame, mScene, mNoise.get(), currentChunk - 1);
-		mCenter = new Chunk(mGame, mScene, mNoise.get(), currentChunk);
-		mRight = new Chunk(mGame, mScene, mNoise.get(), currentChunk + 1);
+		mLeft = new Chunk(mScene, mNoise.get(), currentChunk - 1);
+		mCenter = new Chunk(mScene, mNoise.get(), currentChunk);
+		mRight = new Chunk(mScene, mNoise.get(), currentChunk + 1);
 	}
 }
 
