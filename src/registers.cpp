@@ -19,28 +19,31 @@ using namespace Components;
 enum class MiningSystem { PICKAXE, AXE, SHOVEL, HOE, SHEARS };
 
 const std::unordered_map<Components::Item, std::string> TEXTURES = {
-	{Item::GRASS_BLOCK, "blocks/grass-block.png"},
+	{Item::CAMPFIRE, "blocks/campfire.png"},
+	{Item::CRAFTING_TABLE, "blocks/crafting-table.png"},
+	{Item::COBBLESTONE, "blocks/cobblestone.png"},
+	{Item::COAL_ORE, "blocks/coal-ore.png"},
 	{Item::DIRT, "blocks/dirt.png"},
-	{Item::STONE, "blocks/stone.png"},
+	{Item::FURNACE, "blocks/furnace.png"},
+	{Item::GRASS_BLOCK, "blocks/grass-block.png"},
+	{Item::IRON_ORE, "blocks/iron-ore.png"},
 	{Item::OAK_LOG, "blocks/oak-log.png"},
 	{Item::OAK_LEAVES, "blocks/oak-leaves.png"},
 	{Item::OAK_PLANKS, "blocks/oak-planks.png"},
-	{Item::STICK, "items/stick.png"},
-	{Item::CRAFTING_TABLE, "blocks/crafting-table.png"},
-	{Item::WOODEN_SHOVEL, "items/wooden-shovel.png"},
-	{Item::WOODEN_AXE, "items/wooden-axe.png"},
-	{Item::WOODEN_HOE, "items/wooden-hoe.png"},
-	{Item::WOODEN_PICKAXE, "items/wooden-pickaxe.png"},
+	{Item::STONE, "blocks/stone.png"},
+	{Item::TORCH, "blocks/torch.png"},
+
+	{Item::APPLE, "items/apple.png"},
+	{Item::CHARCOAL, "items/charcoal.png"},
 	{Item::STONE_SHOVEL, "items/stone-shovel.png"},
 	{Item::STONE_AXE, "items/stone-axe.png"},
 	{Item::STONE_HOE, "items/stone-hoe.png"},
 	{Item::STONE_PICKAXE, "items/stone-pickaxe.png"},
-	{Item::COBBLESTONE, "blocks/cobblestone.png"},
-	{Item::FURNACE, "blocks/furnace.png"},
-	{Item::APPLE, "items/apple.png"},
-	{Item::TORCH, "blocks/torch.png"},
-	{Item::CAMPFIRE, "blocks/campfire.png"},
-	{Item::CHARCOAL, "items/charcoal.png"},
+	{Item::STICK, "items/stick.png"},
+	{Item::WOODEN_SHOVEL, "items/wooden-shovel.png"},
+	{Item::WOODEN_AXE, "items/wooden-axe.png"},
+	{Item::WOODEN_HOE, "items/wooden-hoe.png"},
+	{Item::WOODEN_PICKAXE, "items/wooden-pickaxe.png"},
 };
 
 const std::unordered_map<Components::Item, std::pair<int, std::uint64_t>> BREAK_TIMES = {
@@ -48,6 +51,7 @@ const std::unordered_map<Components::Item, std::pair<int, std::uint64_t>> BREAK_
 	{Item::STONE, {1, 80}},	     {Item::OAK_LOG, {0, 50}},	      {Item::OAK_LEAVES, {0, 20}},
 	{Item::OAK_PLANKS, {0, 60}}, {Item::CRAFTING_TABLE, {0, 50}}, {Item::COBBLESTONE, {1, 80}},
 	{Item::FURNACE, {1, 80}},    {Item::CAMPFIRE, {0, 50}},	      {Item::TORCH, {0, 2}},
+	{Item::IRON_ORE, {2, 120}},  {Item::COAL_ORE, {1, 120}},
 };
 
 // Will add one in the real calculation
@@ -112,10 +116,12 @@ const std::unordered_map<Components::Item, std::vector<std::pair<float, Componen
 		 {1.1f, Item::CHARCOAL},
 		 {1.1f, Item::CHARCOAL},
 	 }},
+	// TODO: Coal ore
 };
 
 // NOLINTBEGIN
 // ITEMS ARE IN REVERSE!!!
+// FIXME: No more reversal
 const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vector<Components::Item>,
 			     std::pair<std::uint64_t, Components::Item>>>
 	CRAFTING_RECIPIES = {
@@ -268,8 +274,12 @@ const std::vector<std::string> BACKGROUND_SOUNDS = {
 };
 
 constexpr inline auto size = 16 * 7;
-extern const std::unordered_map<Components::Item, std::pair<Eigen::Vector2f, Eigen::Vector2f>> COLLISION_BOXES = {
+// A collision box of 0x0 is no collision box
+const std::unordered_map<Components::Item, std::pair<Eigen::Vector2f, Eigen::Vector2f>> COLLISION_BOXES = {
 	{Item::CAMPFIRE, {Eigen::Vector2f(0, 0), Eigen::Vector2f(size, size / 2)}},
 	{Item::TORCH, {Eigen::Vector2f(0, 0), Eigen::Vector2f(0, 0)}},
 };
+
+const std::vector<std::pair<Components::Item, std::uint64_t>> VEINS = {};
+
 } // namespace registers

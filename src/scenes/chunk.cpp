@@ -187,6 +187,8 @@ void Chunk::spawnStructure(std::vector<std::vector<Components::Item>>& blocks, c
 				continue;
 			}
 
+			SDL_assert(registers::BREAK_TIMES.contains(blockType) && "The block to be placed isn't brakable!");
+
 			Texture* const texture =
 				Game::getInstance()->getSystemManager()->getTexture(registers::TEXTURES.at(blockType));
 			const EntityID entity = scene->newEntity();

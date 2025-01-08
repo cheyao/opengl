@@ -26,6 +26,8 @@ enum class Item : std::uint64_t {
 	APPLE,
 	CHARCOAL,
 	TORCH,
-	CAMPFIRE
+	CAMPFIRE,
+	IRON_ORE,
+	COAL_ORE,
 };
 } // namespace Components
