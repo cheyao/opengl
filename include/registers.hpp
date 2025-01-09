@@ -55,7 +55,6 @@ extern const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std
 extern const std::unordered_map<Components::Item, class Screen* (*)(void)> CLICKABLES;
 
 // String of sounds
-// TODO: Use this instead of hardocing in game.cpp
 extern const std::vector<std::string> BACKGROUND_SOUNDS;
 
 // Map of item to pair of offset and size

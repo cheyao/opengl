@@ -94,7 +94,6 @@ void Game::init() {
 	spec.format = SDL_AUDIO_S16LE;
 	spec.channels = 2;
 	spec.freq = 48000;
-
 #ifdef __EMSCRIPTEN__
 	emscripten_fetch_attr_t attr;
 	emscripten_fetch_attr_init(&attr);
@@ -102,26 +101,24 @@ void Game::init() {
 	attr.attributes = EMSCRIPTEN_FETCH_LOAD_TO_MEMORY;
 	attr.onsuccess = audioSucceeded;
 	attr.onerror = audioFailed;
-	emscripten_fetch(
-		&attr, "https://rawcdn.githack.com/cheyao/opengl/refs/heads/main/assets/sounds/subwoofer_lullaby.wav");
-	emscripten_fetch(&attr, "https://rawcdn.githack.com/cheyao/opengl/refs/heads/main/assets/sounds/sweden.wav");
 #else
 	std::uint8_t* wav_data;
 	std::uint32_t wav_data_len;
-
-	if (SDL_LoadWAV((getBasePath() + "assets/sounds/subwoofer_lullaby.wav").data(), &spec, &wav_data,
-			&wav_data_len)) {
-		mAudio.emplace_back(std::make_pair(wav_data, wav_data_len));
-	} else {
-		SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
-	}
-
-	if (SDL_LoadWAV((getBasePath() + "assets/sounds/sweden.wav").data(), &spec, &wav_data, &wav_data_len)) {
-		mAudio.emplace_back(std::make_pair(wav_data, wav_data_len));
-	} else {
-		SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
-	}
 #endif
+
+	for (const auto& file : registers::BACKGROUND_SOUNDS) {
+#ifdef __EMSCRIPTEN__
+		emscripten_fetch(
+			&attr,
+			("https://rawcdn.githack.com/cheyao/opengl/refs/heads/main/assets/sounds/" + file).data());
+#else
+		if (SDL_LoadWAV((getBasePath() + "assets/sounds/" + file).data(), &spec, &wav_data, &wav_data_len)) {
+			mAudio.emplace_back(std::make_pair(wav_data, wav_data_len));
+		} else {
+			SDL_Log("Couldn't load .wav file: %s", SDL_GetError());
+		}
+#endif
+	}
 
 	mStream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, nullptr, nullptr);
 	SDL_ResumeAudioStreamDevice(mStream);

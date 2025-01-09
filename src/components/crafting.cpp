@@ -335,8 +335,8 @@ void CraftingInventory::craft() {
 bool CraftingInventory::checkRecipie(const std::uint64_t r) {
 	const auto& recipie = registers::CRAFTING_RECIPIES[r];
 
+	// Shapeless crafting
 	if (std::get<0>(recipie) == std::make_pair(0, 0)) {
-		// Shapeless
 		auto items = std::get<1>(recipie);
 
 		std::uint64_t toFind = items.size();
@@ -365,6 +365,7 @@ bool CraftingInventory::checkRecipie(const std::uint64_t r) {
 			return false;
 		}
 	} else {
+		// Shaped crafting
 		const auto& shape = std::get<0>(recipie);
 		auto items = std::get<1>(recipie);
 		std::uint64_t toFind = items.size();
@@ -380,7 +381,7 @@ bool CraftingInventory::checkRecipie(const std::uint64_t r) {
 			for (std::size_t yoff = 0; yoff <= (mRows - shape.second); ++yoff) {
 				for (std::size_t x = 0; x < shape.first; ++x) {
 					for (std::size_t y = 0; y < shape.second; ++y) {
-						if (items[x + y * shape.first] !=
+						if (items[x + (shape.second - y - 1) * shape.first] !=
 						    mCraftingItems[(x + xoff) + (y + yoff) * mCols]) {
 							goto breakinnerloop;
 						}
