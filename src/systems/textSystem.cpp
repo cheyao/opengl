@@ -93,16 +93,14 @@ void TextSystem::loadFont(const std::string& name) {
 	std::size_t size;
 	FT_Byte* newFontData = static_cast<FT_Byte*>(loadFile((mPath + name).data(), &size));
 	if (newFontData == nullptr) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mTextSystem.cpp: SDL failed to load file %s: %s",
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mTextSystem.cpp: SDL failed to load file %s: %s",
 				(mPath + name).data(), SDL_GetError());
 		ERROR_BOX("Failed load font, unknown file format, assets are probably corrupted");
 
 		throw std::runtime_error("TextSystem.cpp: Failed to load font unable to open file");
 	}
 
-	if (mFontData != nullptr) {
-		SDL_free(static_cast<void*>(mFontData));
-	}
+	SDL_free(static_cast<void*>(mFontData));
 	mFontData = newFontData;
 
 	FT_Face newFace;
@@ -169,22 +167,18 @@ void TextSystem::setFontSize(const unsigned int size) {
 	mGlyphMap.clear();
 }
 
+// Somehow this is taking a ton of time??
 void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen::Vector2f& offset) {
 	SDL_assert(mFace != nullptr);
 
 	const TextSystem::Glyph& glyph = getGlyph(character);
 
-	if (glyph.size.x() <= 0 || glyph.size.y() <= 0) {
-		return;
-	}
+	[[unlikely]] if (glyph.size.x() <= 0 || glyph.size.y() <= 0) { return; }
 
-	Eigen::Affine3f model = Eigen::Affine3f::Identity();
-	model.translate(Eigen::Vector3f(offset.x() + glyph.bearing.x(),
-					offset.y() - (glyph.size.y() - glyph.bearing.y()), 0.0f));
-	shader->set("model"_u, model);
+	shader->set("offset"_u,
+		    Eigen::Vector2f(offset.x() + glyph.bearing.x(), offset.y() - (glyph.size.y() - glyph.bearing.y())));
 	shader->set("size"_u, glyph.size);
 
-	SDL_assert(glyph.texture != nullptr);
 	glyph.texture->activate(0);
 
 	mMesh->draw(shader);
@@ -194,8 +188,6 @@ TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
 	if (mGlyphMap.contains(character)) {
 		return mGlyphMap[character];
 	}
-
-	SDL_assert(mFace != nullptr);
 
 	// Maybe directly ask child?
 	const FT_UInt index = FT_Get_Char_Index(mFace, character);
@@ -282,7 +274,8 @@ void TextSystem::draw(Scene* scene) {
 	}
 }
 
-void TextSystem::draw(const std::string_view str, const Eigen::Vector2f& o, const bool translate, const Eigen::Vector3f& color) {
+void TextSystem::draw(const std::string_view str, const Eigen::Vector2f& o, const bool translate,
+		      const Eigen::Vector3f& color) {
 	Shader* shader = mGame->getSystemManager()->getShader("text.vert", "text.frag");
 	shader->activate();
 	shader->set("letter"_u, 0);
