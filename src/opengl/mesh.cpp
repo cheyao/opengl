@@ -8,9 +8,7 @@
 #include <SDL3/SDL.h>
 #include <algorithm>
 #include <cstddef>
-#include <functional>
 #include <string>
-#include <type_traits>
 #include <utility>
 #include <vector>
 #include <version>
@@ -65,7 +63,9 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 
 	// TODO: Prettier
 	glBindVertexArray(mVAO);
-	glEnableVertexAttribArray(0); // Enable no matter what https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#always_enable_vertex_attrib_0_as_an_array
+	glEnableVertexAttribArray(
+		0); // Enable no matter what
+		    // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#always_enable_vertex_attrib_0_as_an_array
 	if (!positions.empty()) {
 		glBufferSubData(GL_ARRAY_BUFFER, offset, positions.size() * sizeof(float), positions.data());
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
@@ -142,8 +142,6 @@ Mesh::~Mesh() {
  * Cons: Hard to implement without causing more bugs
  */
 
-// NOTE: sizeof(std::function<>) == 48
-
 /*
  * bind: function to bind vertexes
  *
@@ -152,7 +150,7 @@ Mesh::~Mesh() {
  * glVertexAttribPointer(index, count, type, GL_FALSE, stride, reinterpret_cast<GLvoid*>(0));
  * glVertexAttribDivisor(index, divisor);
  */
-void Mesh::addAttribArray(const GLsizeiptr size, const GLvoid* const data, const std::function<void()>& bind) {
+void Mesh::addAttribArray(const GLsizeiptr size, const GLvoid* const data, void (*bind)()) {
 	GLuint VBO;
 
 	glGenBuffers(1, &VBO);
@@ -163,7 +161,7 @@ void Mesh::addAttribArray(const GLsizeiptr size, const GLvoid* const data, const
 	addAttribArray(VBO, bind);
 }
 
-void Mesh::addAttribArray(const GLuint VBO, const std::function<void()>& bind) {
+void Mesh::addAttribArray(const GLuint VBO, void (*bind)()) {
 	SDL_assert(glIsBuffer(VBO));
 
 	glBindVertexArray(mVAO); // Save it in vertex array
@@ -180,6 +178,7 @@ void Mesh::addAttribArray(const GLuint VBO, const std::function<void()>& bind) {
 }
 
 void Mesh::draw(Shader* shader) {
+	/*
 	unsigned int diffuse = 0;
 	unsigned int specular = 0;
 	unsigned int height = 0;
@@ -214,8 +213,9 @@ void Mesh::draw(Shader* shader) {
 
 		mTextures[i].first->activate(i);
 	}
+		*/
 
-	for (const std::function<void(Shader*)>& func : mUniformFuncs) {
+	for (const auto& func : mUniformFuncs) {
 		func(shader);
 	}
 

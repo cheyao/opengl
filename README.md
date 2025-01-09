@@ -21,7 +21,7 @@
 <h2 align="center">Features</h2>
 
 - **Cross-Platorm** 💻📱: **MacOS**, **Linux**, **Windows**, **Web**, **Android** and **IOS** all supported!
-- **Performant** 🏃: Uses C++, the game runs smoothly even on browsers. (**600**+ FPS on a **11 year old** laptop!)
+- **Performant** 🏃: Uses C++, the game runs smoothly even on browsers. (**700**+ FPS on a **11 year old** laptop!)
 - **Multilingual** 🌐: **Unicode** and Locale support build in. (No more �!)
 - **Modern** ✨: Uses **Modern** C++23 features and follows best practices. SDL3 used!
 - **Extendable** 🧩: The Game Engine uses the ECS arcitecture. Extend easily by adding stuff to `src/registers.cpp`!

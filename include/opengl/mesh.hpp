@@ -4,7 +4,6 @@
 #include "third_party/glad/glad.h"
 
 #include <cstddef>
-#include <functional>
 #include <span>
 #include <utility>
 #include <vector>
@@ -31,13 +30,12 @@ class Mesh {
 	std::size_t indices() const { return mIndicesCount; }
 
 	void addTexture(const std::pair<Texture* const, TextureType> texture) { mTextures.emplace_back(texture); }
-	void
-	setDrawFunc(const std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)>& func) {
+	void setDrawFunc(void (*func)(GLenum mode, GLsizei count, GLenum type, const void* indices)) {
 		mDrawFunc = func;
 	}
-	void addUniform(const std::function<void(class Shader* shader)> func) { mUniformFuncs.emplace_back(func); };
-	void addAttribArray(const GLsizeiptr size, const GLvoid* const data, const std::function<void()>& bind);
-	void addAttribArray(const GLuint VBO, const std::function<void()>& bind);
+	void addUniform(void (*func)(class Shader* shader)) { mUniformFuncs.emplace_back(func); };
+	void addAttribArray(const GLsizeiptr size, const GLvoid* const data, void (*bind)());
+	void addAttribArray(const GLuint VBO, void (*bind)());
 
       private:
 	GLuint mVBO;
@@ -47,8 +45,8 @@ class Mesh {
 	std::size_t mIndicesCount;
 	std::vector<std::pair<class Texture* const, TextureType>> mTextures;
 
-	std::function<void(GLenum mode, GLsizei count, GLenum type, const void* indices)> mDrawFunc;
-	std::vector<std::function<void(Shader* shader)>> mUniformFuncs;
+	void (*mDrawFunc)(GLenum mode, GLsizei count, GLenum type, const void* indices);
+	std::vector<void (*)(Shader* shader)> mUniformFuncs;
 
 	std::vector<GLuint> mAttribs;
 };
