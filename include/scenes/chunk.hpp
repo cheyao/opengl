@@ -34,6 +34,8 @@ class Chunk {
 	void spawnStructure(std::vector<std::vector<Components::Item>>& blocks, const Eigen::Vector2i& pos,
 			    const std::vector<std::pair<Components::Item, Eigen::Vector2i>> structure,
 			    class Scene* scene);
+	void carve(std::vector<std::vector<Components::Item>>& blocks, class NoiseGenerator* const noise);
+	void spawnOres(std::vector<std::vector<Components::Item>>& blocks, class NoiseGenerator* const noise);
 
 	const std::int64_t mPosition;
 	std::array<std::uint64_t, CHUNK_WIDTH> mHeightMap;

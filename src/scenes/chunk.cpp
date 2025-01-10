@@ -53,6 +53,10 @@ Chunk::Chunk(Scene* scene, NoiseGenerator* const noise, const std::int64_t posit
 		}
 	}
 
+	carve(grid, noise);
+	spawnOres(grid, noise);
+
+	// Finally spawn the blocks
 	const auto& blockView = scene->view<Components::block>();
 	for (std::uint64_t x = 0; x < CHUNK_WIDTH; ++x) {
 		for (std::uint64_t y = 0; y < WATER_LEVEL * 2; ++y) {
@@ -95,7 +99,6 @@ Chunk::Chunk(Scene* scene, NoiseGenerator* const noise, const std::int64_t posit
 
 // Loading from save
 Chunk::Chunk(const rapidjson::Value& data, Scene* scene) : mPosition(data[POSITION_KEY].GetInt64()) {
-
 	for (rapidjson::SizeType i = 0; i < data[BLOCKS_KEY].Size(); i++) {
 		const Components::Item block = static_cast<Components::Item>(data[BLOCKS_KEY][i][0].GetUint64());
 
@@ -187,7 +190,8 @@ void Chunk::spawnStructure(std::vector<std::vector<Components::Item>>& blocks, c
 				continue;
 			}
 
-			SDL_assert(registers::BREAK_TIMES.contains(blockType) && "The block to be placed isn't brakable!");
+			SDL_assert(registers::BREAK_TIMES.contains(blockType) &&
+				   "The block to be placed isn't brakable!");
 
 			Texture* const texture =
 				Game::getInstance()->getSystemManager()->getTexture(registers::TEXTURES.at(blockType));
@@ -205,6 +209,55 @@ void Chunk::spawnStructure(std::vector<std::vector<Components::Item>>& blocks, c
 		} else {
 			if (blocks[realPos.x()][realPos.y()] == Components::AIR()) {
 				blocks[realPos.x()][realPos.y()] = blockType;
+			}
+		}
+	}
+}
+
+void Chunk::carve(std::vector<std::vector<Components::Item>>& blocks, class NoiseGenerator* const noise) {
+	// TODO: Cave carver
+	(void)noise;
+	(void)blocks;
+}
+
+void Chunk::spawnOres(std::vector<std::vector<Components::Item>>& blocks, class NoiseGenerator* const noise) {
+	const static Eigen::Vector2f dir[] = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
+
+	// Spawn ores here
+	for (std::uint64_t x = 0; x < CHUNK_WIDTH; x += 2) {
+		for (std::uint64_t y = 0; y < WATER_LEVEL * 2; y += 2) {
+			if (blocks[x][y] != Components::Item::STONE) {
+				continue;
+			}
+
+			// Roll
+			for (const auto vein : registers::VEINS) {
+				if (noise->randf() >= std::get<0>(vein)) {
+					continue;
+				}
+
+				const auto ore = std::get<1>(vein);
+				const auto count = std::get<2>(vein) + static_cast<int>(4 * noise->randf() - 0.25f);
+
+				// Now we need to spawn
+				Eigen::Vector2f pos(x, y);
+				for (std::uint64_t c = 0; c < count; ++c) {
+					pos += dir[static_cast<int>(static_cast<int>(count / 3) * noise->randf())];
+					if (pos.x() < 0) {
+						pos.x() = 0;
+					}
+					if (pos.y() < 0) {
+						pos.y() = 0;
+					}
+
+					if (blocks[pos.x()][pos.y()] != Components::Item::STONE) {
+						continue;
+					}
+
+					blocks[pos.x()][pos.y()] = ore;
+				}
+
+				break;
 			}
 		}
 	}

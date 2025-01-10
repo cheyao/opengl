@@ -23,6 +23,7 @@ const std::unordered_map<Components::Item, std::string> TEXTURES = {
 	{Item::CRAFTING_TABLE, "blocks/crafting-table.png"},
 	{Item::COBBLESTONE, "blocks/cobblestone.png"},
 	{Item::COAL_ORE, "blocks/coal-ore.png"},
+	{Item::COAL_BLOCK, "blocks/coal-block.png"},
 	{Item::DIRT, "blocks/dirt.png"},
 	{Item::FURNACE, "blocks/furnace.png"},
 	{Item::GRASS_BLOCK, "blocks/grass-block.png"},
@@ -34,6 +35,7 @@ const std::unordered_map<Components::Item, std::string> TEXTURES = {
 	{Item::TORCH, "blocks/torch.png"},
 
 	{Item::APPLE, "items/apple.png"},
+	{Item::COAL, "items/coal.png"},
 	{Item::CHARCOAL, "items/charcoal.png"},
 	{Item::STONE_SHOVEL, "items/stone-shovel.png"},
 	{Item::STONE_AXE, "items/stone-axe.png"},
@@ -51,7 +53,7 @@ const std::unordered_map<Components::Item, std::pair<int, std::uint64_t>> BREAK_
 	{Item::STONE, {1, 80}},	     {Item::OAK_LOG, {0, 50}},	      {Item::OAK_LEAVES, {0, 20}},
 	{Item::OAK_PLANKS, {0, 60}}, {Item::CRAFTING_TABLE, {0, 50}}, {Item::COBBLESTONE, {1, 80}},
 	{Item::FURNACE, {1, 80}},    {Item::CAMPFIRE, {0, 50}},	      {Item::TORCH, {0, 2}},
-	{Item::IRON_ORE, {2, 120}},  {Item::COAL_ORE, {1, 120}},
+	{Item::IRON_ORE, {2, 120}},  {Item::COAL_ORE, {1, 120}},      {Item::COAL_BLOCK, {1, 80}},
 };
 
 // Will add one in the real calculation
@@ -60,6 +62,7 @@ extern const std::unordered_map<Components::Item, int> MINING_LEVEL = {
 	{Item::WOODEN_PICKAXE, 1}, {Item::WOODEN_AXE, 1}, {Item::WOODEN_SHOVEL, 1}, {Item::WOODEN_HOE, 1},
 	{Item::STONE_PICKAXE, 3},  {Item::STONE_AXE, 3},  {Item::STONE_SHOVEL, 3},  {Item::STONE_HOE, 3},
 };
+
 extern const std::unordered_map<Components::Item, registers::MiningSystem> MINING_SYSTEM = {
 	{Item::GRASS_BLOCK, MiningSystem::SHOVEL},     {Item::DIRT, MiningSystem::SHOVEL},
 	{Item::STONE, MiningSystem::PICKAXE},	       {Item::OAK_LOG, MiningSystem::AXE},
@@ -69,7 +72,10 @@ extern const std::unordered_map<Components::Item, registers::MiningSystem> MININ
 	{Item::WOODEN_PICKAXE, MiningSystem::PICKAXE}, {Item::STONE_SHOVEL, MiningSystem::SHOVEL},
 	{Item::STONE_AXE, MiningSystem::AXE},	       {Item::STONE_HOE, MiningSystem::HOE},
 	{Item::STONE_PICKAXE, MiningSystem::PICKAXE},  {Item::COBBLESTONE, MiningSystem::PICKAXE},
-	{Item::FURNACE, MiningSystem::PICKAXE},	       {Item::CAMPFIRE, MiningSystem::AXE}};
+	{Item::FURNACE, MiningSystem::PICKAXE},	       {Item::CAMPFIRE, MiningSystem::AXE},
+	{Item::IRON_ORE, MiningSystem::PICKAXE},       {Item::COAL_ORE, MiningSystem::PICKAXE},
+	{Item::COAL_BLOCK, MiningSystem::PICKAXE},
+};
 
 const std::vector<std::pair<float, std::vector<std::pair<Components::Item, Eigen::Vector2i>>>> SURFACE_STRUCTURES = {
 	{0.08,
@@ -115,13 +121,17 @@ const std::unordered_map<Components::Item, std::vector<std::pair<float, Componen
 	 {
 		 {1.1f, Item::CHARCOAL},
 		 {1.1f, Item::CHARCOAL},
+		 {0.5f, Item::CHARCOAL},
 	 }},
-	// TODO: Coal ore
+	{Item::COAL_ORE,
+	 {
+		 {1.1f, Item::COAL},
+		 {0.5f, Item::COAL},
+		 {0.5f, Item::COAL},
+	 }},
 };
 
 // NOLINTBEGIN
-// ITEMS ARE IN REVERSE!!!
-// FIXME: No more reversal
 const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vector<Components::Item>,
 			     std::pair<std::uint64_t, Components::Item>>>
 	CRAFTING_RECIPIES = {
@@ -243,13 +253,20 @@ const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vecto
 			 Item::STICK,
 		 },
 		 {4, Item::TORCH}},
+		{{1, 2},
+		 {
+			 Item::COAL,
+			 Item::STICK,
+		 },
+		 {4, Item::TORCH}},
 };
 // NOLINTEND
 
 // Time in seconds
 const std::unordered_map<Components::Item, double> BURNING_TIME = {
-	{Item::OAK_LOG, 16},	   {Item::OAK_PLANKS, 4}, {Item::STICK, 2},	    {Item::WOODEN_AXE, 8},
-	{Item::WOODEN_PICKAXE, 8}, {Item::WOODEN_HOE, 8}, {Item::WOODEN_SHOVEL, 8}, {Item::CHARCOAL, 32},
+	{Item::OAK_LOG, 16},	   {Item::OAK_PLANKS, 4},      {Item::STICK, 2},	 {Item::WOODEN_AXE, 8},
+	{Item::WOODEN_PICKAXE, 8}, {Item::WOODEN_HOE, 8},      {Item::WOODEN_SHOVEL, 8}, {Item::CHARCOAL, 32},
+	{Item::COAL, 32},	   {Item::COAL_BLOCK, 9 * 32},
 };
 
 // Time in seconds
@@ -280,6 +297,9 @@ const std::unordered_map<Components::Item, std::pair<Eigen::Vector2f, Eigen::Vec
 	{Item::TORCH, {Eigen::Vector2f(0, 0), Eigen::Vector2f(0, 0)}},
 };
 
-const std::vector<std::pair<Components::Item, std::uint64_t>> VEINS = {};
+const std::vector<std::tuple<float, Components::Item, std::uint64_t>> VEINS = {
+	{0.02, Item::COAL_ORE, 8},
+	{0.01, Item::IRON_ORE, 3},
+};
 
 } // namespace registers

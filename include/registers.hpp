@@ -61,6 +61,6 @@ extern const std::vector<std::string> BACKGROUND_SOUNDS;
 // Size 0x0 is no collision box
 extern const std::unordered_map<Components::Item, std::pair<Eigen::Vector2f, Eigen::Vector2f>> COLLISION_BOXES;
 
-// Vector of {Ore type and count}
-extern const std::vector<std::pair<Components::Item, std::uint64_t>> VEINS;
+// Vector of {chance, Ore type and count}
+extern const std::vector<std::tuple<float, Components::Item, std::uint64_t>> VEINS;
 } // namespace registers

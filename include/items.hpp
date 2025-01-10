@@ -29,5 +29,7 @@ enum class Item : std::uint64_t {
 	CAMPFIRE,
 	IRON_ORE,
 	COAL_ORE,
+	COAL,
+	COAL_BLOCK,
 };
 } // namespace Components
