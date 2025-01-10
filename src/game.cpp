@@ -269,6 +269,11 @@ void Game::gui() {
 	/* Main menu */ {
 		ImGui::Begin("Developer menu");
 
+		ImGui::Text("WASD + Space to move");
+		ImGui::Text("E to take inventory");
+		ImGui::Text("ESC to close menu");
+		ImGui::Text("Right click to interract");
+
 		const char* locales[] = {"en", "fr"};
 		static int current = 0;
 		if (ImGui::Combo("language", &current, locales, IM_ARRAYSIZE(locales))) {
