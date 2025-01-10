@@ -31,5 +31,14 @@ enum class Item : std::uint64_t {
 	COAL_ORE,
 	COAL,
 	COAL_BLOCK,
+	IRON_INGOT,
+	IRON_BLOCK,
+	IRON_PICKAXE,
+	IRON_AXE,
+	IRON_SHOVEL,
+	IRON_HOE,
+	IRON_SWORD,
+	WOODEN_SWORD,
+	STONE_SWORD,
 };
 } // namespace Components

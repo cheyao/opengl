@@ -16,7 +16,7 @@ namespace registers {
 
 using namespace Components;
 
-enum class MiningSystem { PICKAXE, AXE, SHOVEL, HOE, SHEARS };
+enum class MiningSystem { PICKAXE, AXE, SHOVEL, HOE, SHEARS, SWORD };
 
 const std::unordered_map<Components::Item, std::string> TEXTURES = {
 	{Item::CAMPFIRE, "blocks/campfire.png"},
@@ -37,30 +37,41 @@ const std::unordered_map<Components::Item, std::string> TEXTURES = {
 	{Item::APPLE, "items/apple.png"},
 	{Item::COAL, "items/coal.png"},
 	{Item::CHARCOAL, "items/charcoal.png"},
+	{Item::IRON_INGOT, "items/iron-ingot.png"},
+	{Item::IRON_SHOVEL, "items/iron-shovel.png"},
+	{Item::IRON_AXE, "items/iron-axe.png"},
+	{Item::IRON_HOE, "items/iron-hoe.png"},
+	{Item::IRON_PICKAXE, "items/iron-pickaxe.png"},
+	{Item::IRON_SWORD, "items/iron-sword.png"},
 	{Item::STONE_SHOVEL, "items/stone-shovel.png"},
 	{Item::STONE_AXE, "items/stone-axe.png"},
 	{Item::STONE_HOE, "items/stone-hoe.png"},
 	{Item::STONE_PICKAXE, "items/stone-pickaxe.png"},
+	{Item::STONE_SWORD, "items/stone-sword.png"},
 	{Item::STICK, "items/stick.png"},
 	{Item::WOODEN_SHOVEL, "items/wooden-shovel.png"},
 	{Item::WOODEN_AXE, "items/wooden-axe.png"},
 	{Item::WOODEN_HOE, "items/wooden-hoe.png"},
 	{Item::WOODEN_PICKAXE, "items/wooden-pickaxe.png"},
+	{Item::WOODEN_SWORD, "items/wooden-sword.png"},
 };
 
 const std::unordered_map<Components::Item, std::pair<int, std::uint64_t>> BREAK_TIMES = {
-	{Item::AIR, {0, 0}},	     {Item::GRASS_BLOCK, {0, 30}},    {Item::DIRT, {0, 30}},
-	{Item::STONE, {1, 80}},	     {Item::OAK_LOG, {0, 50}},	      {Item::OAK_LEAVES, {0, 20}},
-	{Item::OAK_PLANKS, {0, 60}}, {Item::CRAFTING_TABLE, {0, 50}}, {Item::COBBLESTONE, {1, 80}},
-	{Item::FURNACE, {1, 80}},    {Item::CAMPFIRE, {0, 50}},	      {Item::TORCH, {0, 2}},
-	{Item::IRON_ORE, {2, 120}},  {Item::COAL_ORE, {1, 120}},      {Item::COAL_BLOCK, {1, 80}},
+	{Item::AIR, {0, 0}},	      {Item::GRASS_BLOCK, {0, 30}},    {Item::DIRT, {0, 30}},
+	{Item::STONE, {1, 80}},	      {Item::OAK_LOG, {0, 50}},	       {Item::OAK_LEAVES, {0, 20}},
+	{Item::OAK_PLANKS, {0, 60}},  {Item::CRAFTING_TABLE, {0, 50}}, {Item::COBBLESTONE, {1, 80}},
+	{Item::FURNACE, {1, 80}},     {Item::CAMPFIRE, {0, 50}},       {Item::TORCH, {0, 2}},
+	{Item::IRON_ORE, {2, 120}},   {Item::COAL_ORE, {1, 120}},      {Item::COAL_BLOCK, {1, 80}},
+	{Item::IRON_BLOCK, {2, 180}},
 };
 
 // Will add one in the real calculation
 // WOOD 1 STONE 3 IRON 5 diamond 7 neth 8 gold 11
 extern const std::unordered_map<Components::Item, int> MINING_LEVEL = {
-	{Item::WOODEN_PICKAXE, 1}, {Item::WOODEN_AXE, 1}, {Item::WOODEN_SHOVEL, 1}, {Item::WOODEN_HOE, 1},
-	{Item::STONE_PICKAXE, 3},  {Item::STONE_AXE, 3},  {Item::STONE_SHOVEL, 3},  {Item::STONE_HOE, 3},
+	{Item::WOODEN_PICKAXE, 1}, {Item::WOODEN_AXE, 1},    {Item::WOODEN_SHOVEL, 1}, {Item::WOODEN_HOE, 1},
+	{Item::WOODEN_SWORD, 1},   {Item::STONE_PICKAXE, 3}, {Item::STONE_AXE, 3},     {Item::STONE_SHOVEL, 3},
+	{Item::STONE_HOE, 3},	   {Item::STONE_SWORD, 3},   {Item::IRON_PICKAXE, 5},  {Item::IRON_AXE, 5},
+	{Item::IRON_SHOVEL, 5},	   {Item::IRON_HOE, 5},	     {Item::IRON_SWORD, 5},
 };
 
 extern const std::unordered_map<Components::Item, registers::MiningSystem> MINING_SYSTEM = {
@@ -74,7 +85,11 @@ extern const std::unordered_map<Components::Item, registers::MiningSystem> MININ
 	{Item::STONE_PICKAXE, MiningSystem::PICKAXE},  {Item::COBBLESTONE, MiningSystem::PICKAXE},
 	{Item::FURNACE, MiningSystem::PICKAXE},	       {Item::CAMPFIRE, MiningSystem::AXE},
 	{Item::IRON_ORE, MiningSystem::PICKAXE},       {Item::COAL_ORE, MiningSystem::PICKAXE},
-	{Item::COAL_BLOCK, MiningSystem::PICKAXE},
+	{Item::COAL_BLOCK, MiningSystem::PICKAXE},     {Item::IRON_BLOCK, MiningSystem::PICKAXE},
+	{Item::IRON_SHOVEL, MiningSystem::SHOVEL},     {Item::IRON_AXE, MiningSystem::AXE},
+	{Item::IRON_HOE, MiningSystem::HOE},	       {Item::IRON_PICKAXE, MiningSystem::PICKAXE},
+	{Item::IRON_SWORD, MiningSystem::SWORD},       {Item::STONE_SWORD, MiningSystem::SWORD},
+	{Item::WOODEN_SWORD, MiningSystem::SWORD},
 };
 
 const std::vector<std::pair<float, std::vector<std::pair<Components::Item, Eigen::Vector2i>>>> SURFACE_STRUCTURES = {
@@ -181,6 +196,14 @@ const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vecto
 			 Item::STICK,
 		 },
 		 {1, Item::WOODEN_HOE}},
+		{{1, 3},
+		 {
+			 Item::OAK_PLANKS,
+			 Item::OAK_PLANKS,
+			 Item::STICK,
+		 },
+		 {1, Item::WOODEN_SWORD}},
+
 		{{3, 3},
 		 {
 			 Item::COBBLESTONE,
@@ -221,6 +244,61 @@ const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vecto
 			 Item::STICK,
 		 },
 		 {1, Item::STONE_HOE}},
+		{{1, 3},
+		 {
+			 Item::COBBLESTONE,
+			 Item::COBBLESTONE,
+			 Item::STICK,
+		 },
+		 {1, Item::STONE_SWORD}},
+
+		{{3, 3},
+		 {
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::AIR,
+			 Item::STICK,
+			 Item::AIR,
+			 Item::AIR,
+			 Item::STICK,
+			 Item::AIR,
+		 },
+		 {1, Item::IRON_PICKAXE}},
+		{{2, 3},
+		 {
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::STICK,
+			 Item::AIR,
+			 Item::STICK,
+		 },
+		 {1, Item::IRON_AXE}},
+		{{1, 3},
+		 {
+			 Item::IRON_INGOT,
+			 Item::STICK,
+			 Item::STICK,
+		 },
+		 {1, Item::IRON_SHOVEL}},
+		{{2, 3},
+		 {
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::AIR,
+			 Item::STICK,
+			 Item::AIR,
+			 Item::STICK,
+		 },
+		 {1, Item::IRON_HOE}},
+		{{1, 3},
+		 {
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::STICK,
+		 },
+		 {1, Item::IRON_SWORD}},
 		{{3, 3},
 		 {
 			 Item::COBBLESTONE,
@@ -259,6 +337,42 @@ const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vecto
 			 Item::STICK,
 		 },
 		 {4, Item::TORCH}},
+		{{3, 3},
+		 {
+			 Item::COAL,
+			 Item::COAL,
+			 Item::COAL,
+			 Item::COAL,
+			 Item::COAL,
+			 Item::COAL,
+			 Item::COAL,
+			 Item::COAL,
+			 Item::COAL,
+		 },
+		 {1, Item::COAL_BLOCK}},
+		{{3, 3},
+		 {
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+			 Item::IRON_INGOT,
+		 },
+		 {1, Item::IRON_BLOCK}},
+		{{0, 0},
+		 {
+			 Item::IRON_BLOCK,
+		 },
+		 {9, Item::IRON_INGOT}},
+		{{0, 0},
+		 {
+			 Item::COAL_BLOCK,
+		 },
+		 {9, Item::COAL}},
 };
 // NOLINTEND
 
@@ -273,6 +387,7 @@ const std::unordered_map<Components::Item, double> BURNING_TIME = {
 const std::unordered_map<Components::Item, std::pair<double, Components::Item>> SMELTING_RECIPIE = {
 	{Item::COBBLESTONE, {8, Item::STONE}},
 	{Item::OAK_LOG, {8, Item::CHARCOAL}},
+	{Item::IRON_ORE, {8, Item::IRON_INGOT}},
 };
 
 template <typename T, typename... Args> T* staticHelper(Args&&... args) {
