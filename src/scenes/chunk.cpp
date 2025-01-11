@@ -249,6 +249,12 @@ void Chunk::spawnOres(std::vector<std::vector<Components::Item>>& blocks, class 
 					if (pos.y() < 0) {
 						pos.y() = 0;
 					}
+					if (pos.x() >= CHUNK_WIDTH) {
+						pos.x() = CHUNK_WIDTH - 1;
+					}
+					if (pos.y() >= 2 * WATER_LEVEL) {
+						pos.y() = WATER_LEVEL * 2 - 1;
+					}
 
 					if (blocks[pos.x()][pos.y()] != Components::Item::STONE) {
 						continue;

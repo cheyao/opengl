@@ -46,8 +46,8 @@ void Level::create() {
 
 	mScene->emplace<Components::velocity>(player, Eigen::Vector2f(0.0f, 0.0f));
 	mScene->emplace<Components::position>(
-		player, Eigen::Vector2f(0.0f, (Chunk::WATER_LEVEL + 1) * Components::block::BLOCK_SIZE +
-						      5 * mNoise->getNoise(0)));
+		player, Eigen::Vector2f(0.0f, (Chunk::WATER_LEVEL + 1 + (5 * mNoise->getNoise(0))) *
+						      Components::block::BLOCK_SIZE));
 	mScene->emplace<Components::inventory>(player, new PlayerInventory(mGame, 36));
 
 	mLeft = new Chunk(mScene, mNoise.get(), -1);
