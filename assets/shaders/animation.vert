@@ -7,14 +7,15 @@ out vec2 vTexPos;
 
 layout(std140) uniform Matrices {
 	mat4 proj;
-	mat4 view;
 };
-uniform sampler2D letter;
-uniform vec2 offset;
+uniform vec2 size;
+uniform float scale;
+
+uniform ivec2 position;
 
 void main() {
-	vec2 size = textureSize(letter, 0);
-	gl_Position = proj * vec4(offset + vec2(aPos.x * size.x, aPos.y * size.y), 0.0f, 1.0f);
+	vec2 pos = (aPos * scale + vec2(position)) * size + offset;
+	gl_Position = proj * vec4(pos, 0.0f, 1.0f);
 
 	vTexPos = aTexPos;
 }

@@ -177,7 +177,6 @@ void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen
 
 	shader->set("offset"_u,
 		    Eigen::Vector2f(offset.x() + glyph.bearing.x(), offset.y() - (glyph.size.y() - glyph.bearing.y())));
-	shader->set("size"_u, glyph.size);
 
 	glyph.texture->activate(0);
 

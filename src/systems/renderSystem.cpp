@@ -270,7 +270,6 @@ void RenderSystem::draw(Scene* scene) {
 	// Draw blocks
 	Shader* shader = this->getShader("block.vert", "block.frag");
 	shader->activate();
-	shader->set("size"_u, (float)Components::block::BLOCK_SIZE, (float)Components::block::BLOCK_SIZE);
 	shader->set("texture_diffuse"_u, 0);
 	shader->set("offset"_u, cameraOffset);
 	shader->set("scale"_u, 1.0f);
@@ -322,7 +321,6 @@ void RenderSystem::draw(Scene* scene) {
 		}
 
 		shader->set("offset"_u, offset);
-		shader->set("size"_u, texture.mTexture->getSize());
 		shader->set("scale"_u, texture.mScale);
 
 		texture.mTexture->activate(0);
@@ -360,7 +358,6 @@ void RenderSystem::draw(Scene* scene) {
 			const Eigen::Vector2f offset = position.mPosition + collision.mOffset + cameraOffset;
 
 			editorShader->set("offset"_u, offset);
-			editorShader->set("size"_u, collision.mSize);
 
 			mMesh->draw(editorShader);
 		}
@@ -394,8 +391,6 @@ void RenderSystem::draw(Scene* scene) {
 			model.translate((Eigen::Vector3f() << (position.mPosition), 0.0f).finished());
 
 			vectorShader->set("model"_u, model);
-			vectorShader->set("size"_u,
-					  Eigen::Vector2f(texture.mTexture->getWidth(), texture.mTexture->getHeight()));
 			const Eigen::Vector2f center = position.mPosition + texture.mTexture->getSize() / 2;
 			vectorShader->set("position"_u, center);
 			vectorShader->set("velocity"_u, velocity.mVelocity);

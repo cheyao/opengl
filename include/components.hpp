@@ -54,12 +54,12 @@ struct texture {
 };
 
 struct animated_texture {
-	std::vector<class Texture*> mTexture;
-	std::size_t mSize;
-	float mScale;
+	class Texture* mSpriteSheet;
+	const Eigen::Vector2f mSize;
+	unsigned int mSelect;
 
-	animated_texture(const decltype(mTexture)& tex, const decltype(mSize) size, const float scale = 1.0f) noexcept
-		: mTexture(tex), mSize(size), mScale(scale) {}
+	animated_texture(const decltype(mSpriteSheet) spriteSheet, const decltype(mSize)& size, unsigned int select = 0)
+		: mSpriteSheet(spriteSheet), mSize(size), mSelect(select) {}
 };
 
 struct input {

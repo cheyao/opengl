@@ -188,7 +188,6 @@ void InputSystem::draw(class Scene* scene) {
 	Shader* shader = systemManager->getShader("block.vert", "block.frag");
 
 	shader->activate();
-	shader->set("size"_u, (float)Components::block::BLOCK_SIZE, (float)Components::block::BLOCK_SIZE);
 	shader->set("texture_diffuse"_u, 0);
 	shader->set("offset"_u, cameraOffset);
 	shader->set("position"_u, mDestruction.pos);
