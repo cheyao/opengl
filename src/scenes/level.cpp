@@ -272,8 +272,10 @@ void Level::update(const float delta) {
 void Level::createCommon() {
 	const auto player = mGame->getPlayerID();
 	auto* const playerTexture = mGame->getSystemManager()->getTexture("steve.png", true);
-	mScene->emplace<Components::texture>(player, playerTexture);
-	mScene->emplace<Components::collision>(player, Eigen::Vector2f(3.0f * 7.0f, 0.0f), playerTexture->getSize());
+	mScene->emplace<Components::animated_texture>(player, playerTexture, Eigen::Vector2i(8, 7), 0);
+	mScene->emplace<Components::collision>(
+		player, Eigen::Vector2f(3.0f * 7.0f, 0.0f),
+		Eigen::Vector2f(Components::block::BLOCK_SIZE, Components::block::BLOCK_SIZE));
 	mScene->emplace<Components::misc>(player, Components::misc::JUMP | Components::misc::PLAYER);
 	mScene->emplace<Components::input>(player, [](class Scene* scene, const EntityID entity, const float) {
 		Eigen::Vector2f& vel = scene->get<Components::velocity>(entity).mVelocity;

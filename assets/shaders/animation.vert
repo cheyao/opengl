@@ -8,14 +8,22 @@ out vec2 vTexPos;
 layout(std140) uniform Matrices {
 	mat4 proj;
 };
-uniform vec2 size;
-uniform float scale;
 
-uniform ivec2 position;
+uniform sampler2D texture_diffuse;
+uniform vec2 offset;
+uniform ivec2 size;
+uniform uint select;
+
+uniform bool flip;
 
 void main() {
-	vec2 pos = (aPos * scale + vec2(position)) * size + offset;
-	gl_Position = proj * vec4(pos, 0.0f, 1.0f);
+	// Size of the sprite
+	vec2 spriteSize = textureSize(texture_diffuse, 0) * 7 / vec2(size);
 
-	vTexPos = aTexPos;
+	// Player pos
+	gl_Position = proj * vec4(aPos * spriteSize + offset, 0, 1);
+
+	// Size of one cell on the texture
+	vec2 texSpriteSize = vec2(1, 1) / vec2(size);
+	vTexPos = texSpriteSize * vec2(select % size.x, select / size.x) + texSpriteSize * aTexPos;
 }

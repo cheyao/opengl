@@ -12,8 +12,7 @@
 // Cache is defined in utils.cpp
 extern std::vector<int*> mViewCache;
 
-template <typename... Components>
-[[nodiscard]] utils::sparse_set_view<Components...> view_impl() {
+template <typename... Components> [[nodiscard]] utils::sparse_set_view<Components...> view_impl() {
 	static int key = (mViewCache.push_back(&key), false);
 	static utils::sparse_set_view<Components...> view = utils::sparse_set_view<Components...>();
 
@@ -52,7 +51,9 @@ class Scene {
 
 	// Adds a component to an entity
 	template <typename Component, typename... Args> void emplace(const EntityID entity, Args&&... args) {
-		ComponentManager::getInstance()->getPool<Component>()->emplace(entity, std::forward<Args>(args)...);
+		static auto* const pool = ComponentManager::getInstance()->getPool<Component>();
+
+		pool->emplace(entity, std::forward<Args>(args)...);
 		// Mark entire view cache as dirty because we changed the pools
 		markAllCachesDirty();
 	}

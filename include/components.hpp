@@ -55,11 +55,12 @@ struct texture {
 
 struct animated_texture {
 	class Texture* mSpriteSheet;
-	const Eigen::Vector2f mSize;
+	Eigen::Vector2i mSize;
 	unsigned int mSelect;
+	bool mFlip;
 
 	animated_texture(const decltype(mSpriteSheet) spriteSheet, const decltype(mSize)& size, unsigned int select = 0)
-		: mSpriteSheet(spriteSheet), mSize(size), mSelect(select) {}
+		: mSpriteSheet(spriteSheet), mSize(size), mSelect(select), mFlip(0) {}
 };
 
 struct input {

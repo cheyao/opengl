@@ -114,9 +114,13 @@ void Shader::activate() const noexcept { glUseProgram(mShaderProgram); }
 
 GLint Shader::getUniform(const std::uint64_t name) const {
 	[[unlikely]] if (!mPositionCache.contains(name)) {
-		SDL_Log("\033[93mShader.cpp: Failed find uniform location with hash \"%" PRIu64
-			"\" for shader %s\033[0m",
-			name, mName.data());
+		static std::unordered_map<std::uint64_t, bool> warned;
+		if (!warned[name]) {
+			SDL_Log("\033[93mShader.cpp: Failed to find uniform location with hash \"%" PRIu64
+				"\" for shader %s\033[0m",
+				name, mName.data());
+			warned[name] = true;
+		}
 
 		return -1;
 	}

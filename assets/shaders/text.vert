@@ -14,7 +14,7 @@ uniform vec2 offset;
 
 void main() {
 	vec2 size = textureSize(letter, 0);
-	gl_Position = proj * vec4(offset + vec2(aPos.x * size.x, aPos.y * size.y), 0.0f, 1.0f);
+	gl_Position = proj * vec4(offset + aPos * size, 0.0f, 1.0f);
 
 	vTexPos = aTexPos;
 }

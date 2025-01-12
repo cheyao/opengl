@@ -49,8 +49,7 @@ EM_JS(int, browserWidth, (), { return window.innerWidth; });
 RenderSystem::RenderSystem() noexcept
 	: mGame(Game::getInstance()), mWindow(nullptr, SDL_DestroyWindow), mCursor(nullptr, SDL_DestroyCursor),
 	  mIcon(nullptr, SDL_DestroySurface), mGL(nullptr), mFramebuffer(nullptr), mMatricesUBO(nullptr),
-	  mTextures(nullptr), mShaders(nullptr), mMesh(nullptr),
-	  mWidth(0), mHeight(0) {
+	  mTextures(nullptr), mShaders(nullptr), mMesh(nullptr), mWidth(0), mHeight(0) {
 	const SDL_DisplayMode* const DM = SDL_GetCurrentDisplayMode(SDL_GetPrimaryDisplay());
 
 	SDL_Log("\n");
@@ -327,6 +326,40 @@ void RenderSystem::draw(Scene* scene) {
 
 		mMesh->draw(shader);
 	}
+
+	shader = this->getShader("animation.vert", "block.frag");
+	shader->activate();
+	shader->set("texture_diffuse"_u, 0);
+
+	// Draw other textures
+	for (const auto& [entity, texture, position] :
+	     scene->view<Components::animated_texture, Components::position>().each()) {
+		Eigen::Vector2f offset = position.mPosition + cameraOffset;
+
+		// Not so performant but let's do it for each entity
+		const float time = SDL_sin(SDL_GetTicks() / 1000.0f + position.mPosition.sum());
+
+		// The item is on screen
+		if (scene->contains<Components::item>(entity)) {
+			offset.y() += 40 * time;
+		}
+
+		shader->set("offset"_u, offset);
+		shader->set("size"_u, texture.mSize);
+		shader->set("select"_u, texture.mSelect);
+		shader->set("flip"_u, texture.mFlip);
+
+		texture.mSpriteSheet->activate(0);
+		scene->get<Components::animated_texture>(entity).mSelect++;
+		if (scene->get<Components::animated_texture>(entity).mSelect ==
+		    static_cast<unsigned int>(scene->get<Components::animated_texture>(entity).mSize.sum())) {
+			scene->get<Components::animated_texture>(entity).mSelect = 0;
+		}
+		mMesh->draw(shader);
+	}
+
+	shader = this->getShader("block.vert", "block.frag");
+	shader->activate();
 
 	drawHUD(scene);
 
