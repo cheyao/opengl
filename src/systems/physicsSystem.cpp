@@ -98,8 +98,17 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 			if (!onGround) {
 				texture.mSelect = 2 * 8 + (velocity.y() > 0);
 			} else {
+				static float step = 0;
 				if (nearZero(velocity.x())) {
 					texture.mSelect = 0;
+					step = 0;
+				} else {
+					step += delta * 10;
+					if (step >= 4.0f) {
+						step = 0.0f;
+					}
+
+					texture.mSelect = 8 + static_cast<int>(step);
 				}
 			}
 

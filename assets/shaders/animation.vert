@@ -33,5 +33,5 @@ void main() {
 
 	vec2 texSpritePos = texSpriteSize * texPos;
 
-	vTexPos = texSpritePos; texSpriteSize * vec2(select % size.x, select / size.x) + texSpritePos;
+	vTexPos = texSpriteSize * vec2(select % size.x, select / size.x) + texSpritePos;
 }
