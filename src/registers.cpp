@@ -18,7 +18,7 @@ using namespace Components;
 
 enum class MiningSystem { PICKAXE, AXE, SHOVEL, HOE, SHEARS, SWORD };
 
-const std::unordered_map<Components::Item, std::string> TEXTURES = {
+std::unordered_map<Components::Item, std::string> TEXTURES = {
 	{Item::CAMPFIRE, "blocks/campfire.png"},
 	{Item::CRAFTING_TABLE, "blocks/crafting-table.png"},
 	{Item::COBBLESTONE, "blocks/cobblestone.png"},
@@ -337,6 +337,8 @@ const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vecto
 			 Item::STICK,
 		 },
 		 {4, Item::TORCH}},
+
+		// Ingots to blocks
 		{{3, 3},
 		 {
 			 Item::COAL,
@@ -363,6 +365,8 @@ const std::vector<std::tuple<std::pair<std::uint64_t, std::uint64_t>, std::vecto
 			 Item::IRON_INGOT,
 		 },
 		 {1, Item::IRON_BLOCK}},
+
+		// Blocks to ingots
 		{{0, 0},
 		 {
 			 Item::IRON_BLOCK,
@@ -405,16 +409,16 @@ const std::vector<std::string> BACKGROUND_SOUNDS = {
 	"subwoofer_lullaby.wav",
 };
 
-constexpr inline auto size = 16 * 7;
+constexpr const static inline auto BLOCK_SIZE = 16 * 7;
 // A collision box of 0x0 is no collision box
 const std::unordered_map<Components::Item, std::pair<Eigen::Vector2f, Eigen::Vector2f>> COLLISION_BOXES = {
-	{Item::CAMPFIRE, {Eigen::Vector2f(0, 0), Eigen::Vector2f(size, size / 2)}},
+	{Item::CAMPFIRE, {Eigen::Vector2f(0, 0), Eigen::Vector2f(BLOCK_SIZE, BLOCK_SIZE / 2)}},
 	{Item::TORCH, {Eigen::Vector2f(0, 0), Eigen::Vector2f(0, 0)}},
 };
 
-const std::vector<std::tuple<float, Components::Item, std::uint64_t>> VEINS = {
-	{0.02, Item::COAL_ORE, 8},
-	{0.01, Item::IRON_ORE, 3},
+const std::vector<std::tuple<float, std::uint64_t, Components::Item, std::uint64_t>> VEINS = {
+	{0.02, 32, Item::COAL_ORE, 8},
+	{0.01, 14, Item::IRON_ORE, 3},
 };
 
 } // namespace registers

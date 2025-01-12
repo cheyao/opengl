@@ -1,6 +1,7 @@
 #include "components/furnace.hpp"
 
 #include "game.hpp"
+#include "items.hpp"
 #include "managers/eventManager.hpp"
 #include "managers/systemManager.hpp"
 #include "opengl/mesh.hpp"
@@ -260,10 +261,14 @@ processFuel:
 			if (mSmeltingCount[FUEL_SLOT] == 0) {
 				mSmeltingItems[FUEL_SLOT] = Components::AIR();
 			}
+
+			registers::TEXTURES[Components::Item::FURNACE] = "blocks/furnace-on.png";
 		} else {
 			mFuelTime = 0;
 			mFuelLeft = 0;
 			mRecipieTime = 0;
+
+			registers::TEXTURES[Components::Item::FURNACE] = "blocks/furnace.png";
 
 			return;
 		}

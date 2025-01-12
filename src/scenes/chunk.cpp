@@ -232,12 +232,16 @@ void Chunk::spawnOres(std::vector<std::vector<Components::Item>>& blocks, class 
 
 			// Roll
 			for (const auto vein : registers::VEINS) {
+				if (y >= std::get<1>(vein)) {
+					continue;
+				}
+
 				if (noise->randf() >= std::get<0>(vein)) {
 					continue;
 				}
 
-				const auto ore = std::get<1>(vein);
-				const auto count = std::get<2>(vein) + static_cast<int>(4 * noise->randf() - 0.25f);
+				const auto ore = std::get<2>(vein);
+				const auto count = std::get<3>(vein) + static_cast<int>(4 * noise->randf() - 0.25f);
 
 				// Now we need to spawn
 				Eigen::Vector2f pos(x, y);

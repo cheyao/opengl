@@ -20,7 +20,7 @@ namespace registers {
 enum class MiningSystem;
 
 // item to texture path
-extern const std::unordered_map<Components::Item, std::string> TEXTURES;
+extern std::unordered_map<Components::Item, std::string> TEXTURES;
 
 // Map to the time to break the block: {tool and time in ticks}
 extern const std::unordered_map<Components::Item, std::pair<int, std::uint64_t>> BREAK_TIMES;
@@ -61,6 +61,6 @@ extern const std::vector<std::string> BACKGROUND_SOUNDS;
 // Size 0x0 is no collision box
 extern const std::unordered_map<Components::Item, std::pair<Eigen::Vector2f, Eigen::Vector2f>> COLLISION_BOXES;
 
-// Vector of {chance, Ore type and count}
-extern const std::vector<std::tuple<float, Components::Item, std::uint64_t>> VEINS;
+// Vector of {chance, min y, ore type and count}
+extern const std::vector<std::tuple<float, std::uint64_t, Components::Item, std::uint64_t>> VEINS;
 } // namespace registers

@@ -7,6 +7,7 @@
 #include <functional>
 #include <span>
 #include <type_traits>
+#include <vector>
 
 // Android needs the constructers to be able to use emplace
 class Texture;
@@ -50,6 +51,15 @@ struct texture {
 	float mScale;
 
 	texture(const decltype(mTexture) tex, const float scale = 1.0f) noexcept : mTexture(tex), mScale(scale) {}
+};
+
+struct animated_texture {
+	std::vector<class Texture*> mTexture;
+	std::size_t mSize;
+	float mScale;
+
+	animated_texture(const decltype(mTexture)& tex, const decltype(mSize) size, const float scale = 1.0f) noexcept
+		: mTexture(tex), mSize(size), mScale(scale) {}
 };
 
 struct input {
