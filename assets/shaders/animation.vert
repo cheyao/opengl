@@ -24,6 +24,14 @@ void main() {
 	gl_Position = proj * vec4(aPos * spriteSize + offset, 0, 1);
 
 	// Size of one cell on the texture
-	vec2 texSpriteSize = vec2(1, 1) / vec2(size);
-	vTexPos = texSpriteSize * vec2(select % size.x, select / size.x) + texSpriteSize * aTexPos;
+	vec2 texSpriteSize = vec2(1.0f, 1.0f) / vec2(size);
+
+	vec2 texPos = aTexPos;
+	if (flip) {
+		texPos.x = texPos.x * -1.0f + 1.0f;
+	}
+
+	vec2 texSpritePos = texSpriteSize * texPos;
+
+	vTexPos = texSpritePos; texSpriteSize * vec2(select % size.x, select / size.x) + texSpritePos;
 }

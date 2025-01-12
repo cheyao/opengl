@@ -9,6 +9,7 @@
 #include "scene.hpp"
 #include "systems/UISystem.hpp"
 #include "third_party/Eigen/Core"
+#include "utils.hpp"
 
 #include <SDL3/SDL.h>
 #include <cstddef>
@@ -90,6 +91,22 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 			}
 		} else {
 			velocity.y() -= G * delta;
+		}
+
+		if (scene->contains<Components::animated_texture>(entity)) {
+			auto& texture = scene->get<Components::animated_texture>(entity);
+			if (!onGround) {
+				texture.mSelect = 2 * 8 + (velocity.y() > 0);
+			} else {
+				if (nearZero(velocity.x())) {
+					texture.mSelect = 0;
+				}
+			}
+
+			if (!nearZero(velocity.x())) {
+				// Flip if going left
+				texture.mFlip = velocity.x() < 0;
+			}
 		}
 
 		scene->get<Components::position>(entity).mPosition += velocity * delta;

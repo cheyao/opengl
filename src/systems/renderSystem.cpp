@@ -350,11 +350,7 @@ void RenderSystem::draw(Scene* scene) {
 		shader->set("flip"_u, texture.mFlip);
 
 		texture.mSpriteSheet->activate(0);
-		scene->get<Components::animated_texture>(entity).mSelect++;
-		if (scene->get<Components::animated_texture>(entity).mSelect ==
-		    static_cast<unsigned int>(scene->get<Components::animated_texture>(entity).mSize.sum())) {
-			scene->get<Components::animated_texture>(entity).mSelect = 0;
-		}
+
 		mMesh->draw(shader);
 	}
 
