@@ -78,7 +78,7 @@ void TextSystem::loadFont(const std::string& name) {
 		return;
 	}
 
-	if (!stbtt_InitFont(&mFont, newFontData, stbtt_GetFontOffsetForIndex(newFontData, 0))) {
+	if (!stbtt_InitFont(&mFont, newFontData, 0)) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "TextSystem.cpp: Failed to load font: %s", name.data());
 		ERROR_BOX("Failed load font, please reinstall assets");
 
@@ -112,14 +112,23 @@ TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
 		return mGlyphMap[character];
 	}
 
-	bitmap = stbtt_GetCodepointBitmap(&mFont, 0, stbtt_ScaleForPixelHeight(&mFont, 1), c, &w, &h, 0, 0);
+	int w, h, xo, yo, x0, y0, x1, y1;
+	unsigned char* bitmap =
+		stbtt_GetCodepointBitmap(&mFont, 0, stbtt_ScaleForPixelHeight(&mFont, 24), character, &w, &h, &xo, &yo);
 
-	mGlyphMap[character] = {(mFace->glyph->bitmap.rows > 0 && mFace->glyph->bitmap.width > 0)
-					? new Texture(mFace->glyph->bitmap)
-					: nullptr,
-				Eigen::Vector2f(mFace->glyph->bitmap.width, mFace->glyph->bitmap.rows),
-				Eigen::Vector2f(mFace->glyph->bitmap_left, mFace->glyph->bitmap_top),
-				Eigen::Vector2f(mFace->glyph->advance.x >> 6, mFace->glyph->advance.y >> 6)};
+	// get the bbox of the bitmap centered around the glyph origin; so the
+	// bitmap width is ix1-ix0, height is iy1-iy0, and location to place
+	// the bitmap top left is (leftSideBearing*scale,iy0).
+	stbtt_GetCodepointBitmapBox(&mFont, character, stbtt_ScaleForPixelHeight(&mFont, 24), stbtt_ScaleForPixelHeight(&mFont, 24), &x0, &y0, &x1, &y1);
+	if (character == ' ') {
+		x0 = 0;
+		x1 = 7;
+	}
+
+	mGlyphMap[character] = {new Texture(Eigen::Vector2f(w, h), bitmap), Eigen::Vector2f(w, h),
+				Eigen::Vector2f(xo, -yo), Eigen::Vector2f(x1-x0+xo, 0)};
+
+	stbtt_FreeBitmap(bitmap, nullptr);
 
 	return mGlyphMap[character];
 }

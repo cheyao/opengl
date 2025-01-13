@@ -15,9 +15,8 @@
 Texture::Texture(const std::string_view path) : name(path), mWidth(0), mHeight(0) {}
 
 // PERF: Use compiled texture format
-Texture::Texture(const FT_Bitmap& bitmap)
-	: name(string_format("from freetype bitmap %ux%u", bitmap.width, bitmap.rows)), mWidth(bitmap.width),
-	  mHeight(bitmap.rows) {
+Texture::Texture(const Eigen::Vector2f& size, unsigned char* bitmap)
+	: name(string_format("from freetype bitmap %ux%u", size.x(), size.y())), mWidth(size.x()), mHeight(size.y()) {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glGenTextures(1, &mID);
@@ -30,7 +29,7 @@ Texture::Texture(const FT_Bitmap& bitmap)
 #else
 		     GL_RED,
 #endif
-		     mWidth, mHeight, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap.buffer);
+		     mWidth, mHeight, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
