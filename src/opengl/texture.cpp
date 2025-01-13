@@ -4,9 +4,7 @@
 #include "third_party/stb_image.h"
 #include "utils.hpp"
 
-#include <ft2build.h>
 #include <memory>
-#include FT_FREETYPE_H
 #include <SDL3/SDL.h>
 #include <cstddef>
 #include <string_view>

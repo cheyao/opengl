@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 project(
-	OpenGL
+	2d-minecraft
 	LANGUAGES C CXX
 	VERSION 1.0
-	DESCRIPTION "OpenGL Game Engine"
+	DESCRIPTION "2D Minecraft"
 )
 
 set(CMAKE_CXX_STANDARD 23)
@@ -257,9 +257,9 @@ elseif(WINDOWS)
 elseif(WEB)
 	add_executable(${BUILD_NAME} ${SRC})
 
-	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -DGLES -fno-rtti -fno-exceptions)
+	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -DGLES -fno-rtti -fno-exceptions)
 	target_compile_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
-	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sALLOW_MEMORY_GROWTH -fno-rtti -fno-exceptions -sFETCH)
+	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sALLOW_MEMORY_GROWTH -fno-rtti -fno-exceptions -sFETCH)
 	target_link_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
 
 	if(DEBUG)
@@ -344,15 +344,6 @@ if(NOT ANDROID) # Android projects include themself using subdirectory
 	target_link_libraries(${BUILD_NAME} PRIVATE ${SDL3_LIBRARIES} SDL3::Headers) # Static library?
 else()
 	target_link_libraries(${BUILD_NAME} PRIVATE SDL3::SDL3) # Static library?
-endif()
-
-# Freetype
-if (NOT WEB AND NOT ANDROID)
-	find_package(Freetype REQUIRED)
-	target_include_directories(${BUILD_NAME} PRIVATE ${FREETYPE_INCLUDE_DIRS})
-	target_link_libraries(${BUILD_NAME} PRIVATE ${FREETYPE_LIBRARIES})
-elseif(ANDROID)
-	target_link_libraries(${BUILD_NAME} PRIVATE freetype)
 endif()
 
 # ImGUI

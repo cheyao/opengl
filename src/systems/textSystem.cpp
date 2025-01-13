@@ -112,21 +112,19 @@ TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
 		return mGlyphMap[character];
 	}
 
-	int w, h, xo, yo, x0, y0, x1, y1;
+	int w, h, xo, yo, x0, x1;
 	unsigned char* bitmap =
 		stbtt_GetCodepointBitmap(&mFont, 0, stbtt_ScaleForPixelHeight(&mFont, 24), character, &w, &h, &xo, &yo);
 
-	// get the bbox of the bitmap centered around the glyph origin; so the
-	// bitmap width is ix1-ix0, height is iy1-iy0, and location to place
-	// the bitmap top left is (leftSideBearing*scale,iy0).
-	stbtt_GetCodepointBitmapBox(&mFont, character, stbtt_ScaleForPixelHeight(&mFont, 24), stbtt_ScaleForPixelHeight(&mFont, 24), &x0, &y0, &x1, &y1);
+	stbtt_GetCodepointBitmapBox(&mFont, character, stbtt_ScaleForPixelHeight(&mFont, 24),
+				    stbtt_ScaleForPixelHeight(&mFont, 24), &x0, 0, &x1, 0);
 	if (character == ' ') {
 		x0 = 0;
 		x1 = 7;
 	}
 
 	mGlyphMap[character] = {new Texture(Eigen::Vector2f(w, h), bitmap), Eigen::Vector2f(w, h),
-				Eigen::Vector2f(xo, -yo), Eigen::Vector2f(x1-x0+xo, 0)};
+				Eigen::Vector2f(xo, -yo), Eigen::Vector2f(x1 - x0 + xo, 0)};
 
 	stbtt_FreeBitmap(bitmap, nullptr);
 

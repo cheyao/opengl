@@ -29,6 +29,7 @@
 - **Custom Saves** 📝: Easily save **any** data on any platform you want in a json file, the game engine will manage it for you!
 - **Crafting UI**: UI for any type of menu you want!
 - **Audio** 📢: Easily integrate audio into the game
+- **Minimal dependencies**: Only SDL3 Needed!
 
 Minecraft Features:
 
@@ -57,11 +58,8 @@ The systems manage all the logic and changes the components.
 Dependencies:
 
 - SDL3
-- Freetype 2
 
 ### MacOS and Linux
-
-Install `freetype` with your package manager
 
 Compile SDL3:
 ```bash
@@ -71,16 +69,6 @@ $ mkdir build && cd build
 $ cmake ..
 $ cmake --build .
 $ sudo cmake --install .
-```
-
-Install dependencies:
-
-```bash
-# Install freetype 2
-# MacOS
-$ brew install freetype
-# Linux
-$ sudo pacman -S freetype2
 ```
 
 Compile project:
@@ -238,7 +226,6 @@ The linux save directory is `~/.local/share/cyao/opengl/`
         - [ ] Real time component and entity addition
 - [ ] UI
     - [ ] Embed text in buttons
-    - [ ] MacOS: Link new freetype version
 - [ ] Pause menu etc
     - [x] Text
     - [ ] Settings

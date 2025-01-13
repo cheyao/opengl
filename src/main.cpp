@@ -20,11 +20,11 @@
 SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
 	SDL_srand(0);
 
-	SDL_Log("Initializing cyao engine v0.5\n");
+	SDL_Log("Initializing cyao engine v1.0\n");
 
-	SDL_SetAppMetadata("Cyao", "0.5", "com.cyao.opengl");
-	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, "Cyao's opengl Game Engine");
-	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_URL_STRING, "https://github.com/cheyao/opengl");
+	SDL_SetAppMetadata("Cyao", "1.0", "com.cyao.2d-minecraft");
+	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_NAME_STRING, "2D Minecraft");
+	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_URL_STRING, "https://github.com/cheyao/2d-minecraft");
 	SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_TYPE_STRING, "game");
 
 	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");

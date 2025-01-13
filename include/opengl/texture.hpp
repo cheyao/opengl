@@ -3,8 +3,6 @@
 #include "third_party/Eigen/Core"
 #include "third_party/glad/glad.h"
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
 #include <string>
 
 class Texture {
