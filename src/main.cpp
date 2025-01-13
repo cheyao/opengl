@@ -47,15 +47,18 @@ SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
 	SDL_Log("The SDL version is %d", SDL_GetAndroidSDKVersion());
 #endif
 
+#ifdef __cpp_exceptions
 	try {
 		Game::getInstance()->init();
 		*appstate = Game::getInstance();
 	} catch (const std::runtime_error& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mMain.cpp: Critical runtime error: %s\033[0m\n", error.what());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mMain.cpp: Critical runtime error: %s\033[0m\n",
+				error.what());
 
 		return SDL_APP_FAILURE;
 	} catch (const std::exception& error) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mMain.cpp: Critical exception: %s\033[0m\n", error.what());
+		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mMain.cpp: Critical exception: %s\033[0m\n",
+				error.what());
 
 		return SDL_APP_FAILURE;
 	} catch (...) {
@@ -63,6 +66,10 @@ SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
 
 		return SDL_APP_FAILURE;
 	}
+#else
+	Game::getInstance()->init();
+	*appstate = Game::getInstance();
+#endif
 
 	return SDL_APP_CONTINUE;
 }
@@ -70,6 +77,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int, char**) {
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 	SDL_assert(appstate != nullptr);
 
+#ifdef __cpp_exceptions
 	try {
 		return static_cast<Game*>(appstate)->event(*event);
 	} catch (...) {
@@ -77,40 +85,35 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 
 		return SDL_APP_FAILURE;
 	}
+#else
+	return static_cast<Game*>(appstate)->event(*event);
+#endif
 }
 
 SDL_AppResult SDL_AppIterate(void* appstate) {
 	SDL_assert(appstate != nullptr);
 
+#ifdef __cpp_exceptions
 	try {
 		return static_cast<Game*>(appstate)->iterate();
 	} catch (const std::runtime_error& error) {
 		SDL_Log("Main.cpp: Uncaught runtime error: %s", error.what());
 		ERROR_BOX(string_format("Runtime error %s", error.what()).data());
-
-#ifdef IMGUI
-		ImGui::EndFrame();
-#endif
-
-		return SDL_APP_CONTINUE;
 	} catch (const std::exception& error) {
 		SDL_Log("Main.cpp: Uncaught exception: %s", error.what());
 		ERROR_BOX(string_format("Exception %s", error.what()).data());
-
-#ifdef IMGUI
-		ImGui::EndFrame();
-#endif
-
-		return SDL_APP_CONTINUE;
 	} catch (...) {
 		SDL_Log("Main.cpp: Uncaught exception of unknown type");
+	}
 
 #ifdef IMGUI
-		ImGui::EndFrame();
+	ImGui::EndFrame();
 #endif
 
-		return SDL_APP_CONTINUE;
-	}
+	return SDL_APP_CONTINUE;
+#else
+	return static_cast<Game*>(appstate)->iterate();
+#endif
 }
 
 void SDL_AppQuit(void*, const SDL_AppResult result) {

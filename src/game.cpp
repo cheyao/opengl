@@ -14,6 +14,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_audio.h>
+#include <SDL3/SDL_events.h>
 #include <chrono>
 #include <cinttypes>
 #include <cstdint>
@@ -300,6 +301,12 @@ SDL_AppResult Game::event(const SDL_Event& event) {
 #ifdef IMGUI
 	ImGui_ImplSDL3_ProcessEvent(&event);
 #endif
+
+	if (event.type == SDL_EVENT_LOCALE_CHANGED) {
+		mLocaleManager.reset(new LocaleManager());
+
+		return SDL_APP_CONTINUE;
+	}
 
 	return mEventManager->manageEvent(event);
 }

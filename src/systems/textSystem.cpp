@@ -10,17 +10,14 @@
 #include "opengl/texture.hpp"
 #include "scene.hpp"
 #include "third_party/Eigen/Core"
-#include "third_party/Eigen/Geometry"
 #include "third_party/glad/glad.h"
+#include "third_party/stb_truetype.h"
 #include "utils.hpp"
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
 #include <SDL3/SDL.h>
 #include <cstddef>
 #include <memory>
 #include <span>
-#include <stdexcept>
 #include <utility>
 #include <vector>
 #include <wchar.h>
@@ -30,15 +27,8 @@
 // FIXME: Maybe add support for emojis
 // FIXME: Better unicode support
 TextSystem::TextSystem(const unsigned int size, const bool final) noexcept
-	: mGame(Game::getInstance()), mPath(getBasePath() + "assets/fonts/"), mSize(size), mLibrary(nullptr),
-	  mFace(nullptr), mFontData(nullptr), mChild(nullptr) {
-	if (FT_Init_FreeType(&mLibrary)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "TextSystem.cpp: Failed to init freetype");
-		ERROR_BOX("Failed to init freetype, please reinstall your freetype library");
-
-		return;
-	}
-
+	: mGame(Game::getInstance()), mPath(getBasePath() + "assets/fonts/"), mSize(size), mFont(),
+	  mFontData(nullptr, SDL_free), mChild(nullptr) {
 	/*
 	 * NOTE:
 	 * This works by setting all the vectors to 1, and multiply the cords by the offset
@@ -72,94 +62,30 @@ TextSystem::TextSystem(const unsigned int size, const bool final) noexcept
 }
 
 TextSystem::~TextSystem() {
-	if (mFontData != nullptr) {
-		SDL_free(static_cast<void*>(mFontData));
-	}
-
-	if (mFace != nullptr) {
-		FT_Done_Face(mFace);
-	}
-
-	FT_Done_FreeType(mLibrary);
-
 	for (const auto& [_, texture] : mGlyphMap) {
 		delete texture.texture;
 	}
 }
 
 void TextSystem::loadFont(const std::string& name) {
-	SDL_assert(mLibrary != nullptr);
-
 	std::size_t size;
-	FT_Byte* newFontData = static_cast<FT_Byte*>(loadFile((mPath + name).data(), &size));
+	unsigned char* newFontData = static_cast<unsigned char*>(loadFile((mPath + name).data(), &size));
 	if (newFontData == nullptr) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mTextSystem.cpp: SDL failed to load file %s: %s",
 				(mPath + name).data(), SDL_GetError());
 		ERROR_BOX("Failed load font, unknown file format, assets are probably corrupted");
 
-		throw std::runtime_error("TextSystem.cpp: Failed to load font unable to open file");
+		return;
 	}
 
-	SDL_free(static_cast<void*>(mFontData));
-	mFontData = newFontData;
-
-	FT_Face newFace;
-	const int status = FT_New_Memory_Face(mLibrary, mFontData, size, 0, &newFace);
-	if (status == FT_Err_Unknown_File_Format) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
-				"\x1B[31mTextSystem.cpp: Failed to load font, unknown file format: %s\033[0m",
-				name.data());
-		ERROR_BOX("Failed load font, unknown file format, please reinstall assets and the freetype library");
-
-		SDL_free(static_cast<void*>(mFontData));
-		mFontData = nullptr;
-
-		throw std::runtime_error("TextSystem.cpp: Failed to load font: unknown file format");
-	} else if (status) {
+	if (!stbtt_InitFont(&mFont, newFontData, stbtt_GetFontOffsetForIndex(newFontData, 0))) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "TextSystem.cpp: Failed to load font: %s", name.data());
-		ERROR_BOX("Failed load font, please reinstall assets and the freetype library");
+		ERROR_BOX("Failed load font, please reinstall assets");
 
-		SDL_free(static_cast<void*>(mFontData));
-		mFontData = nullptr;
-
-		throw std::runtime_error("TextSystem.cpp: Failed to load font");
+		return;
 	}
 
-	// TODO: https://freetype.org/freetype2/docs/tutorial/step1.html#section-1
-	// TODO: Fractions with `FT_Set_Char_Size`
-	if (FT_Set_Pixel_Sizes(newFace, 0, 24)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mTextSystem.cpp: Failed to set font size: %s\033[0m",
-				name.data());
-		ERROR_BOX("Failed set font size, please reinstall assets and the freetype library");
-
-		throw std::runtime_error("TextSystem.cpp: Failed to set font size");
-	}
-
-	if (mFace != nullptr) {
-		FT_Done_Face(mFace);
-	}
-	mFace = newFace;
-
-	if (FT_Select_Charmap(mFace, FT_ENCODING_UNICODE)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mTextSystem.cpp: Failed to select unicode: %s\033[0m",
-				name.data());
-		ERROR_BOX("Failed select unicode, please reinstall assets and the freetype library");
-
-		throw std::runtime_error("TextSystem.cpp: Failed to select unicode");
-	}
-
-	for (const auto& [_, texture] : mGlyphMap) {
-		delete texture.texture;
-	}
-	mGlyphMap.clear();
-}
-
-void TextSystem::setFontSize(const unsigned int size) {
-	mSize = size;
-
-	if (mFace != nullptr) {
-		FT_Set_Pixel_Sizes(mFace, 0, mSize);
-	}
+	mFontData.reset(newFontData);
 
 	for (const auto& [_, texture] : mGlyphMap) {
 		delete texture.texture;
@@ -169,11 +95,9 @@ void TextSystem::setFontSize(const unsigned int size) {
 
 // Somehow this is taking a ton of time??
 void TextSystem::drawGlyph(const char32_t character, Shader* shader, const Eigen::Vector2f& offset) {
-	SDL_assert(mFace != nullptr);
-
 	const TextSystem::Glyph& glyph = getGlyph(character);
 
-	[[unlikely]] if (glyph.size.x() <= 0 || glyph.size.y() <= 0) { return; }
+	[[unlikely]] if (!glyph.texture) { return; }
 
 	shader->set("offset"_u,
 		    Eigen::Vector2f(offset.x() + glyph.bearing.x(), offset.y() - (glyph.size.y() - glyph.bearing.y())));
@@ -188,26 +112,7 @@ TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
 		return mGlyphMap[character];
 	}
 
-	// Maybe directly ask child?
-	const FT_UInt index = FT_Get_Char_Index(mFace, character);
-
-	if (index == 0) {
-		if (mChild != nullptr) {
-			// SDL_Log("Loading 0x%x from fallback font", character);
-			return mChild->getGlyph(character);
-		} else {
-			SDL_Log("\x1B[31mTextSystem.cpp: Failed to load character: 0x%x (No matching glyph)\033[0m",
-				character);
-		}
-	}
-
-	if (FT_Load_Glyph(mFace, index, FT_LOAD_RENDER)) {
-		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\x1B[31mTextSystem.cpp: Failed to load character: 0x%x\033[0m",
-				character);
-		ERROR_BOX("Failed load character, please reinstall assets and the freetype library");
-
-		throw std::runtime_error("TextSystem.cpp: Failed to load character");
-	}
+	bitmap = stbtt_GetCodepointBitmap(&mFont, 0, stbtt_ScaleForPixelHeight(&mFont, 1), c, &w, &h, 0, 0);
 
 	mGlyphMap[character] = {(mFace->glyph->bitmap.rows > 0 && mFace->glyph->bitmap.width > 0)
 					? new Texture(mFace->glyph->bitmap)

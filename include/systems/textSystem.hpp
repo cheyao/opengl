@@ -1,12 +1,11 @@
 #pragma once
 
 #include "third_party/Eigen/Core"
+#include "third_party/stb_truetype.h"
 
-#include <ft2build.h>
-#include <string_view>
-#include FT_FREETYPE_H
 #include <memory>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
 class TextSystem {
@@ -20,9 +19,9 @@ class TextSystem {
 
 	void loadFont(const std::string& name);
 	// Size in 1/64 of a pixel
-	void setFontSize(const unsigned int size);
 	void draw(class Scene* scene);
-	void draw(std::string_view str, const Eigen::Vector2f& offset, bool translate, const Eigen::Vector3f& color = COLOR);
+	void draw(std::string_view str, const Eigen::Vector2f& offset, bool translate,
+		  const Eigen::Vector3f& color = COLOR);
 
       private:
 	const static inline Eigen::Vector3f COLOR = Eigen::Vector3f(0.0f, 0.0f, 0.0f);
@@ -43,9 +42,8 @@ class TextSystem {
 	const std::string mPath;
 	unsigned int mSize;
 
-	FT_Library mLibrary;
-	FT_Face mFace;
-	FT_Byte* mFontData;
+	stbtt_fontinfo mFont;
+	std::unique_ptr<unsigned char[], std::function<void(void*)>> mFontData;
 
 	std::unordered_map<char32_t, Glyph> mGlyphMap;
 

@@ -45,9 +45,7 @@ Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mRBO(0), mScreen(
 
 	[[unlikely]] if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Framebuffer is not complete");
-		ERROR_BOX("Failed to read assets, your assets are corrupted or you dont't have enough memory");
-
-		throw std::runtime_error("Framebuffer.cpp: Failed to create framebuffer");
+		ERROR_BOX("Failed to create framebuffer");
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);

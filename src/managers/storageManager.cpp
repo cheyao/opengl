@@ -197,9 +197,7 @@ void StorageManager::saveState(SDL_Storage* storage) {
 			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033[31mFailed to parse json (offset %u): %s\033[0m",
 					(unsigned)worlds.GetErrorOffset(),
 					rapidjson::GetParseError_En(worlds.GetParseError()));
-			ERROR_BOX("Failed to load old save file");
-
-			throw std::runtime_error("StorageManager.cpp: Failed to parse json");
+			ERROR_BOX("Failed to load old save file, ignoring");
 		}
 	} else {
 		worlds.SetObject();

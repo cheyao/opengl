@@ -86,8 +86,8 @@ $ sudo pacman -S freetype2
 Compile project:
 
 ```bash
-$ git clone --depth 1 https://github.com/cheyao/opengl.git
-$ cd opengl 
+$ git clone --depth 1 https://github.com/cheyao/2d-minecraft.git
+$ cd 2d-minecraft 
 $ mkdir build && cd build 
 $ cmake ..
 $ cmake --build .
@@ -130,8 +130,8 @@ RELEASE_KEY_PASSWORD=[KEY PASSWORD]
 
 Now build the project:
 ```bash
-$ git clone --depth 1 https://github.com/cheyao/opengl.git
-$ cd opengl
+$ git clone --depth 1 https://github.com/cheyao/2d-minecraft.git
+$ cd 2d-minecraft
 $ git submodule update --init --recursive
 $ mkdir build && cd build 
 $ cmake -DCMAKE_BUILD_TYPE=Release \
@@ -160,8 +160,8 @@ $ cmake --install .
 
 Build the project:
 ```bash
-$ git clone --depth 1 https://github.com/cheyao/opengl.git
-$ cd opengl
+$ git clone --depth 1 https://github.com/cheyao/2d-minecraft.git
+$ cd 2d-minecraft
 $ mkdir build && cd build 
 $ emcmake cmake -DCMAKE_BUILD_TYPE=Release ..
 $ emcmake cmake --build .

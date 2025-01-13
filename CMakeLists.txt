@@ -123,7 +123,9 @@ include/screens/hud.hpp
 
 # External
 src/third_party/stb_image.c
+src/third_party/stb_truetype.c
 include/third_party/stb_image.h
+include/third_party/stb_truetype.h
 
 # Glad
 src/third_party/glad.c 
@@ -255,9 +257,9 @@ elseif(WINDOWS)
 elseif(WEB)
 	add_executable(${BUILD_NAME} ${SRC})
 
-	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -DGLES -fno-rtti)
+	target_compile_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -DGLES -fno-rtti -fno-exceptions)
 	target_compile_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
-	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sFULL_ES2 -sFULL_ES3 -sALLOW_MEMORY_GROWTH -fno-rtti -sFETCH)
+	target_link_options(${BUILD_NAME} PRIVATE -sUSE_SDL=3 -sUSE_FREETYPE=1 -sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2 -sALLOW_MEMORY_GROWTH -fno-rtti -fno-exceptions -sFETCH)
 	target_link_options(${BUILD_NAME} PRIVATE ${ASSETS_EMBED_WEB})
 
 	if(DEBUG)

@@ -18,7 +18,7 @@ uniform bool flip;
 
 void main() {
 	// Size of the sprite
-	vec2 spriteSize = textureSize(texture_diffuse, 0) * 7 / vec2(size);
+	vec2 spriteSize = vec2(textureSize(texture_diffuse, 0)) * 7.0f / vec2(size);
 
 	// Player pos
 	gl_Position = proj * vec4(aPos * spriteSize + offset, 0, 1);
@@ -33,5 +33,5 @@ void main() {
 
 	vec2 texSpritePos = texSpriteSize * texPos;
 
-	vTexPos = texSpriteSize * vec2(select % size.x, select / size.x) + texSpritePos;
+	vTexPos = texSpriteSize * vec2(select % uint(size.x), select / uint(size.x)) + texSpritePos;
 }

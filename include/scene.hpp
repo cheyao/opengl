@@ -1,4 +1,5 @@
 #pragma once
+
 #include "components.hpp"
 #include "managers/componentManager.hpp"
 #include "managers/entityManager.hpp"

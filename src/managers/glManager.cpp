@@ -23,7 +23,9 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 		ERROR_BOX("Failed to initialize OpenGL Context, there is something "
 			  "wrong with your OpenGL");
 
+#ifdef __cpp_exceptions
 		throw std::runtime_error("GlManager.cpp: Failed to get opengl context");
+#endif
 	}
 
 #ifdef GLES
@@ -42,7 +44,9 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 
 		ERROR_BOX("Failed to initialize GLAD, there is something wrong with your OpenGL installation");
 
+#ifdef __cpp_exceptions
 		throw std::runtime_error("GLManager.cpp: Failed to init glad");
+#endif
 	}
 
 	SDL_Log("\033[32mGLManager.cpp: Successfully loaded glad OpenGL %d.%d\033[0m", GLAD_VERSION_MAJOR(version),

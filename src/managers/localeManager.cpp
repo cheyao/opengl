@@ -7,12 +7,10 @@
 #include <SDL3/SDL.h>
 #include <cstddef>
 #include <cstdint>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <version>
 
-// TODO: Handle SDL_EVENT_LOCALE_CHANGED
 LocaleManager::LocaleManager() : mLocaleDir(getBasePath() + "assets/strings/"), mLocaleDataS(nullptr, SDL_free) {
 	int c = 0;
 	SDL_Locale** const loc = SDL_GetPreferredLocales(&c);
@@ -39,14 +37,7 @@ LocaleManager::LocaleManager() : mLocaleDir(getBasePath() + "assets/strings/"), 
 
 		SDL_Log("LocaleManager.cpp: Tring to load locale %s", mLocale.data());
 
-		try {
-			loadLocale();
-		} catch (const std::runtime_error& error) {
-			SDL_Log("\033[33mLocaleManager.cpp: Failed to load locale %s: %s\033[0m", mLocale.data(),
-				error.what());
-
-			continue;
-		}
+		loadLocale();
 
 		SDL_Log("\033[32mLocaleManager.cpp: Successfully loaded system locale %s\033[0m", mLocale.data());
 
@@ -83,7 +74,7 @@ std::u32string LocaleManager::U8toU32(const std::string_view& u8) const {
 			out.push_back(((u8[i] & 0x7) << 18) | ((u8[i + 1] & 0x3f) << 12) | ((u8[i + 2] & 0x3f) << 6) |
 				      (u8[i + 3] & 0x3f));
 		} else {
-			throw std::runtime_error("LocaleManager.cpp: Error! couldn't convert utf8 to utf32");
+			out.push_back(0x000025A1); // https://www.fileformat.info/info/unicode/char/25a1/index.htm
 		}
 	}
 
@@ -97,10 +88,6 @@ std::u32string LocaleManager::get(const std::string_view& id) const {
 
 	if (!mLocaleData.HasMember(id.data())) {
 		SDL_Log("\x1B[31mLocaleManager.cpp: Error! Unknown id %s\033[0m", id.data());
-
-#ifdef DEBUG
-		throw std::runtime_error("LocaleManager.cpp: Unknown id!");
-#endif
 
 		return U"NAN";
 	}
@@ -135,8 +122,7 @@ void LocaleManager::loadLocale() {
 			SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO,
 					"LocaleManager.cpp: Failed to find/read locale shource %s: %s\n",
 					(mLocaleDir + mLocale + ".json").data(), SDL_GetError());
-
-			throw std::runtime_error("LocaleManager.cpp: Failed to find/read locale");
+			return;
 		}
 	}
 
@@ -147,7 +133,7 @@ void LocaleManager::loadLocale() {
 		ERROR_BOX("Failed to load save file");
 		ERROR_BOX("Failed to read locale, reinstall assets");
 
-		throw std::runtime_error("StorageManager.cpp: Failed to parse json");
+		return;
 	}
 
 	SDL_Log("LocaleManager.cpp: Found locale %s version %d", mLocale.data(), mLocaleData["version"].GetInt());
