@@ -15,6 +15,7 @@ class Framebuffer {
 
 	void setDemensions(const int width, const int height);
 	void swap();
+	void bind() const;
 
   private:
 	class RenderSystem* mOwner;

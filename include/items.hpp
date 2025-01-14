@@ -40,5 +40,7 @@ enum class Item : std::uint64_t {
 	IRON_SWORD,
 	WOODEN_SWORD,
 	STONE_SWORD,
+
+	ITEM_COUNT
 };
 } // namespace Components

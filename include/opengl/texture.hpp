@@ -10,7 +10,8 @@ class Texture {
 
       public:
 	Texture(std::string_view path);
-	explicit Texture(const Eigen::Vector2f& size, unsigned char* bitmap);
+	explicit Texture(const Eigen::Vector2i& size, unsigned char* bitmap);
+	explicit Texture(const Eigen::Vector2i& size);
 	Texture(Texture&&) = delete;
 	Texture(const Texture&) = delete;
 	Texture& operator=(Texture&&) = delete;

@@ -4,16 +4,15 @@
 #include "third_party/stb_image.h"
 #include "utils.hpp"
 
-#include <memory>
 #include <SDL3/SDL.h>
 #include <cstddef>
+#include <memory>
 #include <string_view>
 
 // Load on demand
 Texture::Texture(const std::string_view path) : name(path), mWidth(0), mHeight(0) {}
 
-// PERF: Use compiled texture format
-Texture::Texture(const Eigen::Vector2f& size, unsigned char* bitmap)
+Texture::Texture(const Eigen::Vector2i& size, unsigned char* bitmap)
 	: name(string_format("from freetype bitmap %ux%u", size.x(), size.y())), mWidth(size.x()), mHeight(size.y()) {
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -29,6 +28,17 @@ Texture::Texture(const Eigen::Vector2f& size, unsigned char* bitmap)
 #endif
 		     mWidth, mHeight, 0, GL_RED, GL_UNSIGNED_BYTE, bitmap);
 	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
+
+Texture::Texture(const Eigen::Vector2i& size) {
+	glGenTextures(1, &mID);
+	glBindTexture(GL_TEXTURE_2D, mID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x(), size.y(), 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

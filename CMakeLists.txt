@@ -406,7 +406,12 @@ if(DEBUG)
 	)
 	add_custom_target(copy-assets ALL DEPENDS ${CMAKE_BINARY_DIR}/assets)
 else()
-	file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
+	add_custom_command(
+		OUTPUT ${CMAKE_BINARY_DIR}/assets
+		COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/assets" "${CMAKE_CURRENT_BINARY_DIR}/assets"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets" "${CMAKE_CURRENT_SOURCE_DIR}/assets/strings/en.json"
+	)
+	add_custom_target(copy-assets ALL DEPENDS ${CMAKE_BINARY_DIR}/assets)
 endif()
 
 # Copy stuff for apple

@@ -266,13 +266,6 @@ void RenderSystem::draw(Scene* scene) {
 	const Eigen::Vector2f cameraOffset = -scene->get<Components::position>(mGame->getPlayerID()).mPosition +
 					     Eigen::Vector2f(mWidth, mHeight) / 2;
 
-	// Draw blocks
-	Shader* shader = this->getShader("block.vert", "block.frag");
-	shader->activate();
-	shader->set("texture_diffuse"_u, 0);
-	shader->set("offset"_u, cameraOffset);
-	shader->set("scale"_u, 1.0f);
-
 	const Eigen::Vector2f screenSize = mGame->getSystemManager()->getDemensions() / Components::block::BLOCK_SIZE;
 	const Eigen::Vector2f playerBlockPos = (scene->get<Components::position>(mGame->getPlayerID()).mPosition +
 						scene->get<Components::collision>(mGame->getPlayerID()).mOffset) /
@@ -285,22 +278,37 @@ void RenderSystem::draw(Scene* scene) {
 	float sr = playerBlockPos.x() + screenSize.x() / 2;
 
 	// PERF: Use some VEB to send the data
-	// PERF: Culling & stuff
-	Components::Item lastBlock = Components::AIR();
 	for (const auto& [_, block] : scene->view<Components::block>().each()) {
 		const auto& pos = block.mPosition;
 
+		// Culling
+		if (!(pos.y() >= sb && pos.y() <= st && pos.x() <= sr && pos.x() >= sl)) {
+			continue;
+		}
+
+		mTextures->blitzAtlas(block.mType);
+	}
+	mFramebuffer->bind();
+
+	// Draw blocks
+	Shader* shader = this->getShader("block.vert", "block.frag");
+	shader->activate();
+	shader->set("texture_diffuse"_u, 0);
+	shader->set("offset"_u, cameraOffset);
+	shader->set("scale"_u, 1.0f);
+
+	auto* const atlas = mTextures->getAtlas();
+	atlas->activate(0);
+
+	for (const auto& [_, block] : scene->view<Components::block>().each()) {
+		const auto& pos = block.mPosition;
+
+		// Culling
 		if (!(pos.y() >= sb && pos.y() <= st && pos.x() <= sr && pos.x() >= sl)) {
 			continue;
 		}
 
 		shader->set("position"_u, pos);
-
-		if (lastBlock != block.mType) {
-			lastBlock = block.mType;
-
-			getTexture(registers::TEXTURES.at(lastBlock))->activate(0);
-		}
 
 		mMesh->draw(shader);
 	}
@@ -479,7 +487,7 @@ void RenderSystem::drawHUD(Scene* scene) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	SystemManager* systemManager = mGame->getSystemManager();
-	Texture* texture = systemManager->getTexture("ui/hotbar.png");
+	Texture* texture = mTextures->get("ui/hotbar.png");
 	Shader* shader = systemManager->getShader("ui.vert", "ui.frag");
 	const Eigen::Vector2f dimensions = systemManager->getDemensions();
 
@@ -528,7 +536,7 @@ void RenderSystem::drawHUD(Scene* scene) {
 			continue;
 		}
 
-		Texture* const itemTexture = systemManager->getTexture(registers::TEXTURES.at(inventory->mItems[i]));
+		Texture* const itemTexture = mTextures->get(registers::TEXTURES.at(inventory->mItems[i]));
 		itemTexture->activate(0);
 
 		shader->set("offset"_u, offset.x() + i * x / 9.1 + y / 4, y / 4);

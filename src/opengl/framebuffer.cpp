@@ -10,7 +10,6 @@
 #include <SDL3/SDL.h>
 #include <memory>
 #include <span>
-#include <stdexcept>
 #include <string>
 
 #ifdef IMGUI
@@ -67,6 +66,8 @@ Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mRBO(0), mScreen(
 	mScreenMesh = std::make_unique<Mesh>(pos, std::span<float>(), std::span<float>(), indices);
 }
 
+void Framebuffer::bind() const { glBindFramebuffer(GL_FRAMEBUFFER, mScreen); }
+
 void Framebuffer::setDemensions(const int width, const int height) {
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 
@@ -76,12 +77,14 @@ void Framebuffer::setDemensions(const int width, const int height) {
 }
 
 void Framebuffer::swap() {
+#ifdef IMGUI
 	GLint mode[2] = {};
 	if (glPolygonMode) {
 		glGetIntegerv(GL_POLYGON_MODE, mode);
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
+#endif
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -94,12 +97,6 @@ void Framebuffer::swap() {
 
 	Shader* mShader = mOwner->getShader("framebuffer.vert", "framebuffer.frag");
 	mShader->activate();
-
-#ifdef GLES
-	mShader->set("gamma"_u, false);
-#else
-	mShader->set("gamma"_u, true);
-#endif
 
 	glBindTexture(GL_TEXTURE_2D, mScreenTexture);
 
@@ -114,9 +111,11 @@ void Framebuffer::swap() {
 
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 
+#ifdef IMGUI
 	if (glPolygonMode) {
 		glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
 	}
+#endif
 }
 
 Framebuffer::~Framebuffer() {

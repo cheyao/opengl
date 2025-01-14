@@ -123,7 +123,7 @@ TextSystem::Glyph& TextSystem::getGlyph(const char32_t character) {
 		x1 = 7;
 	}
 
-	mGlyphMap[character] = {new Texture(Eigen::Vector2f(w, h), bitmap), Eigen::Vector2f(w, h),
+	mGlyphMap[character] = {new Texture(Eigen::Vector2i(w, h), bitmap), Eigen::Vector2f(w, h),
 				Eigen::Vector2f(xo, -yo), Eigen::Vector2f(x1 - x0 + xo, 0)};
 
 	stbtt_FreeBitmap(bitmap, nullptr);
