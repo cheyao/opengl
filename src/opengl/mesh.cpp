@@ -15,7 +15,7 @@
 // TODO: Accept non-Vertex data
 Mesh::Mesh(const std::span<const Vertex> vertices, const std::span<const GLuint> indices,
 	   const std::vector<std::pair<Texture* const, TextureType>>& textures)
-	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
+	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
 
@@ -48,7 +48,7 @@ Mesh::Mesh(const std::span<const Vertex> vertices, const std::span<const GLuint>
 Mesh::Mesh(const std::span<const float> positions, const std::span<const float> normals,
 	   const std::span<const float> texturePos, const std::span<const GLuint> indices,
 	   const std::vector<std::pair<Texture* const, TextureType>>& textures)
-	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures), mDrawFunc(glDrawElements) {
+	: mVBO(0), mEBO(0), mVAO(0), mIndicesCount(indices.size()), mTextures(textures) {
 	glGenBuffers(1, &mVBO);
 	glGenBuffers(1, &mEBO);
 
@@ -62,9 +62,9 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 
 	// TODO: Prettier
 	glBindVertexArray(mVAO);
-	glEnableVertexAttribArray(
-		0); // Enable no matter what
-		    // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#always_enable_vertex_attrib_0_as_an_array
+	glEnableVertexAttribArray(0);
+	// Enable no matter what
+	// https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#always_enable_vertex_attrib_0_as_an_array
 	if (!positions.empty()) {
 		glBufferSubData(GL_ARRAY_BUFFER, offset, positions.size() * sizeof(float), positions.data());
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
@@ -98,8 +98,6 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndicesCount * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
 }
 
 Mesh::~Mesh() {
@@ -169,56 +167,15 @@ void Mesh::addAttribArray(const GLuint VBO, void (*bind)()) {
 
 	bind();
 
-	glBindVertexArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0); // Maybe before attrib divisor?
-
 	mAttribs.emplace_back(VBO);
 }
 
-void Mesh::draw(Shader* shader) {
-	/*
-	unsigned int diffuse = 0;
-	unsigned int specular = 0;
-	unsigned int height = 0;
-	unsigned int ambient = 0;
-
-	for (unsigned int i = 0; i < mTextures.size(); i++) {
-		std::string name;
-		name.reserve(20);
-
-		// += to avoid extra copy that + returns
-		switch (mTextures[i].second) {
-			case DIFFUSE:
-				name = "texture_diffuse";
-				name += std::to_string(diffuse++);
-				break;
-			case SPECULAR:
-				name = "texture_specular";
-				name += std::to_string(specular++);
-				break;
-			case HEIGHT:
-				name = "texture_height";
-				name += std::to_string(height++);
-				break;
-			case AMBIENT:
-				name = "texture_ambient";
-				name += std::to_string(ambient++);
-				break;
-		}
-
-		// FIXME:
-		// shader->set(, static_cast<GLint>(i));
-
-		mTextures[i].first->activate(i);
-	}
-		*/
-
-	for (const auto& func : mUniformFuncs) {
-		func(shader);
-	}
-
+void Mesh::draw(Shader*) {
 	glBindVertexArray(mVAO);
-	mDrawFunc(GL_TRIANGLES, mIndicesCount, GL_UNSIGNED_INT, nullptr);
-	glBindVertexArray(0);
+	glDrawElements(GL_TRIANGLES, mIndicesCount, GL_UNSIGNED_INT, nullptr);
+}
+
+void Mesh::drawInstanced(const GLsizei count) {
+	glBindVertexArray(mVAO);
+	glDrawElementsInstanced(GL_TRIANGLES, mIndicesCount, GL_UNSIGNED_INT, nullptr, count);
 }

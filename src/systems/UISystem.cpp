@@ -14,17 +14,10 @@ UISystem::UISystem() noexcept : mGame(Game::getInstance()), mMesh(nullptr) {
 		1.0f, 1.0f  // BL
 	};
 
-	constexpr const static float texturePos[] = {
-		0.0f, 1.0f, // TR
-		0.0f, 0.0f, // BR
-		1.0f, 1.0f, // TL
-		1.0f, 0.0f  // BL
-	};
-
 	constexpr const static GLuint indices[] = {2, 1, 0,  // a
 						   1, 2, 3}; // b
 
-	mMesh.reset(new Mesh(vertices, {}, texturePos, indices, {}));
+	mMesh.reset(new Mesh(vertices, {}, {}, indices, {}));
 }
 
 void UISystem::update(Scene* scene, const float delta) {

@@ -1,7 +1,6 @@
 #version 410 core
 
 layout (location = 0) in vec2 aPos;
-layout (location = 2) in vec2 aTexPos;
 
 out vec2 vTexPos;
 
@@ -26,7 +25,7 @@ void main() {
 	// Size of one cell on the texture
 	vec2 texSpriteSize = vec2(1.0f, 1.0f) / vec2(size);
 
-	vec2 texPos = aTexPos;
+	vec2 texPos = vec2(aPos.x, aPos.y * -1.0f + 1.0f);
 	if (flip) {
 		texPos.x = texPos.x * -1.0f + 1.0f;
 	}

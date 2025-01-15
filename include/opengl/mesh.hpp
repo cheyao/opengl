@@ -26,14 +26,11 @@ class Mesh {
 	~Mesh();
 
 	void draw(class Shader* shader);
+	void drawInstanced(GLsizei count);
 
 	std::size_t indices() const { return mIndicesCount; }
 
 	void addTexture(const std::pair<Texture* const, TextureType> texture) { mTextures.emplace_back(texture); }
-	void setDrawFunc(void (*func)(GLenum mode, GLsizei count, GLenum type, const void* indices)) {
-		mDrawFunc = func;
-	}
-	void addUniform(void (*func)(class Shader* shader)) { mUniformFuncs.emplace_back(func); };
 	void addAttribArray(const GLsizeiptr size, const GLvoid* const data, void (*bind)());
 	void addAttribArray(const GLuint VBO, void (*bind)());
 
@@ -44,9 +41,6 @@ class Mesh {
 
 	std::size_t mIndicesCount;
 	std::vector<std::pair<class Texture* const, TextureType>> mTextures;
-
-	void (*mDrawFunc)(GLenum mode, GLsizei count, GLenum type, const void* indices);
-	std::vector<void (*)(Shader* shader)> mUniformFuncs;
 
 	std::vector<GLuint> mAttribs;
 };

@@ -7,7 +7,6 @@
 #include <SDL3/SDL.h>
 #include <cinttypes>
 #include <cstddef>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>

@@ -1,7 +1,6 @@
 #version 410 core
 
 layout (location = 0) in vec2 aPos;
-layout (location = 2) in vec2 aTexPos;
 
 out vec2 vTexPos;
 
@@ -18,5 +17,5 @@ void main() {
        vec2 pos = (aPos * scale + vec2(position)) * vec2(textureSize(texture_diffuse, 0)) * 7.0f + offset;
        gl_Position = proj * vec4(pos, 0.0f, 1.0f);
 
-       vTexPos = aTexPos;
+       vTexPos = vec2(aPos.x, aPos.y * -1.0f + 1.0f);
 }

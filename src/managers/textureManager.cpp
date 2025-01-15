@@ -96,13 +96,11 @@ void TextureManager::blitzAtlas(Components::Item block) {
 		s = true;
 	}
 	shader->set("position"_u, static_cast<int>(etoi(block)));
-	Game::getInstance()
-		->getSystemManager()
-		->getRenderSystem()
-		->getTexture(registers::TEXTURES.at(block))
-		->activate(0);
+
+	get(registers::TEXTURES.at(block))->activate(0);
 
 	Game::getInstance()->getSystemManager()->getUISystem()->getMesh()->draw(shader);
+
 	mBlitzed[etoi(block)] = true;
 }
 

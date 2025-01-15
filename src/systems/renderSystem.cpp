@@ -208,17 +208,10 @@ RenderSystem::RenderSystem() noexcept
 		1.0f, 1.0f, // BL
 	};
 
-	constexpr const static float texturePos[] = {
-		0.0f, 1.0f, // TR
-		0.0f, 0.0f, // BR
-		1.0f, 1.0f, // TL
-		1.0f, 0.0f  // BL
-	};
-
 	const static GLuint indices[] = {2, 1, 0,  // a
 					 1, 2, 3}; // b
 
-	mMesh.reset(new Mesh(vertices, {}, texturePos, indices, {}));
+	mMesh.reset(new Mesh(vertices, {}, {}, indices, {}));
 
 #ifndef __ANDROID__
 	std::unique_ptr<SDL_Surface, void (*)(SDL_Surface*)> cursorSurface(
@@ -282,7 +275,8 @@ void RenderSystem::draw(Scene* scene) {
 	// 1. Blitz the new blocks onto our texture atlas
 	Shader* shader = mShaders->get("blitz.vert", "block.frag");
 	shader->activate();
-	for (const auto& [_, block] : scene->view<Components::block>().each()) {
+	const auto blocks = scene->view<Components::block>();
+	for (const auto& [_, block] : blocks.each()) {
 		const auto& pos = block.mPosition;
 
 		// Culling
@@ -301,10 +295,8 @@ void RenderSystem::draw(Scene* scene) {
 	shader->set("texture_diffuse"_u, 0);
 	shader->set("offset"_u, cameraOffset);
 
-	auto* const atlas = mTextures->getAtlas();
-	atlas->activate(0);
-
-	for (const auto& [_, block] : scene->view<Components::block>().each()) {
+	std::vector<GLint> data;
+	for (const auto& [_, block] : blocks.each()) {
 		const auto& pos = block.mPosition;
 
 		// Culling
@@ -312,11 +304,33 @@ void RenderSystem::draw(Scene* scene) {
 			continue;
 		}
 
-		shader->set("position"_u, pos);
-		shader->set("select"_u, static_cast<int>(etoi(block.mType)));
-
-		mMesh->draw(shader);
+		data.emplace_back(pos.x());
+		data.emplace_back(pos.y());
+		data.emplace_back(static_cast<GLint>(etoi(block.mType)));
 	}
+
+	auto* const atlas = mTextures->getAtlas();
+	atlas->activate(0);
+
+	static bool o = false;
+	static unsigned int instanceVBO;
+	if (!o) {
+		o = true;
+		glGenBuffers(1, &instanceVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * data.size(), data.data(), GL_STATIC_DRAW);
+
+		mMesh->addAttribArray(instanceVBO, [] {
+			glEnableVertexAttribArray(3);
+			glVertexAttribIPointer(3, 3, GL_INT, 3 * sizeof(GLint), nullptr);
+			glVertexAttribDivisor(3, 1);
+		});
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * data.size(), data.data(), GL_STATIC_DRAW);
+
+	mMesh->drawInstanced(data.size() / 3);
 
 	// Draw other textures
 	shader = mShaders->get("single_block.vert", "block.frag");
