@@ -31,7 +31,8 @@ TextureManager::TextureManager()
 	mAtlas = new Texture(Eigen::Vector2i(1024, 1024));
 	glGenFramebuffers(1, &mAtlasBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, mAtlasBuffer);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mAtlas->mID, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mAtlas->mID, 0);
+
 	constexpr const GLenum buffers = GL_COLOR_ATTACHMENT0;
 	glDrawBuffers(1, &buffers);
 

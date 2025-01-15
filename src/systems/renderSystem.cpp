@@ -74,8 +74,8 @@ RenderSystem::RenderSystem() noexcept
 #endif
 #endif
 
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -109,11 +109,14 @@ RenderSystem::RenderSystem() noexcept
 		return;
 	}
 
+	// No icon on web
+#ifndef __EMSCRIPTEN__
 	mIcon.reset(SDL_LoadBMP((getBasePath() + "assets/textures/icon.bmp").data()));
 	if (!SDL_SetWindowIcon(mWindow.get(), mIcon.get())) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "\033]31mFailed to set window icon: %s\n\033]0m",
 				SDL_GetError());
 	}
+#endif
 
 #ifdef __EMSCRIPTEN__
 	mWidth = browserWidth();
@@ -202,7 +205,7 @@ RenderSystem::RenderSystem() noexcept
 		0.0f, 0.0f, // TL
 		0.0f, 1.0f, // BR
 		1.0f, 0.0f, // TR
-		1.0f, 1.0f  // BL
+		1.0f, 1.0f, // BL
 	};
 
 	constexpr const static float texturePos[] = {
@@ -259,10 +262,8 @@ void RenderSystem::setDemensions(int width, int height) {
 
 void RenderSystem::draw(Scene* scene) {
 	// Values *borrowed* from minecraft wiki
-#ifdef DEBUG
 	glClearColor(0.470588235294f, 0.65490190784f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-#endif
 
 	const Eigen::Vector2f cameraOffset = -scene->get<Components::position>(mGame->getPlayerID()).mPosition +
 					     Eigen::Vector2f(mWidth, mHeight) / 2;
@@ -273,10 +274,10 @@ void RenderSystem::draw(Scene* scene) {
 					       Components::block::BLOCK_SIZE;
 
 	// Screen top, bottom...
-	float sb = playerBlockPos.y() - screenSize.y() / 2 - 1;
-	float st = playerBlockPos.y() + screenSize.y() / 2;
-	float sl = playerBlockPos.x() - screenSize.x() / 2 - 1;
-	float sr = playerBlockPos.x() + screenSize.x() / 2;
+	const float sb = playerBlockPos.y() - screenSize.y() / 2 - 1;
+	const float st = playerBlockPos.y() + screenSize.y() / 2;
+	const float sl = playerBlockPos.x() - screenSize.x() / 2 - 2;
+	const float sr = playerBlockPos.x() + screenSize.x() / 2;
 
 	// 1. Blitz the new blocks onto our texture atlas
 	Shader* shader = mShaders->get("blitz.vert", "block.frag");
@@ -292,7 +293,6 @@ void RenderSystem::draw(Scene* scene) {
 		mTextures->blitzAtlas(block.mType);
 	}
 
-	// We bind back our framebuffer
 	mFramebuffer->bind();
 
 	// Draw blocks
@@ -300,7 +300,6 @@ void RenderSystem::draw(Scene* scene) {
 	shader->activate();
 	shader->set("texture_diffuse"_u, 0);
 	shader->set("offset"_u, cameraOffset);
-	shader->set("scale"_u, 1.0f);
 
 	auto* const atlas = mTextures->getAtlas();
 	atlas->activate(0);
@@ -319,17 +318,19 @@ void RenderSystem::draw(Scene* scene) {
 		mMesh->draw(shader);
 	}
 
-	// Draw other textures (UI)
+	// Draw other textures
+	shader = mShaders->get("single_block.vert", "block.frag");
+	shader->activate();
 	shader->set("position"_u, 0, 0);
 	for (const auto& [entity, texture, position] :
 	     scene->view<Components::texture, Components::position>().each()) {
 		Eigen::Vector2f offset = position.mPosition + cameraOffset;
 
-		// Not so performant but let's do it for each entity
-		const float time = SDL_sin(SDL_GetTicks() / 1000.0f + position.mPosition.sum());
-
 		// The item is on screen
 		if (scene->contains<Components::item>(entity)) {
+			// Not so performant but let's do it for each entity
+			const float time = SDL_sin(SDL_GetTicks() / 1000.0f + position.mPosition.sum());
+
 			offset.y() += 40 * time;
 		}
 
@@ -406,38 +407,6 @@ void RenderSystem::draw(Scene* scene) {
 
 		if (hitbox && glPolygonMode != nullptr) {
 			glPolygonMode(GL_FRONT_AND_BACK, mode[0]);
-		}
-	}
-
-	if (vector) {
-		// See https://stackoverflow.com/questions/3484260/opengl-line-width
-		static float magnitude = 1.0f;
-		ImGui::Begin("Developer menu");
-		ImGui::SliderFloat("magnitude", &magnitude, 0, 3.0f);
-		ImGui::End();
-
-		Shader* vectorShader =
-			mGame->getSystemManager()->getShader("vector.vert", "vector.frag", "vector.geom");
-
-		vectorShader->activate();
-		vectorShader->set("magnitude"_u, magnitude);
-
-		for (const auto& [_, velocity, position, texture] :
-		     scene->view<Components::velocity, Components::position, Components::texture>().each()) {
-			if (nearZero(velocity.mVelocity.x() + velocity.mVelocity.y())) {
-				continue;
-			}
-
-			Eigen::Affine3f model = Eigen::Affine3f::Identity();
-
-			model.translate((Eigen::Vector3f() << (position.mPosition), 0.0f).finished());
-
-			vectorShader->set("model"_u, model);
-			const Eigen::Vector2f center = position.mPosition + texture.mTexture->getSize() / 2;
-			vectorShader->set("position"_u, center);
-			vectorShader->set("velocity"_u, velocity.mVelocity);
-
-			mMesh->draw(vectorShader);
 		}
 	}
 

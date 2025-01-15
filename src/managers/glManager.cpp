@@ -52,9 +52,11 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 	SDL_Log("\033[32mGLManager.cpp: Successfully loaded glad OpenGL %d.%d\033[0m", GLAD_VERSION_MAJOR(version),
 		GLAD_VERSION_MINOR(version));
 
+#ifndef __EMSCRIPTEN__
 	if (!SDL_GL_SetSwapInterval(1)) {
 		SDL_Log("\033[31mGLManager.cpp: Failed to enable VSync\033[0m");
 	}
+#endif
 
 	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_DEPTH_TEST);

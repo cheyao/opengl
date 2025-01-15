@@ -10,8 +10,8 @@ layout(std140) uniform Matrices {
 };
 uniform vec2 offset;
 uniform float scale;
-
 uniform ivec2 position;
+
 uniform sampler2D texture_diffuse;
 
 void main() {
