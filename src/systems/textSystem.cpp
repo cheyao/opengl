@@ -35,10 +35,10 @@ TextSystem::TextSystem(const unsigned int size, const bool final) noexcept
 	 * Not the best thing here.
 	 */
 	constexpr const static float vertices[] = {
-		0.0f, 0.0f, 0.0f, // TL
-		0.0f, 1.0f, 0.0f, // BR
-		1.0f, 0.0f, 0.0f, // TR
-		1.0f, 1.0f, 0.0f  // BL
+		0.0f, 0.0f, // TL
+		0.0f, 1.0f, // BR
+		1.0f, 0.0f, // TR
+		1.0f, 1.0f  // BL
 	};
 
 	constexpr const static float texturePos[] = {

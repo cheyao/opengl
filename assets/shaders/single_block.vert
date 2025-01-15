@@ -9,15 +9,14 @@ layout(std140) uniform Matrices {
 	mat4 proj;
 };
 uniform vec2 offset;
-uniform int position;
+uniform float scale;
+
+uniform ivec2 position;
 uniform sampler2D texture_diffuse;
 
 void main() {
-	vec2 offset = vec2(position % 64 * 16, position / 64 * 16);
+       vec2 pos = (aPos * scale + vec2(position)) * vec2(textureSize(texture_diffuse, 0)) * 7.0f + offset;
+       gl_Position = proj * vec4(pos, 0.0f, 1.0f);
 
-	vec2 pos = aPos * vec2(textureSize(texture_diffuse, 0)) + offset;
-
-	gl_Position = proj * vec4(pos, 0.0f, 1.0f);
-
-	vTexPos = aTexPos;
+       vTexPos = aTexPos;
 }

@@ -10,13 +10,19 @@ layout(std140) uniform Matrices {
 };
 uniform vec2 offset;
 uniform float scale;
+uniform int select;
 
 uniform ivec2 position;
-uniform sampler2D texture_diffuse;
 
 void main() {
-	vec2 pos = (aPos * scale + vec2(position)) * vec2(textureSize(texture_diffuse, 0)) * 7.0f + offset;
+	vec2 pos = (aPos * scale + vec2(position)) * vec2(16, 16) * 7.0f + offset;
 	gl_Position = proj * vec4(pos, 0.0f, 1.0f);
 
-	vTexPos = aTexPos;
+	// One block is this size
+	vec2 texSpriteSize = vec2(1.0f, 1.0f) / vec2(64.0f, 64.0f);
+	vec2 texPos = aTexPos;
+	texPos.y = texPos.y * -1.0f + 1.0f;
+	vec2 texSpritePos = texSpriteSize * texPos;
+
+	vTexPos = texSpriteSize * vec2(select % 64, select / 64) + texSpritePos;
 }

@@ -56,7 +56,8 @@ GLManager::GLManager(SDL_Window* window) : mContext(nullptr) {
 		SDL_Log("\033[31mGLManager.cpp: Failed to enable VSync\033[0m");
 	}
 
-	glDepthFunc(GL_LEQUAL);
+	glDepthFunc(GL_ALWAYS);
+	glDisable(GL_DEPTH_TEST);
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);

@@ -8,10 +8,10 @@
 
 UISystem::UISystem() noexcept : mGame(Game::getInstance()), mMesh(nullptr) {
 	constexpr const static float vertices[] = {
-		0.0f, 0.0f, 0.0f, // TL
-		0.0f, 1.0f, 0.0f, // BR
-		1.0f, 0.0f, 0.0f, // TR
-		1.0f, 1.0f, 0.0f  // BL
+		0.0f, 0.0f, // TL
+		0.0f, 1.0f, // BR
+		1.0f, 0.0f, // TR
+		1.0f, 1.0f  // BL
 	};
 
 	constexpr const static float texturePos[] = {

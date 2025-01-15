@@ -26,10 +26,10 @@ class UISystem {
 		SDL_assert(!mScreenStack.empty());
 		mScreenStack.pop_back();
 	}
-	class Screen* top() { return mScreenStack.back(); }
+	[[nodiscard]] class Screen* top() { return mScreenStack.back(); }
 
 	bool empty() const { return mScreenStack.empty(); }
-	class Mesh* getMesh() const { return mMesh.get(); }
+	[[nodiscard]] class Mesh* getMesh() const { return mMesh.get(); }
 
       private:
 	class Game* mGame;

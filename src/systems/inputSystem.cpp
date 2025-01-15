@@ -185,7 +185,7 @@ void InputSystem::draw(class Scene* scene) {
 	const auto playerPos = scene->get<Components::position>(mGame->getPlayerID()).mPosition;
 	const Eigen::Vector2f cameraOffset = -playerPos + systemManager->getDemensions() / 2;
 
-	Shader* shader = systemManager->getShader("block.vert", "block.frag");
+	Shader* shader = systemManager->getShader("single_block.vert", "block.frag");
 
 	shader->activate();
 	shader->set("texture_diffuse"_u, 0);

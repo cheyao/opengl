@@ -27,6 +27,7 @@ class SystemManager {
 
 	[[nodiscard]] class UISystem* getUISystem() const { return mUISystem.get(); }
 	[[nodiscard]] class TextSystem* getTextSystem() const { return mTextSystem.get(); }
+	[[nodiscard]] class RenderSystem* getRenderSystem() const { return mRenderSystem.get(); }
 
       private:
 	void printDebug(class Scene* scene);

@@ -20,7 +20,6 @@ class Framebuffer {
   private:
 	class RenderSystem* mOwner;
 
-	GLuint mRBO;
 	GLuint mScreen;
 	GLuint mScreenTexture;
 

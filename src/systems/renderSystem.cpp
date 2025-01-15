@@ -74,8 +74,8 @@ RenderSystem::RenderSystem() noexcept
 #endif
 #endif
 
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 0);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -199,10 +199,10 @@ RenderSystem::RenderSystem() noexcept
 	setOrtho();
 
 	constexpr const static float vertices[] = {
-		0.0f, 0.0f, 0.0f, // TL
-		0.0f, 1.0f, 0.0f, // BR
-		1.0f, 0.0f, 0.0f, // TR
-		1.0f, 1.0f, 0.0f  // BL
+		0.0f, 0.0f, // TL
+		0.0f, 1.0f, // BR
+		1.0f, 0.0f, // TR
+		1.0f, 1.0f  // BL
 	};
 
 	constexpr const static float texturePos[] = {
@@ -259,9 +259,10 @@ void RenderSystem::setDemensions(int width, int height) {
 
 void RenderSystem::draw(Scene* scene) {
 	// Values *borrowed* from minecraft wiki
+#ifdef DEBUG
 	glClearColor(0.470588235294f, 0.65490190784f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glDisable(GL_BLEND);
+#endif
 
 	const Eigen::Vector2f cameraOffset = -scene->get<Components::position>(mGame->getPlayerID()).mPosition +
 					     Eigen::Vector2f(mWidth, mHeight) / 2;
@@ -277,7 +278,9 @@ void RenderSystem::draw(Scene* scene) {
 	float sl = playerBlockPos.x() - screenSize.x() / 2 - 1;
 	float sr = playerBlockPos.x() + screenSize.x() / 2;
 
-	// PERF: Use some VEB to send the data
+	// 1. Blitz the new blocks onto our texture atlas
+	Shader* shader = mShaders->get("blitz.vert", "block.frag");
+	shader->activate();
 	for (const auto& [_, block] : scene->view<Components::block>().each()) {
 		const auto& pos = block.mPosition;
 
@@ -288,10 +291,12 @@ void RenderSystem::draw(Scene* scene) {
 
 		mTextures->blitzAtlas(block.mType);
 	}
+
+	// We bind back our framebuffer
 	mFramebuffer->bind();
 
 	// Draw blocks
-	Shader* shader = this->getShader("block.vert", "block.frag");
+	shader = mShaders->get("block.vert", "block.frag");
 	shader->activate();
 	shader->set("texture_diffuse"_u, 0);
 	shader->set("offset"_u, cameraOffset);
@@ -309,11 +314,12 @@ void RenderSystem::draw(Scene* scene) {
 		}
 
 		shader->set("position"_u, pos);
+		shader->set("select"_u, static_cast<int>(etoi(block.mType)));
 
 		mMesh->draw(shader);
 	}
 
-	// Draw other textures
+	// Draw other textures (UI)
 	shader->set("position"_u, 0, 0);
 	for (const auto& [entity, texture, position] :
 	     scene->view<Components::texture, Components::position>().each()) {
@@ -335,11 +341,10 @@ void RenderSystem::draw(Scene* scene) {
 		mMesh->draw(shader);
 	}
 
-	shader = this->getShader("animation.vert", "block.frag");
+	// Draw animations
+	shader = mShaders->get("animation.vert", "block.frag");
 	shader->activate();
 	shader->set("texture_diffuse"_u, 0);
-
-	// Draw other textures
 	for (const auto& [entity, texture, position] :
 	     scene->view<Components::animated_texture, Components::position>().each()) {
 		Eigen::Vector2f offset = position.mPosition + cameraOffset;
@@ -362,7 +367,7 @@ void RenderSystem::draw(Scene* scene) {
 		mMesh->draw(shader);
 	}
 
-	shader = this->getShader("block.vert", "block.frag");
+	shader = mShaders->get("block.vert", "block.frag");
 	shader->activate();
 
 	drawHUD(scene);

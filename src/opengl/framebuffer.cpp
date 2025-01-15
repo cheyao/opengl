@@ -1,6 +1,5 @@
 #include "opengl/framebuffer.hpp"
 
-#include "game.hpp"
 #include "opengl/mesh.hpp"
 #include "opengl/shader.hpp"
 #include "systems/renderSystem.hpp"
@@ -17,11 +16,10 @@
 #include <imgui.h>
 #endif
 
-Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mRBO(0), mScreen(0), mScreenTexture(0) {
+Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mScreen(0), mScreenTexture(0) {
 	SDL_Log("Framebuffer.cpp: Generating framebuffer");
 
 	SDL_assert(glGenFramebuffers != nullptr);
-	SDL_assert(glGenRenderbuffers != nullptr);
 
 	glGenFramebuffers(1, &mScreen);
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
@@ -37,11 +35,6 @@ Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mRBO(0), mScreen(
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mScreenTexture, 0);
 
-	glGenRenderbuffers(1, &mRBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, mRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1024, 768);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRBO);
-
 	[[unlikely]] if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Framebuffer is not complete");
 		ERROR_BOX("Failed to create framebuffer");
@@ -50,10 +43,10 @@ Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mRBO(0), mScreen(
 	glBindFramebuffer(GL_FRAMEBUFFER, mScreen);
 
 	constexpr const static float pos[] = {
-		-1.0f, +1.0f, 0.0f, // Top left
-		-1.0f, -1.0f, 0.0f, // Bot left
-		+1.0f, +1.0f, 0.0f, // Top right
-		+1.0f, -1.0f, 0.0f, // Bot right
+		-1.0f, +1.0f, // Top left
+		-1.0f, -1.0f, // Bot left
+		+1.0f, +1.0f, // Top right
+		+1.0f, -1.0f, // Bot right
 	};
 	constexpr const static unsigned int indices[] = {0, 1, 2, 3, 2, 1};
 
@@ -69,8 +62,6 @@ Framebuffer::Framebuffer(RenderSystem* owner) : mOwner(owner), mRBO(0), mScreen(
 void Framebuffer::bind() const { glBindFramebuffer(GL_FRAMEBUFFER, mScreen); }
 
 void Framebuffer::setDemensions(const int width, const int height) {
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-
 	glBindTexture(GL_TEXTURE_2D, mScreenTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -121,5 +112,4 @@ void Framebuffer::swap() {
 Framebuffer::~Framebuffer() {
 	glDeleteTextures(1, &mScreenTexture);
 	glDeleteFramebuffers(1, &mScreen);
-	glDeleteRenderbuffers(1, &mRBO);
 }

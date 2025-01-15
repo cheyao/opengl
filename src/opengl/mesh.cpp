@@ -67,7 +67,7 @@ Mesh::Mesh(const std::span<const float> positions, const std::span<const float> 
 		    // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#always_enable_vertex_attrib_0_as_an_array
 	if (!positions.empty()) {
 		glBufferSubData(GL_ARRAY_BUFFER, offset, positions.size() * sizeof(float), positions.data());
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), reinterpret_cast<GLvoid*>(offset));
 
 		offset += positions.size() * sizeof(float);
 	} else {
