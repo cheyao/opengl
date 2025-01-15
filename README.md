@@ -200,65 +200,9 @@ assets
 
 ## Notes
 
-The linux save directory is `~/.local/share/cyao/opengl/`
+The linux save directory is `~/.local/share/cyao/2d-minecraft/`
 
-## TODO
-
-- [x] In-game metrics & ms count
-    - [x] ImGUI Menu
-- [ ] Live edit shaders in-game
-- [ ] Fix MacOS bundle process https://github.com/libsdl-org/SDL/blob/main/docs/README-macos.md
-- [x] Game pause + resume things
-- [x] Debug menu with ImGUI and item names
-- [x] Better component and actors
-- [x] UI Scaling
-- [x] Multitouch
-- [x] Collision resolver
-- [x] Scaling
-- [x] Save state
-- [x] Android build
-    - [x] Android controls
-- [x] Debug menu 
-    - [x] Collision area editor
-    - [x] Signal list
-    - [x] Velocity arrows
-    - [x] Component and entity list
-        - [ ] Real time component and entity addition
-- [ ] UI
-    - [ ] Embed text in buttons
-- [ ] Pause menu etc
-    - [x] Text
-    - [ ] Settings
-- [x] Localization
-    - [x] Fallback fonts.
-- [x] Emscripten build
-    - [ ] Progress bar
-    - [ ] Text with contrast
-- [x] TTF
-    - [ ] Button auto scale + text
-    - [ ] Generate texturemap
-    - [ ] Signed distance field fonts https://steamcdn-a.akamaihd.net/apps/valve/2007/SIGGRAPH2007_AlphaTestedMagnification.pdf
-- [ ] Windows build
-- [ ] Level map
-    - [ ] Level generator
-    - [ ] Thing
-    - [ ] Binary json (MessagePack)
-    - [x] Move scenes to `src/scenes`
-- [ ] Grid map
-- [ ] Add functional hot reload
-- [ ] Entity name saved
-- [x] Combine localemanager and textmanager
-- [ ] Shadows
-- [ ] Multithreading
-    - [ ] Preload
-
-- [ ] Read books (By priority)
-    - [ ] [Effective Modern C++]()
-    - [ ] [Game maths](https://gamemath.com/book/intro.html)
-    - [ ] [Game engine architecture](https://www.amazon.com/dp/1568814135)
-    - [ ] [Game programming gems](https://www.satori.org/game-programming-gems/)
-    - [ ] [Real time rendering](https://www.amazon.com/dp/1568814240)
-    - [ ] [Real time collision detection](https://www.amazon.com/dp/1558607323)
+Add your own blocks to `~/.local/share/cyao/opengl/`
 
 # :3
 
