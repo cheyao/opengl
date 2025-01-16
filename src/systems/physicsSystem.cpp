@@ -45,8 +45,6 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 	constexpr const static float G = 1200.0f;
 	constexpr const static float jumpForce = 600.0f;
 
-	markDirty(scene);
-
 	if (!mGame->getSystemManager()->getUISystem()->empty()) {
 		return;
 	}
@@ -66,10 +64,6 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 			    !scene->contains<Components::block>(mCache.lastAbove[entity]) ||
 			    !(onGround = collidingBellow(scene, entity, mCache.lastAbove[entity]))) {
 				for (const auto& block : blocks) {
-					if (!scene->get<Components::block>(block).mClose) {
-						continue;
-					}
-
 					if (collidingBellow(scene, entity, block)) {
 						onGround = true;
 						mCache.lastAbove[entity] = block;
@@ -125,27 +119,6 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 	itemPhysics(scene);
 }
 
-// Somehow this is taking 50% of the CPU?
-void PhysicsSystem::markDirty(Scene* scene) {
-	// Get the person's pos
-	const Eigen::Vector2f playerPos = (scene->get<Components::position>(mGame->getPlayerID()).mPosition +
-					   scene->get<Components::collision>(mGame->getPlayerID()).mOffset) /
-					  Components::block::BLOCK_SIZE;
-
-	const float cb = playerPos.y() - 1;
-	const float ct = playerPos.y() + 1;
-	const float cl = playerPos.x() - 1;
-	const float cr = playerPos.x() + 1;
-
-	for (const auto block : scene->view<Components::collision, Components::block>()) {
-		const auto& pos = scene->get<Components::block>(block).mPosition;
-
-		if (pos.y() >= cb && pos.y() <= ct && pos.x() <= cr && pos.x() >= cl) {
-			scene->get<Components::block>(block).mClose = true;
-		}
-	}
-}
-
 void PhysicsSystem::collide(Scene* scene) {
 	// Get a list of all the entities we need to check
 	// Wow my move operator has usages!
@@ -159,10 +132,6 @@ void PhysicsSystem::collide(Scene* scene) {
 	// Multithreading this will result in worse performance :(
 	for (const auto& entity : entities) {
 		for (const auto& block : blocks) {
-			if (!scene->get<Components::block>(block).mClose) {
-				continue;
-			}
-
 			if (AABBxAABB(scene, entity, block)) {
 				pushBack(scene, entity, block);
 			}

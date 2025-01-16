@@ -92,7 +92,6 @@ enum class Item : std::uint64_t;
 struct block {
 	Item mType;
 	Eigen::Vector2i mPosition;
-	bool mClose;
 
 	block(const decltype(mType) type, const decltype(mPosition) position) noexcept
 		: mType(type), mPosition(position) {}
