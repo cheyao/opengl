@@ -158,6 +158,11 @@ void InputSystem::updateMouse(Scene* scene, const float) {
 				scene->emplace<Components::texture>(
 					item, mGame->getSystemManager()->getTexture(registers::TEXTURES.at(type)),
 					0.3f);
+				scene->emplace<Components::velocity>(item, Eigen::Vector2f(0, 0));
+				const auto size =
+					Eigen::Vector2f(Components::block::BLOCK_SIZE, Components::block::BLOCK_SIZE) *
+					0.3f;
+				scene->emplace<Components::collision>(item, Eigen::Vector2f(0, 0), size);
 			}
 
 			scene->erase(entity);

@@ -312,10 +312,11 @@ void RenderSystem::draw(Scene* scene) {
 	auto* const atlas = mTextures->getAtlas();
 	atlas->activate(0);
 
-	static bool o = false;
+	static bool initialized = false;
 	static unsigned int instanceVBO;
-	if (!o) {
-		o = true;
+	if (!initialized) {
+		initialized = true;
+
 		glGenBuffers(1, &instanceVBO);
 		glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * data.size(), data.data(), GL_STATIC_DRAW);
@@ -339,14 +340,6 @@ void RenderSystem::draw(Scene* scene) {
 	for (const auto& [entity, texture, position] :
 	     scene->view<Components::texture, Components::position>().each()) {
 		Eigen::Vector2f offset = position.mPosition + cameraOffset;
-
-		// The item is on screen
-		if (scene->contains<Components::item>(entity)) {
-			// Not so performant but let's do it for each entity
-			const float time = SDL_sin(SDL_GetTicks() / 1000.0f + position.mPosition.sum());
-
-			offset.y() += 40 * time;
-		}
 
 		shader->set("offset"_u, offset);
 		shader->set("scale"_u, texture.mScale);
