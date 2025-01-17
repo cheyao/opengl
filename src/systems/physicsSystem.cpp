@@ -34,13 +34,6 @@ PhysicsSystem::PhysicsSystem() noexcept : mGame(Game::getInstance()) {}
 // Parralel collision detection std::execution::par_unseq             2887647.807018ns avg (346 FPS)
 // Aww soo many frances lost
 
-/*
- * FIXME:
- * Currently we are checking the player by using a bitmask or smt
- * But it should just be any entity with
- * <Components::position, Components::velocity, Components::force(, Components::move?)>
- * Like this we won't need to depend on a lot of checks and prayers
- */
 void PhysicsSystem::update(Scene* scene, const float delta) {
 	constexpr const static float G = 1200.0f;
 	constexpr const static float jumpForce = 600.0f;
@@ -49,11 +42,6 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 		return;
 	}
 
-	/*
-	 * FIXME: Currently this is a mock up gravity impl
-	 * https://gamedev.stackexchange.com/questions/15708/how-can-i-implement-gravity
-	 * To fix it we need to add a acceleration vector(Wow school knowladge has usages)
-	 */
 	const auto blocks = scene->view<Components::collision, Components::block>();
 	for (const auto entity : scene->view<Components::position, Components::velocity>()) {
 		bool onGround = false;

@@ -40,6 +40,7 @@ struct collision {
 	Eigen::Vector2f mOffset;
 	Eigen::Vector2f mSize;
 	bool mStationary = false;
+	EntityID mLast;
 
 	collision(const decltype(mOffset) offset, const decltype(mSize) size,
 		  const decltype(mStationary) stationary = false) noexcept
