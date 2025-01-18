@@ -300,3 +300,5 @@ void Level::createCommon() {
 	mScene->emplace<Components::position>(mTextID, Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(),
 								       std::numeric_limits<float>::infinity()));
 }
+
+std::int64_t Level::getPosition() { return mCenter->getPosition(); }

@@ -15,7 +15,6 @@
 #include "third_party/rapidjson/rapidjson.h"
 
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_stdinc.h>
 #include <cstddef>
 #include <cstdint>
 

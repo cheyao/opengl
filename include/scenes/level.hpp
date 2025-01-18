@@ -26,6 +26,7 @@ class Level {
 
 	// The update method maily checks if new chunks needs to be loaded
 	void update(float delta);
+	std::int64_t getPosition();
 
       private:
 	inline constexpr const static char* const CHUNK_KEY = "chunks";

@@ -36,5 +36,6 @@ class PhysicsSystem {
 	// Collision cache
 	struct {
 		std::unordered_map<EntityID, EntityID> lastAbove;
+		std::array<std::array<EntityID, 16 * 3>, 128> chunk;
 	} mCache;
 };

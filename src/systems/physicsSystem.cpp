@@ -7,6 +7,8 @@
 #include "managers/systemManager.hpp"
 #include "opengl/texture.hpp"
 #include "scene.hpp"
+#include "scenes/chunk.hpp"
+#include "scenes/level.hpp"
 #include "systems/UISystem.hpp"
 #include "third_party/Eigen/Core"
 #include "utils.hpp"
@@ -108,23 +110,33 @@ void PhysicsSystem::update(Scene* scene, const float delta) {
 }
 
 void PhysicsSystem::collide(Scene* scene) {
-	// Get a list of all the entities we need to check
-	// Wow my move operator has usages!
-	const auto entities = scene->view<Components::collision, Components::position>();
-	const auto blocks = scene->view<Components::collision, Components::block>();
+	// Populate cache once
+	const auto leftChunk = (mGame->getLevel()->getPosition() - 1) * Chunk::CHUNK_WIDTH;
 
-	// Iterate over all pairs of colliders
-	// PERF: Use some nice trees
-	// https://gamedev.stackexchange.com/questions/26501/how-does-a-collision-engine-work
-
-	// Multithreading this will result in worse performance :(
-	for (const auto& entity : entities) {
-		for (const auto& block : blocks) {
-			if (AABBxAABB(scene, entity, block)) {
-				pushBack(scene, entity, block);
-			}
+	// Reset cache
+	for (auto& row : mCache.chunk) {
+		for (auto& block : row) {
+			block = 0;
 		}
 	}
+
+	for (const auto& block : scene->view<Components::collision, Components::block>()) {
+		const auto pos = scene->get<Components::block>(block).mPosition;
+		assert((pos.x() - leftChunk) >= 0 && (pos.x() - leftChunk) < 128);
+
+		if (AABBxAABB(scene, mGame->getPlayerID(), block)) {
+			pushBack(scene, mGame->getPlayerID(), block);
+		}
+	}
+
+	// Get a list of all the entities we need to check
+	const auto entities = scene->view<Components::collision, Components::position>();
+
+	/*
+	// Multithreading this will result in worse performance :(
+	for (const auto& entity : entities) {
+	}
+	*/
 
 	// Debug editor
 #if defined(IMGUI) && defined(DEBUG)
