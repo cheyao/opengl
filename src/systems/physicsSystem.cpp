@@ -122,7 +122,7 @@ void PhysicsSystem::collide(Scene* scene) {
 
 	for (const auto& block : scene->view<Components::collision, Components::block>()) {
 		const auto pos = scene->get<Components::block>(block).mPosition;
-		assert((pos.x() - leftChunk) >= 0 && (pos.x() - leftChunk) < 128);
+		mCache.chunk[pos.x() - leftChunk][pos.y()] = block;
 
 		if (AABBxAABB(scene, mGame->getPlayerID(), block)) {
 			pushBack(scene, mGame->getPlayerID(), block);
@@ -131,6 +131,16 @@ void PhysicsSystem::collide(Scene* scene) {
 
 	// Get a list of all the entities we need to check
 	const auto entities = scene->view<Components::collision, Components::position>();
+	for (const auto& entity : entities) {
+		const auto pos = scene->get<Components::position>(entity).mPosition;
+		const auto cell = mCache.chunk[(pos.x() / Components::block::BLOCK_SIZE) - leftChunk]
+					      [pos.y() / Components::block::BLOCK_SIZE];
+		if (cell) {
+			if (AABBxAABB(scene, entity, cell)) {
+				pushBack(scene, entity, cell);
+			}
+		}
+	}
 
 	/*
 	// Multithreading this will result in worse performance :(
